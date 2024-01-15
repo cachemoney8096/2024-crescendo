@@ -1,6 +1,7 @@
 package frc.robot;
 
 public class RobotMap {
+  public static final int PIGEON_CAN_ID = Constants.PLACEHOLDER_INT;
     /** Driving SPARK MAX CAN IDs */
   public static final int FRONT_LEFT_DRIVING_CAN_ID = Constants.PLACEHOLDER_INT,
   REAR_LEFT_DRIVING_CAN_ID = Constants.PLACEHOLDER_INT,
