@@ -30,4 +30,5 @@
     "spotlessGradle.format.enable": true,
     "spotlessGradle.diagnostics.enable": false
   },
+  "editor.tabSize": 2
 }

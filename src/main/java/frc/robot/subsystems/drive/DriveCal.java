@@ -1,5 +1,6 @@
 package frc.robot.subsystems.drive;
 
+import edu.wpi.first.math.controller.PIDController;
 import frc.robot.Constants;
 
 public class DriveCal {
@@ -45,4 +46,16 @@ public class DriveCal {
             SWERVE_BACK_LEFT_ANGULAR_OFFSET_RAD + (3.0 * Math.PI / 4.0),
         BACK_RIGHT_CHASSIS_ANGULAR_OFFSET_RAD =
             SWERVE_BACK_RIGHT_ANGULAR_OFFSET_RAD + (Math.PI / 4.0);
+    
+    /**
+     * Controller on module speed for rotating to target, input degrees [-180,180], output [0,1].
+     */
+    public static final PIDController ROTATE_TO_TARGET_PID_CONTROLLER =
+        new PIDController(0.015, 0, 0.000); // From 2022
+
+    /** Feed forward for rotating to target, gets added to or subtracted from PID controller. */
+    public static final double ROTATE_TO_TARGET_FF = 0.01;
+
+    /** If the desired chassis rotation is below this value in [0,1], it is ignored */
+    public static final double ROTATION_DEADBAND_THRESHOLD = 0.04;
 }
