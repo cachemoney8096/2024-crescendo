@@ -21,12 +21,22 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotMap;
 import frc.robot.subsystems.Lights;
 import frc.robot.utils.GeometryUtils;
+import java.util.function.Consumer;
+
+import com.pathplanner.lib.commands.FollowPathHolonomic;
+
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.PathPlannerTrajectory;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 
 public class DriveSubsystem extends SubsystemBase {
   private double targetHeadingDegrees;
@@ -114,6 +124,21 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public Pose2d getPose() {
     return odometry.getPoseMeters();
+  }
+
+  public ChassisSpeeds getChassisSpeeds() {
+    return lastSetChassisSpeeds;
+  }
+
+  /**
+   * applies the robot-relative output speeds of the FollowPathHolonomic Command
+   * adapted from drive() (but doesn't need the code to turn xSpeed, ySpeed, rot, fieldRelative into a ChassisSpeeds object)
+   * does not call the correctForDynamics method because we pass in a corrected lastSetChassisSpeeds (// TODO is this right???)
+  */
+  public void setOutputRobotRelativeSpeeds(ChassisSpeeds desiredChassisSpeeds) {
+    lastSetChassisSpeeds = desiredChassisSpeeds;
+    var swerveModuleStates = Constants.SwerveDrive.DRIVE_KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds);
+    setModuleStates(swerveModuleStates);
   }
 
   /**
@@ -349,8 +374,37 @@ public class DriveSubsystem extends SubsystemBase {
     return gyro;
   }
 
-  public void followTrajectoryCommand() {
-    // TODO do this
+  public Command followTrajectoryCommand(PathPlannerPath path, boolean isFirstPath) {
+    return new SequentialCommandGroup(
+        new InstantCommand(
+            () -> {
+              // Reset odometry for the first path you run during auto
+              if (isFirstPath) {
+                this.resetOdometry(path.getPreviewStartingHolonomicPose());
+              }
+            }),
+
+        new FollowPathHolonomic(
+            path,
+            this::getPose, // pose supplier
+            this::getChassisSpeeds, // robot relative chassis speeds supplier
+            this::setOutputRobotRelativeSpeeds, // robot relative chassis speeds consumer
+            new PIDConstants(DriveCal.DRIVING_P, DriveCal.DRIVING_I, DriveCal.DRIVING_D), // PID Constants for translation
+            new PIDConstants(DriveCal.TURNING_P, DriveCal.TURNING_I, DriveCal.TURNING_D), // PID Constants for rotation
+            DriveConstants.DRIVE_WHEEL_FREE_SPEED_METERS_PER_SECOND, // maxModuleSpeed
+            DriveConstants.DRIVE_BASE_RADIUS_METERS,
+            new ReplanningConfig(), // creates a path replanning configuration with the default config
+            () -> {
+              return false;
+            }, // boolean supplier for shouldFlipPath
+            this),
+
+        new InstantCommand(
+            () -> {
+              targetHeadingDegrees = getHeadingDegrees();
+            }),
+
+        new PrintCommand("Finished a trajectory"));
   }
 
   /** Returns a past pose, given a latency adjustment */
