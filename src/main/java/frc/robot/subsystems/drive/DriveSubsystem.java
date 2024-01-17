@@ -374,6 +374,7 @@ public class DriveSubsystem extends SubsystemBase {
     return gyro;
   }
 
+  /** adapted from last year's version, which was taken from Github */
   public Command followTrajectoryCommand(PathPlannerPath path, boolean isFirstPath) {
     return new SequentialCommandGroup(
         new InstantCommand(
@@ -384,7 +385,7 @@ public class DriveSubsystem extends SubsystemBase {
               }
             }),
 
-        new FollowPathHolonomic(
+        new FollowPathHolonomic( // old method from last year: PPSwerveControllerCommand
             path,
             this::getPose, // pose supplier
             this::getChassisSpeeds, // robot relative chassis speeds supplier

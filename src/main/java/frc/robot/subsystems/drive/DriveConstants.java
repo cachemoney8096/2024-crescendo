@@ -24,6 +24,9 @@ public class DriveConstants {
         WHEEL_DIAMETER_METERS = Units.inchesToMeters(3) * WHEEL_DIAMETER_FUDGE_FACTOR,
         WHEEL_CIRCUMFERENCE_METERS = WHEEL_DIAMETER_METERS * Math.PI;
 
+    /** the distance from the center of the robot to the furthest module */
+    public static final double DRIVE_BASE_RADIUS_METERS = Constants.PLACEHOLDER_DOUBLE;
+
     public static final double DRIVING_MOTOR_REDUCTION = 4.8;
     public static final double DRIVE_WHEEL_FREE_SPEED_FUDGE_FACTOR = 1.0;
     public static final double DRIVE_WHEEL_FREE_SPEED_METERS_PER_SECOND =
