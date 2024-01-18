@@ -23,6 +23,7 @@ public class DriveConstants {
     public static final double DRIVING_MOTOR_FREE_SPEED_RPS = Constants.NEO_FREE_SPEED_RPM / 60,
         WHEEL_DIAMETER_METERS = Units.inchesToMeters(3) * WHEEL_DIAMETER_FUDGE_FACTOR,
         WHEEL_CIRCUMFERENCE_METERS = WHEEL_DIAMETER_METERS * Math.PI;
+    public static final double DRIVING_MOTOR_MAX_ACCEL_RPS_SQRD = Constants.PLACEHOLDER_DOUBLE;
 
     /** the distance from the center of the robot to the furthest module */
     public static final double DRIVE_BASE_RADIUS_METERS = Constants.PLACEHOLDER_DOUBLE;
@@ -33,6 +34,7 @@ public class DriveConstants {
         DRIVE_WHEEL_FREE_SPEED_FUDGE_FACTOR
             * ((DRIVING_MOTOR_FREE_SPEED_RPS * WHEEL_CIRCUMFERENCE_METERS)
                 / DRIVING_MOTOR_REDUCTION);
+    public static final double DRIVE_WHEEL_MAX_ACCEL_METERS_PER_SEC_SQRD = Constants.PLACEHOLDER_DOUBLE;
 
     public static final double DRIVING_ENCODER_POSITION_FACTOR_METERS =
         WHEEL_CIRCUMFERENCE_METERS / DRIVING_MOTOR_REDUCTION; // meters
@@ -50,4 +52,13 @@ public class DriveConstants {
     public static final int TURNING_MOTOR_CURRENT_LIMIT_AMPS = 20; // amps
 
     public static final double TURN_MODULE_ENCODER_GEAR_RATIO = 1.0;
+
+    public static final double SLOW_LINEAR_SPEED_METERS_PER_SEC = Constants.PLACEHOLDER_DOUBLE;
+    public static final double SLOW_LINEAR_ACCELERATION_METERS_PER_SEC_SQ = Constants.PLACEHOLDER_DOUBLE;
+    public static final double SLOW_ANGULAR_SPEED_RAD_PER_SEC = Constants.PLACEHOLDER_DOUBLE;
+    public static final double SLOW_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = Constants.PLACEHOLDER_DOUBLE;
+
+
+
+
 }

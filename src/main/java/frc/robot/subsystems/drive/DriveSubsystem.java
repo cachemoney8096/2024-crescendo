@@ -1,5 +1,8 @@
 package frc.robot.subsystems.drive;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
@@ -32,9 +35,12 @@ import frc.robot.utils.GeometryUtils;
 import java.util.function.Consumer;
 
 import com.pathplanner.lib.commands.FollowPathHolonomic;
-
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.PathPlannerTrajectory;
+import com.pathplanner.lib.path.PathPoint;
+import com.pathplanner.lib.path.RotationTarget;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
@@ -132,9 +138,11 @@ public class DriveSubsystem extends SubsystemBase {
 
   /**
    * applies the robot-relative output speeds of the FollowPathHolonomic Command
-   * adapted from drive() (but doesn't need the code to turn xSpeed, ySpeed, rot, fieldRelative into a ChassisSpeeds object)
-   * does not call the correctForDynamics method because we pass in a corrected lastSetChassisSpeeds (// TODO is this right???)
-  */
+   * adapted from drive() (but doesn't need the code to turn xSpeed, ySpeed, rot,
+   * fieldRelative into a ChassisSpeeds object)
+   * does not call the correctForDynamics method because we pass in a corrected
+   * lastSetChassisSpeeds (// TODO is this right???)
+   */
   public void setOutputRobotRelativeSpeeds(ChassisSpeeds desiredChassisSpeeds) {
     lastSetChassisSpeeds = desiredChassisSpeeds;
     var swerveModuleStates = Constants.SwerveDrive.DRIVE_KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds);
@@ -390,7 +398,8 @@ public class DriveSubsystem extends SubsystemBase {
             this::getPose, // pose supplier
             this::getChassisSpeeds, // robot relative chassis speeds supplier
             this::setOutputRobotRelativeSpeeds, // robot relative chassis speeds consumer
-            new PIDConstants(DriveCal.DRIVING_P, DriveCal.DRIVING_I, DriveCal.DRIVING_D), // PID Constants for translation
+            new PIDConstants(DriveCal.DRIVING_P, DriveCal.DRIVING_I, DriveCal.DRIVING_D), // PID Constants for
+                                                                                          // translation
             new PIDConstants(DriveCal.TURNING_P, DriveCal.TURNING_I, DriveCal.TURNING_D), // PID Constants for rotation
             DriveConstants.DRIVE_WHEEL_FREE_SPEED_METERS_PER_SECOND, // maxModuleSpeed
             DriveConstants.DRIVE_BASE_RADIUS_METERS,
@@ -442,12 +451,53 @@ public class DriveSubsystem extends SubsystemBase {
         : Optional.of(curPose.plus(flipTransform));
   }
 
-  public void pathToPoint() {
-    // TODO do this
+  public PathPlannerPath pathToPoint(Pose2d finalPose, double finalSpeedMetersPerSec) {
+    Pose2d curPose = getPose();
+    Transform2d finalTransform = new Transform2d(finalPose.getTranslation(), finalPose.getRotation());
+    System.out.println(
+        "Trajectory Transform: " + finalTransform.getX() + " " + finalTransform.getY());
+    Rotation2d finalHeading = Rotation2d.fromDegrees(180);
+    Rotation2d finalHolonomicRotation = finalPose.getRotation();
+
+    PathPlannerPath path = PathPlannerPath.fromPathPoints(Arrays.asList(new PathPoint(finalTransform.getTranslation(),
+        new RotationTarget(Constants.PLACEHOLDER_DOUBLE, finalHolonomicRotation))),
+        new PathConstraints(DriveConstants.DRIVE_WHEEL_FREE_SPEED_METERS_PER_SECOND,
+            DriveConstants.DRIVE_WHEEL_MAX_ACCEL_METERS_PER_SEC_SQRD, DriveConstants.DRIVING_MOTOR_FREE_SPEED_RPS,
+            DriveConstants.DRIVING_MOTOR_MAX_ACCEL_RPS_SQRD),
+        new GoalEndState(finalSpeedMetersPerSec, finalHolonomicRotation));
+
+    return path;
   }
 
-  public void poseToPath() {
-    // TODO do this
+  // TODO check this
+  public Optional<PathPlannerPath> poseToPath() {
+    Pose2d curPose = getPose();
+    double coastLatencySec = 0.00;
+    Transform2d coastTransform = new Transform2d(
+        new Translation2d(
+            lastSetChassisSpeeds.vxMetersPerSecond * coastLatencySec,
+            lastSetChassisSpeeds.vyMetersPerSecond * coastLatencySec),
+        Rotation2d.fromRadians(lastSetChassisSpeeds.omegaRadiansPerSecond * coastLatencySec));
+    Pose2d futurePose = curPose.plus(coastTransform);
+
+    System.out.println("Acquired target? " + targetPose.isPresent());
+    if (!targetPose.isPresent()) {
+      return Optional.empty();
+    }
+
+    Pose2d finalPose = targetPose.get();
+    Transform2d finalTransform = new Transform2d(finalPose.getTranslation(), finalPose.getRotation());
+    Rotation2d finalHeading = Rotation2d.fromDegrees(180);
+    Rotation2d finalHolonomicRotation = Rotation2d.fromDegrees(0);
+
+    PathPlannerPath path = PathPlannerPath.fromPathPoints(Arrays.asList(new PathPoint(finalTransform.getTranslation(),
+        new RotationTarget(Constants.PLACEHOLDER_DOUBLE, finalHolonomicRotation))),
+        new PathConstraints(DriveConstants.SLOW_LINEAR_SPEED_METERS_PER_SEC,
+            DriveConstants.SLOW_LINEAR_ACCELERATION_METERS_PER_SEC_SQ, DriveConstants.SLOW_ANGULAR_SPEED_RAD_PER_SEC,
+            DriveConstants.SLOW_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ),
+        null);
+    boolean generatedPath = true;
+    return Optional.of(path);
   }
 
   /**
