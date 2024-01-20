@@ -115,12 +115,10 @@ public class SwerveModule implements Sendable{
     toApply.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS;
     toApply.CurrentLimits.SupplyCurrentLimitEnable = true; 
     toApply.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-    Slot0Configs slot0Configs = new Slot0Configs();
-    slot0Configs.kP = DriveCal.DRIVING_P; 
-    slot0Configs.kI = DriveCal.DRIVING_I; 
-    slot0Configs.kD = DriveCal.DRIVING_D; 
-    slot0Configs.kV = DriveCal.DRIVING_FF;
-    toApply.Slot0 = slot0Configs;
+    toApply.Slot0.kP = DriveCal.DRIVING_P;
+    toApply.Slot0.kI = DriveCal.DRIVING_I;
+    toApply.Slot0.kD = DriveCal.DRIVING_D;
+    toApply.Slot0.kV = DriveCal.DRIVING_FF;
     cfg.apply(toApply);
   }
 
