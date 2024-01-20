@@ -33,7 +33,6 @@ import frc.robot.RobotMap;
 import frc.robot.subsystems.Lights;
 import frc.robot.utils.GeometryUtils;
 import frc.robot.utils.PoseBuffer;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
@@ -408,10 +407,10 @@ public class DriveSubsystem extends SubsystemBase {
         new PrintCommand("Finished a trajectory"));
   }
   /** Returns a past pose, using the PoseBuffer */
-  public Pose2d getPastBufferedPose(double latencySec){
-    Optional<Pose2d> p = poseBuffer.getPoseAtTimestamp(Timer.getFPGATimestamp()-latencySec);
-    if(!p.isPresent()){
-      return extrapolatePastPoseBasedOnVelocity(Timer.getFPGATimestamp()-latencySec);
+  public Pose2d getPastBufferedPose(double latencySec) {
+    Optional<Pose2d> p = poseBuffer.getPoseAtTimestamp(Timer.getFPGATimestamp() - latencySec);
+    if (!p.isPresent()) {
+      return extrapolatePastPoseBasedOnVelocity(Timer.getFPGATimestamp() - latencySec);
     }
     return p.get();
   }
