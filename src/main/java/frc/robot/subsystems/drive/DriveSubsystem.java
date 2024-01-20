@@ -72,11 +72,8 @@ public class DriveSubsystem extends SubsystemBase {
   private final Pigeon2 gyro = new Pigeon2(RobotMap.PIGEON_CAN_ID);
   private ChassisSpeeds lastSetChassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
   public Optional<Pose2d> targetPose = Optional.empty();
-  /** include path planner initialization here */
-  private MedianFilter pitchFilter = new MedianFilter(Constants.PLACEHOLDER_INT);
-  private double latestFilteredPitchDeg = Constants.PLACEHOLDER_DOUBLE;
 
-  SwerveDriveOdometry odometry = new SwerveDriveOdometry(Constants.SwerveDrive.DRIVE_KINEMATICS,
+  SwerveDriveOdometry odometry = new SwerveDriveOdometry(DriveConstants.DRIVE_KINEMATICS,
       Rotation2d.fromDegrees(Constants.PLACEHOLDER_DOUBLE), getModulePositions());
 
   /** Multiplier for drive speed, does not affect trajectory following */
@@ -86,19 +83,13 @@ public class DriveSubsystem extends SubsystemBase {
   public DriveSubsystem(Lights lightsSubsystem, BooleanSupplier isTimedMatchFunc) {
     /** Need to factory default settings for gyro, but no function exists */
     gyro.reset();
-    /** Need to configure a mount pose for gyro, but no function exist */
+    
     this.lights = lightsSubsystem;
     this.isTimedMatch = isTimedMatchFunc;
   }
 
-  public double getFilteredPitch() {
-    return latestFilteredPitchDeg - Constants.SwerveSubsystem.IMU_PITCH_BIAS_DEG;
-  }
-
   @Override
   public void periodic() {
-    latestFilteredPitchDeg = pitchFilter.calculate(gyro.getPitch().getValue());
-
     // Update the odometry in the periodic block
     frontLeft.periodic();
     frontRight.periodic();
@@ -145,7 +136,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void setOutputRobotRelativeSpeeds(ChassisSpeeds desiredChassisSpeeds) {
     lastSetChassisSpeeds = desiredChassisSpeeds;
-    var swerveModuleStates = Constants.SwerveDrive.DRIVE_KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds);
+    var swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds);
     setModuleStates(swerveModuleStates);
   }
 
@@ -228,9 +219,9 @@ public class DriveSubsystem extends SubsystemBase {
       setNoMove();
       return;
     }
-    xSpeed *= Constants.SwerveDrive.MAX_SPEED_METERS_PER_SECOND;
-    ySpeed *= Constants.SwerveDrive.MAX_SPEED_METERS_PER_SECOND;
-    rot *= Constants.SwerveDrive.MAX_ANGULAR_SPEED_RAD_PER_SECONDS;
+    xSpeed *= DriveConstants.MAX_SPEED_METERS_PER_SECOND;
+    ySpeed *= DriveConstants.MAX_SPEED_METERS_PER_SECOND;
+    rot *= DriveConstants.MAX_ANGULAR_SPEED_RAD_PER_SECONDS;
 
     xSpeed *= throttleMultiplier;
     ySpeed *= throttleMultiplier;
@@ -244,7 +235,7 @@ public class DriveSubsystem extends SubsystemBase {
     desiredChassisSpeeds = correctForDynamics(desiredChassisSpeeds);
     lastSetChassisSpeeds = desiredChassisSpeeds;
 
-    var swerveModuleStates = Constants.SwerveDrive.DRIVE_KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds);
+    var swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds);
     setModuleStates(swerveModuleStates);
   }
 
@@ -263,7 +254,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(
-        desiredStates, Constants.SwerveDrive.MAX_SPEED_METERS_PER_SECOND);
+        desiredStates, DriveConstants.MAX_SPEED_METERS_PER_SECOND);
     frontLeft.setDesiredState(desiredStates[0]);
     frontRight.setDesiredState(desiredStates[1]);
     rearLeft.setDesiredState(desiredStates[2]);
@@ -294,7 +285,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public double getTurnRate() {
     return gyro.getRate()
-        * (Constants.SwerveDrive.GYRO_REVERSED ? Constants.PLACEHOLDER_DOUBLE : Constants.PLACEHOLDER_DOUBLE);
+        * (DriveConstants.GYRO_REVERSED ? Constants.PLACEHOLDER_DOUBLE : Constants.PLACEHOLDER_DOUBLE);
   }
 
   /**
@@ -571,7 +562,6 @@ public class DriveSubsystem extends SubsystemBase {
     addChild("Front Left", frontLeft);
     addChild("Rear Right", rearRight);
     addChild("Rear Left", rearLeft);
-    builder.addDoubleProperty("Filtered pitch deg", this::getFilteredPitch, null);
     builder.addDoubleProperty(
         "Throttle multiplier",
         () -> {
