@@ -1,19 +1,16 @@
 package frc.robot.subsystems.drive;
 
-import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.AbsoluteEncoder;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
-
+import com.revrobotics.SparkPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -23,7 +20,7 @@ import edu.wpi.first.wpilibj.Timer;
 import frc.robot.utils.AbsoluteEncoderChecker;
 import frc.robot.utils.SparkMaxUtils;
 
-public class SwerveModule implements Sendable{
+public class SwerveModule implements Sendable {
   public final TalonFX drivingTalon;
   public final CANSparkMax turningSparkMax;
 
@@ -70,11 +67,11 @@ public class SwerveModule implements Sendable{
     // gear ratio)
     errors +=
         SparkMaxUtils.check(
-            SparkMaxUtils.UnitConversions.setRadsFromGearRatio(turningEncoderTmp, DriveConstants.TURN_MODULE_ENCODER_GEAR_RATIO));
+            SparkMaxUtils.UnitConversions.setRadsFromGearRatio(
+                turningEncoderTmp, DriveConstants.TURN_MODULE_ENCODER_GEAR_RATIO));
 
     errors +=
-        SparkMaxUtils.check(
-            turningEncoderTmp.setInverted(DriveConstants.TURNING_ENCODER_INVERTED));
+        SparkMaxUtils.check(turningEncoderTmp.setInverted(DriveConstants.TURNING_ENCODER_INVERTED));
 
     errors += SparkMaxUtils.check(turningPidTmp.setPositionPIDWrappingEnabled(true));
     errors +=
@@ -92,16 +89,13 @@ public class SwerveModule implements Sendable{
     errors += SparkMaxUtils.check(turningPidTmp.setFF(DriveCal.TURNING_FF));
     errors +=
         SparkMaxUtils.check(
-            turningPidTmp.setOutputRange(
-                DriveCal.TURNING_MIN_OUTPUT, DriveCal.TURNING_MAX_OUTPUT));
+            turningPidTmp.setOutputRange(DriveCal.TURNING_MIN_OUTPUT, DriveCal.TURNING_MAX_OUTPUT));
 
     errors +=
-        SparkMaxUtils.check(
-            turningSparkMax.setIdleMode(DriveConstants.TURNING_MOTOR_IDLE_MODE));
+        SparkMaxUtils.check(turningSparkMax.setIdleMode(DriveConstants.TURNING_MOTOR_IDLE_MODE));
     errors +=
         SparkMaxUtils.check(
-            turningSparkMax.setSmartCurrentLimit(
-                DriveConstants.TURNING_MOTOR_CURRENT_LIMIT_AMPS));
+            turningSparkMax.setSmartCurrentLimit(DriveConstants.TURNING_MOTOR_CURRENT_LIMIT_AMPS));
 
     return errors == 0;
   }
@@ -111,9 +105,13 @@ public class SwerveModule implements Sendable{
     TalonFXConfigurator cfg = drivingTalon.getConfigurator();
     TalonFXConfiguration toApply = new TalonFXConfiguration();
     toApply.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // TODO: check this
-    toApply.Feedback.SensorToMechanismRatio = 1/DriveConstants.DRIVING_MOTOR_REDUCTION*Math.PI*DriveConstants.WHEEL_DIAMETER_FUDGE_FACTOR; //TODO somebody fix this math
+    toApply.Feedback.SensorToMechanismRatio =
+        1
+            / DriveConstants.DRIVING_MOTOR_REDUCTION
+            * Math.PI
+            * DriveConstants.WHEEL_DIAMETER_FUDGE_FACTOR; // TODO somebody fix this math
     toApply.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS;
-    toApply.CurrentLimits.SupplyCurrentLimitEnable = true; 
+    toApply.CurrentLimits.SupplyCurrentLimitEnable = true;
     toApply.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     toApply.Slot0.kP = DriveCal.DRIVING_P;
     toApply.Slot0.kI = DriveCal.DRIVING_I;
@@ -130,7 +128,6 @@ public class SwerveModule implements Sendable{
     Timer.delay(0.005);
     turningSparkMax.burnFlash();
   }
-
 
   /**
    * Returns the current state of the module.
@@ -154,7 +151,7 @@ public class SwerveModule implements Sendable{
     // Apply chassis angular offset to the encoder position to get the position
     // relative to the chassis.
     return new SwerveModulePosition(
-        drivingTalon.getPosition().getValue(), 
+        drivingTalon.getPosition().getValue(),
         new Rotation2d(turningEncoder.getPosition() - chassisAngularOffsetRadians));
   }
 
@@ -179,7 +176,7 @@ public class SwerveModule implements Sendable{
     this.desiredState = optimizedDesiredState;
 
     // Command driving and turning SPARKS MAX towards their respective setpoints.
-    drivingTalon.setControl(new VelocityVoltage(optimizedDesiredState.speedMetersPerSecond)); 
+    drivingTalon.setControl(new VelocityVoltage(optimizedDesiredState.speedMetersPerSecond));
     turningPIDController.setReference(
         optimizedDesiredState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
   }
@@ -198,20 +195,59 @@ public class SwerveModule implements Sendable{
   }
 
   public void initSendable(SendableBuilder builder) {
-    builder.addDoubleProperty("Driving kP", ()->{return DriveCal.DRIVING_P;}, null);
-    builder.addDoubleProperty("Driving kI", ()->{return DriveCal.DRIVING_I;}, null);
-    builder.addDoubleProperty("Driving kD", ()->{return DriveCal.DRIVING_D;}, null);
-    builder.addDoubleProperty("Driving kP output contribution", ()->{return drivingTalon.getClosedLoopProportionalOutput().getValue();}, null); //TODO find a setter? i couldn't
-    builder.addDoubleProperty("Driving kI output contribution", ()->{return drivingTalon.getClosedLoopIntegratedOutput().getValue();}, null);
-    builder.addDoubleProperty("Driving kD output contribution", ()->{return drivingTalon.getClosedLoopDerivativeOutput().getValue();}, null);
     builder.addDoubleProperty(
-        "Driving kFF", ()->{return drivingTalon.getClosedLoopFeedForward().getValue();}, null); 
+        "Driving kP",
+        () -> {
+          return DriveCal.DRIVING_P;
+        },
+        null);
+    builder.addDoubleProperty(
+        "Driving kI",
+        () -> {
+          return DriveCal.DRIVING_I;
+        },
+        null);
+    builder.addDoubleProperty(
+        "Driving kD",
+        () -> {
+          return DriveCal.DRIVING_D;
+        },
+        null);
+    builder.addDoubleProperty(
+        "Driving kP output contribution",
+        () -> {
+          return drivingTalon.getClosedLoopProportionalOutput().getValue();
+        },
+        null); // TODO find a setter? i couldn't
+    builder.addDoubleProperty(
+        "Driving kI output contribution",
+        () -> {
+          return drivingTalon.getClosedLoopIntegratedOutput().getValue();
+        },
+        null);
+    builder.addDoubleProperty(
+        "Driving kD output contribution",
+        () -> {
+          return drivingTalon.getClosedLoopDerivativeOutput().getValue();
+        },
+        null);
+    builder.addDoubleProperty(
+        "Driving kFF",
+        () -> {
+          return drivingTalon.getClosedLoopFeedForward().getValue();
+        },
+        null);
     builder.addDoubleProperty("Turning kP", turningPIDController::getP, turningPIDController::setP);
     builder.addDoubleProperty("Turning kI", turningPIDController::getI, turningPIDController::setI);
     builder.addDoubleProperty("Turning kD", turningPIDController::getD, turningPIDController::setD);
     builder.addDoubleProperty(
         "Turning kFF", turningPIDController::getFF, turningPIDController::setFF);
-    builder.addDoubleProperty("Driving Vel (m/s)", ()->{ return drivingTalon.getVelocity().getValue();} , null);
+    builder.addDoubleProperty(
+        "Driving Vel (m/s)",
+        () -> {
+          return drivingTalon.getVelocity().getValue();
+        },
+        null);
     builder.addDoubleProperty("Steering Pos (rad)", turningEncoder::getPosition, null);
     builder.addDoubleProperty(
         "Desired Vel (m/s)",

@@ -1,17 +1,14 @@
 package frc.robot.subsystems.drive;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.BooleanSupplier;
-
 import com.ctre.phoenix6.configs.MountPoseConfigs;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.Pigeon2Configurator;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.ctre.phoenix6.signals.InvertedValue;
-
+import com.pathplanner.lib.commands.FollowPathHolonomic;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,7 +21,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -35,53 +31,59 @@ import frc.robot.Constants;
 import frc.robot.RobotMap;
 import frc.robot.subsystems.Lights;
 import frc.robot.utils.GeometryUtils;
-import com.pathplanner.lib.commands.FollowPathHolonomic;
-import com.pathplanner.lib.path.GoalEndState;
-import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.ReplanningConfig;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.BooleanSupplier;
 
 public class DriveSubsystem extends SubsystemBase {
   private double targetHeadingDegrees;
   private Lights lights;
 
   // Create SwerveModules
-  public final SwerveModule frontLeft = new SwerveModule(
-      RobotMap.FRONT_LEFT_DRIVING_CAN_ID,
-      RobotMap.FRONT_LEFT_TURNING_CAN_ID,
-      DriveCal.FRONT_LEFT_CHASSIS_ANGULAR_OFFSET_RAD);
+  public final SwerveModule frontLeft =
+      new SwerveModule(
+          RobotMap.FRONT_LEFT_DRIVING_CAN_ID,
+          RobotMap.FRONT_LEFT_TURNING_CAN_ID,
+          DriveCal.FRONT_LEFT_CHASSIS_ANGULAR_OFFSET_RAD);
 
-  public final SwerveModule frontRight = new SwerveModule(
-      RobotMap.FRONT_RIGHT_DRIVING_CAN_ID,
-      RobotMap.FRONT_RIGHT_TURNING_CAN_ID,
-      DriveCal.FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET_RAD);
+  public final SwerveModule frontRight =
+      new SwerveModule(
+          RobotMap.FRONT_RIGHT_DRIVING_CAN_ID,
+          RobotMap.FRONT_RIGHT_TURNING_CAN_ID,
+          DriveCal.FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET_RAD);
 
-  public final SwerveModule rearLeft = new SwerveModule(
-      RobotMap.REAR_LEFT_DRIVING_CAN_ID,
-      RobotMap.REAR_LEFT_TURNING_CAN_ID,
-      DriveCal.BACK_LEFT_CHASSIS_ANGULAR_OFFSET_RAD);
+  public final SwerveModule rearLeft =
+      new SwerveModule(
+          RobotMap.REAR_LEFT_DRIVING_CAN_ID,
+          RobotMap.REAR_LEFT_TURNING_CAN_ID,
+          DriveCal.BACK_LEFT_CHASSIS_ANGULAR_OFFSET_RAD);
 
-  public final SwerveModule rearRight = new SwerveModule(
-      RobotMap.REAR_RIGHT_DRIVING_CAN_ID,
-      RobotMap.REAR_RIGHT_TURNING_CAN_ID,
-      DriveCal.BACK_RIGHT_CHASSIS_ANGULAR_OFFSET_RAD);
+  public final SwerveModule rearRight =
+      new SwerveModule(
+          RobotMap.REAR_RIGHT_DRIVING_CAN_ID,
+          RobotMap.REAR_RIGHT_TURNING_CAN_ID,
+          DriveCal.BACK_RIGHT_CHASSIS_ANGULAR_OFFSET_RAD);
 
   private final Pigeon2 gyro = new Pigeon2(RobotMap.PIGEON_CAN_ID);
   private ChassisSpeeds lastSetChassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
   public Optional<Pose2d> targetPose = Optional.empty();
 
-  SwerveDriveOdometry odometry = new SwerveDriveOdometry(DriveConstants.DRIVE_KINEMATICS,
-      Rotation2d.fromDegrees(Constants.PLACEHOLDER_DOUBLE), getModulePositions());
+  SwerveDriveOdometry odometry =
+      new SwerveDriveOdometry(
+          DriveConstants.DRIVE_KINEMATICS,
+          Rotation2d.fromDegrees(Constants.PLACEHOLDER_DOUBLE),
+          getModulePositions());
 
   /** Multiplier for drive speed, does not affect trajectory following */
   private double throttleMultiplier = 1.0;
+
   private BooleanSupplier isTimedMatch;
 
   public DriveSubsystem(Lights lightsSubsystem, BooleanSupplier isTimedMatchFunc) {
     Pigeon2Configurator cfg = gyro.getConfigurator();
     Pigeon2Configuration blankGyroConfiguration = new Pigeon2Configuration();
     cfg.apply(blankGyroConfiguration);
-    
+
     gyro.reset();
     MountPoseConfigs gyroConfig = new MountPoseConfigs();
     gyroConfig.MountPosePitch = 0;
@@ -107,12 +109,13 @@ public class DriveSubsystem extends SubsystemBase {
 
   public SwerveModulePosition[] getModulePositions() {
     return new SwerveModulePosition[] {
-        frontLeft.getPosition(),
-        frontRight.getPosition(),
-        rearLeft.getPosition(),
-        rearRight.getPosition()
+      frontLeft.getPosition(),
+      frontRight.getPosition(),
+      rearLeft.getPosition(),
+      rearRight.getPosition()
     };
-  };
+  }
+  ;
 
   public void burnFlashSparks() {
     frontLeft.burnFlashSparks();
@@ -131,22 +134,24 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public ChassisSpeeds getCurrentChassisSpeeds() {
-    ChassisSpeeds chassisSpeeds = DriveConstants.DRIVE_KINEMATICS.toChassisSpeeds(frontLeft.getState(),
-        frontRight.getState(), rearLeft.getState(), rearRight.getState());
+    ChassisSpeeds chassisSpeeds =
+        DriveConstants.DRIVE_KINEMATICS.toChassisSpeeds(
+            frontLeft.getState(), frontRight.getState(), rearLeft.getState(), rearRight.getState());
     return chassisSpeeds;
   }
 
   /**
-   * applies the robot-relative output speeds of the FollowPathHolonomic Command
-   * adapted from drive() (but doesn't need the code to turn xSpeed, ySpeed, rot,
-   * fieldRelative into a ChassisSpeeds object)
+   * applies the robot-relative output speeds of the FollowPathHolonomic Command adapted from
+   * drive() (but doesn't need the code to turn xSpeed, ySpeed, rot, fieldRelative into a
+   * ChassisSpeeds object)
    */
   public void setOutputRobotRelativeSpeeds(ChassisSpeeds desiredChassisSpeeds) {
 
     ChassisSpeeds correctedDesiredChassisSpeeds = correctForDynamics(desiredChassisSpeeds);
 
     lastSetChassisSpeeds = correctedDesiredChassisSpeeds;
-    var swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds);
+    var swerveModuleStates =
+        DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds);
     setModuleStates(swerveModuleStates);
   }
 
@@ -157,8 +162,10 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void resetOdometry(Pose2d pose) {
     // Just update the translation, not the yaw
-    Pose2d resetPose = new Pose2d(pose.getTranslation(), Rotation2d.fromDegrees(gyro.getYaw().getValue()));
-    odometry.resetPosition(Rotation2d.fromDegrees(gyro.getYaw().getValue()), getModulePositions(), resetPose);
+    Pose2d resetPose =
+        new Pose2d(pose.getTranslation(), Rotation2d.fromDegrees(gyro.getYaw().getValue()));
+    odometry.resetPosition(
+        Rotation2d.fromDegrees(gyro.getYaw().getValue()), getModulePositions(), resetPose);
   }
 
   public void resetYawToAngle(double yawDeg) {
@@ -184,15 +191,17 @@ public class DriveSubsystem extends SubsystemBase {
   private static ChassisSpeeds correctForDynamics(ChassisSpeeds originalSpeeds) {
     final double LOOP_TIME_S = 0.02;
     // TODO test arbitrarily making this larger to see if it helps
-    Pose2d futureRobotPose = new Pose2d(
-        originalSpeeds.vxMetersPerSecond * LOOP_TIME_S,
-        originalSpeeds.vyMetersPerSecond * LOOP_TIME_S,
-        Rotation2d.fromRadians(originalSpeeds.omegaRadiansPerSecond * LOOP_TIME_S));
+    Pose2d futureRobotPose =
+        new Pose2d(
+            originalSpeeds.vxMetersPerSecond * LOOP_TIME_S,
+            originalSpeeds.vyMetersPerSecond * LOOP_TIME_S,
+            Rotation2d.fromRadians(originalSpeeds.omegaRadiansPerSecond * LOOP_TIME_S));
     Twist2d twistForPose = GeometryUtils.log(futureRobotPose);
-    ChassisSpeeds updatedSpeeds = new ChassisSpeeds(
-        twistForPose.dx / LOOP_TIME_S,
-        twistForPose.dy / LOOP_TIME_S,
-        twistForPose.dtheta / LOOP_TIME_S);
+    ChassisSpeeds updatedSpeeds =
+        new ChassisSpeeds(
+            twistForPose.dx / LOOP_TIME_S,
+            twistForPose.dy / LOOP_TIME_S,
+            twistForPose.dtheta / LOOP_TIME_S);
     return updatedSpeeds;
   }
 
@@ -211,13 +220,10 @@ public class DriveSubsystem extends SubsystemBase {
   /**
    * Method to drive the robot using joystick info.
    *
-   * @param xSpeed        Desired speed of the robot in the x direction (forward),
-   *                      [-1,1].
-   * @param ySpeed        Desired speed of the robot in the y direction
-   *                      (sideways), [-1,1].
-   * @param rot           Desired angular rate of the robot, [-1,1].
-   * @param fieldRelative Whether the provided x and y speeds are relative to the
-   *                      field.
+   * @param xSpeed Desired speed of the robot in the x direction (forward), [-1,1].
+   * @param ySpeed Desired speed of the robot in the y direction (sideways), [-1,1].
+   * @param rot Desired angular rate of the robot, [-1,1].
+   * @param fieldRelative Whether the provided x and y speeds are relative to the field.
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
     if (xSpeed == 0 && ySpeed == 0 && rot == 0) {
@@ -232,15 +238,17 @@ public class DriveSubsystem extends SubsystemBase {
     ySpeed *= throttleMultiplier;
     rot *= throttleMultiplier;
 
-    ChassisSpeeds desiredChassisSpeeds = fieldRelative
-        ? ChassisSpeeds.fromFieldRelativeSpeeds(
-            xSpeed, ySpeed, rot, Rotation2d.fromDegrees(gyro.getYaw().getValue()))
-        : new ChassisSpeeds(xSpeed, ySpeed, rot);
+    ChassisSpeeds desiredChassisSpeeds =
+        fieldRelative
+            ? ChassisSpeeds.fromFieldRelativeSpeeds(
+                xSpeed, ySpeed, rot, Rotation2d.fromDegrees(gyro.getYaw().getValue()))
+            : new ChassisSpeeds(xSpeed, ySpeed, rot);
 
     desiredChassisSpeeds = correctForDynamics(desiredChassisSpeeds);
     lastSetChassisSpeeds = desiredChassisSpeeds;
 
-    var swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds);
+    var swerveModuleStates =
+        DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds);
     setModuleStates(swerveModuleStates);
   }
 
@@ -289,28 +297,24 @@ public class DriveSubsystem extends SubsystemBase {
    * @return The turn rate of the robot, in degrees per second
    */
   public double getTurnRate() {
-    return gyro.getRate()
-        * (DriveConstants.GYRO_REVERSED ? -1.0 : 1.0);
+    return gyro.getRate() * (DriveConstants.GYRO_REVERSED ? -1.0 : 1.0);
   }
 
   /**
-   * Keeps the heading of the robot when the driver is not turning, by using PID
-   * to keep the
+   * Keeps the heading of the robot when the driver is not turning, by using PID to keep the
    * distance between the actual heading and the last intended heading to 0.
    *
-   * @param x             Desired speed of the robot in the x direction (forward),
-   *                      [-1,1].
-   * @param y             Desired speed of the robot in the y direction
-   *                      (sideways), [-1,1].
-   * @param fieldRelative Whether the provided x and y speeds are relative to the
-   *                      field.
+   * @param x Desired speed of the robot in the x direction (forward), [-1,1].
+   * @param y Desired speed of the robot in the y direction (sideways), [-1,1].
+   * @param fieldRelative Whether the provided x and y speeds are relative to the field.
    */
   public void keepHeading(double x, double y, boolean fieldRelative) {
     double currentHeadingDegrees = getHeadingDegrees();
     double headingDifferenceDegrees = currentHeadingDegrees - targetHeadingDegrees;
     double offsetHeadingDegrees = MathUtil.inputModulus(headingDifferenceDegrees, -180, 180);
 
-    double pidRotation = DriveCal.ROTATE_TO_TARGET_PID_CONTROLLER.calculate(offsetHeadingDegrees, 0.0);
+    double pidRotation =
+        DriveCal.ROTATE_TO_TARGET_PID_CONTROLLER.calculate(offsetHeadingDegrees, 0.0);
     double ffRotation = Math.signum(offsetHeadingDegrees) * DriveCal.ROTATE_TO_TARGET_FF;
 
     double desiredRotation = pidRotation - ffRotation;
@@ -324,7 +328,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   /**
    * Rotates to a specific angle from the D-pad buttons
-   * 
+   *
    * @param povAngleDeg Angle of D-pad control
    */
   public int convertCardinalDirections(int povAngleDeg) {
@@ -340,19 +344,14 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   /**
-   * Determines whether to rotate according to input or to run the keep heading
-   * code, by checking if
+   * Determines whether to rotate according to input or to run the keep heading code, by checking if
    * the (already deadbanded) rotation input is equal to 0.
    *
-   * @param x             Desired speed of the robot in the x direction (forward),
-   *                      [-1,1].
-   * @param y             Desired speed of the robot in the y direction
-   *                      (sideways), [-1,1].
-   * @param rot           Desired angular rate of the robot, [-1,1].
-   * @param fieldRelative Whether the provided x and y speeds are relative to the
-   *                      field.
-   * @param povAngleDeg   Get the angle in degrees of the D-pad (clockwise, -1
-   *                      means POV not pressed).
+   * @param x Desired speed of the robot in the x direction (forward), [-1,1].
+   * @param y Desired speed of the robot in the y direction (sideways), [-1,1].
+   * @param rot Desired angular rate of the robot, [-1,1].
+   * @param fieldRelative Whether the provided x and y speeds are relative to the field.
+   * @param povAngleDeg Get the angle in degrees of the D-pad (clockwise, -1 means POV not pressed).
    */
   public void rotateOrKeepHeading(
       double x, double y, double rot, boolean fieldRelative, int povAngleDeg) {
@@ -381,7 +380,6 @@ public class DriveSubsystem extends SubsystemBase {
                 this.resetOdometry(path.getPreviewStartingHolonomicPose());
               }
             }),
-
         new FollowPathHolonomic( // old method from last year: PPSwerveControllerCommand
             path,
             this::getPose, // pose supplier
@@ -391,17 +389,16 @@ public class DriveSubsystem extends SubsystemBase {
             DriveCal.PATH_ROTATION_CONTROLLER,
             DriveConstants.DRIVE_WHEEL_FREE_SPEED_METERS_PER_SECOND, // maxModuleSpeed
             DriveConstants.DRIVE_BASE_RADIUS_METERS,
-            new ReplanningConfig(), // TODO: creates a path replanning configuration with the default config
+            new ReplanningConfig(), // TODO: creates a path replanning configuration with the
+            // default config
             () -> {
               return false;
             }, // boolean supplier for shouldFlipPath
             this),
-
         new InstantCommand(
             () -> {
               targetHeadingDegrees = getHeadingDegrees();
             }),
-
         new PrintCommand("Finished a trajectory"));
   }
 
@@ -410,12 +407,13 @@ public class DriveSubsystem extends SubsystemBase {
     Pose2d curPose = getPose();
     double latencyAdjustmentSec = 0.00;
     latencySec += latencyAdjustmentSec;
-    Transform2d pastTransform = new Transform2d(
-        new Translation2d(
-            -lastSetChassisSpeeds.vxMetersPerSecond * latencySec,
-            -lastSetChassisSpeeds.vyMetersPerSecond * latencySec),
-        Rotation2d.fromRadians(lastSetChassisSpeeds.omegaRadiansPerSecond * latencySec)
-            .unaryMinus());
+    Transform2d pastTransform =
+        new Transform2d(
+            new Translation2d(
+                -lastSetChassisSpeeds.vxMetersPerSecond * latencySec,
+                -lastSetChassisSpeeds.vyMetersPerSecond * latencySec),
+            Rotation2d.fromRadians(lastSetChassisSpeeds.omegaRadiansPerSecond * latencySec)
+                .unaryMinus());
     Pose2d pastPose = curPose.plus(pastTransform);
     return pastPose;
   }
@@ -424,8 +422,9 @@ public class DriveSubsystem extends SubsystemBase {
     // Transform is to get the limelight to the correct location, not to get the
     // robot
     // Here we correct for that
-    Transform2d flipTransform = new Transform2d(
-        new Translation2d(-transform.getX(), transform.getY()), transform.getRotation());
+    Transform2d flipTransform =
+        new Transform2d(
+            new Translation2d(-transform.getX(), transform.getY()), transform.getRotation());
 
     double latencyAdjustmentSec = 0.00;
 
@@ -435,23 +434,31 @@ public class DriveSubsystem extends SubsystemBase {
 
     final boolean useLatencyAdjustment = true;
 
-    targetPose = useLatencyAdjustment
-        ? Optional.of(pastPose.plus(flipTransform))
-        : Optional.of(curPose.plus(flipTransform));
+    targetPose =
+        useLatencyAdjustment
+            ? Optional.of(pastPose.plus(flipTransform))
+            : Optional.of(curPose.plus(flipTransform));
   }
 
   public PathPlannerPath pathToPoint(Pose2d finalPose, double finalSpeedMetersPerSec) {
     Pose2d curPose = getPose();
-    Transform2d finalTransform = new Transform2d(finalPose.getTranslation(), finalPose.getRotation());
+    Transform2d finalTransform =
+        new Transform2d(finalPose.getTranslation(), finalPose.getRotation());
     System.out.println(
         "Trajectory Transform: " + finalTransform.getX() + " " + finalTransform.getY());
 
     Rotation2d finalHolonomicRotation = finalPose.getRotation();
 
     List<Translation2d> bezierTranslations = PathPlannerPath.bezierFromPoses(curPose, finalPose);
-    PathPlannerPath path = new PathPlannerPath(bezierTranslations, new PathConstraints(DriveConstants.MEDIUM_LINEAR_SPEED_METERS_PER_SEC,
-            DriveConstants.MEDIUM_LINEAR_ACCELERATION_METERS_PER_SEC_SQ, DriveConstants.MEDIUM_ANGULAR_SPEED_RAD_PER_SEC,
-            DriveConstants.MEDIUM_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ), new GoalEndState(finalSpeedMetersPerSec, finalHolonomicRotation));
+    PathPlannerPath path =
+        new PathPlannerPath(
+            bezierTranslations,
+            new PathConstraints(
+                DriveConstants.MEDIUM_LINEAR_SPEED_METERS_PER_SEC,
+                DriveConstants.MEDIUM_LINEAR_ACCELERATION_METERS_PER_SEC_SQ,
+                DriveConstants.MEDIUM_ANGULAR_SPEED_RAD_PER_SEC,
+                DriveConstants.MEDIUM_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ),
+            new GoalEndState(finalSpeedMetersPerSec, finalHolonomicRotation));
 
     return path;
   }
@@ -467,21 +474,24 @@ public class DriveSubsystem extends SubsystemBase {
     Pose2d finalPose = targetPose.get();
     List<Translation2d> bezierTranslations = PathPlannerPath.bezierFromPoses(curPose, finalPose);
 
-    Rotation2d finalHolonomicRotation = Rotation2d.fromDegrees(0); // TODO we may need to question this
+    Rotation2d finalHolonomicRotation =
+        Rotation2d.fromDegrees(0); // TODO we may need to question this
 
-    PathPlannerPath path = new PathPlannerPath(bezierTranslations,
-        new PathConstraints(DriveConstants.SLOW_LINEAR_SPEED_METERS_PER_SEC,
-            DriveConstants.SLOW_LINEAR_ACCELERATION_METERS_PER_SEC_SQ, DriveConstants.SLOW_ANGULAR_SPEED_RAD_PER_SEC,
-            DriveConstants.SLOW_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ),
-        new GoalEndState(DriveConstants.SLOW_LINEAR_SPEED_METERS_PER_SEC, finalHolonomicRotation));
+    PathPlannerPath path =
+        new PathPlannerPath(
+            bezierTranslations,
+            new PathConstraints(
+                DriveConstants.SLOW_LINEAR_SPEED_METERS_PER_SEC,
+                DriveConstants.SLOW_LINEAR_ACCELERATION_METERS_PER_SEC_SQ,
+                DriveConstants.SLOW_ANGULAR_SPEED_RAD_PER_SEC,
+                DriveConstants.SLOW_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ),
+            new GoalEndState(
+                DriveConstants.SLOW_LINEAR_SPEED_METERS_PER_SEC, finalHolonomicRotation));
 
     return Optional.of(path);
   }
 
-  /**
-   * Driving inputs will get multiplied by the throttle value, so it should be in
-   * [0,1]
-   */
+  /** Driving inputs will get multiplied by the throttle value, so it should be in [0,1] */
   public void throttle(double throttleValue) {
     throttleMultiplier = throttleValue;
   }
@@ -504,9 +514,9 @@ public class DriveSubsystem extends SubsystemBase {
 
   public Command turnInPlace(double timeoutSec) {
     return new RunCommand(
-        () -> {
-          rotateOrKeepHeading(0, 0, 0, true, -1);
-        })
+            () -> {
+              rotateOrKeepHeading(0, 0, 0, true, -1);
+            })
         .withTimeout(timeoutSec);
   }
 
