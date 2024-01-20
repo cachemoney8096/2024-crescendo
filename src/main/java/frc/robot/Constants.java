@@ -16,4 +16,9 @@ public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
+
+  public static final double NEO_FREE_SPEED_RPM = 5676.0;
+
+  public static final double PLACEHOLDER_DOUBLE = 0.0;
+  public static final int PLACEHOLDER_INT = 0;
 }
