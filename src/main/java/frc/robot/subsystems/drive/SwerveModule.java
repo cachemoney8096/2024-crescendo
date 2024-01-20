@@ -1,8 +1,13 @@
 package frc.robot.subsystems.drive;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
@@ -17,14 +22,12 @@ import frc.robot.utils.AbsoluteEncoderChecker;
 import frc.robot.utils.SparkMaxUtils;
 
 public class SwerveModule implements Sendable{
-  public final CANSparkMax drivingSparkMax;
+  public final TalonFX drivingTalon;
   public final CANSparkMax turningSparkMax;
 
-  private final RelativeEncoder drivingEncoder;
   private final AbsoluteEncoder turningEncoder;
   private AbsoluteEncoderChecker turningAbsoluteEncoderChecker = new AbsoluteEncoderChecker();
 
-  private final SparkPIDController drivingPIDController;
   private final SparkPIDController turningPIDController;
 
   private double chassisAngularOffsetRadians = 0;
@@ -36,20 +39,18 @@ public class SwerveModule implements Sendable{
    * MAX, and a Through Bore Encoder.
    */
   public SwerveModule(int drivingCanId, int turningCanId, double chassisAngularOffset) {
-    drivingSparkMax = new CANSparkMax(drivingCanId, MotorType.kBrushless);
+    drivingTalon = new TalonFX(drivingCanId);
     turningSparkMax = new CANSparkMax(turningCanId, MotorType.kBrushless);
     chassisAngularOffsetRadians = chassisAngularOffset;
 
-    SparkMaxUtils.initWithRetry(this::initDriveSpark, DriveCal.SPARK_INIT_RETRY_ATTEMPTS);
+    initDriveTalon();
     SparkMaxUtils.initWithRetry(this::initTurnSpark, DriveCal.SPARK_INIT_RETRY_ATTEMPTS);
 
-    drivingEncoder = drivingSparkMax.getEncoder();
-    drivingPIDController = drivingSparkMax.getPIDController();
     turningEncoder = turningSparkMax.getAbsoluteEncoder(Type.kDutyCycle);
     turningPIDController = turningSparkMax.getPIDController();
 
     desiredState.angle = new Rotation2d(turningEncoder.getPosition());
-    drivingEncoder.setPosition(0);
+    drivingTalon.setPosition(0);
   }
 
   /** Does all the initialization for the spark, return true on success */
@@ -104,33 +105,22 @@ public class SwerveModule implements Sendable{
   }
 
   /** Does all the initialization for the spark, return true on success */
-  boolean initDriveSpark() {
-    int errors = 0;
-    errors += SparkMaxUtils.check(drivingSparkMax.restoreFactoryDefaults());
+  void initDriveTalon() {
+    TalonFXConfigurator cfg = drivingTalon.getConfigurator();
+    TalonFXConfiguration toApply = new TalonFXConfiguration();
+    toApply.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    cfg.apply(toApply);
 
-    drivingSparkMax.setInverted(true);
-
-    RelativeEncoder drivingEncoderTmp = drivingSparkMax.getEncoder();
-    SparkPIDController drivingPidTmp = drivingSparkMax.getPIDController();
-    errors += SparkMaxUtils.check(drivingPidTmp.setFeedbackDevice(drivingEncoderTmp));
-
-    errors += SparkMaxUtils.check(drivingPidTmp.setP(DriveCal.DRIVING_P));
-    errors += SparkMaxUtils.check(drivingPidTmp.setI(DriveCal.DRIVING_I));
-    errors += SparkMaxUtils.check(drivingPidTmp.setD(DriveCal.DRIVING_D));
-    errors += SparkMaxUtils.check(drivingPidTmp.setFF(DriveCal.DRIVING_FF));
-    errors +=
+    Slot0Configs slot0Configs = new Slot0Configs();
+    slot0Configs.kP = DriveCal.DRIVING_P; 
+    slot0Configs.kI = DriveCal.DRIVING_I; 
+    slot0Configs.kD = DriveCal.DRIVING_D; 
+    drivingTalon.getConfigurator().apply(slot0Configs); 
+    
+    /*errors +=
         SparkMaxUtils.check(
             drivingPidTmp.setOutputRange(
                 DriveCal.DRIVING_MIN_OUTPUT, DriveCal.DRIVING_MAX_OUTPUT));
-
-    errors +=
-        SparkMaxUtils.check(
-            drivingEncoderTmp.setPositionConversionFactor(
-                DriveConstants.DRIVING_ENCODER_POSITION_FACTOR_METERS));
-    errors +=
-        SparkMaxUtils.check(
-            drivingEncoderTmp.setVelocityConversionFactor(
-                DriveConstants.DRIVING_ENCODER_VELOCITY_FACTOR_METERS_PER_SECOND));
 
     errors +=
         SparkMaxUtils.check(
@@ -138,9 +128,7 @@ public class SwerveModule implements Sendable{
     errors +=
         SparkMaxUtils.check(
             drivingSparkMax.setSmartCurrentLimit(
-                DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS));
-
-    return errors == 0;
+                DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS));*/ //TODO I cannot find a Talon equivlent for this stuff
   }
 
   /**
@@ -148,8 +136,6 @@ public class SwerveModule implements Sendable{
    * after all settings are set.
    */
   public void burnFlashSparks() {
-    Timer.delay(0.005);
-    drivingSparkMax.burnFlash();
     Timer.delay(0.005);
     turningSparkMax.burnFlash();
   }
@@ -163,7 +149,7 @@ public class SwerveModule implements Sendable{
     // Apply chassis angular offset to the encoder position to get the position
     // relative to the chassis.
     return new SwerveModuleState(
-        drivingEncoder.getVelocity(),
+        drivingTalon.getVelocity().getValue()*DriveConstants.DRIVING_ENCODER_POSITION_FACTOR_METERS,
         new Rotation2d(turningEncoder.getPosition() - chassisAngularOffsetRadians));
   }
 
@@ -176,7 +162,7 @@ public class SwerveModule implements Sendable{
     // Apply chassis angular offset to the encoder position to get the position
     // relative to the chassis.
     return new SwerveModulePosition(
-        drivingEncoder.getPosition(),
+        drivingTalon.getPosition().getValue()*DriveConstants.DRIVING_ENCODER_POSITION_FACTOR_METERS, 
         new Rotation2d(turningEncoder.getPosition() - chassisAngularOffsetRadians));
   }
 
@@ -201,15 +187,15 @@ public class SwerveModule implements Sendable{
     this.desiredState = optimizedDesiredState;
 
     // Command driving and turning SPARKS MAX towards their respective setpoints.
-    drivingPIDController.setReference(
-        optimizedDesiredState.speedMetersPerSecond, CANSparkMax.ControlType.kVelocity);
+    drivingTalon.setControl(
+        new DutyCycleOut(optimizedDesiredState.speedMetersPerSecond));
     turningPIDController.setReference(
         optimizedDesiredState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
   }
 
   /** Zeroes all the SwerveModule encoders. */
   public void resetDriveEncoder() {
-    drivingEncoder.setPosition(0);
+    drivingTalon.setPosition(0);
   }
 
   public double getEncoderAbsPositionRad() {
@@ -221,17 +207,17 @@ public class SwerveModule implements Sendable{
   }
 
   public void initSendable(SendableBuilder builder) {
-    builder.addDoubleProperty("Driving kP", drivingPIDController::getP, drivingPIDController::setP);
-    builder.addDoubleProperty("Driving kI", drivingPIDController::getI, drivingPIDController::setI);
-    builder.addDoubleProperty("Driving kD", drivingPIDController::getD, drivingPIDController::setD);
+    builder.addDoubleProperty("Driving kP", ()->{return drivingTalon.getClosedLoopProportionalOutput().getValue();}, null); //TODO find a setter? i couldn't
+    builder.addDoubleProperty("Driving kI", ()->{return drivingTalon.getClosedLoopIntegratedOutput().getValue();}, null);
+    builder.addDoubleProperty("Driving kD", ()->{return drivingTalon.getClosedLoopDerivativeOutput().getValue();}, null);
     builder.addDoubleProperty(
-        "Driving kFF", drivingPIDController::getFF, drivingPIDController::setFF);
+        "Driving kFF", ()->{return drivingTalon.getClosedLoopFeedForward().getValue();}, null); 
     builder.addDoubleProperty("Turning kP", turningPIDController::getP, turningPIDController::setP);
     builder.addDoubleProperty("Turning kI", turningPIDController::getI, turningPIDController::setI);
     builder.addDoubleProperty("Turning kD", turningPIDController::getD, turningPIDController::setD);
     builder.addDoubleProperty(
         "Turning kFF", turningPIDController::getFF, turningPIDController::setFF);
-    builder.addDoubleProperty("Driving Vel (m/s)", drivingEncoder::getVelocity, null);
+    builder.addDoubleProperty("Driving Vel (m/s)", ()->{ return drivingTalon.getVelocity().getValue();} , null);
     builder.addDoubleProperty("Steering Pos (rad)", turningEncoder::getPosition, null);
     builder.addDoubleProperty(
         "Desired Vel (m/s)",
