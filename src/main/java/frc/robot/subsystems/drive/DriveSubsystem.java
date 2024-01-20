@@ -21,6 +21,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -31,6 +32,7 @@ import frc.robot.Constants;
 import frc.robot.RobotMap;
 import frc.robot.subsystems.Lights;
 import frc.robot.utils.GeometryUtils;
+import frc.robot.utils.PoseBuffer;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
@@ -68,6 +70,8 @@ public class DriveSubsystem extends SubsystemBase {
   private ChassisSpeeds lastSetChassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
   public Optional<Pose2d> targetPose = Optional.empty();
 
+  public PoseBuffer poseBuffer = new PoseBuffer();
+
   SwerveDriveOdometry odometry =
       new SwerveDriveOdometry(
           DriveConstants.DRIVE_KINEMATICS,
@@ -104,6 +108,7 @@ public class DriveSubsystem extends SubsystemBase {
     rearLeft.periodic();
     rearRight.periodic();
     odometry.update(Rotation2d.fromDegrees(gyro.getYaw().getValue()), getModulePositions());
+    poseBuffer.pushToBuffer(getPose(), Timer.getFPGATimestamp());
     // TODO: put this in a thread that loops faster
   }
 
@@ -401,9 +406,16 @@ public class DriveSubsystem extends SubsystemBase {
             }),
         new PrintCommand("Finished a trajectory"));
   }
-
+  /** Returns a past pose, using the PoseBuffer */
+  public Pose2d getPastBufferedPose(double latencySec) {
+    Optional<Pose2d> p = poseBuffer.getPoseAtTimestamp(Timer.getFPGATimestamp() - latencySec);
+    if (!p.isPresent()) {
+      return extrapolatePastPoseBasedOnVelocity(Timer.getFPGATimestamp() - latencySec);
+    }
+    return p.get();
+  }
   /** Returns a past pose, given a latency adjustment */
-  public Pose2d getPastPose(double latencySec) {
+  public Pose2d extrapolatePastPoseBasedOnVelocity(double latencySec) {
     Pose2d curPose = getPose();
     double latencyAdjustmentSec = 0.00;
     latencySec += latencyAdjustmentSec;
@@ -429,7 +441,7 @@ public class DriveSubsystem extends SubsystemBase {
     double latencyAdjustmentSec = 0.00;
 
     Pose2d curPose = getPose();
-    Pose2d pastPose = getPastPose(latencyAdjustmentSec);
+    Pose2d pastPose = getPastBufferedPose(latencyAdjustmentSec);
     // TODO: see if we can get this working with the real latencySec
 
     final boolean useLatencyAdjustment = true;
