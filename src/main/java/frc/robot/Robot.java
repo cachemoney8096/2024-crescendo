@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -62,6 +63,19 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+
+    boolean realMatch = DriverStation.getMatchTime() > 1.0;
+    m_robotContainer.matchState.realMatch = realMatch;
+    // boolean blue = DriverStation.getAlliance() == DriverStation.Alliance.Blue;
+    if (!DriverStation.getAlliance().isEmpty()) {
+      boolean blue;
+      if (!realMatch) {
+        blue = true;
+      } else {
+        blue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
+      }
+      m_robotContainer.matchState.blue = blue;
+    }
   }
 
   /** This function is called periodically during autonomous. */
@@ -76,6 +90,19 @@ public class Robot extends TimedRobot {
     // this line or comment it out.
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
+    }
+
+    boolean realMatch = DriverStation.getMatchTime() > 1.0;
+    m_robotContainer.matchState.realMatch = realMatch;
+    // boolean blue = DriverStation.getAlliance() == DriverStation.Alliance.Blue;
+    if (!DriverStation.getAlliance().isEmpty()) {
+      boolean blue;
+      if (!realMatch) {
+        blue = true;
+      } else {
+        blue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
+      }
+      m_robotContainer.matchState.blue = blue;
     }
   }
 

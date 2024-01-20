@@ -32,6 +32,18 @@ public class RobotContainer {
     configureBindings();
   }
 
+  public class MatchState {
+    public boolean realMatch;
+    public boolean blue;
+
+    public MatchState(boolean realMatch, boolean blue) {
+      this.realMatch = realMatch;
+      this.blue = blue;
+    }
+  }
+
+  public MatchState matchState = new MatchState(false, true);
+
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
    * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary

@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotMap;
+import frc.robot.RobotContainer.MatchState;
 import frc.robot.subsystems.Lights;
 import frc.robot.utils.GeometryUtils;
 import java.util.List;
@@ -77,9 +78,9 @@ public class DriveSubsystem extends SubsystemBase {
   /** Multiplier for drive speed, does not affect trajectory following */
   private double throttleMultiplier = 1.0;
 
-  private BooleanSupplier isTimedMatch;
+  private MatchState matchState;
 
-  public DriveSubsystem(Lights lightsSubsystem, BooleanSupplier isTimedMatchFunc) {
+  public DriveSubsystem(Lights lightsSubsystem, MatchState matchState) {
     Pigeon2Configurator cfg = gyro.getConfigurator();
     Pigeon2Configuration blankGyroConfiguration = new Pigeon2Configuration();
     cfg.apply(blankGyroConfiguration);
@@ -93,7 +94,7 @@ public class DriveSubsystem extends SubsystemBase {
     cfg.apply(gyroConfig);
 
     this.lights = lightsSubsystem;
-    this.isTimedMatch = isTimedMatchFunc;
+    this.matchState = matchState;
   }
 
   @Override
@@ -500,8 +501,8 @@ public class DriveSubsystem extends SubsystemBase {
     targetHeadingDegrees = getHeadingDegrees() + offsetDegrees;
   }
 
-  public void setZeroTargetHeading() {
-    targetHeadingDegrees = 0.0;
+  public void setForwardTargetHeading() {
+    targetHeadingDegrees = matchState.blue ? 0 : 180;
   }
 
   public void stopDriving() {
