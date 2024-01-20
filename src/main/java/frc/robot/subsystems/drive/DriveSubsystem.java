@@ -31,6 +31,8 @@ import frc.robot.Constants;
 import frc.robot.RobotMap;
 import frc.robot.subsystems.Lights;
 import frc.robot.utils.GeometryUtils;
+import frc.robot.utils.PoseBuffer;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
@@ -67,6 +69,8 @@ public class DriveSubsystem extends SubsystemBase {
   private final Pigeon2 gyro = new Pigeon2(RobotMap.PIGEON_CAN_ID);
   private ChassisSpeeds lastSetChassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
   public Optional<Pose2d> targetPose = Optional.empty();
+
+  public PoseBuffer poseBuffer = new PoseBuffer();
 
   SwerveDriveOdometry odometry =
       new SwerveDriveOdometry(
@@ -401,9 +405,16 @@ public class DriveSubsystem extends SubsystemBase {
             }),
         new PrintCommand("Finished a trajectory"));
   }
-
+  /** Returns a past pose, using the PoseBuffer */
+  public Pose2d getPastBufferedPose(double latencySec){
+    Optional<Pose2d> p = poseBuffer.getPoseAtTimestamp(latencySec);
+    if(!p.isPresent()){
+      return interpolatePastPoseBasedOnVelocity(latencySec);
+    }
+    return p.get();
+  }
   /** Returns a past pose, given a latency adjustment */
-  public Pose2d getPastPose(double latencySec) {
+  public Pose2d interpolatePastPoseBasedOnVelocity(double latencySec) {
     Pose2d curPose = getPose();
     double latencyAdjustmentSec = 0.00;
     latencySec += latencyAdjustmentSec;
@@ -429,7 +440,7 @@ public class DriveSubsystem extends SubsystemBase {
     double latencyAdjustmentSec = 0.00;
 
     Pose2d curPose = getPose();
-    Pose2d pastPose = getPastPose(latencyAdjustmentSec);
+    Pose2d pastPose = getPastBufferedPose(latencyAdjustmentSec);
     // TODO: see if we can get this working with the real latencySec
 
     final boolean useLatencyAdjustment = true;
