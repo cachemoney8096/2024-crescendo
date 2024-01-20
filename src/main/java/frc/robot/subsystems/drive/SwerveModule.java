@@ -111,17 +111,16 @@ public class SwerveModule implements Sendable{
     TalonFXConfigurator cfg = drivingTalon.getConfigurator();
     TalonFXConfiguration toApply = new TalonFXConfiguration();
     toApply.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    toApply.Feedback.SensorToMechanismRatio = 1/DriveConstants.DRIVING_MOTOR_REDUCTION*Math.PI*DriveConstants.WHEEL_BASE_METERS; //TODO somebody fix this math
+    toApply.Feedback.SensorToMechanismRatio = 1/DriveConstants.DRIVING_MOTOR_REDUCTION*Math.PI*DriveConstants.WHEEL_DIAMETER_FUDGE_FACTOR; //TODO somebody fix this math
     toApply.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS;
-    toApply.CurrentLimits.SupplyCurrentLimitEnable = true; //this is acutally goofy af
+    toApply.CurrentLimits.SupplyCurrentLimitEnable = true; 
     toApply.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-    cfg.apply(toApply);
-
     Slot0Configs slot0Configs = new Slot0Configs();
     slot0Configs.kP = DriveCal.DRIVING_P; 
     slot0Configs.kI = DriveCal.DRIVING_I; 
     slot0Configs.kD = DriveCal.DRIVING_D; 
-    drivingTalon.getConfigurator().apply(slot0Configs); 
+    toApply.Slot0 = slot0Configs;
+    cfg.apply(toApply);
   }
 
   /**
@@ -134,11 +133,6 @@ public class SwerveModule implements Sendable{
   }
 
 
-  /** Helper function for getting velocity */
-  private double getTalonVelocityMeters(){
-      return drivingTalon.getVelocity().getValue()*60*DriveConstants.DRIVING_ENCODER_POSITION_FACTOR_METERS;
-  }
-
   /**
    * Returns the current state of the module.
    *
@@ -148,7 +142,7 @@ public class SwerveModule implements Sendable{
     // Apply chassis angular offset to the encoder position to get the position
     // relative to the chassis.
     return new SwerveModuleState(
-        getTalonVelocityMeters(),
+        drivingTalon.getVelocity().getValue(),
         new Rotation2d(turningEncoder.getPosition() - chassisAngularOffsetRadians));
   }
 
@@ -161,7 +155,7 @@ public class SwerveModule implements Sendable{
     // Apply chassis angular offset to the encoder position to get the position
     // relative to the chassis.
     return new SwerveModulePosition(
-        drivingTalon.getPosition().getValue()*DriveConstants.DRIVING_ENCODER_POSITION_FACTOR_METERS, 
+        drivingTalon.getPosition().getValue(), 
         new Rotation2d(turningEncoder.getPosition() - chassisAngularOffsetRadians));
   }
 
@@ -218,7 +212,7 @@ public class SwerveModule implements Sendable{
     builder.addDoubleProperty("Turning kD", turningPIDController::getD, turningPIDController::setD);
     builder.addDoubleProperty(
         "Turning kFF", turningPIDController::getFF, turningPIDController::setFF);
-    builder.addDoubleProperty("Driving Vel (m/s)", ()->{ return getTalonVelocityMeters();} , null);
+    builder.addDoubleProperty("Driving Vel (m/s)", ()->{ return drivingTalon.getVelocity().getValue();} , null);
     builder.addDoubleProperty("Steering Pos (rad)", turningEncoder::getPosition, null);
     builder.addDoubleProperty(
         "Desired Vel (m/s)",
