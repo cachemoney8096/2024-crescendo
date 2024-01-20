@@ -1,5 +1,7 @@
 package frc.robot.subsystems.drive;
 
+import com.pathplanner.lib.util.PIDConstants;
+
 import edu.wpi.first.math.controller.PIDController;
 import frc.robot.Constants;
 
@@ -58,4 +60,8 @@ public class DriveCal {
 
     /** If the desired chassis rotation is below this value in [0,1], it is ignored */
     public static final double ROTATION_DEADBAND_THRESHOLD = 0.04;
+
+    /** path finding controller for translation and rotation; used in PathPlanner */
+    public static final PIDConstants PATH_TRANSLATION_CONTROLLER = new PIDConstants(Constants.PLACEHOLDER_DOUBLE, Constants.PLACEHOLDER_DOUBLE, Constants.PLACEHOLDER_DOUBLE),
+      PATH_ROTATION_CONTROLLER = new PIDConstants(Constants.PLACEHOLDER_DOUBLE, Constants.PLACEHOLDER_DOUBLE, Constants.PLACEHOLDER_DOUBLE);
 }

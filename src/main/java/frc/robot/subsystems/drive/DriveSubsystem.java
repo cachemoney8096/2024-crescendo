@@ -1,7 +1,5 @@
 package frc.robot.subsystems.drive;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
@@ -21,7 +19,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -32,16 +29,10 @@ import frc.robot.Constants;
 import frc.robot.RobotMap;
 import frc.robot.subsystems.Lights;
 import frc.robot.utils.GeometryUtils;
-import java.util.function.Consumer;
-
 import com.pathplanner.lib.commands.FollowPathHolonomic;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.path.PathPlannerTrajectory;
-import com.pathplanner.lib.path.PathPoint;
-import com.pathplanner.lib.path.RotationTarget;
-import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
 public class DriveSubsystem extends SubsystemBase {
@@ -83,7 +74,7 @@ public class DriveSubsystem extends SubsystemBase {
   public DriveSubsystem(Lights lightsSubsystem, BooleanSupplier isTimedMatchFunc) {
     /** Need to factory default settings for gyro, but no function exists */
     gyro.reset();
-    
+
     this.lights = lightsSubsystem;
     this.isTimedMatch = isTimedMatchFunc;
   }
@@ -123,19 +114,22 @@ public class DriveSubsystem extends SubsystemBase {
     return odometry.getPoseMeters();
   }
 
-  public ChassisSpeeds getChassisSpeeds() {
-    return lastSetChassisSpeeds;
+  public ChassisSpeeds getCurrentChassisSpeeds() {
+    ChassisSpeeds chassisSpeeds = DriveConstants.DRIVE_KINEMATICS.toChassisSpeeds(frontLeft.getState(),
+        frontRight.getState(), rearLeft.getState(), rearRight.getState());
+    return chassisSpeeds;
   }
 
   /**
    * applies the robot-relative output speeds of the FollowPathHolonomic Command
    * adapted from drive() (but doesn't need the code to turn xSpeed, ySpeed, rot,
    * fieldRelative into a ChassisSpeeds object)
-   * does not call the correctForDynamics method because we pass in a corrected
-   * lastSetChassisSpeeds (// TODO is this right???)
    */
   public void setOutputRobotRelativeSpeeds(ChassisSpeeds desiredChassisSpeeds) {
-    lastSetChassisSpeeds = desiredChassisSpeeds;
+
+    ChassisSpeeds correctedDesiredChassisSpeeds = correctForDynamics(desiredChassisSpeeds);
+
+    lastSetChassisSpeeds = correctedDesiredChassisSpeeds;
     var swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds);
     setModuleStates(swerveModuleStates);
   }
@@ -172,7 +166,7 @@ public class DriveSubsystem extends SubsystemBase {
    * https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964
    */
   private static ChassisSpeeds correctForDynamics(ChassisSpeeds originalSpeeds) {
-    final double LOOP_TIME_S = 0.02;
+    final double LOOP_TIME_S = 0.02; // TODO potentially making this larger helping
     Pose2d futureRobotPose = new Pose2d(
         originalSpeeds.vxMetersPerSecond * LOOP_TIME_S,
         originalSpeeds.vyMetersPerSecond * LOOP_TIME_S,
@@ -387,14 +381,14 @@ public class DriveSubsystem extends SubsystemBase {
         new FollowPathHolonomic( // old method from last year: PPSwerveControllerCommand
             path,
             this::getPose, // pose supplier
-            this::getChassisSpeeds, // robot relative chassis speeds supplier
+            this::getCurrentChassisSpeeds, // robot relative chassis speeds supplier
             this::setOutputRobotRelativeSpeeds, // robot relative chassis speeds consumer
-            new PIDConstants(DriveCal.DRIVING_P, DriveCal.DRIVING_I, DriveCal.DRIVING_D), // PID Constants for
-                                                                                          // translation
-            new PIDConstants(DriveCal.TURNING_P, DriveCal.TURNING_I, DriveCal.TURNING_D), // PID Constants for rotation
+            DriveCal.PATH_TRANSLATION_CONTROLLER,
+            DriveCal.PATH_ROTATION_CONTROLLER,
             DriveConstants.DRIVE_WHEEL_FREE_SPEED_METERS_PER_SECOND, // maxModuleSpeed
             DriveConstants.DRIVE_BASE_RADIUS_METERS,
-            new ReplanningConfig(), // creates a path replanning configuration with the default config
+            new ReplanningConfig(), // TODO right now this just creates a path replanning configuration with the
+                                    // default config
             () -> {
               return false;
             }, // boolean supplier for shouldFlipPath
@@ -433,7 +427,7 @@ public class DriveSubsystem extends SubsystemBase {
     double latencyAdjustmentSec = 0.00;
 
     Pose2d curPose = getPose();
-    Pose2d pastPose = getPastPose(latencyAdjustmentSec);
+    Pose2d pastPose = getPastPose(latencyAdjustmentSec); // TODO see if can work with latencySec
 
     final boolean useLatencyAdjustment = true;
 
@@ -447,29 +441,19 @@ public class DriveSubsystem extends SubsystemBase {
     Transform2d finalTransform = new Transform2d(finalPose.getTranslation(), finalPose.getRotation());
     System.out.println(
         "Trajectory Transform: " + finalTransform.getX() + " " + finalTransform.getY());
-    Rotation2d finalHeading = Rotation2d.fromDegrees(180);
+
     Rotation2d finalHolonomicRotation = finalPose.getRotation();
 
-    PathPlannerPath path = PathPlannerPath.fromPathPoints(Arrays.asList(new PathPoint(finalTransform.getTranslation(),
-        new RotationTarget(Constants.PLACEHOLDER_DOUBLE, finalHolonomicRotation))),
-        new PathConstraints(DriveConstants.DRIVE_WHEEL_FREE_SPEED_METERS_PER_SECOND,
-            DriveConstants.DRIVE_WHEEL_MAX_ACCEL_METERS_PER_SEC_SQRD, DriveConstants.DRIVING_MOTOR_FREE_SPEED_RPS,
-            DriveConstants.DRIVING_MOTOR_MAX_ACCEL_RPS_SQRD),
-        new GoalEndState(finalSpeedMetersPerSec, finalHolonomicRotation));
+    List<Translation2d> bezierTranslations = PathPlannerPath.bezierFromPoses(curPose, finalPose);
+    PathPlannerPath path = new PathPlannerPath(bezierTranslations, new PathConstraints(DriveConstants.MEDIUM_LINEAR_SPEED_METERS_PER_SEC,
+            DriveConstants.MEDIUM_LINEAR_ACCELERATION_METERS_PER_SEC_SQ, DriveConstants.MEDIUM_ANGULAR_SPEED_RAD_PER_SEC,
+            DriveConstants.MEDIUM_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ), new GoalEndState(finalSpeedMetersPerSec, finalHolonomicRotation));
 
     return path;
   }
 
-  // TODO check this
   public Optional<PathPlannerPath> poseToPath() {
     Pose2d curPose = getPose();
-    double coastLatencySec = 0.00;
-    Transform2d coastTransform = new Transform2d(
-        new Translation2d(
-            lastSetChassisSpeeds.vxMetersPerSecond * coastLatencySec,
-            lastSetChassisSpeeds.vyMetersPerSecond * coastLatencySec),
-        Rotation2d.fromRadians(lastSetChassisSpeeds.omegaRadiansPerSecond * coastLatencySec));
-    Pose2d futurePose = curPose.plus(coastTransform);
 
     System.out.println("Acquired target? " + targetPose.isPresent());
     if (!targetPose.isPresent()) {
@@ -477,17 +461,16 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     Pose2d finalPose = targetPose.get();
-    Transform2d finalTransform = new Transform2d(finalPose.getTranslation(), finalPose.getRotation());
-    Rotation2d finalHeading = Rotation2d.fromDegrees(180);
-    Rotation2d finalHolonomicRotation = Rotation2d.fromDegrees(0);
+    List<Translation2d> bezierTranslations = PathPlannerPath.bezierFromPoses(curPose, finalPose);
 
-    PathPlannerPath path = PathPlannerPath.fromPathPoints(Arrays.asList(new PathPoint(finalTransform.getTranslation(),
-        new RotationTarget(Constants.PLACEHOLDER_DOUBLE, finalHolonomicRotation))),
+    Rotation2d finalHolonomicRotation = Rotation2d.fromDegrees(0); // TODO we may need to question this
+
+    PathPlannerPath path = new PathPlannerPath(bezierTranslations,
         new PathConstraints(DriveConstants.SLOW_LINEAR_SPEED_METERS_PER_SEC,
             DriveConstants.SLOW_LINEAR_ACCELERATION_METERS_PER_SEC_SQ, DriveConstants.SLOW_ANGULAR_SPEED_RAD_PER_SEC,
             DriveConstants.SLOW_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ),
-        null);
-    boolean generatedPath = true;
+        new GoalEndState(DriveConstants.SLOW_LINEAR_SPEED_METERS_PER_SEC, finalHolonomicRotation));
+
     return Optional.of(path);
   }
 
