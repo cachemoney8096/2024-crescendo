@@ -119,6 +119,7 @@ public class SwerveModule implements Sendable{
     slot0Configs.kP = DriveCal.DRIVING_P; 
     slot0Configs.kI = DriveCal.DRIVING_I; 
     slot0Configs.kD = DriveCal.DRIVING_D; 
+    slot0Configs.kV = DriveCal.DRIVING_FF;
     toApply.Slot0 = slot0Configs;
     cfg.apply(toApply);
   }
