@@ -4,8 +4,10 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkPIDController;
@@ -109,6 +111,10 @@ public class SwerveModule implements Sendable{
     TalonFXConfigurator cfg = drivingTalon.getConfigurator();
     TalonFXConfiguration toApply = new TalonFXConfiguration();
     toApply.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    toApply.Feedback.SensorToMechanismRatio = 1/DriveConstants.DRIVING_MOTOR_REDUCTION*Math.PI*DriveConstants.WHEEL_BASE_METERS; //TODO somebody fix this math
+    toApply.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS;
+    toApply.CurrentLimits.SupplyCurrentLimitEnable = true; //this is acutally goofy af
+    toApply.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     cfg.apply(toApply);
 
     Slot0Configs slot0Configs = new Slot0Configs();
@@ -116,19 +122,6 @@ public class SwerveModule implements Sendable{
     slot0Configs.kI = DriveCal.DRIVING_I; 
     slot0Configs.kD = DriveCal.DRIVING_D; 
     drivingTalon.getConfigurator().apply(slot0Configs); 
-    
-    /*errors +=
-        SparkMaxUtils.check(
-            drivingPidTmp.setOutputRange(
-                DriveCal.DRIVING_MIN_OUTPUT, DriveCal.DRIVING_MAX_OUTPUT));
-
-    errors +=
-        SparkMaxUtils.check(
-            drivingSparkMax.setIdleMode(DriveConstants.DRIVING_MOTOR_IDLE_MODE));
-    errors +=
-        SparkMaxUtils.check(
-            drivingSparkMax.setSmartCurrentLimit(
-                DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS));*/ //TODO I cannot find a Talon equivlent for this stuff
   }
 
   /**
@@ -140,6 +133,12 @@ public class SwerveModule implements Sendable{
     turningSparkMax.burnFlash();
   }
 
+
+  /** Helper function for getting velocity */
+  private double getTalonVelocityMeters(){
+      return drivingTalon.getVelocity().getValue()*60*DriveConstants.DRIVING_ENCODER_POSITION_FACTOR_METERS;
+  }
+
   /**
    * Returns the current state of the module.
    *
@@ -149,7 +148,7 @@ public class SwerveModule implements Sendable{
     // Apply chassis angular offset to the encoder position to get the position
     // relative to the chassis.
     return new SwerveModuleState(
-        drivingTalon.getVelocity().getValue()*DriveConstants.DRIVING_ENCODER_POSITION_FACTOR_METERS,
+        getTalonVelocityMeters(),
         new Rotation2d(turningEncoder.getPosition() - chassisAngularOffsetRadians));
   }
 
@@ -187,8 +186,7 @@ public class SwerveModule implements Sendable{
     this.desiredState = optimizedDesiredState;
 
     // Command driving and turning SPARKS MAX towards their respective setpoints.
-    drivingTalon.setControl(
-        new DutyCycleOut(optimizedDesiredState.speedMetersPerSecond));
+    drivingTalon.setControl(new VelocityVoltage(optimizedDesiredState.speedMetersPerSecond)); 
     turningPIDController.setReference(
         optimizedDesiredState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
   }
@@ -207,9 +205,12 @@ public class SwerveModule implements Sendable{
   }
 
   public void initSendable(SendableBuilder builder) {
-    builder.addDoubleProperty("Driving kP", ()->{return drivingTalon.getClosedLoopProportionalOutput().getValue();}, null); //TODO find a setter? i couldn't
-    builder.addDoubleProperty("Driving kI", ()->{return drivingTalon.getClosedLoopIntegratedOutput().getValue();}, null);
-    builder.addDoubleProperty("Driving kD", ()->{return drivingTalon.getClosedLoopDerivativeOutput().getValue();}, null);
+    builder.addDoubleProperty("Driving kP", ()->{return DriveCal.DRIVING_P;}, null);
+    builder.addDoubleProperty("Driving kI", ()->{return DriveCal.DRIVING_I;}, null);
+    builder.addDoubleProperty("Driving kD", ()->{return DriveCal.DRIVING_D;}, null);
+    builder.addDoubleProperty("Driving kP output contribution", ()->{return drivingTalon.getClosedLoopProportionalOutput().getValue();}, null); //TODO find a setter? i couldn't
+    builder.addDoubleProperty("Driving kI output contribution", ()->{return drivingTalon.getClosedLoopIntegratedOutput().getValue();}, null);
+    builder.addDoubleProperty("Driving kD output contribution", ()->{return drivingTalon.getClosedLoopDerivativeOutput().getValue();}, null);
     builder.addDoubleProperty(
         "Driving kFF", ()->{return drivingTalon.getClosedLoopFeedForward().getValue();}, null); 
     builder.addDoubleProperty("Turning kP", turningPIDController::getP, turningPIDController::setP);
@@ -217,7 +218,7 @@ public class SwerveModule implements Sendable{
     builder.addDoubleProperty("Turning kD", turningPIDController::getD, turningPIDController::setD);
     builder.addDoubleProperty(
         "Turning kFF", turningPIDController::getFF, turningPIDController::setFF);
-    builder.addDoubleProperty("Driving Vel (m/s)", ()->{ return drivingTalon.getVelocity().getValue();} , null);
+    builder.addDoubleProperty("Driving Vel (m/s)", ()->{ return getTalonVelocityMeters();} , null);
     builder.addDoubleProperty("Steering Pos (rad)", turningEncoder::getPosition, null);
     builder.addDoubleProperty(
         "Desired Vel (m/s)",
