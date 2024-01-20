@@ -10,7 +10,7 @@ public class PoseBuffer {
 
   public PoseBuffer() {}
 
-  /** Timestamps must be sequential. Using Timer.getFPGATimestamp*/
+  /** Timestamps must be sequential. Using Timer.getFPGATimestamp */
   public void pushToBuffer(Pose2d pose, double timestamp) {
     Pair<Double, Pose2d> pos = new Pair<Double, Pose2d>(timestamp, pose);
     buffer.addFirst(pos);
