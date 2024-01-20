@@ -4,7 +4,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
+import com.ctre.phoenix6.configs.MountPoseConfigs;
+import com.ctre.phoenix6.configs.Pigeon2Configuration;
+import com.ctre.phoenix6.configs.Pigeon2Configurator;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.signals.InvertedValue;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -72,8 +78,17 @@ public class DriveSubsystem extends SubsystemBase {
   private BooleanSupplier isTimedMatch;
 
   public DriveSubsystem(Lights lightsSubsystem, BooleanSupplier isTimedMatchFunc) {
-    /** Need to factory default settings for gyro, but no function exists */
+    Pigeon2Configurator cfg = gyro.getConfigurator();
+    Pigeon2Configuration blankGyroConfiguration = new Pigeon2Configuration();
+    cfg.apply(blankGyroConfiguration);
+    
     gyro.reset();
+    MountPoseConfigs gyroConfig = new MountPoseConfigs();
+    gyroConfig.MountPosePitch = 0;
+    gyroConfig.MountPoseRoll = 0;
+    gyroConfig.MountPoseYaw = 90;
+
+    cfg.apply(gyroConfig);
 
     this.lights = lightsSubsystem;
     this.isTimedMatch = isTimedMatchFunc;
@@ -87,6 +102,7 @@ public class DriveSubsystem extends SubsystemBase {
     rearLeft.periodic();
     rearRight.periodic();
     odometry.update(Rotation2d.fromDegrees(gyro.getYaw().getValue()), getModulePositions());
+    // TODO: put this in a thread that loops faster
   }
 
   public SwerveModulePosition[] getModulePositions() {
@@ -166,7 +182,8 @@ public class DriveSubsystem extends SubsystemBase {
    * https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964
    */
   private static ChassisSpeeds correctForDynamics(ChassisSpeeds originalSpeeds) {
-    final double LOOP_TIME_S = 0.02; // TODO potentially making this larger helping
+    final double LOOP_TIME_S = 0.02;
+    // TODO test arbitrarily making this larger to see if it helps
     Pose2d futureRobotPose = new Pose2d(
         originalSpeeds.vxMetersPerSecond * LOOP_TIME_S,
         originalSpeeds.vyMetersPerSecond * LOOP_TIME_S,
@@ -203,12 +220,6 @@ public class DriveSubsystem extends SubsystemBase {
    *                      field.
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
-    if (isTimedMatch.getAsBoolean()
-        && DriverStation.isTeleop()
-        && DriverStation.getMatchTime() < 0.3) {
-      setX();
-      return;
-    }
     if (xSpeed == 0 && ySpeed == 0 && rot == 0) {
       setNoMove();
       return;
@@ -279,7 +290,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public double getTurnRate() {
     return gyro.getRate()
-        * (DriveConstants.GYRO_REVERSED ? Constants.PLACEHOLDER_DOUBLE : Constants.PLACEHOLDER_DOUBLE);
+        * (DriveConstants.GYRO_REVERSED ? -1.0 : 1.0);
   }
 
   /**
@@ -356,13 +367,6 @@ public class DriveSubsystem extends SubsystemBase {
     }
   }
 
-  public void setForward() {
-    frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(0)));
-    frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(0)));
-    rearLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(0)));
-    rearRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(0)));
-  }
-
   public Pigeon2 getGyro() {
     return gyro;
   }
@@ -387,8 +391,7 @@ public class DriveSubsystem extends SubsystemBase {
             DriveCal.PATH_ROTATION_CONTROLLER,
             DriveConstants.DRIVE_WHEEL_FREE_SPEED_METERS_PER_SECOND, // maxModuleSpeed
             DriveConstants.DRIVE_BASE_RADIUS_METERS,
-            new ReplanningConfig(), // TODO right now this just creates a path replanning configuration with the
-                                    // default config
+            new ReplanningConfig(), // TODO: creates a path replanning configuration with the default config
             () -> {
               return false;
             }, // boolean supplier for shouldFlipPath
@@ -427,7 +430,8 @@ public class DriveSubsystem extends SubsystemBase {
     double latencyAdjustmentSec = 0.00;
 
     Pose2d curPose = getPose();
-    Pose2d pastPose = getPastPose(latencyAdjustmentSec); // TODO see if can work with latencySec
+    Pose2d pastPose = getPastPose(latencyAdjustmentSec);
+    // TODO: see if we can get this working with the real latencySec
 
     final boolean useLatencyAdjustment = true;
 
@@ -504,34 +508,6 @@ public class DriveSubsystem extends SubsystemBase {
           rotateOrKeepHeading(0, 0, 0, true, -1);
         })
         .withTimeout(timeoutSec);
-  }
-
-  public void zeroFrontLeftAtCurrentPos() {
-    DriveCal.SWERVE_FRONT_LEFT_ANGULAR_OFFSET_RAD = frontLeft.getEncoderAbsPositionRad();
-    System.out.println(
-        "New Zero for Front Left Swerve: "
-            + DriveCal.SWERVE_FRONT_LEFT_ANGULAR_OFFSET_RAD);
-  }
-
-  public void zeroFrontRightAtCurrentPos() {
-    DriveCal.SWERVE_FRONT_RIGHT_ANGULAR_OFFSET_RAD = frontRight.getEncoderAbsPositionRad();
-    System.out.println(
-        "New Zero for Front Right Swerve: "
-            + DriveCal.SWERVE_FRONT_RIGHT_ANGULAR_OFFSET_RAD);
-  }
-
-  public void zeroRearLeftAtCurrentPos() {
-    DriveCal.SWERVE_BACK_LEFT_ANGULAR_OFFSET_RAD = rearLeft.getEncoderAbsPositionRad();
-    System.out.println(
-        "New Zero for Rear Left Swerve: "
-            + DriveCal.SWERVE_BACK_LEFT_ANGULAR_OFFSET_RAD);
-  }
-
-  public void zeroRearRightAtCurrentPos() {
-    DriveCal.SWERVE_BACK_RIGHT_ANGULAR_OFFSET_RAD = rearRight.getEncoderAbsPositionRad();
-    System.out.println(
-        "New Zero for Rear Right Swerve: "
-            + DriveCal.SWERVE_BACK_RIGHT_ANGULAR_OFFSET_RAD);
   }
 
   @Override

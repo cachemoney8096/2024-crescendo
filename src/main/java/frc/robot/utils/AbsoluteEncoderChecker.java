@@ -9,6 +9,7 @@ public class AbsoluteEncoderChecker {
   private MedianFilter medianFilter;
   private double lastCalculatedMedian = 0.0;
   private static final int NUM_READINGS = 20;
+  // TODO: rethink this whole thing since it was a nice idea but didn't really work
 
   public AbsoluteEncoderChecker() {
     this.buffer = new double[NUM_READINGS];

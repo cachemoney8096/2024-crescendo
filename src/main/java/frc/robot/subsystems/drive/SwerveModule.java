@@ -110,7 +110,7 @@ public class SwerveModule implements Sendable{
   void initDriveTalon() {
     TalonFXConfigurator cfg = drivingTalon.getConfigurator();
     TalonFXConfiguration toApply = new TalonFXConfiguration();
-    toApply.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    toApply.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // TODO: check this
     toApply.Feedback.SensorToMechanismRatio = 1/DriveConstants.DRIVING_MOTOR_REDUCTION*Math.PI*DriveConstants.WHEEL_DIAMETER_FUDGE_FACTOR; //TODO somebody fix this math
     toApply.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS;
     toApply.CurrentLimits.SupplyCurrentLimitEnable = true; 
