@@ -22,17 +22,18 @@ public class PoseBuffer {
     }
 
     public Optional<Pose2d> getPoseAtTimestamp(double timestamp){
-        if(buffer.getFromFirst(0).getFirst() >= timestamp && buffer.getFromLast(0).getFirst() <= timestamp){
-            if(buffer.size() < 2){
-                return Optional.empty();
-            }
-            for(int i = 0; i < buffer.size()-1; i++){
-                if(buffer.getFromFirst(i).getFirst() >= timestamp && buffer.getFromFirst(i+1).getFirst() <= timestamp){
-                    Pair<Double, Pose2d> timedPoseA = buffer.getFromFirst(i);
-                    Pair<Double, Pose2d> timedPoseB = buffer.getFromFirst(i+1);
-                    double percentage = (timedPoseA.getFirst()-timestamp)/(timedPoseA.getFirst()-timedPoseB.getFirst());
-                    return Optional.of(timedPoseA.getSecond().interpolate(timedPoseB.getSecond(), percentage));
-                }
+        if(buffer.getFromFirst(0).getFirst() <= timestamp && buffer.getFromLast(0).getFirst() >= timestamp){
+            return Optional.empty();
+        }
+        if(buffer.size() < 2){
+            return Optional.empty();
+        }
+        for(int i = 0; i < buffer.size()-1; i++){
+            if(buffer.getFromFirst(i).getFirst() >= timestamp && buffer.getFromFirst(i+1).getFirst() <= timestamp){
+                Pair<Double, Pose2d> timedPoseA = buffer.getFromFirst(i);
+                Pair<Double, Pose2d> timedPoseB = buffer.getFromFirst(i+1);
+                double percentage = (timedPoseA.getFirst()-timestamp)/(timedPoseA.getFirst()-timedPoseB.getFirst());
+                return Optional.of(timedPoseA.getSecond().interpolate(timedPoseB.getSecond(), percentage));
             }
         }
         return Optional.empty();
