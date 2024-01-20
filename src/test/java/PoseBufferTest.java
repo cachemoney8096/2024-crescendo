@@ -16,13 +16,6 @@ public class PoseBufferTest {
       poses.add(p);
     }
     for (double i = 10; i < 20; i++) {
-      // System.out.print(poseBuffer.getPoseAtTimestamp(i));
-      // System.out.print(" - ");
-      // System.out.println(poses.get((int)i));
-      // assert poses.get((int)i).interpolate(poses.get((int)(i+1)), 0.5) ==
-      // poseBuffer.getPoseAtTimestamp(i+0.5).get();
-      // System.out.println(poses.get((int)i).interpolate(poses.get((int)(i+1)), 0.5));
-      // System.out.println(poseBuffer.getPoseAtTimestamp(i+0.5).get());
       Pose2d interp1 = poses.get((int) i).interpolate(poses.get((int) (i + 1)), 0.5);
       Pose2d interp2 = poseBuffer.getPoseAtTimestamp(i + 0.5).get();
       assert Math.abs(interp1.getX() - interp2.getX()) < 0.00001;
