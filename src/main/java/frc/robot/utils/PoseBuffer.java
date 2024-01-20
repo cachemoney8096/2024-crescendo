@@ -5,10 +5,12 @@ import edu.wpi.first.math.geometry.Pose2d;
 import java.util.Optional;
 
 public class PoseBuffer {
+  /* The double is the FGAT timestamp, the Pose is a pose (xy+rotation) */
   RingBuffer<Pair<Double, Pose2d>> buffer = new RingBuffer<Pair<Double, Pose2d>>();
 
   public PoseBuffer() {}
 
+  /** Timestamps must be sequential. Using Timer.getFPGATimestamp*/
   public void pushToBuffer(Pose2d pose, double timestamp) {
     Pair<Double, Pose2d> pos = new Pair<Double, Pose2d>(timestamp, pose);
     buffer.addFirst(pos);
