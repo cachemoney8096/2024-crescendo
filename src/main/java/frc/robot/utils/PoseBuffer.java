@@ -4,14 +4,13 @@ import java.util.Optional;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.Timer;
 
 public class PoseBuffer {
     RingBuffer<Pair<Double, Pose2d>> buffer = new RingBuffer<Pair<Double, Pose2d>>();
     public PoseBuffer(){}
 
-    public void pushToBuffer(Pose2d pose){
-        Pair<Double, Pose2d> pos = new Pair<Double, Pose2d>(Timer.getFPGATimestamp(), pose);
+    public void pushToBuffer(Pose2d pose, double timestamp){
+        Pair<Double, Pose2d> pos = new Pair<Double, Pose2d>(timestamp, pose);
         buffer.addFirst(pos);
         if(buffer.size() > 50){
             buffer.removeLast();

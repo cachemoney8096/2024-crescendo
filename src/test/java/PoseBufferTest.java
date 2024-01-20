@@ -1,0 +1,28 @@
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.utils.PoseBuffer;
+
+public class PoseBufferTest {
+    @Test
+    void test(){
+        PoseBuffer poseBuffer = new PoseBuffer();
+        ArrayList<Pose2d> poses = new ArrayList<Pose2d>();
+        for(int i = 0; i < 30; i++){
+            Pose2d p = new Pose2d(Math.random()*100, Math.random()*100, new Rotation2d(Math.random()));
+            poseBuffer.pushToBuffer(p, i);
+            poses.add(p);
+        }
+        for(double i = 10; i < 20; i++){
+            //System.out.print(poseBuffer.getPoseAtTimestamp(i));
+            //System.out.print(" - ");
+            //System.out.println(poses.get((int)i));
+            //assert poses.get((int)i).interpolate(poses.get((int)(i+1)), 0.5) == poseBuffer.getPoseAtTimestamp(i+0.5).get();
+            System.out.println(poses.get((int)i).interpolate(poses.get((int)(i+1)), 0.5));
+            System.out.println(poseBuffer.getPoseAtTimestamp(i+0.5).get());
+        }
+    }
+}
