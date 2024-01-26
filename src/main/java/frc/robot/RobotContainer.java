@@ -32,6 +32,15 @@ public class RobotContainer {
     configureBindings();
   }
 
+  /**
+   * This class stores the state of the match (the alliance color, and whether it's a real match)
+   *
+   * @param realMatch a boolean variable defining whether we are in a real match; this can be
+   *     determined by checking if the remaining match time in the init function for the match face
+   *     is greater than one second
+   * @param blue a boolean variable defining whether we are on the blue alliance (true) or the red
+   *     alliance (false). When in a fake match, this variable should be true.
+   */
   public class MatchState {
     public boolean realMatch;
     public boolean blue;

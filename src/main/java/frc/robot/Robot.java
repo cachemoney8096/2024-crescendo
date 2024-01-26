@@ -64,18 +64,7 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.schedule();
     }
 
-    boolean realMatch = DriverStation.getMatchTime() > 1.0;
-    m_robotContainer.matchState.realMatch = realMatch;
-    // boolean blue = DriverStation.getAlliance() == DriverStation.Alliance.Blue;
-    if (!DriverStation.getAlliance().isEmpty()) {
-      boolean blue;
-      if (!realMatch) {
-        blue = true;
-      } else {
-        blue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
-      }
-      m_robotContainer.matchState.blue = blue;
-    }
+    setRobotContainerMatchState();
   }
 
   /** This function is called periodically during autonomous. */
@@ -92,18 +81,7 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
-    boolean realMatch = DriverStation.getMatchTime() > 1.0;
-    m_robotContainer.matchState.realMatch = realMatch;
-    // boolean blue = DriverStation.getAlliance() == DriverStation.Alliance.Blue;
-    if (!DriverStation.getAlliance().isEmpty()) {
-      boolean blue;
-      if (!realMatch) {
-        blue = true;
-      } else {
-        blue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
-      }
-      m_robotContainer.matchState.blue = blue;
-    }
+    setRobotContainerMatchState();
   }
 
   /** This function is called periodically during operator control. */
@@ -127,4 +105,18 @@ public class Robot extends TimedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {}
+
+  private void setRobotContainerMatchState() {
+    boolean realMatch = DriverStation.getMatchTime() > 1.0;
+    m_robotContainer.matchState.realMatch = realMatch;
+    if (!DriverStation.getAlliance().isEmpty()) {
+      boolean blue;
+      if (!realMatch) {
+        blue = true;
+      } else {
+        blue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
+      }
+      m_robotContainer.matchState.blue = blue;
+    }
+  }
 }
