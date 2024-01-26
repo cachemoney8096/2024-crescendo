@@ -12,12 +12,16 @@ import com.revrobotics.SparkAbsoluteEncoder.Type;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotMap;
+import frc.robot.utils.SendableHelper;
 import frc.robot.utils.SparkMaxUtils;
+
+//TODO absolute encoder zeroing
 
 public class Elevator extends SubsystemBase {
   public enum ElevatorPosition{
@@ -39,12 +43,12 @@ public class Elevator extends SubsystemBase {
 
   private ProfiledPIDController noteScoringElevatorController = new ProfiledPIDController(ElevatorCal.NOTE_SCORING_P,
       ElevatorCal.NOTE_SCORING_I, ElevatorCal.NOTE_SCORING_D, new TrapezoidProfile.Constraints(
-          ElevatorCal.MAX_VELOCITY_PER_SECOND,
-          ElevatorCal.MAX_ACCELERATION_PER_SECOND_SQUARED));
-  private ProfiledPIDController chainGrabberElevatorController = new ProfiledPIDController(ElevatorCal.GRABBING_P,
-      ElevatorCal.GRABBING_I, ElevatorCal.GRABBING_D, new TrapezoidProfile.Constraints(
-          ElevatorCal.MAX_VELOCITY_PER_SECOND,
-          ElevatorCal.MAX_ACCELERATION_PER_SECOND_SQUARED));
+          ElevatorCal.MAX_VELOCITY_IN_PER_SECOND,
+          ElevatorCal.MAX_ACCELERATION_IN_PER_SECOND_SQUARED));
+  private ProfiledPIDController chainGrabberElevatorController = new ProfiledPIDController(ElevatorCal.CLIMBING_P,
+      ElevatorCal.CLIMBING_I, ElevatorCal.CLIMBING_D, new TrapezoidProfile.Constraints(
+          ElevatorCal.MAX_VELOCITY_IN_PER_SECOND,
+          ElevatorCal.MAX_ACCELERATION_IN_PER_SECOND_SQUARED));
 
   private ProfiledPIDController currentPIDController = noteScoringElevatorController;
 
@@ -52,22 +56,25 @@ public class Elevator extends SubsystemBase {
 
   private ElevatorPosition desiredPosition;
 
-  private boolean usingScoringPID = true;
+  private boolean usingNoteScoringPID = true;
+
+  private double prevVelocity = 0;
+  private double prevTimestamp = -1;
 
   public Elevator() {
     SparkMaxUtils.initWithRetry(this::initSparks, ElevatorCal.MAX_INIT_RETRY_ATTEMPTS);
     elevatorPositions = new TreeMap<ElevatorPosition, Double>();
-    elevatorPositions.put(ElevatorPosition.HOME, ElevatorCal.POSITION_HOME);
-    elevatorPositions.put(ElevatorPosition.SCORE_AMP, ElevatorCal.POSITION_SCORE_AMP);
-    elevatorPositions.put(ElevatorPosition.SCORE_TRAP, ElevatorCal.POSITION_SCORE_TRAP);
-    elevatorPositions.put(ElevatorPosition.PRE_CLIMB, ElevatorCal.POSITION_PRE_CLIMB);
-    elevatorPositions.put(ElevatorPosition.CLIMB, ElevatorCal.POSITION_CLIMB);
-    elevatorPositions.put(ElevatorPosition.POST_CLIMB, ElevatorCal.POSITION_POST_CLIMB);
+    elevatorPositions.put(ElevatorPosition.HOME, ElevatorCal.POSITION_IN_HOME);
+    elevatorPositions.put(ElevatorPosition.SCORE_AMP, ElevatorCal.POSITION_IN_SCORE_AMP);
+    elevatorPositions.put(ElevatorPosition.SCORE_TRAP, ElevatorCal.POSITION_IN_SCORE_TRAP);
+    elevatorPositions.put(ElevatorPosition.PRE_CLIMB, ElevatorCal.POSITION_IN_PRE_CLIMB);
+    elevatorPositions.put(ElevatorPosition.POST_CLIMB, ElevatorCal.POSITION_IN_POST_CLIMB);
+    this.desiredPosition = ElevatorPosition.HOME;
   }
 
-  public void useScoringPID(boolean b){
-    usingScoringPID = b;
-    if(b){
+  public void useScoringPID(boolean useNoteScoringPID){
+    usingNoteScoringPID = useNoteScoringPID;
+    if(useNoteScoringPID){
       currentPIDController = noteScoringElevatorController;
     }
     else{
@@ -78,19 +85,33 @@ public class Elevator extends SubsystemBase {
   private void controlPosition(ElevatorPosition pos){
     currentPIDController.setGoal(elevatorPositions.get(pos));
     double elevatorDemandVolts = currentPIDController.calculate(leftMotorEncoder.getPosition());
-    if(usingScoringPID){
+    if(usingNoteScoringPID){
       elevatorDemandVolts +=
         ElevatorCal.NOTE_SCORING_FF.calculate(currentPIDController.getSetpoint().velocity);
+      if(prevTimestamp != -1){
+        elevatorDemandVolts += ElevatorCal.NOTE_SCORING_FF.calculate(prevVelocity, currentPIDController.getSetpoint().velocity, Timer.getFPGATimestamp()-prevTimestamp);
+      }
     }
     else{
       elevatorDemandVolts +=
-        ElevatorCal.GRABBING_FF.calculate(currentPIDController.getSetpoint().velocity);
+        ElevatorCal.CLIMBING_FF.calculate(currentPIDController.getSetpoint().velocity);
+      if(prevTimestamp != -1){
+        elevatorDemandVolts += ElevatorCal.CLIMBING_FF.calculate(prevVelocity, currentPIDController.getSetpoint().velocity, Timer.getFPGATimestamp()-prevTimestamp);
+      }
     }
+    prevVelocity = currentPIDController.getSetpoint().velocity;
+    prevTimestamp = Timer.getFPGATimestamp();
     leftMotor.setVoltage(elevatorDemandVolts);
   }
 
   public void setDesiredPosition(ElevatorPosition desiredPosition){
     this.desiredPosition = desiredPosition;
+  }
+
+  public boolean atDesiredPosition(){
+      double desiredPositionIn = elevatorPositions.get(desiredPosition);
+      double currentPositionIn = leftMotorEncoder.getPosition();
+      return Math.abs(desiredPositionIn-currentPositionIn) < ElevatorCal.ELEVATOR_MARGIN_IN;
   }
 
   @Override
@@ -109,7 +130,7 @@ public class Elevator extends SubsystemBase {
 
     errors +=
         SparkMaxUtils.check(
-            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(leftMotorEncoderAbs, 1.0));
+            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(leftMotorEncoderAbs, ElevatorCal.ELEVATOR_LEFT_ABSOLUTE_ENCODER_RATIO));
     errors +=
         SparkMaxUtils.check(
             SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(
@@ -121,7 +142,7 @@ public class Elevator extends SubsystemBase {
     errors +=
         SparkMaxUtils.check(
             leftMotorEncoder.setVelocityConversionFactor(
-                ElevatorCal.ELEVATOR_MOTOR_ENCODER_IPS_PER_RPM));
+                ElevatorCal.ELEVATOR_MOTOR_ENCODER_IN_PER_SEC_PER_RPM));
 
     errors +=
         SparkMaxUtils.check(
@@ -152,6 +173,22 @@ public class Elevator extends SubsystemBase {
     leftMotor.burnFlash();
     Timer.delay(0.005);
     rightMotor.burnFlash();
+  }
+
+  @Override
+  public void initSendable(SendableBuilder builder){
+    super.initSendable(builder);
+    SendableHelper.addChild(builder, this, currentPIDController, "CurrentElevatorController");
+    builder.addDoubleProperty(
+        "Elevator Position (in)",
+        leftMotorEncoder::getPosition,
+        leftMotorEncoder::setPosition);
+    builder.addDoubleProperty("Elevator Vel (in/s)", leftMotorEncoder::getVelocity, null);
+    builder.addDoubleProperty(
+        "Elevator Left Abs Pos (deg)", leftMotorEncoderAbs::getPosition, null);
+    builder.addDoubleProperty(
+        "Elevator Right Abs Pos (deg)", rightMotorEncoderAbs::getPosition, null);
+    builder.addBooleanProperty("Elevator at desired position", this::atDesiredPosition, null);
   }
   
 }
