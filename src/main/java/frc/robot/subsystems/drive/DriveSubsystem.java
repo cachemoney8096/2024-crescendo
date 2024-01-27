@@ -28,13 +28,12 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.RobotMap;
 import frc.robot.RobotContainer.MatchState;
+import frc.robot.RobotMap;
 import frc.robot.subsystems.Lights;
 import frc.robot.utils.GeometryUtils;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BooleanSupplier;
 
 public class DriveSubsystem extends SubsystemBase {
   private double targetHeadingDegrees;
@@ -242,7 +241,10 @@ public class DriveSubsystem extends SubsystemBase {
     ChassisSpeeds desiredChassisSpeeds =
         fieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                matchState.blue ? xSpeed : -xSpeed, ySpeed, rot, Rotation2d.fromDegrees(gyro.getYaw().getValue()))
+                matchState.blue ? xSpeed : -xSpeed,
+                matchState.blue ? ySpeed : -ySpeed,
+                rot,
+                Rotation2d.fromDegrees(gyro.getYaw().getValue()))
             : new ChassisSpeeds(xSpeed, ySpeed, rot);
 
     desiredChassisSpeeds = correctForDynamics(desiredChassisSpeeds);
