@@ -1,5 +1,6 @@
 package frc.robot.subsystems.elevator;
 
+import java.util.Optional;
 import java.util.TreeMap;
 
 import com.revrobotics.AbsoluteEncoder;
@@ -56,7 +57,7 @@ public class Elevator extends SubsystemBase {
   private boolean usingNoteScoringPID = true;
 
   private double prevVelocity = 0;
-  private double prevTimestamp = -1;
+  private Optional<Double> prevTimestamp = Optional.empty();
 
   public Elevator() {
     SparkMaxUtils.initWithRetry(this::initSparks, ElevatorCal.MAX_INIT_RETRY_ATTEMPTS);
@@ -66,7 +67,6 @@ public class Elevator extends SubsystemBase {
     elevatorPositions.put(ElevatorPosition.SCORE_TRAP, ElevatorCal.POSITION_IN_SCORE_TRAP);
     elevatorPositions.put(ElevatorPosition.PRE_CLIMB, ElevatorCal.POSITION_IN_PRE_CLIMB);
     elevatorPositions.put(ElevatorPosition.POST_CLIMB, ElevatorCal.POSITION_IN_POST_CLIMB);
-    this.desiredPosition = ElevatorPosition.HOME;
   }
 
   public void useScoringPID(boolean useNoteScoringPID){
@@ -82,22 +82,23 @@ public class Elevator extends SubsystemBase {
   private void controlPosition(ElevatorPosition pos){
     currentPIDController.setGoal(elevatorPositions.get(pos));
     double elevatorDemandVolts = currentPIDController.calculate(leftMotorEncoder.getPosition());
+    double timestamp = Timer.getFPGATimestamp();
     if(usingNoteScoringPID){
       elevatorDemandVolts +=
         ElevatorCal.NOTE_SCORING_FF.calculate(currentPIDController.getSetpoint().velocity);
-      if(prevTimestamp != -1){
-        elevatorDemandVolts += ElevatorCal.NOTE_SCORING_FF.calculate(prevVelocity, currentPIDController.getSetpoint().velocity, Timer.getFPGATimestamp()-prevTimestamp);
+      if(!prevTimestamp.isEmpty()){
+        elevatorDemandVolts += ElevatorCal.NOTE_SCORING_FF.calculate(prevVelocity, currentPIDController.getSetpoint().velocity, timestamp-prevTimestamp.get());
       }
     }
     else{
       elevatorDemandVolts +=
         ElevatorCal.CLIMBING_FF.calculate(currentPIDController.getSetpoint().velocity);
-      if(prevTimestamp != -1){
-        elevatorDemandVolts += ElevatorCal.CLIMBING_FF.calculate(prevVelocity, currentPIDController.getSetpoint().velocity, Timer.getFPGATimestamp()-prevTimestamp);
+      if(!prevTimestamp.isEmpty()){
+        elevatorDemandVolts += ElevatorCal.CLIMBING_FF.calculate(prevVelocity, currentPIDController.getSetpoint().velocity, timestamp-prevTimestamp.get());
       }
     }
     prevVelocity = currentPIDController.getSetpoint().velocity;
-    prevTimestamp = Timer.getFPGATimestamp();
+    prevTimestamp = Optional.of(timestamp);
     leftMotor.setVoltage(elevatorDemandVolts);
   }
 
