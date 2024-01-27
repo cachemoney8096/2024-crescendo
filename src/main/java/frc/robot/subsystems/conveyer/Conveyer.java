@@ -30,7 +30,7 @@ public class Conveyer extends SubsystemBase {
   public enum NotePosition {
     NO_NOTE,
     RECEIVING_NOTE,
-    HELD_NOTE
+    HOLDING_NOTE
   }
 
   public NotePosition notePosition = NotePosition.NO_NOTE;
@@ -115,7 +115,7 @@ public class Conveyer extends SubsystemBase {
       /** If the back motor has moved more than the threshold, we have a note */
       if (backMotorEncoder.getPosition() - secondMotorZeroPosition
           > ConveyerCal.NOTE_THRESHOLD_DEGREES) {
-        notePosition = NotePosition.HELD_NOTE;
+        notePosition = NotePosition.HOLDING_NOTE;
       } else {
         /**
          * If we were receiving a note and the back motor has not moved more than the threshold, we
