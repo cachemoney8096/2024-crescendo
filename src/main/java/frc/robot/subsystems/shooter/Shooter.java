@@ -9,7 +9,9 @@ import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
 
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.robot.Constants;
 import frc.robot.RobotMap;
 
@@ -23,17 +25,16 @@ public class Shooter {
   private final RelativeEncoder motorBEncoder = motorB.getEncoder();
   private final CANSparkMax pivotMotor =
       new CANSparkMax(RobotMap.SHOOTER_PIVOT_MOTOR_CAN_ID, MotorType.kBrushless);
-  private final AbsoluteEncoder shooterAbsoluteEncoder =
+  private final AbsoluteEncoder pivotMotorAbsoluteEncoder =
       pivotMotor.getAbsoluteEncoder(Type.kDutyCycle);
   private double pivotDesiredPosition = ShooterCal.STARTING_POSITION_DEGREES;
-  private final int SMART_MOTION_SLOT = 0;
 
   /** Double distance, Double angle for pivotMotor */
   private InterpolatingDoubleTreeMap pivotAngleMap;
 
   private final SparkPIDController controllerA;
   private final SparkPIDController controllerB;
-  private final SparkPIDController pivotController;
+  private final ProfiledPIDController pivotController = new ProfiledPIDController(ShooterCal.PIVOT_MOTOR_kP, ShooterCal.PIVOT_MOTOR_kI, ShooterCal.PIVOT_MOTOR_kD, new TrapezoidProfile.Constraints(ShooterCal.PIVOT_MAX_VELOCITY_DEG_PER_SECOND, ShooterCal.PIVOT_MAX_ACCELERATION_DEG_PER_SECOND_SQUARED));
 
   public Shooter() {
     pivotAngleMap = new InterpolatingDoubleTreeMap();
@@ -42,7 +43,6 @@ public class Shooter {
 
     controllerA = motorA.getPIDController();
     controllerB = motorB.getPIDController();
-    pivotController = pivotMotor.getPIDController();
 
     controllerA.setP(ShooterCal.MOTOR_A_kP);
     controllerA.setI(ShooterCal.MOTOR_A_kI);
@@ -54,10 +54,7 @@ public class Shooter {
     controllerB.setD(ShooterCal.MOTOR_B_kD);
     controllerB.setFF(ShooterCal.MOTOR_B_kFF);
 
-    pivotController.setP(ShooterCal.PIVOT_MOTOR_kP);
-    pivotController.setI(ShooterCal.PIVOT_MOTOR_kI);
-    pivotController.setD(ShooterCal.PIVOT_MOTOR_kD);
-    pivotController.setFF(ShooterCal.PIVOT_MOTOR_kFF);
+    
 
   }
 
@@ -72,26 +69,22 @@ public class Shooter {
   }
 
   /** Returns the cosine of the intake angle in degrees off of the horizontal. */
-  public double getCosineIntakeAngle() {
+  public double getCosineArmAngle() {
     return Math.cos(
-        shooterAbsoluteEncoder.getPosition() - ShooterConstants.POSITION_WHEN_HORIZONTAL_DEGREES);
+        pivotMotorAbsoluteEncoder.getPosition() - ShooterConstants.POSITION_WHEN_HORIZONTAL_DEGREES);
   }
 
-  public void setPivotAngle(double distance) {
-    pivotMotor.set(pivotAngleMap.get(distance));
+  private void controlPosition(double distance){
+    pivotController.setGoal(pivotAngleMap.get(distance));
+    double armDemandVoltsA = pivotController.calculate(pivotMotorAbsoluteEncoder.getPosition());
+    double armDemandVoltsB =
+        ShooterCal.PIVOT_MOTOR_FF.calculate(pivotController.getSetpoint().velocity);
+    double armDemandVoltsC = ShooterCal.ARBITRARY_PIVOT_FEED_FORWARD_VOLTS * getCosineArmAngle();
+    pivotMotor.setVoltage(armDemandVoltsA + armDemandVoltsB + armDemandVoltsC);
   }
   /** NOT DONE */
   public void setLatchAngle() {
     pivotMotor.set(ShooterConstants.LATCH_ANGLE_DEGREES);
   }
 
-   public void correctPosition() {
-    pivotController.setReference(
-        ShooterCal.STARTING_POSITION_DEGREES, 
-        CANSparkMax.ControlType.kSmartMotion,
-        SMART_MOTION_SLOT, // check this variable
-        ShooterCal.ARBITRARY_FEED_FORWARD_VOLTS * getCosineIntakeAngle(),
-        ArbFFUnits.kVoltage);
-    pivotDesiredPosition = ShooterCal.STARTING_POSITION_DEGREES;
-  }
 }
