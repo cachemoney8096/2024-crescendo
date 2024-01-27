@@ -12,17 +12,16 @@ import com.revrobotics.SparkPIDController.ArbFFUnits;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotMap;
 
-public class Shooter {
+public class Shooter extends SubsystemBase{
 
   private final CANSparkMax motorA =
       new CANSparkMax(RobotMap.SHOOTER_MOTOR_A_CAN_ID, MotorType.kBrushless);
-  private final RelativeEncoder motorAEncoder = motorA.getEncoder();
   private final CANSparkMax motorB =
       new CANSparkMax(RobotMap.SHOOTER_MOTOR_B_CAN_ID, MotorType.kBrushless);
-  private final RelativeEncoder motorBEncoder = motorB.getEncoder();
   private final CANSparkMax pivotMotor =
       new CANSparkMax(RobotMap.SHOOTER_PIVOT_MOTOR_CAN_ID, MotorType.kBrushless);
   private final AbsoluteEncoder pivotMotorAbsoluteEncoder =
@@ -53,9 +52,6 @@ public class Shooter {
     controllerB.setI(ShooterCal.MOTOR_B_kI);
     controllerB.setD(ShooterCal.MOTOR_B_kD);
     controllerB.setFF(ShooterCal.MOTOR_B_kFF);
-
-    
-
   }
 
   public void shoot(double speedA, double speedB) {
@@ -64,8 +60,8 @@ public class Shooter {
   }
 
   public void stop() {
-    motorA.stopMotor();
-    motorB.stopMotor();
+    controllerA.setReference(0, ControlType.kVelocity);
+    controllerB.setReference(0, ControlType.kVelocity);
   }
 
   /** Returns the cosine of the intake angle in degrees off of the horizontal. */
@@ -82,9 +78,23 @@ public class Shooter {
     double armDemandVoltsC = ShooterCal.ARBITRARY_PIVOT_FEED_FORWARD_VOLTS * getCosineArmAngle();
     pivotMotor.setVoltage(armDemandVoltsA + armDemandVoltsB + armDemandVoltsC);
   }
-  /** NOT DONE */
-  public void setLatchAngle() {
-    pivotMotor.set(ShooterConstants.LATCH_ANGLE_DEGREES);
+
+//**Shooter latches (post climbing) **/
+  public void latch(){
+    controlPosition(Constants.PLACEHOLDER_DOUBLE);
+  }
+
+  //** Puts shooter in position to latch (before climbing)**/
+  public void setLatchPosition() {
+    controlPosition(Constants.PLACEHOLDER_DOUBLE);
+  }
+//**Checks to see if shooter is in position to latch **/
+  public boolean checkLatch() {
+    if (pivotDesiredPosition == ShooterConstants.LATCH_ANGLE_DEGREES){
+      return true;
+    } else {
+      return false;
+    }
   }
 
 }
