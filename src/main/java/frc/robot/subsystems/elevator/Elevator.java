@@ -27,7 +27,6 @@ public class Elevator extends SubsystemBase {
     SCORE_TRAP,
     SCORE_AMP,
     PRE_CLIMB,
-    CLIMB,
     POST_CLIMB
   }
 
@@ -52,7 +51,7 @@ public class Elevator extends SubsystemBase {
 
   private TreeMap<ElevatorPosition, Double> elevatorPositions;
 
-  private ElevatorPosition desiredPosition;
+  private ElevatorPosition desiredPosition = ElevatorPosition.HOME;
 
   private boolean usingNoteScoringPID = true;
 
