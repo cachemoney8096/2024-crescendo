@@ -3,11 +3,9 @@ package frc.robot.subsystems.shooter;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
-import com.revrobotics.SparkPIDController.ArbFFUnits;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
@@ -38,7 +36,7 @@ public class Shooter extends SubsystemBase{
   public Shooter() {
     pivotAngleMap = new InterpolatingDoubleTreeMap();
     pivotAngleMap.put(Constants.PLACEHOLDER_DOUBLE, Constants.PLACEHOLDER_DOUBLE);
-    pivotAngleMap.put(Constants.PLACEHOLDER_DOUBLE, Constants.PLACEHOLDER_DOUBLE);
+  pivotAngleMap.put(Constants.PLACEHOLDER_DOUBLE, Constants.PLACEHOLDER_DOUBLE);
 
     controllerA = motorA.getPIDController();
     controllerB = motorB.getPIDController();
@@ -54,9 +52,9 @@ public class Shooter extends SubsystemBase{
     controllerB.setFF(ShooterCal.MOTOR_B_kFF);
   }
 
-  public void shoot(double speedA, double speedB) {
-    controllerA.setReference(speedA, ControlType.kVelocity);
-    controllerB.setReference(speedB, ControlType.kVelocity);
+  public void shoot() {
+    controllerA.setReference(ShooterConstants.SHOOTER_MOTOR_SPEED_RPS, ControlType.kVelocity);
+    controllerB.setReference(ShooterConstants.SHOOTER_MOTOR_SPEED_RPS, ControlType.kVelocity);
   }
 
   public void stop() {
@@ -72,6 +70,7 @@ public class Shooter extends SubsystemBase{
 
   private void controlPosition(double distance){
     pivotController.setGoal(pivotAngleMap.get(distance));
+    pivotDesiredPosition = pivotAngleMap.get(distance);
     double armDemandVoltsA = pivotController.calculate(pivotMotorAbsoluteEncoder.getPosition());
     double armDemandVoltsB =
         ShooterCal.PIVOT_MOTOR_FF.calculate(pivotController.getSetpoint().velocity);
@@ -79,22 +78,20 @@ public class Shooter extends SubsystemBase{
     pivotMotor.setVoltage(armDemandVoltsA + armDemandVoltsB + armDemandVoltsC);
   }
 
-//**Shooter latches (post climbing) **/
-  public void latch(){
-    controlPosition(Constants.PLACEHOLDER_DOUBLE);
+/** Set arm to latching position (up = 180deg). Modified controlPosition. **/
+  public void setLatchPosition(){
+    pivotController.setGoal(180);
+    pivotDesiredPosition = 180;
+    double armDemandVoltsA = pivotController.calculate(pivotMotorAbsoluteEncoder.getPosition());
+    double armDemandVoltsB =
+        ShooterCal.PIVOT_MOTOR_FF.calculate(pivotController.getSetpoint().velocity);
+    double armDemandVoltsC = ShooterCal.ARBITRARY_PIVOT_FEED_FORWARD_VOLTS * getCosineArmAngle();
+    pivotMotor.setVoltage(armDemandVoltsA + armDemandVoltsB + armDemandVoltsC);
+  }
+  /** Check if robot is in latch position (180deg) */
+  public boolean atDesiredPosition() {
+    return Math.abs(pivotMotorAbsoluteEncoder.getPosition() - pivotDesiredPosition) < ShooterConstants.PIVOT_ANGLE_MARGIN;
   }
 
-  //** Puts shooter in position to latch (before climbing)**/
-  public void setLatchPosition() {
-    controlPosition(Constants.PLACEHOLDER_DOUBLE);
-  }
-//**Checks to see if shooter is in position to latch **/
-  public boolean checkLatch() {
-    if (pivotDesiredPosition == ShooterConstants.LATCH_ANGLE_DEGREES){
-      return true;
-    } else {
-      return false;
-    }
-  }
 
 }
