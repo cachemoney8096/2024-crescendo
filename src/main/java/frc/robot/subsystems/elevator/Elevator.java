@@ -1,16 +1,12 @@
 package frc.robot.subsystems.elevator;
 
-import java.util.Optional;
-import java.util.TreeMap;
-
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkBase.SoftLimitDirection;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
-
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -19,11 +15,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
 import frc.robot.utils.SendableHelper;
 import frc.robot.utils.SparkMaxUtils;
+import java.util.Optional;
+import java.util.TreeMap;
 
-//TODO absolute encoder zeroing
+// TODO absolute encoder zeroing
 
 public class Elevator extends SubsystemBase {
-  public enum ElevatorPosition{
+  public enum ElevatorPosition {
     HOME,
     SCORE_TRAP,
     SCORE_AMP,
@@ -31,22 +29,33 @@ public class Elevator extends SubsystemBase {
     POST_CLIMB
   }
 
-  public CANSparkMax leftMotor = new CANSparkMax(RobotMap.LEFT_ELEVATOR_CAN_ID, MotorType.kBrushless);
-  public CANSparkMax rightMotor = new CANSparkMax(RobotMap.RIGHT_ELEVATOR_CAN_ID, MotorType.kBrushless);
+  public CANSparkMax leftMotor =
+      new CANSparkMax(RobotMap.LEFT_ELEVATOR_CAN_ID, MotorType.kBrushless);
+  public CANSparkMax rightMotor =
+      new CANSparkMax(RobotMap.RIGHT_ELEVATOR_CAN_ID, MotorType.kBrushless);
 
   private final RelativeEncoder leftMotorEncoder = leftMotor.getEncoder();
   private final AbsoluteEncoder leftMotorEncoderAbs = leftMotor.getAbsoluteEncoder(Type.kDutyCycle);
   private final RelativeEncoder rightMotorEncoder = rightMotor.getEncoder();
-  private final AbsoluteEncoder rightMotorEncoderAbs = rightMotor.getAbsoluteEncoder(Type.kDutyCycle);
+  private final AbsoluteEncoder rightMotorEncoderAbs =
+      rightMotor.getAbsoluteEncoder(Type.kDutyCycle);
 
-  private ProfiledPIDController noteScoringElevatorController = new ProfiledPIDController(ElevatorCal.NOTE_SCORING_P,
-      ElevatorCal.NOTE_SCORING_I, ElevatorCal.NOTE_SCORING_D, new TrapezoidProfile.Constraints(
-          ElevatorCal.MAX_VELOCITY_IN_PER_SECOND,
-          ElevatorCal.MAX_ACCELERATION_IN_PER_SECOND_SQUARED));
-  private ProfiledPIDController chainGrabberElevatorController = new ProfiledPIDController(ElevatorCal.CLIMBING_P,
-      ElevatorCal.CLIMBING_I, ElevatorCal.CLIMBING_D, new TrapezoidProfile.Constraints(
-          ElevatorCal.MAX_VELOCITY_IN_PER_SECOND,
-          ElevatorCal.MAX_ACCELERATION_IN_PER_SECOND_SQUARED));
+  private ProfiledPIDController noteScoringElevatorController =
+      new ProfiledPIDController(
+          ElevatorCal.NOTE_SCORING_P,
+          ElevatorCal.NOTE_SCORING_I,
+          ElevatorCal.NOTE_SCORING_D,
+          new TrapezoidProfile.Constraints(
+              ElevatorCal.MAX_VELOCITY_IN_PER_SECOND,
+              ElevatorCal.MAX_ACCELERATION_IN_PER_SECOND_SQUARED));
+  private ProfiledPIDController chainGrabberElevatorController =
+      new ProfiledPIDController(
+          ElevatorCal.CLIMBING_P,
+          ElevatorCal.CLIMBING_I,
+          ElevatorCal.CLIMBING_D,
+          new TrapezoidProfile.Constraints(
+              ElevatorCal.MAX_VELOCITY_IN_PER_SECOND,
+              ElevatorCal.MAX_ACCELERATION_IN_PER_SECOND_SQUARED));
 
   private ProfiledPIDController currentPIDController = noteScoringElevatorController;
 
@@ -69,32 +78,38 @@ public class Elevator extends SubsystemBase {
     elevatorPositions.put(ElevatorPosition.POST_CLIMB, ElevatorCal.POSITION_IN_POST_CLIMB);
   }
 
-  public void useScoringPID(boolean useNoteScoringPID){
+  public void useScoringPID(boolean useNoteScoringPID) {
     usingNoteScoringPID = useNoteScoringPID;
-    if(useNoteScoringPID){
+    if (useNoteScoringPID) {
       currentPIDController = noteScoringElevatorController;
-    }
-    else{
+    } else {
       currentPIDController = chainGrabberElevatorController;
     }
   }
 
-  private void controlPosition(ElevatorPosition pos){
+  private void controlPosition(ElevatorPosition pos) {
     currentPIDController.setGoal(elevatorPositions.get(pos));
     double elevatorDemandVolts = currentPIDController.calculate(leftMotorEncoder.getPosition());
     double timestamp = Timer.getFPGATimestamp();
-    if(usingNoteScoringPID){
+    if (usingNoteScoringPID) {
       elevatorDemandVolts +=
-        ElevatorCal.NOTE_SCORING_FF.calculate(currentPIDController.getSetpoint().velocity);
-      if(!prevTimestamp.isEmpty()){
-        elevatorDemandVolts += ElevatorCal.NOTE_SCORING_FF.calculate(prevVelocity, currentPIDController.getSetpoint().velocity, timestamp-prevTimestamp.get());
+          ElevatorCal.NOTE_SCORING_FF.calculate(currentPIDController.getSetpoint().velocity);
+      if (!prevTimestamp.isEmpty()) {
+        elevatorDemandVolts +=
+            ElevatorCal.NOTE_SCORING_FF.calculate(
+                prevVelocity,
+                currentPIDController.getSetpoint().velocity,
+                timestamp - prevTimestamp.get());
       }
-    }
-    else{
+    } else {
       elevatorDemandVolts +=
-        ElevatorCal.CLIMBING_FF.calculate(currentPIDController.getSetpoint().velocity);
-      if(!prevTimestamp.isEmpty()){
-        elevatorDemandVolts += ElevatorCal.CLIMBING_FF.calculate(prevVelocity, currentPIDController.getSetpoint().velocity, timestamp-prevTimestamp.get());
+          ElevatorCal.CLIMBING_FF.calculate(currentPIDController.getSetpoint().velocity);
+      if (!prevTimestamp.isEmpty()) {
+        elevatorDemandVolts +=
+            ElevatorCal.CLIMBING_FF.calculate(
+                prevVelocity,
+                currentPIDController.getSetpoint().velocity,
+                timestamp - prevTimestamp.get());
       }
     }
     prevVelocity = currentPIDController.getSetpoint().velocity;
@@ -102,18 +117,18 @@ public class Elevator extends SubsystemBase {
     leftMotor.setVoltage(elevatorDemandVolts);
   }
 
-  public void setDesiredPosition(ElevatorPosition desiredPosition){
+  public void setDesiredPosition(ElevatorPosition desiredPosition) {
     this.desiredPosition = desiredPosition;
   }
 
-  public boolean atDesiredPosition(){
-      double desiredPositionIn = elevatorPositions.get(desiredPosition);
-      double currentPositionIn = leftMotorEncoder.getPosition();
-      return Math.abs(desiredPositionIn-currentPositionIn) < ElevatorCal.ELEVATOR_MARGIN_IN;
+  public boolean atDesiredPosition() {
+    double desiredPositionIn = elevatorPositions.get(desiredPosition);
+    double currentPositionIn = leftMotorEncoder.getPosition();
+    return Math.abs(desiredPositionIn - currentPositionIn) < ElevatorCal.ELEVATOR_MARGIN_IN;
   }
 
   @Override
-  public void periodic(){
+  public void periodic() {
     controlPosition(desiredPosition);
   }
 
@@ -128,7 +143,8 @@ public class Elevator extends SubsystemBase {
 
     errors +=
         SparkMaxUtils.check(
-            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(leftMotorEncoderAbs, ElevatorCal.ELEVATOR_LEFT_ABSOLUTE_ENCODER_RATIO));
+            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(
+                leftMotorEncoderAbs, ElevatorCal.ELEVATOR_LEFT_ABSOLUTE_ENCODER_RATIO));
     errors +=
         SparkMaxUtils.check(
             SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(
@@ -174,13 +190,11 @@ public class Elevator extends SubsystemBase {
   }
 
   @Override
-  public void initSendable(SendableBuilder builder){
+  public void initSendable(SendableBuilder builder) {
     super.initSendable(builder);
     SendableHelper.addChild(builder, this, currentPIDController, "CurrentElevatorController");
     builder.addDoubleProperty(
-        "Elevator Position (in)",
-        leftMotorEncoder::getPosition,
-        leftMotorEncoder::setPosition);
+        "Elevator Position (in)", leftMotorEncoder::getPosition, leftMotorEncoder::setPosition);
     builder.addDoubleProperty("Elevator Vel (in/s)", leftMotorEncoder::getVelocity, null);
     builder.addDoubleProperty(
         "Elevator Left Abs Pos (deg)", leftMotorEncoderAbs::getPosition, null);
@@ -188,5 +202,4 @@ public class Elevator extends SubsystemBase {
         "Elevator Right Abs Pos (deg)", rightMotorEncoderAbs::getPosition, null);
     builder.addBooleanProperty("Elevator at desired position", this::atDesiredPosition, null);
   }
-  
 }
