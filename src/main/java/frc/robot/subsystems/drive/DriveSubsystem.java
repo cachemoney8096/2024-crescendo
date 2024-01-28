@@ -242,7 +242,7 @@ public class DriveSubsystem extends SubsystemBase {
     ChassisSpeeds desiredChassisSpeeds =
         fieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                matchState.blue ? xSpeed : -xSpeed, ySpeed, rot, Rotation2d.fromDegrees(gyro.getYaw().getValue()))
+                xSpeed, ySpeed, rot, Rotation2d.fromDegrees(gyro.getYaw().getValue()))
             : new ChassisSpeeds(xSpeed, ySpeed, rot);
 
     desiredChassisSpeeds = correctForDynamics(desiredChassisSpeeds);
