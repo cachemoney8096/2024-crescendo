@@ -28,19 +28,45 @@ public class Conveyer extends SubsystemBase {
       beamBreakSensorThree = backMotor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen),
       beamBreakSensorFour = backMotor.getReverseLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
 
-  public enum NotePosition {
+  /**
+   * Used to define the current position of the note.
+   *
+   * <ul>
+   *   <li>NO_NOTE: There is no note in the conveyer.
+   *   <li>HOLDING_NOTE: The conveyer is holding a note in place.
+   *   <li>PARTIAL_NOTE: The conveyer is in the process of receiving a note from the intake, sending
+   *       a note to the shooter, or scoring a note in the trap or amp.
+   * </ul>
+   */
+  public enum ConveyerPositions {
     NO_NOTE,
-    HOLDING_NOTE
+    HOLDING_NOTE,
+    PARTIAL_NOTE
   }
 
-  public enum CurrentAction {
-    HOLD,
+  /**
+   * Used to define the current action of the conveyer.
+   *
+   * <ul>
+   *   <li>NO_ACTION: The conveyer is not doing anything (i.e. either holding a note in place, or
+   *       does not have a note at all)
+   *   <li>SHOOT: The conveyer is sending a note towards the shooter.
+   *   <li>TRAP_AMP: The conveyer is scoring in the trap or amp.
+   *   <li>RECEIVE: The conveyer is receiving a note from the intake.
+   * </ul>
+   */
+  public enum ConveyerActions {
+    NO_ACTION,
     SHOOT,
     TRAP_AMP,
-    RECEIVE
+    RECEIVE,
   }
 
-  public NotePosition notePosition = NotePosition.NO_NOTE;
+  public ConveyerPositions currentNotePosition = ConveyerPositions.NO_NOTE;
+  public ConveyerPositions desiredNotePosition = ConveyerPositions.NO_NOTE;
+
+  public ConveyerActions currentAction = ConveyerActions.NO_ACTION;
+  public ConveyerActions desiredAction = ConveyerActions.NO_ACTION;
 
   public double secondMotorZeroPosition;
 
@@ -84,72 +110,56 @@ public class Conveyer extends SubsystemBase {
     return errors == 0;
   }
 
-  public void prepareToShoot() {
+  private void prepareToShoot() {
     frontMotor.set(ConveyerCal.PREPARE_TO_SHOOT_FRONT_SPEED);
     backMotor.set(ConveyerCal.PREPARE_TO_SHOOT_BACK_SPEED);
   }
 
-  public void scoreTrapOrAmp() {
+  private void scoreTrapOrAmp() {
     frontMotor.set(ConveyerCal.SCORE_AMP_TRAP_FRONT_SPEED);
     backMotor.set(ConveyerCal.SCORE_AMP_TRAP_BACK_SPEED);
   }
 
-  public void hold() {
+  private void receive() {
     frontMotor.set(ConveyerCal.FRONT_HOLD_SPEED);
     backMotor.set(0.0);
   }
 
-  public void stop() {
+  private void stop() {
     frontMotor.set(0.0);
     backMotor.set(0.0);
   }
 
   @Override
   public void periodic() {
-    setNotePosition();
-  }
+    if (desiredNotePosition == currentNotePosition) {
+      stop();
+    } else {
+      switch (desiredNotePosition) {
+        case NO_NOTE:
+          stop();
+          break;
+        case HOLDING_NOTE:
+          receive();
+          break;
+        case PARTIAL_NOTE:
+          switch (desiredAction) {
+            case NO_ACTION:
+              stop();
+              break;
+            case SHOOT:
+              prepareToShoot();
+              break;
+            case TRAP_AMP:
+              scoreTrapOrAmp();
+              break;
+            case RECEIVE:
+              receive();
+              break;
+          }
+          break;
+      }
 
-  public void startReceivingNote() {
-    notePosition = NotePosition.RECEIVING_NOTE;
-    secondMotorZeroPosition = backMotorEncoder.getPosition();
-    hold();
-  }
-
-
-
-  public void setNoteAction() {
-    
-  }
-
-
-
-
-  /**
-   * Get the current position of the note. While we have the beam break sensors available, we are
-   * attempting to not use them, and rather just check the note position with the motors.
-   */
-  public void setNotePosition() {
-    /**
-     * If the front motor is not moving and we currently have no note, we are not receiving a note
-     */
-    // if (notePosition == NotePosition.NO_NOTE
-    //     && frontMotorEncoder.getVelocity() < ConveyerCal.MOTOR_VELOCITY_THRESHOLD_RPM) {
-    //   notePosition = NotePosition.NO_NOTE;
-    // } else {
-    //   /** If the back motor has moved more than the threshold, we have a note */
-    //   if (backMotorEncoder.getPosition() - secondMotorZeroPosition
-    //       > ConveyerCal.NOTE_THRESHOLD_DEGREES) {
-    //     notePosition = NotePosition.HOLDING_NOTE;
-    //   } else {
-    //     /**
-    //      * If we were receiving a note and the back motor has not moved more than the threshold, we
-    //      * are no still receiving a note
-    //      */
-    //     notePosition = NotePosition.RECEIVING_NOTE;
-    //   }
-    // }
-    if (frontMotorEncoder.getVelocity() > ConveyerCal.MOTOR_VELOCITY_THRESHOLD_RPM) {
-      
     }
   }
 }
