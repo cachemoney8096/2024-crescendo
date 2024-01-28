@@ -163,18 +163,18 @@ public class DriveSubsystem extends SubsystemBase {
   public void resetOdometry(Pose2d pose) {
     // Just update the translation, not the yaw
     Pose2d resetPose =
-        new Pose2d(pose.getTranslation(), Rotation2d.fromDegrees(gyro.getYaw().getValue()));
-    odometry.resetPosition(
-        Rotation2d.fromDegrees(gyro.getYaw().getValue()), getModulePositions(), resetPose);
+        new Pose2d(
+            pose.getTranslation(),
+            Rotation2d.fromDegrees(gyro.getYaw().getValue() + (matchState.blue ? 0 : 180)));
+    odometry.resetPosition(resetPose.getRotation(), getModulePositions(), resetPose);
   }
 
   public void resetYawToAngle(double yawDeg) {
-    double curYawDeg = gyro.getYaw().getValue();
+    double curYawDeg = gyro.getYaw().getValue() + (matchState.blue ? 0 : 180);
     double offsetToTargetDeg = targetHeadingDegrees - curYawDeg;
     gyro.setYaw(yawDeg);
     Pose2d curPose = getPose();
-    Pose2d resetPose = new Pose2d(curPose.getTranslation(), Rotation2d.fromDegrees(yawDeg));
-    odometry.resetPosition(Rotation2d.fromDegrees(yawDeg), getModulePositions(), resetPose);
+    resetOdometry(curPose);
     targetHeadingDegrees = yawDeg + offsetToTargetDeg;
   }
 
@@ -288,10 +288,10 @@ public class DriveSubsystem extends SubsystemBase {
   /**
    * Returns the heading of the robot.
    *
-   * @return the robot's heading in degrees, from -180 to 180
+   * @return the robot's heading in degrees, from -180 to 180 (field relative, so 0 is facing away from blue)
    */
   public double getHeadingDegrees() {
-    return Rotation2d.fromDegrees(gyro.getYaw().getValue()).getDegrees();
+    return Rotation2d.fromDegrees(gyro.getYaw().getValue()).getDegrees() + (matchState.blue ? 0 : 180);
   }
 
   /**
