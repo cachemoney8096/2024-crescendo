@@ -7,4 +7,5 @@ public class ShooterConstants {
   public static final double PIVOT_ANGLE_MARGIN  = Constants.PLACEHOLDER_DOUBLE;  
 
   public static final double SHOOTER_MOTOR_SPEED_RPM = Constants.PLACEHOLDER_DOUBLE;
+  public static final double PIVOT_ANGLE_OFFSET_DEGREES = Constants.PLACEHOLDER_DOUBLE;
 }

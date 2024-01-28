@@ -13,13 +13,13 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final double PLACEHOLDER_DOUBLE = 0.0;
+  public static final int PLACEHOLDER_INT = 0;
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
-
+  public static final int SPARK_INIT_RETRY_ATTEMPTS = PLACEHOLDER_INT;
   public static final double NEO_FREE_SPEED_RPM = 5676.0;
 
-  public static final double PLACEHOLDER_DOUBLE = 0.0;
-  public static final int PLACEHOLDER_INT = 0;
-  public static final int SPARK_INIT_RETRY_ATTEMPTS = PLACEHOLDER_INT;
+
 }
