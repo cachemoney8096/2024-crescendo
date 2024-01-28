@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -62,6 +63,8 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+
+    setRobotContainerMatchState();
   }
 
   /** This function is called periodically during autonomous. */
@@ -77,6 +80,8 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    setRobotContainerMatchState();
   }
 
   /** This function is called periodically during operator control. */
@@ -100,4 +105,20 @@ public class Robot extends TimedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {}
+
+  private void setRobotContainerMatchState() {
+    boolean realMatch = DriverStation.getMatchTime() > 1.0;
+    m_robotContainer.matchState.realMatch = realMatch;
+    if (DriverStation.getAlliance().isPresent()) {
+      boolean blue;
+      if (realMatch) {
+        blue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
+      } else {
+        blue = true;
+      }
+      m_robotContainer.matchState.blue = blue;
+    } else {
+      m_robotContainer.matchState.blue = true;
+    }
+  }
 }
