@@ -109,14 +109,16 @@ public class Robot extends TimedRobot {
   private void setRobotContainerMatchState() {
     boolean realMatch = DriverStation.getMatchTime() > 1.0;
     m_robotContainer.matchState.realMatch = realMatch;
-    if (!DriverStation.getAlliance().isEmpty()) {
+    if (DriverStation.getAlliance().isPresent()) {
       boolean blue;
-      if (!realMatch) {
-        blue = true;
-      } else {
+      if (realMatch) {
         blue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
+      } else {
+        blue = true;
       }
       m_robotContainer.matchState.blue = blue;
+    } else {
+      m_robotContainer.matchState.blue = true;
     }
   }
 }
