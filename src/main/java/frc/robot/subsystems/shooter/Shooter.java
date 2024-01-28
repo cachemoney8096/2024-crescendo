@@ -36,7 +36,7 @@ public class Shooter extends SubsystemBase{
   public Shooter() {
     pivotAngleMap = new InterpolatingDoubleTreeMap();
     pivotAngleMap.put(Constants.PLACEHOLDER_DOUBLE, Constants.PLACEHOLDER_DOUBLE);
-  pivotAngleMap.put(Constants.PLACEHOLDER_DOUBLE, Constants.PLACEHOLDER_DOUBLE);
+    pivotAngleMap.put(Constants.PLACEHOLDER_DOUBLE, Constants.PLACEHOLDER_DOUBLE);
 
     controllerA = motorA.getPIDController();
     controllerB = motorB.getPIDController();
@@ -92,6 +92,4 @@ public class Shooter extends SubsystemBase{
   public boolean atDesiredPosition() {
     return Math.abs(pivotMotorAbsoluteEncoder.getPosition() - pivotDesiredPosition) < ShooterConstants.PIVOT_ANGLE_MARGIN;
   }
-
-
 }

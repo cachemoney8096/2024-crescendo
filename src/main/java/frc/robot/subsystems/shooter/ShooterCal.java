@@ -1,5 +1,4 @@
 package frc.robot.subsystems.shooter;
-
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import frc.robot.Constants;
 

@@ -1,5 +1,4 @@
 package frc.robot.subsystems.shooter;
-
 import frc.robot.Constants;
 
 public class ShooterConstants {
@@ -7,5 +6,5 @@ public class ShooterConstants {
   public static final double LATCH_ANGLE_DEGREES = Constants.PLACEHOLDER_DOUBLE;
   public static final double PIVOT_ANGLE_MARGIN  = Constants.PLACEHOLDER_DOUBLE;  
 
-  public static final double SHOOTER_MOTOR_SPEED_VELOCITY = Constants.PLACEHOLDER_DOUBLE;
+  public static final double SHOOTER_MOTOR_SPEED_RPS = Constants.PLACEHOLDER_DOUBLE;
 }
