@@ -13,8 +13,11 @@ public class ConveyerCal {
       SCORE_AMP_TRAP_BACK_SPEED = -1.0;
 
   /** The power used for each conveyer motor to hold the note in place */
-  public static final double FRONT_HOLD_SPEED = 1.0, BACK_HOLD_SPEED = -1.0;
+  public static final double FRONT_HOLD_SPEED = 1.0;
 
   /** The threshold required for the position of the back motor to change in order to register the note */
   public static final double NOTE_THRESHOLD_DEGREES = 0.5;
+
+  /** The threshold required for the velocity of the front motor in order to count it as moving */
+  public static final double MOTOR_VELOCITY_THRESHOLD_RPM = 1.0;
 }

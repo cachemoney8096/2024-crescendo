@@ -22,15 +22,22 @@ public class Conveyer extends SubsystemBase {
    * These aren't actually limit switches; we just use SparkLimitSwitch objects to access them
    * easily. At the moment, these are unused.
    */
-  private SparkLimitSwitch beamBreakSensorOne,
-      beamBreakSensorTwo,
-      beamBreakSensorThree,
-      beamBreakSensorFour;
+  SparkLimitSwitch
+      beamBreakSensorOne = frontMotor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen),
+      beamBreakSensorTwo = frontMotor.getReverseLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen),
+      beamBreakSensorThree = backMotor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen),
+      beamBreakSensorFour = backMotor.getReverseLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
 
   public enum NotePosition {
     NO_NOTE,
-    RECEIVING_NOTE,
     HOLDING_NOTE
+  }
+
+  public enum CurrentAction {
+    HOLD,
+    SHOOT,
+    TRAP_AMP,
+    RECEIVE
   }
 
   public NotePosition notePosition = NotePosition.NO_NOTE;
@@ -39,16 +46,6 @@ public class Conveyer extends SubsystemBase {
 
   public Conveyer() {
     SparkMaxUtils.initWithRetry(this::setUpConveyerSparks, ConveyerCal.SPARK_INIT_RETRY_ATTEMPTS);
-
-    beamBreakSensorOne = frontMotor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
-    beamBreakSensorTwo = frontMotor.getReverseLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
-    beamBreakSensorThree = backMotor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
-    beamBreakSensorFour = backMotor.getReverseLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
-
-    beamBreakSensorOne.enableLimitSwitch(false);
-    beamBreakSensorTwo.enableLimitSwitch(false);
-    beamBreakSensorThree.enableLimitSwitch(false);
-    beamBreakSensorFour.enableLimitSwitch(false);
 
     secondMotorZeroPosition = backMotorEncoder.getPosition();
   }
@@ -72,6 +69,18 @@ public class Conveyer extends SubsystemBase {
         SparkMaxUtils.check(
             backMotor.setSmartCurrentLimit(ConveyerCal.CONVEYER_CURRENT_LIMIT_AMPS));
 
+    errors +=
+        SparkMaxUtils.check(
+            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(frontMotorEncoder, 1.0));
+    errors +=
+        SparkMaxUtils.check(
+            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(backMotorEncoder, 1.0));
+
+    errors += SparkMaxUtils.check(beamBreakSensorOne.enableLimitSwitch(false));
+    errors += SparkMaxUtils.check(beamBreakSensorTwo.enableLimitSwitch(false));
+    errors += SparkMaxUtils.check(beamBreakSensorThree.enableLimitSwitch(false));
+    errors += SparkMaxUtils.check(beamBreakSensorFour.enableLimitSwitch(false));
+
     return errors == 0;
   }
 
@@ -87,12 +96,17 @@ public class Conveyer extends SubsystemBase {
 
   public void hold() {
     frontMotor.set(ConveyerCal.FRONT_HOLD_SPEED);
-    backMotor.set(ConveyerCal.BACK_HOLD_SPEED);
+    backMotor.set(0.0);
   }
 
   public void stop() {
     frontMotor.set(0.0);
     backMotor.set(0.0);
+  }
+
+  @Override
+  public void periodic() {
+    setNotePosition();
   }
 
   public void startReceivingNote() {
@@ -101,30 +115,41 @@ public class Conveyer extends SubsystemBase {
     hold();
   }
 
+
+
+  public void setNoteAction() {
+    
+  }
+
+
+
+
   /**
    * Get the current position of the note. While we have the beam break sensors available, we are
    * attempting to not use them, and rather just check the note position with the motors.
    */
-  public NotePosition getNotePosition() {
+  public void setNotePosition() {
     /**
      * If the front motor is not moving and we currently have no note, we are not receiving a note
      */
-    if (notePosition == NotePosition.NO_NOTE && frontMotorEncoder.getVelocity() < 1) {
-      notePosition = NotePosition.NO_NOTE;
-    } else {
-      /** If the back motor has moved more than the threshold, we have a note */
-      if (backMotorEncoder.getPosition() - secondMotorZeroPosition
-          > ConveyerCal.NOTE_THRESHOLD_DEGREES) {
-        notePosition = NotePosition.HOLDING_NOTE;
-      } else {
-        /**
-         * If we were receiving a note and the back motor has not moved more than the threshold, we
-         * are no still receiving a note
-         */
-        notePosition = NotePosition.RECEIVING_NOTE;
-      }
+    // if (notePosition == NotePosition.NO_NOTE
+    //     && frontMotorEncoder.getVelocity() < ConveyerCal.MOTOR_VELOCITY_THRESHOLD_RPM) {
+    //   notePosition = NotePosition.NO_NOTE;
+    // } else {
+    //   /** If the back motor has moved more than the threshold, we have a note */
+    //   if (backMotorEncoder.getPosition() - secondMotorZeroPosition
+    //       > ConveyerCal.NOTE_THRESHOLD_DEGREES) {
+    //     notePosition = NotePosition.HOLDING_NOTE;
+    //   } else {
+    //     /**
+    //      * If we were receiving a note and the back motor has not moved more than the threshold, we
+    //      * are no still receiving a note
+    //      */
+    //     notePosition = NotePosition.RECEIVING_NOTE;
+    //   }
+    // }
+    if (frontMotorEncoder.getVelocity() > ConveyerCal.MOTOR_VELOCITY_THRESHOLD_RPM) {
+      
     }
-
-    return notePosition;
   }
 }
