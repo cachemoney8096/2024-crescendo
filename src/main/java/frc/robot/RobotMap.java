@@ -18,4 +18,7 @@ public class RobotMap {
       REAR_LEFT_TURNING_CAN_ID = Constants.PLACEHOLDER_INT,
       FRONT_RIGHT_TURNING_CAN_ID = Constants.PLACEHOLDER_INT,
       REAR_RIGHT_TURNING_CAN_ID = Constants.PLACEHOLDER_INT;
+
+  public static final int LEFT_ELEVATOR_CAN_ID = Constants.PLACEHOLDER_INT,
+      RIGHT_ELEVATOR_CAN_ID = Constants.PLACEHOLDER_INT;
 }

@@ -33,6 +33,27 @@ public class RobotContainer {
   }
 
   /**
+   * This class stores the state of the match (the alliance color, and whether it's a real match)
+   *
+   * @param realMatch a boolean variable defining whether we are in a real match; this can be
+   *     determined by checking if the remaining match time in the init function for the match face
+   *     is greater than one second
+   * @param blue a boolean variable defining whether we are on the blue alliance (true) or the red
+   *     alliance (false). When in a fake match, this variable should be true.
+   */
+  public class MatchState {
+    public boolean realMatch;
+    public boolean blue;
+
+    public MatchState(boolean realMatch, boolean blue) {
+      this.realMatch = realMatch;
+      this.blue = blue;
+    }
+  }
+
+  public MatchState matchState = new MatchState(false, true);
+
+  /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
    * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
    * predicate, or via the named factories in {@link
