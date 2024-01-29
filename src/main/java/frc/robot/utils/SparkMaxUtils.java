@@ -46,9 +46,12 @@ public class SparkMaxUtils {
       return sparkMaxEncoder.setVelocityConversionFactor(radsPerRotationPerSecond);
     }
 
-    /** Sets the encoder to read a linear distance with a gear ratio and a conversion to linear.
+    /**
+     * Sets the encoder to read a linear distance with a gear ratio and a conversion to linear.
+     *
      * @param sparkMaxEncoder The encoder to set on.
-     * @param ratio The gear ratio from motor to the winch (or other rotary-to-linear converter). >1 is a reduction.
+     * @param ratio The gear ratio from motor to the winch (or other rotary-to-linear converter). >1
+     *     is a reduction.
      * @param diameter The diameter of the winch (or other rotary-to-linear converter).
      */
     public static REVLibError setLinearFromGearRatio(
@@ -91,9 +94,12 @@ public class SparkMaxUtils {
       return sparkMaxEncoder.setVelocityConversionFactor(radsPerRotationPerSecond);
     }
 
-    /** Sets the encoder to read a linear distance with a gear ratio and a conversion to linear.
+    /**
+     * Sets the encoder to read a linear distance with a gear ratio and a conversion to linear.
+     *
      * @param sparkMaxEncoder The encoder to set on.
-     * @param ratio The gear ratio from motor to the winch (or other rotary-to-linear converter). >1 is a reduction.
+     * @param ratio The gear ratio from motor to the winch (or other rotary-to-linear converter). >1
+     *     is a reduction.
      * @param diameter The diameter of the winch (or other rotary-to-linear converter).
      */
     public static REVLibError setLinearFromGearRatio(

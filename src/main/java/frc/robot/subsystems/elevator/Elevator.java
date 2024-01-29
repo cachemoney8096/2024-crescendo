@@ -8,7 +8,6 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
-
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -21,7 +20,10 @@ import frc.robot.utils.SparkMaxUtils;
 import java.util.Optional;
 import java.util.TreeMap;
 
-/** Moves the elevator carriage up and down. Does not control anything on the carriage (that's the conveyor). */
+/**
+ * Moves the elevator carriage up and down. Does not control anything on the carriage (that's the
+ * conveyor).
+ */
 public class Elevator extends SubsystemBase {
   public enum ElevatorPosition {
     HOME,
@@ -67,7 +69,7 @@ public class Elevator extends SubsystemBase {
 
   /** FPGA timestamp from previous cycle. Empty for first cycle only. */
   private Optional<Double> prevTimestamp = Optional.empty();
-  
+
   /** Profiled velocity setpoint from previous cycle (inches per sec) */
   private double prevVelocityInPerSec = 0;
 
@@ -121,7 +123,9 @@ public class Elevator extends SubsystemBase {
     errors +=
         SparkMaxUtils.check(
             SparkMaxUtils.UnitConversions.setLinearFromGearRatio(
-                leftMotorEncoderRel, ElevatorConstants.ELEVATOR_GEAR_RATIO, ElevatorConstants.ELEVATOR_DRUM_DIAMETER_IN));
+                leftMotorEncoderRel,
+                ElevatorConstants.ELEVATOR_GEAR_RATIO,
+                ElevatorConstants.ELEVATOR_DRUM_DIAMETER_IN));
 
     errors += SparkMaxUtils.check(setZeroFromAbsolute());
 
@@ -155,14 +159,9 @@ public class Elevator extends SubsystemBase {
     if (prevTimestamp.isPresent()) {
       elevatorDemandVolts +=
           currentFeedforward.calculate(
-              prevVelocityInPerSec,
-              nextVelocityInPerSec,
-              timestamp - prevTimestamp.get());
-    }
-    else {
-      elevatorDemandVolts +=
-          currentFeedforward.calculate(
-              nextVelocityInPerSec);
+              prevVelocityInPerSec, nextVelocityInPerSec, timestamp - prevTimestamp.get());
+    } else {
+      elevatorDemandVolts += currentFeedforward.calculate(nextVelocityInPerSec);
     }
     leftMotor.setVoltage(elevatorDemandVolts);
 
@@ -197,7 +196,9 @@ public class Elevator extends SubsystemBase {
     super.initSendable(builder);
     SendableHelper.addChild(builder, this, currentPIDController, "CurrentElevatorController");
     builder.addDoubleProperty(
-        "Elevator Position (in)", leftMotorEncoderRel::getPosition, leftMotorEncoderRel::setPosition);
+        "Elevator Position (in)",
+        leftMotorEncoderRel::getPosition,
+        leftMotorEncoderRel::setPosition);
     builder.addDoubleProperty("Elevator Vel (in/s)", leftMotorEncoderRel::getVelocity, null);
     builder.addDoubleProperty(
         "Elevator Left Abs Pos (deg)", leftMotorEncoderAbs::getPosition, null);

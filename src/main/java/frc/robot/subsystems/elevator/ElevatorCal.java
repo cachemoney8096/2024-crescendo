@@ -9,9 +9,10 @@ public final class ElevatorCal {
       NOTE_SCORING_I = Constants.PLACEHOLDER_DOUBLE,
       NOTE_SCORING_D = Constants.PLACEHOLDER_DOUBLE;
   /** Feedforward parameters for the elevator when not climbing. Input in/s, output Volts. */
-    public static final double NOTE_SCORING_KS = Constants.PLACEHOLDER_DOUBLE,
+  public static final double NOTE_SCORING_KS = Constants.PLACEHOLDER_DOUBLE,
       NOTE_SCORING_KV = Constants.PLACEHOLDER_DOUBLE,
       NOTE_SCORING_KA = Constants.PLACEHOLDER_DOUBLE;
+
   public static final SimpleMotorFeedforward NOTE_SCORING_FF =
       new SimpleMotorFeedforward(NOTE_SCORING_KS, NOTE_SCORING_KV, NOTE_SCORING_KA);
 
@@ -20,10 +21,10 @@ public final class ElevatorCal {
       CLIMBING_I = Constants.PLACEHOLDER_DOUBLE,
       CLIMBING_D = Constants.PLACEHOLDER_DOUBLE;
   /** Feedforward parameters for the elevator when climbing. Input in/s, output Volts. */
-      public static final double
-      CLIMBING_KS = Constants.PLACEHOLDER_DOUBLE,
+  public static final double CLIMBING_KS = Constants.PLACEHOLDER_DOUBLE,
       CLIMBING_KV = Constants.PLACEHOLDER_DOUBLE,
       CLIMBING_KA = Constants.PLACEHOLDER_DOUBLE;
+
   public static final SimpleMotorFeedforward CLIMBING_FF =
       new SimpleMotorFeedforward(CLIMBING_KS, CLIMBING_KV, CLIMBING_KA);
 
