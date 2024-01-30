@@ -5,7 +5,13 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkLimitSwitch;
+
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.RobotMap;
 import frc.robot.utils.SparkMaxUtils;
 
@@ -44,36 +50,13 @@ public class Conveyer extends SubsystemBase {
     PARTIAL_NOTE
   }
 
-  /**
-   * Used to define the current action of the conveyer.
-   *
-   * <ul>
-   *   <li>NO_ACTION: The conveyer is not doing anything (i.e. either holding a note in place, or
-   *       does not have a note at all)
-   *   <li>SHOOT: The conveyer is sending a note towards the shooter.
-   *   <li>TRAP_AMP: The conveyer is scoring in the trap or amp.
-   *   <li>RECEIVE: The conveyer is receiving a note from the intake.
-   * </ul>
-   */
-  public enum ConveyerActions {
-    NO_ACTION,
-    SHOOT,
-    TRAP_AMP,
-    RECEIVE,
-  }
-
   public ConveyerPositions currentNotePosition = ConveyerPositions.NO_NOTE;
-  public ConveyerPositions desiredNotePosition = ConveyerPositions.NO_NOTE;
 
-  public ConveyerActions currentAction = ConveyerActions.NO_ACTION;
-  public ConveyerActions desiredAction = ConveyerActions.NO_ACTION;
-
-  public double secondMotorZeroPosition;
+  private double backMotorZeroPosition;
 
   public Conveyer() {
     SparkMaxUtils.initWithRetry(this::setUpConveyerSparks, ConveyerCal.SPARK_INIT_RETRY_ATTEMPTS);
-
-    secondMotorZeroPosition = backMotorEncoder.getPosition();
+    backMotorZeroPosition = backMotorEncoder.getPosition();
   }
 
   /** Does all the initialization for the sparks, return true on success */
@@ -97,10 +80,10 @@ public class Conveyer extends SubsystemBase {
 
     errors +=
         SparkMaxUtils.check(
-            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(frontMotorEncoder, 1.0));
+            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(frontMotorEncoder, ConveyerConstants.FRONT_GEAR_RATIO));
     errors +=
         SparkMaxUtils.check(
-            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(backMotorEncoder, 1.0));
+            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(backMotorEncoder, ConveyerConstants.BACK_GEAR_RATIO));
 
     errors += SparkMaxUtils.check(beamBreakSensorOne.enableLimitSwitch(false));
     errors += SparkMaxUtils.check(beamBreakSensorTwo.enableLimitSwitch(false));
@@ -110,56 +93,52 @@ public class Conveyer extends SubsystemBase {
     return errors == 0;
   }
 
-  private void prepareToShoot() {
-    frontMotor.set(ConveyerCal.PREPARE_TO_SHOOT_FRONT_SPEED);
-    backMotor.set(ConveyerCal.PREPARE_TO_SHOOT_BACK_SPEED);
+  public Command shoot() {
+    return new SequentialCommandGroup(
+      new InstantCommand(() -> frontMotor.set(ConveyerCal.PREPARE_TO_SHOOT_FRONT_SPEED)),
+      new InstantCommand(() -> backMotor.set(ConveyerCal.PREPARE_TO_SHOOT_BACK_SPEED)),
+      new InstantCommand(() -> currentNotePosition = ConveyerPositions.PARTIAL_NOTE),
+      new WaitCommand(ConveyerCal.NOTE_EXIT_TIME_SHOOTER_SECONDS),
+      stop(),
+      new InstantCommand(() -> currentNotePosition = ConveyerPositions.NO_NOTE),
+      new WaitUntilCommand(() -> backMotorEncoder.getVelocity() < ConveyerCal.MOTOR_VELOCITY_THRESHOLD_RPM),
+      new InstantCommand(() -> backMotorZeroPosition = backMotorEncoder.getPosition())
+    );
   }
 
-  private void scoreTrapOrAmp() {
-    frontMotor.set(ConveyerCal.SCORE_AMP_TRAP_FRONT_SPEED);
-    backMotor.set(ConveyerCal.SCORE_AMP_TRAP_BACK_SPEED);
+  public Command scoreTrapOrAmp() {
+    return new SequentialCommandGroup(
+      new InstantCommand(() -> frontMotor.set(ConveyerCal.SCORE_AMP_TRAP_FRONT_SPEED)),
+      new InstantCommand(() -> backMotor.set(ConveyerCal.SCORE_AMP_TRAP_BACK_SPEED)),
+      new InstantCommand(() -> currentNotePosition = ConveyerPositions.PARTIAL_NOTE),
+      new WaitCommand(ConveyerCal.NOTE_EXIT_TIME_TRAP_AMP_SECONDS),
+      stop(),
+      new InstantCommand(() -> currentNotePosition = ConveyerPositions.NO_NOTE),
+      new WaitUntilCommand(() -> backMotorEncoder.getVelocity() < ConveyerCal.MOTOR_VELOCITY_THRESHOLD_RPM),
+      new InstantCommand(() -> backMotorZeroPosition = backMotorEncoder.getPosition())
+    );
   }
 
-  private void receive() {
-    frontMotor.set(ConveyerCal.FRONT_HOLD_SPEED);
-    backMotor.set(0.0);
+  public Command receive() {
+    return new SequentialCommandGroup(
+      new InstantCommand(() -> frontMotor.set(ConveyerCal.FRONT_RECEIVE_SPEED)),
+      new InstantCommand(() -> backMotor.set(0.0)),
+      new InstantCommand(() -> currentNotePosition = ConveyerPositions.PARTIAL_NOTE),
+      new WaitUntilCommand(() -> Math.abs(backMotorEncoder.getPosition() - backMotorZeroPosition) < ConveyerCal.NOTE_POSITION_THRESHOLD_DEGREES),
+      new InstantCommand(() -> backMotorZeroPosition = backMotorEncoder.getPosition()),
+      new InstantCommand(() -> frontMotor.set(ConveyerCal.BACK_OFF_POWER)),
+      new InstantCommand(() -> backMotor.set(ConveyerCal.BACK_OFF_POWER)),
+      new WaitUntilCommand(() -> Math.abs(backMotorEncoder.getPosition() - backMotorZeroPosition) < ConveyerCal.BACK_OFF_DEGREES),
+      stop(),
+      new InstantCommand(() -> currentNotePosition = ConveyerPositions.HOLDING_NOTE)
+
+    );
   }
 
-  private void stop() {
-    frontMotor.set(0.0);
-    backMotor.set(0.0);
-  }
-
-  @Override
-  public void periodic() {
-    if (desiredNotePosition == currentNotePosition) {
-      stop();
-    } else {
-      switch (desiredNotePosition) {
-        case NO_NOTE:
-          stop();
-          break;
-        case HOLDING_NOTE:
-          receive();
-          break;
-        case PARTIAL_NOTE:
-          switch (desiredAction) {
-            case NO_ACTION:
-              stop();
-              break;
-            case SHOOT:
-              prepareToShoot();
-              break;
-            case TRAP_AMP:
-              scoreTrapOrAmp();
-              break;
-            case RECEIVE:
-              receive();
-              break;
-          }
-          break;
-      }
-
-    }
+  private Command stop() {
+    return new SequentialCommandGroup(
+      new InstantCommand(() -> frontMotor.set(0.0)),
+      new InstantCommand(() -> backMotor.set(0.0))
+    );
   }
 }
