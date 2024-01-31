@@ -77,18 +77,17 @@ public class Shooter extends SubsystemBase{
     double timestamp = Timer.getFPGATimestamp();
 
     double armDemandVoltsA = pivotController.calculate(getPivotPosition());
-    double armDemandVoltsB = pivotController.calculate(getPivotPosition());
     if (!prevTimestamp.isEmpty()) {
-      armDemandVoltsB += ShooterCal.PIVOT_MOTOR_FF.calculate(prevVelocityRPM, pivotController.getSetpoint().velocity, timestamp - prevTimestamp.get());
+      armDemandVoltsA += ShooterCal.PIVOT_MOTOR_FF.calculate(prevVelocityRPM, pivotController.getSetpoint().velocity, timestamp - prevTimestamp.get());
     } else {
-      armDemandVoltsB += ShooterCal.PIVOT_MOTOR_FF.calculate(pivotController.getSetpoint().velocity);
+      armDemandVoltsA += ShooterCal.PIVOT_MOTOR_FF.calculate(pivotController.getSetpoint().velocity);
     }
-    double armDemandVoltsC = ShooterCal.ARBITRARY_PIVOT_FEED_FORWARD_VOLTS * getCosineArmAngle();
+    double armDemandVoltsB = ShooterCal.ARBITRARY_PIVOT_FEED_FORWARD_VOLTS * getCosineArmAngle();
 
     prevTimestamp = Optional.of(timestamp);
     prevVelocityRPM = pivotController.getSetpoint().velocity;
     
-    pivotMotor.setVoltage(armDemandVoltsA + armDemandVoltsB + armDemandVoltsC);
+    pivotMotor.setVoltage(armDemandVoltsA + armDemandVoltsB);
   }
 
   public boolean atDesiredPosition() {
