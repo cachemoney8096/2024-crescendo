@@ -1,9 +1,6 @@
 package frc.robot.subsystems.shooter;
 
 import java.util.Optional;
-
-import javax.swing.text.html.Option;
-
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
@@ -31,9 +28,9 @@ public class Shooter extends SubsystemBase{
       new CANSparkMax(RobotMap.SHOOTER_PIVOT_MOTOR_CAN_ID, MotorType.kBrushless);
   private final AbsoluteEncoder pivotMotorAbsoluteEncoder =
       pivotMotor.getAbsoluteEncoder(Type.kDutyCycle);
-  private double pivotDesiredPosition = ShooterCal.STARTING_POSITION_DEGREES;
+  private double pivotDesiredPositionDegrees = ShooterCal.STARTING_POSITION_DEGREES;
 
-  private double prevVelocity = 0;
+  private double prevVelocityRPM = 0;
   private Optional<Double> prevTimestamp = Optional.empty();
 
   /** double distance (meters), double angle (degrees) for pivotMotor */
@@ -56,8 +53,8 @@ public class Shooter extends SubsystemBase{
   }
 
   public void stop() {
-    controllerA.setReference(0, ControlType.kVelocity);
-    controllerB.setReference(0, ControlType.kVelocity);
+    motorA.setVoltage(0);
+    motorB.setVoltage(0);
   }
 
   /** Returns the cosine of the intake angle in degrees off of the horizontal. */
@@ -65,47 +62,37 @@ public class Shooter extends SubsystemBase{
     return Math.cos(
         getPivotPosition() - ShooterConstants.POSITION_WHEN_HORIZONTAL_DEGREES);
   }
-
-  public void controlPosition(double distance){
-    pivotDesiredPosition = pivotAngleMap.get(distance);
-    pivotController.setGoal(pivotDesiredPosition);
-    double timestamp = Timer.getFPGATimestamp();
-
-    double armDemandVoltsA = pivotController.calculate(getPivotPosition());
-    double armDemandVoltsB = pivotController.calculate(getPivotPosition());
-    if (!prevTimestamp.isEmpty()) {
-      armDemandVoltsB += ShooterCal.PIVOT_MOTOR_FF.calculate(prevVelocity, pivotController.getSetpoint().velocity, timestamp - prevTimestamp.get());
-    }
-    double armDemandVoltsC = ShooterCal.ARBITRARY_PIVOT_FEED_FORWARD_VOLTS * getCosineArmAngle();
-
-    prevTimestamp = Optional.of(timestamp);
-    prevVelocity = pivotController.getSetpoint().velocity;
-    
-    pivotMotor.setVoltage(armDemandVoltsA + armDemandVoltsB + armDemandVoltsC);
+  /** Set arm to a specific angle by using distance (applies controlPosition())
+   * @param distance 
+   * **/
+  public void controlPositionWithDistance(double distance) {
+    controlPosition(pivotAngleMap.get(distance));
   }
-
-
-/** Set arm to latching position (up = 180deg). Modified controlPosition. **/
-  public void setLatchPosition(){
-    pivotDesiredPosition = ShooterConstants.LATCH_ANGLE_DEGREES;
-    pivotController.setGoal(pivotDesiredPosition);   
+  /** Set arm to a specific angle using voltage
+   * @param angle 
+   * **/
+  public void controlPosition(double angle){
+    pivotDesiredPositionDegrees = angle;
+    pivotController.setGoal(angle);
     double timestamp = Timer.getFPGATimestamp();
 
     double armDemandVoltsA = pivotController.calculate(getPivotPosition());
     double armDemandVoltsB = pivotController.calculate(getPivotPosition());
     if (!prevTimestamp.isEmpty()) {
-      armDemandVoltsB += ShooterCal.PIVOT_MOTOR_FF.calculate(prevVelocity, pivotController.getSetpoint().velocity, timestamp - prevTimestamp.get());
+      armDemandVoltsB += ShooterCal.PIVOT_MOTOR_FF.calculate(prevVelocityRPM, pivotController.getSetpoint().velocity, timestamp - prevTimestamp.get());
+    } else {
+      armDemandVoltsB += ShooterCal.PIVOT_MOTOR_FF.calculate(pivotController.getSetpoint().velocity);
     }
     double armDemandVoltsC = ShooterCal.ARBITRARY_PIVOT_FEED_FORWARD_VOLTS * getCosineArmAngle();
 
     prevTimestamp = Optional.of(timestamp);
-    prevVelocity = pivotController.getSetpoint().velocity;
+    prevVelocityRPM = pivotController.getSetpoint().velocity;
     
     pivotMotor.setVoltage(armDemandVoltsA + armDemandVoltsB + armDemandVoltsC);
   }
 
   public boolean atDesiredPosition() {
-    return Math.abs(getPivotPosition() - pivotDesiredPosition) < ShooterConstants.PIVOT_ANGLE_MARGIN;
+    return Math.abs(getPivotPosition() - pivotDesiredPositionDegrees) < ShooterConstants.PIVOT_ANGLE_MARGIN;
   }
   private double getPivotPosition() {
     return  pivotMotorAbsoluteEncoder.getPosition() - ShooterConstants.PIVOT_ANGLE_OFFSET_DEGREES;
@@ -117,8 +104,8 @@ public class Shooter extends SubsystemBase{
     errors += SparkMaxUtils.check(motorB.restoreFactoryDefaults());
 
     errors += SparkMaxUtils.check(pivotMotor.setIdleMode(IdleMode.kBrake));
-    errors += SparkMaxUtils.check(motorA.setIdleMode(IdleMode.kBrake));
-    errors += SparkMaxUtils.check(motorB.setIdleMode(IdleMode.kBrake));
+    errors += SparkMaxUtils.check(motorA.setIdleMode(IdleMode.kCoast));
+    errors += SparkMaxUtils.check(motorB.setIdleMode(IdleMode.kCoast));
 
     errors +=
         SparkMaxUtils.check(
