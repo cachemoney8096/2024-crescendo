@@ -22,4 +22,9 @@ public class RobotMap {
 
   public static final int LEFT_ELEVATOR_CAN_ID = Constants.PLACEHOLDER_INT,
       RIGHT_ELEVATOR_CAN_ID = Constants.PLACEHOLDER_INT;
+
+  /** Intake motor and talon CAN IDs */
+  public static final int INTAKE_PIVOT_MOTOR_CAN_ID = Constants.PLACEHOLDER_INT,
+      INTAKING_FRONT_MOTOR_CAN_ID = Constants.PLACEHOLDER_INT,
+      INTAKING_BACK_MOTOR_CAN_ID = Constants.PLACEHOLDER_INT;
 }

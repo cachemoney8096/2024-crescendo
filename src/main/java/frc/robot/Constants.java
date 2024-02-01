@@ -24,4 +24,7 @@ public final class Constants {
   public static final float PLACEHOLDER_FLOAT = 0;
 
   public static final int SPARK_INIT_RETRY_ATTEMPTS = 5;
+
+  /* time between compute cycles */
+  public static final double PERIOD_TIME_SECONDS = 0.02;
 }
