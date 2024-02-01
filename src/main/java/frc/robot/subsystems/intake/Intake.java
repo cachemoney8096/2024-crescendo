@@ -28,7 +28,6 @@ import frc.robot.utils.SendableHelper;
 public class Intake extends SubsystemBase {
 
     private final CANSparkMax pivotMotor = new CANSparkMax(RobotMap.INTAKE_PIVOT_MOTOR_CAN_ID, MotorType.kBrushless);
-    private final RelativeEncoder pivotEncoder = pivotMotor.getEncoder();
     private final AbsoluteEncoder pivotAbsoluteEncoder = pivotMotor.getAbsoluteEncoder(Type.kDutyCycle);
     private final TalonFX intakeTalonFront = new TalonFX(RobotMap.INTAKING_FRONT_MOTOR_CAN_ID);;
     private final TalonFX intakeTalonBack = new TalonFX(RobotMap.INTAKING_BACK_MOTOR_CAN_ID);
