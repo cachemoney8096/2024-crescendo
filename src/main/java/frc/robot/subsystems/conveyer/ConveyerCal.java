@@ -18,7 +18,7 @@ public class ConveyerCal {
   public static final double FRONT_RECEIVE_SPEED = 1.0;
 
   /** The threshold required for the position of the back motor to change in order to register the note */
-  public static final double NOTE_POSITION_THRESHOLD_DEGREES = 0.5;
+  public static final double NOTE_POSITION_THRESHOLD_IN = 0.5;
 
   /** The threshold required for the velocity of a motor in order to count it as moving */
   public static final double MOTOR_VELOCITY_THRESHOLD_RPM = 1.0;
@@ -28,7 +28,7 @@ public class ConveyerCal {
       NOTE_EXIT_TIME_TRAP_AMP_SECONDS = Constants.PLACEHOLDER_DOUBLE;
   
   /** The position to back off when receiving a note */
-  public static final double BACK_OFF_DEGREES = Constants.PLACEHOLDER_DOUBLE;
+  public static final double BACK_OFF_IN = Constants.PLACEHOLDER_DOUBLE;
 
   /** The power to use when backing off a note */
   public static final double BACK_OFF_POWER = -Constants.PLACEHOLDER_DOUBLE;
