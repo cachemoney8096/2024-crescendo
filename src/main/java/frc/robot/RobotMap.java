@@ -8,6 +8,12 @@ public class RobotMap {
       FRONT_RIGHT_DRIVING_CAN_ID = Constants.PLACEHOLDER_INT,
       REAR_RIGHT_DRIVING_CAN_ID = Constants.PLACEHOLDER_INT;
 
+  /** shooter SPARK MAX CAN IDS* */
+  public static final int SHOOTER_MOTOR_A_CAN_ID = Constants.PLACEHOLDER_INT;
+
+  public static final int SHOOTER_MOTOR_B_CAN_ID = Constants.PLACEHOLDER_INT;
+  public static final int SHOOTER_PIVOT_MOTOR_CAN_ID = Constants.PLACEHOLDER_INT;
+
   /** Turning SPARK MAX CAN IDs */
   public static final int FRONT_LEFT_TURNING_CAN_ID = Constants.PLACEHOLDER_INT,
       REAR_LEFT_TURNING_CAN_ID = Constants.PLACEHOLDER_INT,
