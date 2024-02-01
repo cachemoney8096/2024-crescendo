@@ -21,7 +21,7 @@ public class ConveyerCal {
   public static final double NOTE_POSITION_THRESHOLD_IN = 0.5;
 
   /** The threshold required for the velocity of a motor in order to count it as moving */
-  public static final double MOTOR_VELOCITY_THRESHOLD_RPM = 1.0;
+  public static final double MOTOR_VELOCITY_THRESHOLD_IN_PER_SEC = 10.0; // 10 is a guess from Basel
 
   /** The time required for a note to exit the conveyer */
   public static final double NOTE_EXIT_TIME_SHOOTER_SECONDS = Constants.PLACEHOLDER_DOUBLE,

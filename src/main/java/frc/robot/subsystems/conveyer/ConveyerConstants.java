@@ -9,5 +9,5 @@ public class ConveyerConstants {
   public static final double FRONT_GEAR_RATIO = Constants.PLACEHOLDER_DOUBLE,
     BACK_GEAR_RATIO = Constants.PLACEHOLDER_DOUBLE;
   
-  public static final double CONVEYER_MOTOR_ROLLER_DIAMETER_INS = Constants.PLACEHOLDER_DOUBLE;
+  public static final double CONVEYER_MOTOR_ROLLER_DIAMETER_IN = Constants.PLACEHOLDER_DOUBLE;
 }
