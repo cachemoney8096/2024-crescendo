@@ -184,7 +184,6 @@ public class Intake extends SubsystemBase {
         super.initSendable(builder);
         SendableHelper.addChild(builder, this, pivotController, "PivotController");
         builder.addDoubleProperty("pivot desired pos (deg)", () -> intakePositionMap.get(desiredPosition), null);
-        builder.addDoubleProperty("pivot rel enc pos (deg)", pivotEncoder::getPosition, pivotEncoder::setPosition);
         builder.addDoubleProperty("pivot abs pos (deg)", pivotAbsoluteEncoder::getPosition, null);
         builder.addDoubleProperty("pivot abs offset pos (deg)", this::getOffsetAbsPositionDeg, null);
 
