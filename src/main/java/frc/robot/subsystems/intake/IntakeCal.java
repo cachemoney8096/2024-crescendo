@@ -41,6 +41,5 @@ public class IntakeCal {
                         INTAKE_ABSOLUTE_ENCODER_START_POS_DEG = Constants.PLACEHOLDER_DOUBLE;
 
         public static final int PIVOT_MOTOR_CURRENT_LIMIT_AMPS = Constants.PLACEHOLDER_INT;
-        public static final int PIVOT_SPARK_INIT_RETRY_ATTEMPTS = Constants.PLACEHOLDER_INT;
 
 }

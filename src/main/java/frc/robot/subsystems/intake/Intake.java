@@ -63,7 +63,7 @@ public class Intake extends SubsystemBase {
                         IntakeCal.PIVOT_MAX_VELOCITY_DEG_PER_SECOND,
                         IntakeCal.PIVOT_MAX_ACCELERATION_DEG_PER_SECOND_SQUARED));
 
-                        SparkMaxUtils.initWithRetry(this::setUpPivotSpark, IntakeCal.PIVOT_SPARK_INIT_RETRY_ATTEMPTS);
+                        SparkMaxUtils.initWithRetry(this::setUpPivotSpark, Constants.SPARK_INIT_RETRY_ATTEMPTS);
     }
 
     /** Does all the initialization for the pivot spark, return true on success */
