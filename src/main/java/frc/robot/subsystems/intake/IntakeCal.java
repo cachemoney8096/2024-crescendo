@@ -10,7 +10,7 @@ public class IntakeCal {
       INTAKE_PIVOT_I = Constants.PLACEHOLDER_DOUBLE,
       INTAKE_PIVOT_D = Constants.PLACEHOLDER_DOUBLE;
 
-  /** max velocity and acceleration (deg per second) for intake pivot motor */
+  /** Motion profile max velocity and acceleration (deg per second) for intake pivot motor */
   public static final double PIVOT_MAX_VELOCITY_DEG_PER_SECOND = Constants.PLACEHOLDER_DOUBLE,
       PIVOT_MAX_ACCELERATION_DEG_PER_SECOND_SQUARED = Constants.PLACEHOLDER_DOUBLE;
 
@@ -31,12 +31,13 @@ public class IntakeCal {
   /* input degrees, output volts */
   public static final SimpleMotorFeedforward INTAKE_PIVOT_FEEDFORWARD =
       new SimpleMotorFeedforward(Constants.PLACEHOLDER_DOUBLE, Constants.PLACEHOLDER_DOUBLE);
+
+  /** Voltage needed to hold the pivot up when it's horizontal */
   public static final double ARBITRARY_INTAKE_PIVOT_FEEDFORWARD_VOLTS =
       Constants.PLACEHOLDER_DOUBLE;
 
-  /** start and offset degrees for intake absolute encoder */
-  public static final double INTAKE_ABSOLUTE_ENCODER_ZERO_OFFSET_DEG = Constants.PLACEHOLDER_DOUBLE,
-      INTAKE_ABSOLUTE_ENCODER_START_POS_DEG = Constants.PLACEHOLDER_DOUBLE;
+  /** Offset degrees for intake absolute encoder */
+  public static final double INTAKE_ABSOLUTE_ENCODER_ZERO_OFFSET_DEG = Constants.PLACEHOLDER_DOUBLE;
 
   public static final int PIVOT_MOTOR_CURRENT_LIMIT_AMPS = Constants.PLACEHOLDER_INT;
 }
