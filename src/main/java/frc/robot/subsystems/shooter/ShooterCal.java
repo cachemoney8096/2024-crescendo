@@ -20,16 +20,12 @@ public class ShooterCal {
       PIVOT_MOTOR_kI = Constants.PLACEHOLDER_DOUBLE,
       PIVOT_MOTOR_kD = Constants.PLACEHOLDER_DOUBLE;
 
-  /**
-   * Pivot Motor Feedforward. Inputs: Degrees. output Volts.
-   */
+  /** Pivot Motor Feedforward. Inputs: Degrees. output Volts. */
   public static final double PIVOT_MOTOR_KS = Constants.PLACEHOLDER_DOUBLE,
       PIVOT_MOTOR_KV = Constants.PLACEHOLDER_DOUBLE,
       PIVOT_MOTOR_KA = Constants.PLACEHOLDER_DOUBLE;
 
-  /**
-   * Pivot Motor Feedforward. Inputs: Degrees. output Volts.
-   */
+  /** Pivot Motor Feedforward. Inputs: Degrees. output Volts. */
   public static final SimpleMotorFeedforward PIVOT_MOTOR_FF =
       new SimpleMotorFeedforward(PIVOT_MOTOR_KS, PIVOT_MOTOR_KV, PIVOT_MOTOR_KA);
 
@@ -43,8 +39,9 @@ public class ShooterCal {
   public static final double PIVOT_MAX_VELOCITY_DEG_PER_SECOND = Constants.PLACEHOLDER_DOUBLE,
       PIVOT_MAX_ACCELERATION_DEG_PER_SECOND_SQUARED = Constants.PLACEHOLDER_DOUBLE;
 
-  /** Pivot motor voltage to hold the pivot in place at  */
+  /** Pivot motor voltage to hold the pivot in place at */
   public static final double ARBITRARY_PIVOT_FEED_FORWARD_VOLTS = Constants.PLACEHOLDER_DOUBLE;
+
   public static final int SHOOTER_CURRENT_LIMIT_AMPS = Constants.PLACEHOLDER_INT;
 
   /** Pivot position for latching onto the chain */
