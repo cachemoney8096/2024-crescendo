@@ -49,7 +49,9 @@ public class SwerveModule implements Sendable {
     turningEncoder = turningSparkMax.getAbsoluteEncoder(Type.kDutyCycle);
     turningPIDController = turningSparkMax.getPIDController();
 
-    desiredState.angle = new Rotation2d(turningEncoder.getPosition()).plus(Rotation2d.fromRadians(chassisAngularOffsetRadians));
+    desiredState.angle =
+        new Rotation2d(turningEncoder.getPosition())
+            .plus(Rotation2d.fromRadians(chassisAngularOffsetRadians));
     drivingTalon.setPosition(0);
   }
 
@@ -105,8 +107,7 @@ public class SwerveModule implements Sendable {
     TalonFXConfiguration toApply = new TalonFXConfiguration();
     toApply.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // TODO: check this
     toApply.Feedback.SensorToMechanismRatio =
-    DriveConstants.DRIVING_MOTOR_REDUCTION /
-        DriveConstants.WHEEL_CIRCUMFERENCE_METERS;
+        DriveConstants.DRIVING_MOTOR_REDUCTION / DriveConstants.WHEEL_CIRCUMFERENCE_METERS;
     toApply.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS;
     toApply.CurrentLimits.SupplyCurrentLimitEnable = true;
     toApply.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -155,7 +156,8 @@ public class SwerveModule implements Sendable {
   /**
    * Sets the desired state for the module.
    *
-   * @param desiredState Desired state with speed and angle. Angle is relative to chassis (no offset needed).
+   * @param desiredState Desired state with speed and angle. Angle is relative to chassis (no offset
+   *     needed).
    */
   public void setDesiredState(SwerveModuleState desiredState) {
     // Apply chassis angular offset to the desired state.

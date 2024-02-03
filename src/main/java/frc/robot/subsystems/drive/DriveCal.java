@@ -53,15 +53,6 @@ public class DriveCal {
   public static final double ROTATION_DEADBAND_THRESHOLD = 0.04;
 
   /** path finding controller for translation and rotation; used in PathPlanner */
-  public static final PIDConstants
-      PATH_TRANSLATION_CONTROLLER =
-          new PIDConstants(
-              9.0,
-              0.0,
-              0.0),
-      PATH_ROTATION_CONTROLLER =
-          new PIDConstants(
-              9.0,
-              0.0,
-              0.0);
+  public static final PIDConstants PATH_TRANSLATION_CONTROLLER = new PIDConstants(9.0, 0.0, 0.0),
+      PATH_ROTATION_CONTROLLER = new PIDConstants(9.0, 0.0, 0.0);
 }
