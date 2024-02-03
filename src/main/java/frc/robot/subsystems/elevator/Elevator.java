@@ -179,6 +179,11 @@ public class Elevator extends SubsystemBase {
     return Math.abs(desiredPositionIn - currentPositionIn) < ElevatorCal.ELEVATOR_MARGIN_INCHES;
   }
 
+  /** @return true if the elevator's current position is less than its home threshold */
+  public boolean elevatorBelowHomeThreshold() {
+    return leftMotorEncoderRel.getPosition() < ElevatorCal.ELEVATOR_HOME_THRESHOLD_INCHES;
+  }
+
   @Override
   public void periodic() {
     controlPosition(desiredPosition);
