@@ -46,7 +46,7 @@ public class Conveyor extends SubsystemBase {
    *       a note to the shooter, or scoring a note in the trap or amp.
    * </ul>
    */
-  public enum ConveyorPositions {
+  public enum ConveyorPosition {
     /** There is no note in the conveyor. */
     NO_NOTE,
     /** The conveyor is holding a note in place. */
@@ -58,7 +58,7 @@ public class Conveyor extends SubsystemBase {
     PARTIAL_NOTE
   }
 
-  private ConveyorPositions currentNotePosition = ConveyorPositions.NO_NOTE;
+  private ConveyorPosition currentNotePosition = ConveyorPosition.NO_NOTE;
 
   public Conveyor() {
     SparkMaxUtils.initWithRetry(this::setUpConveyorSparks, ConveyorCal.SPARK_INIT_RETRY_ATTEMPTS);
@@ -116,10 +116,10 @@ public class Conveyor extends SubsystemBase {
         new InstantCommand(
             () -> conveyor.frontMotor.set(ConveyorCal.PREPARE_TO_SHOOT_FRONT_SPEED), conveyor),
         new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.PREPARE_TO_SHOOT_BACK_SPEED)),
-        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPositions.PARTIAL_NOTE),
+        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
         new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_SHOOTER_SECONDS),
         Conveyor.stop(conveyor),
-        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPositions.NO_NOTE));
+        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.NO_NOTE));
   }
 
   /** Score note into the trap or the amp */
@@ -128,10 +128,10 @@ public class Conveyor extends SubsystemBase {
         new InstantCommand(
             () -> conveyor.frontMotor.set(ConveyorCal.SCORE_AMP_TRAP_FRONT_SPEED), conveyor),
         new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.SCORE_AMP_TRAP_BACK_SPEED)),
-        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPositions.PARTIAL_NOTE),
+        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
         new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_TRAP_AMP_SECONDS),
         Conveyor.stop(conveyor),
-        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPositions.NO_NOTE));
+        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.NO_NOTE));
   }
 
   /** Get a note from the intake. */
@@ -140,19 +140,19 @@ public class Conveyor extends SubsystemBase {
         new InstantCommand(() -> conveyor.backMotorEncoder.setPosition(0.0), conveyor),
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.FRONT_RECEIVE_SPEED)),
         new InstantCommand(() -> conveyor.backMotor.set(0.0)),
-        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPositions.PARTIAL_NOTE),
+        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
         new WaitUntilCommand(
             () ->
                 Math.abs(conveyor.backMotorEncoder.getPosition())
-                    > ConveyorCal.NOTE_POSITION_THRESHOLD_IN),
+                    > ConveyorCal.NOTE_POSITION_THRESHOLD_INCHES),
         new InstantCommand(() -> conveyor.backMotorEncoder.setPosition(0.0)),
         new InstantCommand(() -> conveyor.frontMotorEncoder.setPosition(0.0)),
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.BACK_OFF_POWER)),
         new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.BACK_OFF_POWER)),
         new WaitUntilCommand(
-            () -> conveyor.frontMotorEncoder.getPosition() < ConveyorCal.BACK_OFF_IN),
+            () -> conveyor.frontMotorEncoder.getPosition() < ConveyorCal.BACK_OFF_INCHES),
         Conveyor.stop(conveyor),
-        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPositions.HOLDING_NOTE));
+        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE));
   }
 
   /** Stop the conveor rollers. */

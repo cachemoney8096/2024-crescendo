@@ -20,14 +20,14 @@ public class ConveyorCal {
    * The threshold required for the position of the back motor to change in order to register the
    * note
    */
-  public static final double NOTE_POSITION_THRESHOLD_IN = 0.5;
+  public static final double NOTE_POSITION_THRESHOLD_INCHES = 0.5;
 
   /** The time required for a note to exit the conveyor */
   public static final double NOTE_EXIT_TIME_SHOOTER_SECONDS = Constants.PLACEHOLDER_DOUBLE,
       NOTE_EXIT_TIME_TRAP_AMP_SECONDS = Constants.PLACEHOLDER_DOUBLE;
 
   /** The position to back off when receiving a note */
-  public static final double BACK_OFF_IN = Constants.PLACEHOLDER_DOUBLE;
+  public static final double BACK_OFF_INCHES = Constants.PLACEHOLDER_DOUBLE;
 
   /** The power to use when backing off a note */
   public static final double BACK_OFF_POWER = -Constants.PLACEHOLDER_DOUBLE;
