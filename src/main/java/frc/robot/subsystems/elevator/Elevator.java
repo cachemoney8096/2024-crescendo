@@ -21,8 +21,7 @@ import java.util.Optional;
 import java.util.TreeMap;
 
 /**
- * Moves the elevator carriage up and down. Does not control anything on the
- * carriage (that's the
+ * Moves the elevator carriage up and down. Does not control anything on the carriage (that's the
  * conveyor).
  */
 public class Elevator extends SubsystemBase {
@@ -34,27 +33,32 @@ public class Elevator extends SubsystemBase {
     POST_CLIMB
   }
 
-  public CANSparkMax leftMotor = new CANSparkMax(RobotMap.LEFT_ELEVATOR_CAN_ID, MotorType.kBrushless);
-  public CANSparkMax rightMotor = new CANSparkMax(RobotMap.RIGHT_ELEVATOR_CAN_ID, MotorType.kBrushless);
+  public CANSparkMax leftMotor =
+      new CANSparkMax(RobotMap.LEFT_ELEVATOR_CAN_ID, MotorType.kBrushless);
+  public CANSparkMax rightMotor =
+      new CANSparkMax(RobotMap.RIGHT_ELEVATOR_CAN_ID, MotorType.kBrushless);
 
   private final RelativeEncoder leftMotorEncoderRel = leftMotor.getEncoder();
   private final AbsoluteEncoder leftMotorEncoderAbs = leftMotor.getAbsoluteEncoder(Type.kDutyCycle);
-  private final AbsoluteEncoder rightMotorEncoderAbs = rightMotor.getAbsoluteEncoder(Type.kDutyCycle);
+  private final AbsoluteEncoder rightMotorEncoderAbs =
+      rightMotor.getAbsoluteEncoder(Type.kDutyCycle);
 
-  private ProfiledPIDController noteScoringElevatorController = new ProfiledPIDController(
-      ElevatorCal.NOTE_SCORING_P,
-      ElevatorCal.NOTE_SCORING_I,
-      ElevatorCal.NOTE_SCORING_D,
-      new TrapezoidProfile.Constraints(
-          ElevatorCal.MAX_VELOCITY_IN_PER_SECOND,
-          ElevatorCal.MAX_ACCELERATION_IN_PER_SECOND_SQUARED));
-  private ProfiledPIDController chainGrabberElevatorController = new ProfiledPIDController(
-      ElevatorCal.CLIMBING_P,
-      ElevatorCal.CLIMBING_I,
-      ElevatorCal.CLIMBING_D,
-      new TrapezoidProfile.Constraints(
-          ElevatorCal.MAX_VELOCITY_IN_PER_SECOND,
-          ElevatorCal.MAX_ACCELERATION_IN_PER_SECOND_SQUARED));
+  private ProfiledPIDController noteScoringElevatorController =
+      new ProfiledPIDController(
+          ElevatorCal.NOTE_SCORING_P,
+          ElevatorCal.NOTE_SCORING_I,
+          ElevatorCal.NOTE_SCORING_D,
+          new TrapezoidProfile.Constraints(
+              ElevatorCal.MAX_VELOCITY_IN_PER_SECOND,
+              ElevatorCal.MAX_ACCELERATION_IN_PER_SECOND_SQUARED));
+  private ProfiledPIDController chainGrabberElevatorController =
+      new ProfiledPIDController(
+          ElevatorCal.CLIMBING_P,
+          ElevatorCal.CLIMBING_I,
+          ElevatorCal.CLIMBING_D,
+          new TrapezoidProfile.Constraints(
+              ElevatorCal.MAX_VELOCITY_IN_PER_SECOND,
+              ElevatorCal.MAX_ACCELERATION_IN_PER_SECOND_SQUARED));
 
   private ProfiledPIDController currentPIDController = noteScoringElevatorController;
   private SimpleMotorFeedforward currentFeedforward = ElevatorCal.NOTE_SCORING_FF;
@@ -86,35 +90,42 @@ public class Elevator extends SubsystemBase {
 
     errors += SparkMaxUtils.check(rightMotor.follow(leftMotor, true));
 
-    errors += SparkMaxUtils.check(
-        leftMotor.setSoftLimit(
-            SoftLimitDirection.kForward, ElevatorCal.ELEVATOR_POSITIVE_LIMIT_INCHES));
+    errors +=
+        SparkMaxUtils.check(
+            leftMotor.setSoftLimit(
+                SoftLimitDirection.kForward, ElevatorCal.ELEVATOR_POSITIVE_LIMIT_INCHES));
     errors += SparkMaxUtils.check(leftMotor.enableSoftLimit(SoftLimitDirection.kForward, true));
-    errors += SparkMaxUtils.check(
-        leftMotor.setSoftLimit(
-            SoftLimitDirection.kReverse, ElevatorCal.ELEVATOR_NEGATIVE_LIMIT_INCHES));
+    errors +=
+        SparkMaxUtils.check(
+            leftMotor.setSoftLimit(
+                SoftLimitDirection.kReverse, ElevatorCal.ELEVATOR_NEGATIVE_LIMIT_INCHES));
     errors += SparkMaxUtils.check(leftMotor.enableSoftLimit(SoftLimitDirection.kReverse, true));
 
     errors += SparkMaxUtils.check(leftMotor.setIdleMode(IdleMode.kBrake));
     errors += SparkMaxUtils.check(rightMotor.setIdleMode(IdleMode.kBrake));
 
-    errors += SparkMaxUtils.check(
-        leftMotor.setSmartCurrentLimit(ElevatorCal.ELEVATOR_CURRENT_LIMIT_AMPS));
-    errors += SparkMaxUtils.check(
-        rightMotor.setSmartCurrentLimit(ElevatorCal.ELEVATOR_CURRENT_LIMIT_AMPS));
+    errors +=
+        SparkMaxUtils.check(
+            leftMotor.setSmartCurrentLimit(ElevatorCal.ELEVATOR_CURRENT_LIMIT_AMPS));
+    errors +=
+        SparkMaxUtils.check(
+            rightMotor.setSmartCurrentLimit(ElevatorCal.ELEVATOR_CURRENT_LIMIT_AMPS));
 
     errors += SparkMaxUtils.check(leftMotorEncoderAbs.setInverted(false));
-    errors += SparkMaxUtils.check(
-        SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(
-            leftMotorEncoderAbs, ElevatorConstants.ELEVATOR_LEFT_ABSOLUTE_ENCODER_RATIO));
-    errors += SparkMaxUtils.check(
-        SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(
-            rightMotorEncoderAbs, ElevatorConstants.ELEVATOR_RIGHT_ABSOLUTE_ENCODER_RATIO));
-    errors += SparkMaxUtils.check(
-        SparkMaxUtils.UnitConversions.setLinearFromGearRatio(
-            leftMotorEncoderRel,
-            ElevatorConstants.ELEVATOR_GEAR_RATIO,
-            ElevatorConstants.ELEVATOR_DRUM_DIAMETER_IN));
+    errors +=
+        SparkMaxUtils.check(
+            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(
+                leftMotorEncoderAbs, ElevatorConstants.ELEVATOR_LEFT_ABSOLUTE_ENCODER_RATIO));
+    errors +=
+        SparkMaxUtils.check(
+            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(
+                rightMotorEncoderAbs, ElevatorConstants.ELEVATOR_RIGHT_ABSOLUTE_ENCODER_RATIO));
+    errors +=
+        SparkMaxUtils.check(
+            SparkMaxUtils.UnitConversions.setLinearFromGearRatio(
+                leftMotorEncoderRel,
+                ElevatorConstants.ELEVATOR_GEAR_RATIO,
+                ElevatorConstants.ELEVATOR_DRUM_DIAMETER_IN));
 
     errors += SparkMaxUtils.check(setZeroFromAbsolute());
 
@@ -127,10 +138,7 @@ public class Elevator extends SubsystemBase {
     return leftMotorEncoderRel.setPosition(0.0);
   }
 
-  /**
-   * If true, use elevator control parameters for note scoring as opposed to
-   * climbing
-   */
+  /** If true, use elevator control parameters for note scoring as opposed to climbing */
   public void setControlParams(boolean useNoteControlParams) {
     if (useNoteControlParams) {
       currentPIDController = noteScoringElevatorController;
@@ -142,18 +150,16 @@ public class Elevator extends SubsystemBase {
     currentPIDController.reset(leftMotorEncoderRel.getPosition());
   }
 
-  /**
-   * Sets elevator motor voltage based on input position. Should be called every
-   * cycle.
-   */
+  /** Sets elevator motor voltage based on input position. Should be called every cycle. */
   private void controlPosition(ElevatorPosition pos) {
     currentPIDController.setGoal(elevatorPositions.get(pos));
     double elevatorDemandVolts = currentPIDController.calculate(leftMotorEncoderRel.getPosition());
     final double timestamp = Timer.getFPGATimestamp();
     final double nextVelocityInPerSec = currentPIDController.getSetpoint().velocity;
     if (prevTimestamp.isPresent()) {
-      elevatorDemandVolts += currentFeedforward.calculate(
-          prevVelocityInPerSec, nextVelocityInPerSec, timestamp - prevTimestamp.get());
+      elevatorDemandVolts +=
+          currentFeedforward.calculate(
+              prevVelocityInPerSec, nextVelocityInPerSec, timestamp - prevTimestamp.get());
     } else {
       elevatorDemandVolts += currentFeedforward.calculate(nextVelocityInPerSec);
     }
@@ -174,8 +180,7 @@ public class Elevator extends SubsystemBase {
   }
 
   /**
-   * @return true if the elevator's current position is less than its interference
-   *         threshold
+   * @return true if the elevator's current position is less than its interference threshold
    */
   public boolean elevatorBelowInterferenceThreshold() {
     return leftMotorEncoderRel.getPosition() < ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_INCHES;

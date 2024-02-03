@@ -8,10 +8,7 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 
 public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
-  /**
-   * this is a specified distance from the speaker each time until we do limelight
-   * stuff
-   */
+  /** this is a specified distance from the speaker each time until we do limelight stuff */
   public final double SPEAKER_SHOOTER_DISTANCE_METERS = 5.0;
 
   public SpeakerPrepScoreSequence(Intake intake, Elevator elevator, Shooter shooter) {

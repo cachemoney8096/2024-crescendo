@@ -17,20 +17,21 @@ public class GoHomeSequence extends SequentialCommandGroup {
             new SequentialCommandGroup(
                 new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)),
                 new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME)),
-                new WaitUntilCommand(() -> {
-                  return intake.atDesiredIntakePosition() && elevator.atDesiredPosition();
-                })),
-
+                new WaitUntilCommand(
+                    () -> {
+                      return intake.atDesiredIntakePosition() && elevator.atDesiredPosition();
+                    })),
             new SequentialCommandGroup(
-                new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.CLEAR_OF_CONVEYOR)),
+                new InstantCommand(
+                    () -> intake.setDesiredIntakePosition(IntakePosition.CLEAR_OF_CONVEYOR)),
                 new WaitUntilCommand(intake::atDesiredIntakePosition),
                 new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME)),
                 new WaitUntilCommand(elevator::elevatorBelowInterferenceThreshold),
                 new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)),
-                new WaitUntilCommand(() -> {
-                  return intake.atDesiredIntakePosition() && elevator.atDesiredPosition();
-                })),
-
+                new WaitUntilCommand(
+                    () -> {
+                      return intake.atDesiredIntakePosition() && elevator.atDesiredPosition();
+                    })),
             () -> elevator.elevatorBelowInterferenceThreshold()));
   }
 }
