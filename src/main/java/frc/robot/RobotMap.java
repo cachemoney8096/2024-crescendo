@@ -20,9 +20,9 @@ public class RobotMap {
       FRONT_RIGHT_TURNING_CAN_ID = Constants.PLACEHOLDER_INT,
       REAR_RIGHT_TURNING_CAN_ID = Constants.PLACEHOLDER_INT;
 
-  /** Conveyer SPARK MAX CAN IDs */
-  public static final int FRONT_CONVEYER_CAN_ID = Constants.PLACEHOLDER_INT,
-      BACK_CONVEYER_CAN_ID = Constants.PLACEHOLDER_INT;
+  /** Conveyor SPARK MAX CAN IDs */
+  public static final int FRONT_CONVEYOR_CAN_ID = Constants.PLACEHOLDER_INT,
+      BACK_CONVEYOR_CAN_ID = Constants.PLACEHOLDER_INT;
 
   public static final int LEFT_ELEVATOR_CAN_ID = Constants.PLACEHOLDER_INT,
       RIGHT_ELEVATOR_CAN_ID = Constants.PLACEHOLDER_INT;
