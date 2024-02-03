@@ -23,21 +23,30 @@ import frc.robot.utils.SparkMaxUtils;
 import java.util.Optional;
 import java.util.TreeMap;
 
+/** Intake pivot and rollers. */
 public class Intake extends SubsystemBase {
 
   private final CANSparkMax pivotMotor =
       new CANSparkMax(RobotMap.INTAKE_PIVOT_MOTOR_CAN_ID, MotorType.kBrushless);
+  /** Configured to read degrees, zero is down. */
   private final AbsoluteEncoder pivotAbsoluteEncoder =
       pivotMotor.getAbsoluteEncoder(Type.kDutyCycle);
-  private final TalonFX intakeTalonFront = new TalonFX(RobotMap.INTAKING_FRONT_MOTOR_CAN_ID);
-  ;
-  private final TalonFX intakeTalonBack = new TalonFX(RobotMap.INTAKING_BACK_MOTOR_CAN_ID);
-  private final Follower intakeTalonBackFollower =
-      new Follower(intakeTalonFront.getDeviceID(), false);
-  private ProfiledPIDController pivotController;
 
-  private Optional<Double> lastControlledTime;
-  private Optional<Double> prevVelocityDegPerSec;
+  private final TalonFX intakeTalonFront = new TalonFX(RobotMap.INTAKING_FRONT_MOTOR_CAN_ID);
+  private final TalonFX intakeTalonBack = new TalonFX(RobotMap.INTAKING_BACK_MOTOR_CAN_ID);
+  private ProfiledPIDController pivotController =
+      new ProfiledPIDController(
+          IntakeCal.INTAKE_PIVOT_P,
+          IntakeCal.INTAKE_PIVOT_I,
+          IntakeCal.INTAKE_PIVOT_D,
+          new TrapezoidProfile.Constraints(
+              IntakeCal.PIVOT_MAX_VELOCITY_DEG_PER_SECOND,
+              IntakeCal.PIVOT_MAX_ACCELERATION_DEG_PER_SECOND_SQUARED));
+
+  /** FPGA timestamp from previous cycle. Empty for first cycle only. */
+  private Optional<Double> lastControlledTime = Optional.empty();
+  /** Profiled velocity setpoint from previous cycle (deg per sec) */
+  private Optional<Double> prevVelocityDegPerSec = Optional.empty();
 
   public enum IntakePosition {
     DEPLOYED,
@@ -55,19 +64,9 @@ public class Intake extends SubsystemBase {
     intakePositionMap.put(IntakePosition.DEPLOYED, IntakeCal.INTAKE_DEPLOYED_POSITION_DEGREES);
     intakePositionMap.put(IntakePosition.STOWED, IntakeCal.INTAKE_STOWED_POSITION_DEGREES);
     intakePositionMap.put(IntakePosition.CLEAR_OF_CONVEYOR, IntakeCal.INTAKE_SAFE_POSITION_DEGREES);
-    lastControlledTime = Optional.of(Timer.getFPGATimestamp());
   }
 
   public void initPivotMotor() {
-    pivotController =
-        new ProfiledPIDController(
-            IntakeCal.INTAKE_PIVOT_P,
-            IntakeCal.INTAKE_PIVOT_I,
-            IntakeCal.INTAKE_PIVOT_D,
-            new TrapezoidProfile.Constraints(
-                IntakeCal.PIVOT_MAX_VELOCITY_DEG_PER_SECOND,
-                IntakeCal.PIVOT_MAX_ACCELERATION_DEG_PER_SECOND_SQUARED));
-
     SparkMaxUtils.initWithRetry(this::setUpPivotSpark, Constants.SPARK_INIT_RETRY_ATTEMPTS);
   }
 
@@ -93,6 +92,7 @@ public class Intake extends SubsystemBase {
   }
 
   public void initIntakeTalons() {
+    // TODO check status codes
     TalonFXConfigurator cfgFront = intakeTalonFront.getConfigurator();
     TalonFXConfigurator cfgBack = intakeTalonFront.getConfigurator();
 
@@ -104,11 +104,11 @@ public class Intake extends SubsystemBase {
     cfgFront.apply(toApply);
     cfgBack.apply(toApply);
 
-    intakeTalonBack.setControl(intakeTalonBackFollower);
+    intakeTalonBack.setControl(new Follower(intakeTalonFront.getDeviceID(), false));
   }
 
   /**
-   * @return the difference between the current time and the last controlled time by the timer if
+   * @return the difference between the current time and the last controlled time by the timer. If
    *     the lastControlledTime is empty (first record), then return 20 milliseconds
    */
   public double getTimeDifference() {
@@ -116,8 +116,8 @@ public class Intake extends SubsystemBase {
       return Constants.PERIOD_TIME_SECONDS;
     }
 
-    double currentTimestamp = Timer.getFPGATimestamp();
-    double timestampDifference = currentTimestamp - lastControlledTime.get();
+    final double currentTimestamp = Timer.getFPGATimestamp();
+    final double timestampDifference = currentTimestamp - lastControlledTime.get();
     lastControlledTime = Optional.of(currentTimestamp);
 
     return timestampDifference;
@@ -131,17 +131,15 @@ public class Intake extends SubsystemBase {
                 - IntakeConstants.INTAKE_POSITION_WHEN_HORIZONTAL_DEGREES));
   }
 
+  /** Gets the correctly zeroed position of the pivot. */
   public double getOffsetAbsPositionDeg() {
     return pivotAbsoluteEncoder.getPosition() + IntakeCal.INTAKE_ABSOLUTE_ENCODER_ZERO_OFFSET_DEG;
   }
 
+  /** Sends the pivot towards the input position. Should be called every cycle. */
   public void moveToPos(IntakePosition pos) {
     pivotController.setGoal(intakePositionMap.get(pos));
     double intakeDemandVoltsA = pivotController.calculate(getOffsetAbsPositionDeg());
-
-    double intakeDemandVoltsC =
-        IntakeCal.ARBITRARY_INTAKE_PIVOT_FEEDFORWARD_VOLTS * getCosineArmAngle();
-
     double intakeDemandVoltsB;
     double currentVelocity = pivotController.getSetpoint().velocity;
     if (prevVelocityDegPerSec.isEmpty()) {
@@ -151,10 +149,12 @@ public class Intake extends SubsystemBase {
           IntakeCal.INTAKE_PIVOT_FEEDFORWARD.calculate(
               prevVelocityDegPerSec.get(), currentVelocity, getTimeDifference());
     }
-
-    prevVelocityDegPerSec = Optional.of(currentVelocity);
+    double intakeDemandVoltsC =
+        IntakeCal.ARBITRARY_INTAKE_PIVOT_FEEDFORWARD_VOLTS * getCosineArmAngle();
 
     pivotMotor.setVoltage(intakeDemandVoltsA + intakeDemandVoltsB + intakeDemandVoltsC);
+
+    prevVelocityDegPerSec = Optional.of(currentVelocity);
   }
 
   public boolean atDesiredIntakePosition() {
@@ -188,11 +188,14 @@ public class Intake extends SubsystemBase {
     intakeTalonFront.set(IntakeCal.REVERSE_INTAKING_POWER);
   }
 
-  public void periodic() {}
+  public void periodic() {
+    moveToPos(desiredPosition);
+  }
 
   public void initSendable(SendableBuilder builder) {
     super.initSendable(builder);
     SendableHelper.addChild(builder, this, pivotController, "PivotController");
+    builder.addStringProperty("pivot desired pos", () -> desiredPosition.toString(), null);
     builder.addDoubleProperty(
         "pivot desired pos (deg)", () -> intakePositionMap.get(desiredPosition), null);
     builder.addDoubleProperty("pivot abs pos (deg)", pivotAbsoluteEncoder::getPosition, null);
