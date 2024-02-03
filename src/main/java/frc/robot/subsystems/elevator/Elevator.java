@@ -180,7 +180,7 @@ public class Elevator extends SubsystemBase {
   }
 
   /** @return true if the elevator's current position is less than its home threshold */
-  public boolean elevatorBelowHomeThreshold() {
+  public boolean elevatorBelowInterferenceThreshold() {
     return leftMotorEncoderRel.getPosition() < ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_INCHES;
   }
 
