@@ -14,10 +14,6 @@ public class DriveConstants {
   public static final boolean TURNING_ENCODER_INVERTED = true;
 
   /** Multiplier for wheel diameter based on empirical on-field measurement */
-  // First number: adjustment for midwest
-  // Second number: adjustment from midwest to practice field
-  // Third number: adjustment from practice field to wisconsin
-  // Fourth number: Wisconsin to Buckeye
   public static final double WHEEL_DIAMETER_FUDGE_FACTOR = 1.0;
 
   /** Calculations required for driving motor conversion factors and feed forward */
@@ -38,16 +34,10 @@ public class DriveConstants {
   public static final double DRIVE_WHEEL_MAX_ACCEL_METERS_PER_SEC_SQRD =
       Constants.PLACEHOLDER_DOUBLE;
 
-  public static final double DRIVING_ENCODER_POSITION_FACTOR_METERS =
-      WHEEL_CIRCUMFERENCE_METERS / DRIVING_MOTOR_REDUCTION; // meters
-  public static final double DRIVING_ENCODER_VELOCITY_FACTOR_METERS_PER_SECOND =
-      DRIVING_ENCODER_POSITION_FACTOR_METERS / 60.0; // meters per second
-
   public static final double TURNING_ENCODER_POSITION_PID_MIN_INPUT_RADIANS = 0; // radians
   public static final double TURNING_ENCODER_POSITION_PID_MAX_INPUT_RADIANS =
       2 * Math.PI; // radians
 
-  public static final IdleMode DRIVING_MOTOR_IDLE_MODE = IdleMode.kCoast;
   public static final IdleMode TURNING_MOTOR_IDLE_MODE = IdleMode.kBrake;
 
   public static final int DRIVING_MOTOR_CURRENT_LIMIT_AMPS = 50; // amps
