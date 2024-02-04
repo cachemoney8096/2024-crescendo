@@ -36,8 +36,6 @@ public class GoHomeSequence extends SequentialCommandGroup {
     addRequirements(intake, elevator);
     addCommands(
         new ConditionalCommand(
-            goHomeWhenSafe,
-            goHomeWhenNotSafe,
-            () -> elevator.elevatorBelowInterferenceZone()));
+            goHomeWhenSafe, goHomeWhenNotSafe, () -> elevator.elevatorBelowInterferenceZone()));
   }
 }
