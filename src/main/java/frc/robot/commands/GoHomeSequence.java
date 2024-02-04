@@ -11,27 +11,33 @@ import frc.robot.subsystems.intake.Intake.IntakePosition;
 
 public class GoHomeSequence extends SequentialCommandGroup {
   public GoHomeSequence(Intake intake, Elevator elevator) {
+    final SequentialCommandGroup goHomeWhenSafe =
+        new SequentialCommandGroup(
+            new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)),
+            new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME)),
+            new WaitUntilCommand(
+                () -> {
+                  return intake.atDesiredIntakePosition() && elevator.atDesiredPosition();
+                }));
+
+    final SequentialCommandGroup goHomeWhenNotSafe =
+        new SequentialCommandGroup(
+            new InstantCommand(
+                () -> intake.setDesiredIntakePosition(IntakePosition.CLEAR_OF_CONVEYOR)),
+            new WaitUntilCommand(intake::atDesiredIntakePosition),
+            new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME)),
+            new WaitUntilCommand(elevator::elevatorBelowInterferenceThreshold),
+            new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)),
+            new WaitUntilCommand(
+                () -> {
+                  return intake.atDesiredIntakePosition() && elevator.atDesiredPosition();
+                }));
+                
     addRequirements(intake, elevator);
     addCommands(
         new ConditionalCommand(
-            new SequentialCommandGroup(
-                new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)),
-                new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME)),
-                new WaitUntilCommand(
-                    () -> {
-                      return intake.atDesiredIntakePosition() && elevator.atDesiredPosition();
-                    })),
-            new SequentialCommandGroup(
-                new InstantCommand(
-                    () -> intake.setDesiredIntakePosition(IntakePosition.CLEAR_OF_CONVEYOR)),
-                new WaitUntilCommand(intake::atDesiredIntakePosition),
-                new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME)),
-                new WaitUntilCommand(elevator::elevatorBelowInterferenceThreshold),
-                new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)),
-                new WaitUntilCommand(
-                    () -> {
-                      return intake.atDesiredIntakePosition() && elevator.atDesiredPosition();
-                    })),
+            goHomeWhenSafe,
+            goHomeWhenNotSafe,
             () -> elevator.elevatorBelowInterferenceThreshold()));
   }
 }
