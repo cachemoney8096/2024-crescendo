@@ -13,17 +13,11 @@ public class DriveCal {
       DRIVING_D = 0.1,
       DRIVING_FF = 0.95 / DriveConstants.DRIVE_WHEEL_FREE_SPEED_METERS_PER_SECOND;
 
-  public static final double DRIVING_MIN_OUTPUT = -1;
-  public static final double DRIVING_MAX_OUTPUT = 1;
-
   /** Input radians, output [-1,1] */
   public static final double TURNING_P = 0.8,
       TURNING_I = Constants.PLACEHOLDER_DOUBLE,
       TURNING_D = 0.1,
       TURNING_FF = 0.00;
-
-  public static final double TURNING_MIN_OUTPUT = -1;
-  public static final double TURNING_MAX_OUTPUT = 1;
 
   /**
    * Angular offset of the modules relative to the zeroing fixture in radians. Ideally should be
@@ -59,15 +53,6 @@ public class DriveCal {
   public static final double ROTATION_DEADBAND_THRESHOLD = 0.04;
 
   /** path finding controller for translation and rotation; used in PathPlanner */
-  public static final PIDConstants
-      PATH_TRANSLATION_CONTROLLER =
-          new PIDConstants(
-              Constants.PLACEHOLDER_DOUBLE,
-              Constants.PLACEHOLDER_DOUBLE,
-              Constants.PLACEHOLDER_DOUBLE),
-      PATH_ROTATION_CONTROLLER =
-          new PIDConstants(
-              Constants.PLACEHOLDER_DOUBLE,
-              Constants.PLACEHOLDER_DOUBLE,
-              Constants.PLACEHOLDER_DOUBLE);
+  public static final PIDConstants PATH_TRANSLATION_CONTROLLER = new PIDConstants(9.0, 0.0, 0.0),
+      PATH_ROTATION_CONTROLLER = new PIDConstants(9.0, 0.0, 0.0);
 }

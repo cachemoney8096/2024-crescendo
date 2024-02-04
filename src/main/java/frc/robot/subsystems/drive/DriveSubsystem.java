@@ -31,7 +31,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer.MatchState;
 import frc.robot.RobotMap;
-import frc.robot.subsystems.Lights;
 import frc.robot.utils.GeometryUtils;
 import frc.robot.utils.PoseBuffer;
 import java.util.List;
@@ -39,7 +38,6 @@ import java.util.Optional;
 
 public class DriveSubsystem extends SubsystemBase {
   private double targetHeadingDegrees;
-  private Lights lights;
 
   // Create SwerveModules
   public final SwerveModule frontLeft =
@@ -81,23 +79,29 @@ public class DriveSubsystem extends SubsystemBase {
   /** Multiplier for drive speed, does not affect trajectory following */
   private double throttleMultiplier = 1.0;
 
+  /** Provides info on our alliance color and whether this is a real match. */
   private MatchState matchState;
 
-  public DriveSubsystem(Lights lightsSubsystem, MatchState matchState) {
+  public DriveSubsystem(MatchState matchState) {
+    intializeGyro();
+    this.matchState = matchState;
+  }
+
+  public void intializeGyro() {
+    // Reset to defaults
     Pigeon2Configurator cfg = gyro.getConfigurator();
     Pigeon2Configuration blankGyroConfiguration = new Pigeon2Configuration();
     cfg.apply(blankGyroConfiguration);
 
-    gyro.reset();
+    // Set mount pose
     MountPoseConfigs gyroConfig = new MountPoseConfigs();
     gyroConfig.MountPosePitch = 0;
     gyroConfig.MountPoseRoll = 0;
     gyroConfig.MountPoseYaw = 90;
-
     cfg.apply(gyroConfig);
 
-    this.lights = lightsSubsystem;
-    this.matchState = matchState;
+    // Reset position to zero, this may be overwritten by a path at the start of auto
+    gyro.reset();
   }
 
   @Override
@@ -524,6 +528,10 @@ public class DriveSubsystem extends SubsystemBase {
     return new InstantCommand(this::stopDriving, this);
   }
 
+  /**
+   * Provides no input to rotateOrKeepHeading for the input amount of time, allowing turning in
+   * place towards the current target heading
+   */
   public Command turnInPlace(double timeoutSec) {
     return new RunCommand(
             () -> {
@@ -535,9 +543,6 @@ public class DriveSubsystem extends SubsystemBase {
   @Override
   public void initSendable(SendableBuilder builder) {
     super.initSendable(builder);
-    // addChild("X Controller", DriveCal.PATH_X_CONTROLLER);
-    // addChild("Y Controller", DriveCal.PATH_Y_CONTROLLER);
-    // addChild("Theta Controller", DriveCal.PATH_THETA_CONTROLLER);
     addChild("Rotate to target controller", DriveCal.ROTATE_TO_TARGET_PID_CONTROLLER);
     addChild("Front Right", frontRight);
     addChild("Front Left", frontLeft);

@@ -2,7 +2,7 @@ package frc.robot.subsystems.drive;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
-import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -30,12 +30,13 @@ public class SwerveModule implements Sendable {
   private final SparkPIDController turningPIDController;
 
   private double chassisAngularOffsetRadians = 0;
+
+  /** Desired velocity and angle. This angle includes the chassis offset. */
   private SwerveModuleState desiredState = new SwerveModuleState(0.0, new Rotation2d());
 
   /**
    * Constructs a SwerveModule and configures the driving and turning motor, encoder, and PID
-   * controller. This configuration is specific to the REV MAXSwerve Module built with NEOs, SPARKS
-   * MAX, and a Through Bore Encoder.
+   * controller.
    */
   public SwerveModule(int drivingCanId, int turningCanId, double chassisAngularOffset) {
     drivingTalon = new TalonFX(drivingCanId);
@@ -48,7 +49,9 @@ public class SwerveModule implements Sendable {
     turningEncoder = turningSparkMax.getAbsoluteEncoder(Type.kDutyCycle);
     turningPIDController = turningSparkMax.getPIDController();
 
-    desiredState.angle = new Rotation2d(turningEncoder.getPosition());
+    desiredState.angle =
+        new Rotation2d(turningEncoder.getPosition())
+            .plus(Rotation2d.fromRadians(chassisAngularOffsetRadians));
     drivingTalon.setPosition(0);
   }
 
@@ -87,9 +90,6 @@ public class SwerveModule implements Sendable {
     errors += SparkMaxUtils.check(turningPidTmp.setI(DriveCal.TURNING_I));
     errors += SparkMaxUtils.check(turningPidTmp.setD(DriveCal.TURNING_D));
     errors += SparkMaxUtils.check(turningPidTmp.setFF(DriveCal.TURNING_FF));
-    errors +=
-        SparkMaxUtils.check(
-            turningPidTmp.setOutputRange(DriveCal.TURNING_MIN_OUTPUT, DriveCal.TURNING_MAX_OUTPUT));
 
     errors +=
         SparkMaxUtils.check(turningSparkMax.setIdleMode(DriveConstants.TURNING_MOTOR_IDLE_MODE));
@@ -102,14 +102,12 @@ public class SwerveModule implements Sendable {
 
   /** Does all the initialization for the spark, return true on success */
   void initDriveTalon() {
+    // TODO check status codes
     TalonFXConfigurator cfg = drivingTalon.getConfigurator();
     TalonFXConfiguration toApply = new TalonFXConfiguration();
     toApply.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // TODO: check this
     toApply.Feedback.SensorToMechanismRatio =
-        1
-            / DriveConstants.DRIVING_MOTOR_REDUCTION
-            * Math.PI
-            * DriveConstants.WHEEL_DIAMETER_FUDGE_FACTOR; // TODO somebody fix this math
+        DriveConstants.DRIVING_MOTOR_REDUCTION / DriveConstants.WHEEL_CIRCUMFERENCE_METERS;
     toApply.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS;
     toApply.CurrentLimits.SupplyCurrentLimitEnable = true;
     toApply.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -158,7 +156,8 @@ public class SwerveModule implements Sendable {
   /**
    * Sets the desired state for the module.
    *
-   * @param desiredState Desired state with speed and angle.
+   * @param desiredState Desired state with speed and angle. Angle is relative to chassis (no offset
+   *     needed).
    */
   public void setDesiredState(SwerveModuleState desiredState) {
     // Apply chassis angular offset to the desired state.
@@ -176,7 +175,7 @@ public class SwerveModule implements Sendable {
     this.desiredState = optimizedDesiredState;
 
     // Command driving and turning SPARKS MAX towards their respective setpoints.
-    drivingTalon.setControl(new VelocityVoltage(optimizedDesiredState.speedMetersPerSecond));
+    drivingTalon.setControl(new VelocityDutyCycle(optimizedDesiredState.speedMetersPerSecond));
     turningPIDController.setReference(
         optimizedDesiredState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
   }
