@@ -7,6 +7,10 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 
+/**
+ * gets the robot ready to shoot a ring into the speaker. gets intake and elevator into position,
+ * spins up the shooter
+ */
 public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
   /** this is a specified distance from the speaker each time until we do limelight stuff */
   public final double SPEAKER_SHOOTER_DISTANCE_METERS = 5.0;
