@@ -12,24 +12,21 @@ import frc.robot.subsystems.intake.Intake.IntakePosition;
 
 public class IntakeSequence extends SequentialCommandGroup {
   public IntakeSequence(Intake intake, Elevator elevator, Conveyor conveyor) {
-    addRequirements(intake, elevator);
+    addRequirements(intake, elevator, conv);
 
     addCommands(
-        new ConditionalCommand(
-            new InstantCommand(),
-            new SequentialCommandGroup(
-                new InstantCommand(
-                    () -> intake.setDesiredIntakePosition(IntakePosition.CLEAR_OF_CONVEYOR)),
-                new WaitUntilCommand(intake::atDesiredIntakePosition),
-                new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME)),
-                new WaitUntilCommand(elevator::elevatorBelowInterferenceThreshold)),
-            elevator::atDesiredPosition),
         new InstantCommand(
             () -> {
               intake.setDesiredIntakePosition(IntakePosition.DEPLOYED);
             },
             intake),
-        new WaitUntilCommand(intake::atDesiredIntakePosition),
+        new WaitUntilCommand(intake::clearOfConveyorZone),
+        new ConditionalCommand(
+            new InstantCommand(),
+            new SequentialCommandGroup(
+                new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME)),
+                new WaitUntilCommand(elevator::elevatorBelowInterferenceThreshold)),
+            elevator::atDesiredPosition),
         new InstantCommand(intake::startRollers),
         Conveyor.receive(conveyor),
         new InstantCommand(
