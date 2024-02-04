@@ -41,7 +41,7 @@ public class CRTGearRatioUtil {
       int maxRotations, double mainGearCircumference) {
     CRTGearRatioUtil u = new CRTGearRatioUtil(mainGearRotationRatioTerm, secondaryGearRotationRatioTerm, maxRotations,
         mainGearCircumference);
-    if (u.validateGearRatioWithMaxRotations()) {
+    if (u.validateGearRatioWithMaxRotations()) { //check if the gear ratio works with the required amount of rotations by the main gear
       return Optional.of(u);
     }
     return Optional.empty();
@@ -59,6 +59,7 @@ public class CRTGearRatioUtil {
     this.mainGearCircumference = mainGearCircumference;
   }
 
+  //"These two functions speak for themselves" - Hans Niemann commenting his code
   public static double gcd(double a, double b) {
     if (b == 0.0)
       return a;
@@ -75,8 +76,8 @@ public class CRTGearRatioUtil {
 
   /**
    * 
-   * @return Returns a multiplier used by CRT. You shouldn't need to use this, and
-   *         I don't fully understand it (Victor Chen did the math behind it)
+   * @return Returns a multiplier used by CRT. You shouldn't need to use this function yourself, and
+   *         I don't fully understand it (Victor Chen did the math behind it).
    */
   public int kFactor() {
     double sum = 0;
@@ -86,7 +87,7 @@ public class CRTGearRatioUtil {
       sum += ((a * (b - i) - 1.0) / b)
           * (1 + Math.floor(((a * (b - i) - 1.0) / b)) - Math.ceil(((a * (b - i) - 1.0) / b)));
     }
-    return (int) ((int) ((sum * b) + 1.0) / a);
+    return (int) ((int) ((sum * b) + 1.0) / a); //basically, when you apply CRT, you can multiply by a certain factor (what this function returns, a constant for a given gear ratio) such that when using modding that factor times the output of crt and the simplified main gear rotation ratio term, it will correctly output a number between 0 and maxrotations. then, to account for wrap around and to make 0 full rotations work correctly, mod the main gear ratio term by the output + the simplified term
   }
 
   /**
@@ -99,10 +100,12 @@ public class CRTGearRatioUtil {
    */
   public int getMainGearFullRotations(double mainGearRotationValue, double secondaryGearRotationValue) {
     double k = kFactor();
-    return (int) Math.round(mod(mainGearRotationRatioTerm,
-        mod(k * (mainGearRotationValue * secondaryGearRotationRatioTermSimplfied
-            - secondaryGearRotationValue * mainGearRotationRatioTermSimplified), mainGearRotationRatioTermSimplified)
-            + mainGearRotationRatioTermSimplified));
+    return (int) Math.round(mod(mainGearRotationRatioTerm, //mod the main gear rotation ratio term by the whole thing plus the simplified term to make 0 full rotations work properly
+        mod(k * //this is the multiplier, see the comment in the returns statement of kFactor() for more details
+        (mainGearRotationValue * secondaryGearRotationRatioTermSimplfied
+            - secondaryGearRotationValue * mainGearRotationRatioTermSimplified) //this returns a decimal where the multiplier is different for every gear ratio
+            , mainGearRotationRatioTermSimplified) //mod it with the main gear rotation ratio term so it is within the correct range
+            + mainGearRotationRatioTermSimplified)); //for more information, see the comment in the kFactor() function
   }
 
   /**
@@ -113,17 +116,16 @@ public class CRTGearRatioUtil {
   public boolean validateGearRatioWithMaxRotations() {
     boolean works = true;
     for (int i = 0; i < maxRotations * 6; i++) {
-      double elevatorPos = i * mainGearCircumference / 6;
-      // System.out.println(elevatorPos);
+      double elevatorPos = i * mainGearCircumference / 6; //set elevator positon (expected position that it will check with) through sixths of a rotation until max rotations is reached
       double epoc = CRTGearRatioUtil.mod(elevatorPos / mainGearCircumference, 1) > 0.9 ? 0.0
           : CRTGearRatioUtil.mod(elevatorPos / mainGearCircumference, 1) < 0.1 ? 0.0
-              : CRTGearRatioUtil.mod(elevatorPos / mainGearCircumference, 1);
-      if (Math.abs(this.getAbsolutePositionOfMainObject(epoc,
+              : CRTGearRatioUtil.mod(elevatorPos / mainGearCircumference, 1); //calculate what the main gear encoder value would be at each position - the ternary operators account for annoying float division rounding problems on either end (0 and 1)
+      if (Math.abs(this.getAbsolutePositionOfMainObject(epoc, //the calculated main gear encoder value
           CRTGearRatioUtil.mod(
               elevatorPos / mainGearCircumference * secondaryGearRotationRatioTerm /
-                  mainGearRotationRatioTerm,
+                  mainGearRotationRatioTerm, //the calculated secondary gear encoder value
               1))
-          - elevatorPos) > 0.01) {
+          - elevatorPos) > 0.01) { //check if the difference in what the function returns is greater than a small error factor, if it is, set working to false - this is a result more annoying float division problems, but will also not work if the gear ratio doesn't work
         works = false;
       }
     }
@@ -139,11 +141,11 @@ public class CRTGearRatioUtil {
    */
   public double getAbsolutePositionOfMainObject(double mainGearRotationValue, double secondaryGearRotationValue) {
     return mainGearRotationValue * mainGearCircumference
-        + getMainGearFullRotations(mainGearRotationValue, secondaryGearRotationValue) * mainGearCircumference;
+        + getMainGearFullRotations(mainGearRotationValue, secondaryGearRotationValue) * mainGearCircumference; //multiplies the number of full rotations plus the fractional amount of rotation from the main gear encoder by the circumference to determine distance traveled by the object attached to the main gear
   }
 
   /**
-   * @return Returns the absolute position of the main object before it wraps around
+   * @return Returns the absolute position of the main object after one wrap around
    */
   public double wrapAroundAbsolutePosition(){
     return mainGearCircumference*maxRotations;
