@@ -20,7 +20,9 @@ public class ClimbSequence extends SequentialCommandGroup {
     addCommands(
         new WaitUntilCommand(
             () -> {
-              return intake.atDesiredIntakePosition() && elevator.atDesiredPosition() && shooter.atDesiredPosition();
+              return intake.atDesiredIntakePosition()
+                  && elevator.atDesiredPosition()
+                  && shooter.atDesiredPosition();
             }),
         new InstantCommand(() -> elevator.setControlParams(false)),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.POST_CLIMB)),
