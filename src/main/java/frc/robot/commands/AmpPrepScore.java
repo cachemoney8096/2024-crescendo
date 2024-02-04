@@ -10,6 +10,9 @@ import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakePosition;
 
+/**
+ * Prepares to score in the amp. This command group safely moves the conveyor and elevator to the score amp position.
+ */
 public class AmpPrepScore extends SequentialCommandGroup {
   /** Creates a new AmpPreScore. */
   public AmpPrepScore(Elevator elevator, Conveyor conveyer, Intake intake) {

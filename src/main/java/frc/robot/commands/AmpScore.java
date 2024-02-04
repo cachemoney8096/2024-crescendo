@@ -1,23 +1,19 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.conveyor.Conveyor;
 
-// NOTE:  Consider using this command inline, rather than writing a subclass.  For more
-// information, see:
-// https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
+/**
+ * Scores a note in the amp. At the moment, this only calls the scoreTrapOrAmp command in the
+ * conveyor. However, we should add functionality in the future to "smartly" go home, in which case
+ * we will likely want a separate command group.
+ */
 public class AmpScore extends SequentialCommandGroup {
-  /** Creates a new AmpScore. */
   public AmpScore(Conveyor conveyor) {
-
     addRequirements(conveyor);
     addCommands(
-      Conveyor.scoreTrapOrAmp(conveyor)
-      // TODO "smartly" go home (e.g. go home once we've driven away from the wall)
-    );
+        Conveyor.scoreTrapOrAmp(conveyor)
+        // TODO "smartly" go home (e.g. go home once we've driven away from the wall)
+        );
   }
 }

@@ -58,7 +58,7 @@ public class Conveyor extends SubsystemBase {
     PARTIAL_NOTE
   }
 
-  public ConveyorPosition currentNotePosition = ConveyorPosition.NO_NOTE;
+  private ConveyorPosition currentNotePosition = ConveyorPosition.NO_NOTE;
 
   public Conveyor() {
     SparkMaxUtils.initWithRetry(this::setUpConveyorSparks, ConveyorCal.SPARK_INIT_RETRY_ATTEMPTS);
