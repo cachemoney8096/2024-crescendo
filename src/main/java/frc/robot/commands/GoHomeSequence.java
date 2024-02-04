@@ -30,7 +30,7 @@ public class GoHomeSequence extends SequentialCommandGroup {
                 () -> intake.setDesiredIntakePosition(IntakePosition.CLEAR_OF_CONVEYOR)),
             new WaitUntilCommand(intake::atDesiredIntakePosition),
             new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME)),
-            new WaitUntilCommand(elevator::elevatorBelowInterferenceThreshold),
+            new WaitUntilCommand(elevator::elevatorBelowInterferenceZone),
             new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)),
             new WaitUntilCommand(
                 () -> {
@@ -40,8 +40,6 @@ public class GoHomeSequence extends SequentialCommandGroup {
     addRequirements(intake, elevator);
     addCommands(
         new ConditionalCommand(
-            goHomeWhenSafe,
-            goHomeWhenNotSafe,
-            () -> elevator.elevatorBelowInterferenceThreshold()));
+            goHomeWhenSafe, goHomeWhenNotSafe, () -> elevator.elevatorBelowInterferenceZone()));
   }
 }

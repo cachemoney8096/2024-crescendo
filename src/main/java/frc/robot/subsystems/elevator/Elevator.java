@@ -180,10 +180,21 @@ public class Elevator extends SubsystemBase {
   }
 
   /**
-   * @return true if the elevator's current position is less than its interference threshold
+   * @return true if the elevator's current position is less than the elevator-intake interference
+   *     zone
    */
-  public boolean elevatorBelowInterferenceThreshold() {
-    return leftMotorEncoderRel.getPosition() < ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_INCHES;
+  public boolean elevatorBelowInterferenceZone() {
+    return leftMotorEncoderRel.getPosition()
+        < ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_MINIMUM_INCHES;
+  }
+
+  /**
+   * @return true if the elevator's current position is greater than the elevator-intake
+   *     interference zone
+   */
+  public boolean elevatorAboveInterferenceZone() {
+    return leftMotorEncoderRel.getPosition()
+        > ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES;
   }
 
   @Override
