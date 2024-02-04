@@ -9,10 +9,11 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakePosition;
-//** Puts the intake into the deployed position then gets elevator to home position **//
-//**Checks that everything is in position to intake then starts rollers **/
-//**Intakes until the conveyor recieves the game piece**/
-//**Stops and stowes intake**/
+/** Puts the intake into the deployed position then gets elevator to home position 
+ * Checks that everything is in position to intake then starts rollers 
+ * Intakes until the conveyor recieves the game piece
+ * Stops and stowes intake
+ **/
 public class IntakeSequence extends SequentialCommandGroup {
   public IntakeSequence(Intake intake, Elevator elevator, Conveyor conveyor) {
     addRequirements(intake, elevator, conveyor);
