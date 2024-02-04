@@ -32,7 +32,7 @@ public class GoHomeSequence extends SequentialCommandGroup {
                 () -> {
                   return intake.atDesiredIntakePosition() && elevator.atDesiredPosition();
                 }));
-                
+
     addRequirements(intake, elevator);
     addCommands(
         new ConditionalCommand(
