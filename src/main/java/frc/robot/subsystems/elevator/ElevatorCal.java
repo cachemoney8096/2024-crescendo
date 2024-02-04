@@ -49,9 +49,11 @@ public final class ElevatorCal {
   public static final double ELEVATOR_MARGIN_INCHES = 0.5;
 
   /**
-   * if elevator is below the threshold, the intake is safe to move without first moving the
-   * elevator this value should be the bottom of the range of values that cause intake-elevator
-   * interference
+   * if elevator is below the bottom of the zone or above the top of the zone, the intake is safe to
+   * move without first moving the elevator. This value should be the bottom or top, respectively,
+   * of the range of values that cause intake-elevator interference
    */
-  public static final double ELEVATOR_INTERFERENCE_THRESHOLD_INCHES = Constants.PLACEHOLDER_DOUBLE;
+  public static final double
+      ELEVATOR_INTERFERENCE_THRESHOLD_MINIMUM_INCHES = Constants.PLACEHOLDER_DOUBLE,
+      ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES = Constants.PLACEHOLDER_DOUBLE;
 }
