@@ -10,15 +10,14 @@ import frc.robot.subsystems.intake.Intake.IntakePosition;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 
+/** gets the robot ready to climb by moving the intake, elevator, and shooter to their appropriate positions */
 public class PrepClimbSequence extends SequentialCommandGroup {
   public PrepClimbSequence(Intake intake, Elevator elevator, Shooter shooter) {
     addRequirements(intake, elevator, shooter);
     addCommands(
         new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.DEPLOYED)),
-        new WaitUntilCommand(intake::atDesiredIntakePosition),
+        new WaitUntilCommand(intake::clearOfConveyorZone),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.PRE_CLIMB)),
-        new WaitUntilCommand(elevator::atDesiredPosition),
-        new InstantCommand(() -> shooter.setShooterMode(ShooterMode.PRELATCH)),
-        new WaitUntilCommand(shooter::atDesiredPosition));
+        new InstantCommand(() -> shooter.setShooterMode(ShooterMode.PRELATCH)));
   }
 }

@@ -9,6 +9,7 @@ import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakePosition;
 
+/** brings the elevator and intake to their respective home positions in a "smart" way so they do not end up attacking each other accidentally */
 public class GoHomeSequence extends SequentialCommandGroup {
   public GoHomeSequence(Intake intake, Elevator elevator) {
     final SequentialCommandGroup goHomeWhenSafe =
