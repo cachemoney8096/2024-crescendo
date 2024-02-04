@@ -123,6 +123,10 @@ public class Intake extends SubsystemBase {
     return timestampDifference;
   }
 
+  public void setDesiredIntakePosition(IntakePosition pos) {
+    this.desiredPosition = pos;
+  }
+
   /** Returns the cosine of the arm angle in degrees off of the horizontal. */
   public double getCosineArmAngle() {
     return Math.cos(
@@ -137,7 +141,7 @@ public class Intake extends SubsystemBase {
   }
 
   /** Sends the pivot towards the input position. Should be called every cycle. */
-  public void moveToPos(IntakePosition pos) {
+  private void moveToPos(IntakePosition pos) {
     pivotController.setGoal(intakePositionMap.get(pos));
     double intakeDemandVoltsA = pivotController.calculate(getOffsetAbsPositionDeg());
     double intakeDemandVoltsB;
