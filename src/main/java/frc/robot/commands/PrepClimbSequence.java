@@ -16,7 +16,7 @@ public class PrepClimbSequence extends SequentialCommandGroup {
     addRequirements(intake, elevator, shooter);
     addCommands(
         new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.DEPLOYED)),
-        new WaitUntilCommand(intake::clearOfConveyorZone),
+        new WaitUntilCommand(intake::clearOfConveyorZone), // TODO only needs to do this wait if the elevator is NOT above the interference zone already
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.PRE_CLIMB)),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.PRELATCH)));
   }

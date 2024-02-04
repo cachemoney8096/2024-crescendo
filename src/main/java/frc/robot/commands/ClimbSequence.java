@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
+import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 
@@ -14,12 +15,12 @@ import frc.robot.subsystems.shooter.Shooter.ShooterMode;
  * the trap
  */
 public class ClimbSequence extends SequentialCommandGroup {
-  public ClimbSequence(Elevator elevator, Shooter shooter, Conveyor conveyor) {
-    addRequirements(elevator, shooter, conveyor);
+  public ClimbSequence(Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor) {
+    addRequirements(intake, elevator, shooter, conveyor);
     addCommands(
         new WaitUntilCommand(
             () -> {
-              return elevator.atDesiredPosition() && shooter.atDesiredPosition();
+              return intake.atDesiredIntakePosition() && elevator.atDesiredPosition() && shooter.atDesiredPosition();
             }),
         new InstantCommand(() -> elevator.setControlParams(false)),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.POST_CLIMB)),
