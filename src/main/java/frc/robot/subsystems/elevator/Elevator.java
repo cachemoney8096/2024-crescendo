@@ -197,14 +197,6 @@ public class Elevator extends SubsystemBase {
         > ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES;
   }
 
-  /**
-   * @return true if the elevator's current position is outside the elevator-intake interference
-   *     zone
-   */
-  public boolean elevatorOutsideInterferenceZone() {
-    return elevatorBelowInterferenceZone() || elevatorAboveInterferenceZone();
-  }
-
   @Override
   public void periodic() {
     controlPosition(desiredPosition);
