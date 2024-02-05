@@ -59,8 +59,13 @@ public class CRTGearRatioUtil {
     this.mainGearCircumference = mainGearCircumference;
   }
 
-  //"These two functions speak for themselves" - Hans Niemann commenting his code
-  public static double gcd(double a, double b) {
+  /**
+   * 
+   * @param a
+   * @param b
+   * @return Greatest common divisor of a and b
+   */
+  private static double gcd(double a, double b) {
     if (b == 0.0)
       return a;
     return gcd(b, a % b);
@@ -79,13 +84,14 @@ public class CRTGearRatioUtil {
    * @return Returns a multiplier used by CRT. You shouldn't need to use this function yourself, and
    *         I don't fully understand it (Victor Chen did the math behind it).
    */
-  public int kFactor() {
+  private int kFactor() {
     double sum = 0;
     double a = secondaryGearRotationRatioTermSimplfied;
     double b = mainGearRotationRatioTermSimplified;
     for (int i = 1; i < b; i++) {
-      sum += ((a * (b - i) - 1.0) / b)
-          * (1 + Math.floor(((a * (b - i) - 1.0) / b)) - Math.ceil(((a * (b - i) - 1.0) / b)));
+      double x = ((a * (b - i) - 1.0) / b);
+      sum += x
+          * (1 + Math.floor(x) - Math.ceil(x));
     }
     return (int) ((int) ((sum * b) + 1.0) / a); //basically, when you apply CRT, you can multiply by a certain factor (what this function returns, a constant for a given gear ratio) such that when using modding that factor times the output of crt and the simplified main gear rotation ratio term, it will correctly output a number between 0 and maxrotations. then, to account for wrap around and to make 0 full rotations work correctly, mod the main gear ratio term by the output + the simplified term
   }
