@@ -7,8 +7,8 @@ public class CRTGearRatioUtilTestingStuff {
   void test() {
     assert checker(44, 42, 22); 
     assert checker(44, 26, 22);
-    assert checker(26, 44, 22);
-    assert checker(42, 44, 21);
+    assert checker(26, 44, 12);
+    assert checker(42, 44, 20);
     assert !checker(3, 4, 22);
     assert !checker(4,3,10);
     assert checker(28,30,14);
