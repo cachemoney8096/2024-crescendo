@@ -151,10 +151,10 @@ public class CRTGearRatioUtil {
   }
 
   /**
-   * @return Returns the absolute position of the main object after one wrap around
+   * @return Returns the absolute position of the main object after one wrap around (my brain is cooked right now and the logic isn't logicing, somebody check this please)
    */
   public double wrapAroundAbsolutePosition(){
-    return mainGearCircumference*maxRotations;
+    return mainGearCircumference*mainGearRotationRatioTermSimplified;
   }
 
 }
