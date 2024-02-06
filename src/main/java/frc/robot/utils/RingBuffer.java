@@ -101,8 +101,9 @@ public class RingBuffer<T> {
     if (i < 0 || i >= size()) {
       throw new NoSuchElementException();
     } else {
-      //noinspection unchecked
-      return (T) backingArray[(firstIdx + i) % backingArray.length];
+      @SuppressWarnings("unchecked")
+      T returnValue = (T) backingArray[(firstIdx + i) % backingArray.length];
+      return returnValue;
     }
   }
 
@@ -114,8 +115,9 @@ public class RingBuffer<T> {
       if (idx < 0) {
         idx += backingArray.length;
       }
-      //noinspection unchecked
-      return (T) backingArray[idx];
+      @SuppressWarnings("unchecked")
+      T returnValue = (T) backingArray[idx];
+      return returnValue;
     }
   }
 }
