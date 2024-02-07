@@ -5,6 +5,7 @@ import java.util.Optional;
 public class CRTGearRatioUtilTestingStuff {
   @Test
   void test() {
+    //we know which of these should work based on the wrap around point compared to the maximum number of rotations we need to do
     assert checker(44, 42, 22); 
     assert checker(44, 26, 22);
     assert checker(26, 44, 12);
