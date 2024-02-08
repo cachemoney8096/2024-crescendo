@@ -20,7 +20,10 @@ public class PrepClimbSequence extends SequentialCommandGroup {
     addRequirements(intake, elevator, shooter);
     addCommands(
         new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.DEPLOYED)),
-        new ConditionalCommand(new InstantCommand(), new WaitUntilCommand(intake::clearOfConveyorZone), elevator::elevatorAboveInterferenceZone),
+        new ConditionalCommand(
+            new InstantCommand(),
+            new WaitUntilCommand(intake::clearOfConveyorZone),
+            elevator::elevatorAboveInterferenceZone),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.PRE_CLIMB)),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.PRELATCH)));
   }
