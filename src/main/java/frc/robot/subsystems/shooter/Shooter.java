@@ -78,8 +78,8 @@ public class Shooter extends SubsystemBase {
 
   public Shooter() {
     pivotAngleMap = new InterpolatingDoubleTreeMap();
-    pivotAngleMap.put(Constants.PLACEHOLDER_DOUBLE, Constants.PLACEHOLDER_DOUBLE);
-    pivotAngleMap.put(Constants.PLACEHOLDER_DOUBLE, Constants.PLACEHOLDER_DOUBLE);
+    pivotAngleMap.put(0.0, 114.0);
+    pivotAngleMap.put(100.0, 114.0);
 
     SparkMaxUtils.initWithRetry(this::initSparks, Constants.SPARK_INIT_RETRY_ATTEMPTS);
   }
@@ -114,7 +114,7 @@ public class Shooter extends SubsystemBase {
 
     errors +=
         SparkMaxUtils.check(
-            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(pivotMotorAbsoluteEncoder, 1.0));
+            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(pivotMotorAbsoluteEncoder, ShooterConstants.ABS_ENCODER_GEAR_RATIO));
 
     return errors == 0;
   }
@@ -217,7 +217,7 @@ public class Shooter extends SubsystemBase {
   }
 
   private double getPivotPosition() {
-    return pivotMotorAbsoluteEncoder.getPosition() - ShooterConstants.PIVOT_ANGLE_OFFSET_DEGREES;
+    return pivotMotorAbsoluteEncoder.getPosition() - ShooterCal.PIVOT_ANGLE_OFFSET_DEGREES;
   }
 
   @Override

@@ -11,33 +11,36 @@ public class IntakeCal {
       INTAKE_PIVOT_D = Constants.PLACEHOLDER_DOUBLE;
 
   /** Motion profile max velocity and acceleration (deg per second) for intake pivot motor */
-  public static final double PIVOT_MAX_VELOCITY_DEG_PER_SECOND = Constants.PLACEHOLDER_DOUBLE,
-      PIVOT_MAX_ACCELERATION_DEG_PER_SECOND_SQUARED = Constants.PLACEHOLDER_DOUBLE;
+  public static final double PIVOT_MAX_VELOCITY_DEG_PER_SECOND = 30.0,
+      PIVOT_MAX_ACCELERATION_DEG_PER_SECOND_SQUARED = 30.0;
 
   /**
    * intake positions (degrees) where 90 degrees represents the intake at the shooter and 0 degrees
    * is down
    */
-  public static final double INTAKE_DEPLOYED_POSITION_DEGREES = Constants.PLACEHOLDER_DOUBLE,
-      INTAKE_STOWED_POSITION_DEGREES = Constants.PLACEHOLDER_DOUBLE,
-      INTAKE_SAFE_POSITION_DEGREES = Constants.PLACEHOLDER_DOUBLE;
+  public static final double INTAKE_DEPLOYED_POSITION_DEGREES = 270.0,
+      INTAKE_STOWED_POSITION_DEGREES = 155.0,
+      INTAKE_SAFE_POSITION_DEGREES = 200.0; // exact safe position is 186.0
 
-  public static final double INTAKE_MARGIN_DEGREES = Constants.PLACEHOLDER_DOUBLE,
-      CONVEYOR_ZONE_THRESHOLD_DEGREES = Constants.PLACEHOLDER_DOUBLE;
+  public static final double INTAKE_MARGIN_DEGREES = 1.0,
+      CONVEYOR_ZONE_THRESHOLD_DEGREES = 190.0;
 
   /** intake power [-1.0,1.0] */
   public static final double INTAKING_POWER = 1.0, REVERSE_INTAKING_POWER = -1.0;
 
-  /* input degrees, output volts */
+  /* input degrees, output volts 
+   * https://www.reca.lc/arm?armMass=%7B%22s%22%3A15%2C%22u%22%3A%22lbs%22%7D&comLength=%7B%22s%22%3A14%2C%22u%22%3A%22in%22%7D&currentLimit=%7B%22s%22%3A50%2C%22u%22%3A%22A%22%7D&efficiency=85&endAngle=%7B%22s%22%3A50%2C%22u%22%3A%22deg%22%7D&iterationLimit=10000&motor=%7B%22quantity%22%3A1%2C%22name%22%3A%22NEO%22%7D&ratio=%7B%22magnitude%22%3A97%2C%22ratioType%22%3A%22Reduction%22%7D&startAngle=%7B%22s%22%3A0%2C%22u%22%3A%22deg%22%7D
+  */
   public static final SimpleMotorFeedforward INTAKE_PIVOT_FEEDFORWARD =
-      new SimpleMotorFeedforward(Constants.PLACEHOLDER_DOUBLE, Constants.PLACEHOLDER_DOUBLE);
+      new SimpleMotorFeedforward(0.0, 0.033, 0.00070);
 
   /** Voltage needed to hold the pivot up when it's horizontal */
   public static final double ARBITRARY_INTAKE_PIVOT_FEEDFORWARD_VOLTS =
-      Constants.PLACEHOLDER_DOUBLE;
+      0.76;
 
   /** Offset degrees for intake absolute encoder */
   public static final double INTAKE_ABSOLUTE_ENCODER_ZERO_OFFSET_DEG = Constants.PLACEHOLDER_DOUBLE;
 
-  public static final int PIVOT_MOTOR_CURRENT_LIMIT_AMPS = Constants.PLACEHOLDER_INT;
+  public static final int PIVOT_MOTOR_CURRENT_LIMIT_AMPS = 25;
+  public static final double INTAKING_TALONS_CURRENT_LIMIT_AMPS = 50.0;
 }
