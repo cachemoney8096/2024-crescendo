@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -9,6 +10,7 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakePosition;
+import frc.robot.subsystems.shooter.Shooter;
 
 /**
  * Puts the intake into the deployed position then gets elevator to home position Checks that
@@ -40,5 +42,14 @@ public class IntakeSequence extends SequentialCommandGroup {
             },
             intake),
         new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)));
+  }
+
+  /** runs IntakeSequence but adds the layer that if the robot is interrupted, then everything is brought back to the home state */
+  public static Command interruptibleIntakeSequnce(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
+    return new IntakeSequence(intake, elevator, conveyor)
+        .finallyDo(
+            (boolean interrupted) -> {
+              new StopMostThings(intake, elevator, conveyor, shooter);
+            });
   }
 }

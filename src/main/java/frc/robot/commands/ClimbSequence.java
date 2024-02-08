@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -33,4 +34,14 @@ public class ClimbSequence extends SequentialCommandGroup {
         new WaitUntilCommand(elevator::atDesiredPosition),
         Conveyor.scoreTrapOrAmp(conveyor));
   }
+
+  /** runs ClimbSequence but adds the layer that if the robot is interrupted, then everything is brought to the prep state */
+  public static Command interruptibleClimbSequence(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
+    return new ClimbSequence(intake, elevator, shooter, conveyor)
+        .finallyDo(
+            (boolean interrupted) -> {
+              PrepClimbSequence.interruptiblePrepClimbSequence(intake, elevator, conveyor, shooter);
+            });
+  }
+
 }

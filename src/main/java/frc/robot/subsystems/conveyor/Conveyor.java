@@ -156,7 +156,7 @@ public class Conveyor extends SubsystemBase {
   }
 
   /** Stop the conveor rollers. */
-  private static Command stop(Conveyor conveyor) {
+  public static Command stop(Conveyor conveyor) {
     return new InstantCommand(conveyor::stopRollers, conveyor);
   }
 

@@ -1,7 +1,9 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
@@ -21,5 +23,14 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
         new InstantCommand(() -> shooter.setShooterDistance(SPEAKER_SHOOTER_DISTANCE_METERS)),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
         new GoHomeSequence(intake, elevator));
+  }
+
+  /** runs SpeakerPrepScoreSequence but adds the layer that if the robot is interrupted, then everything is brought back to the home state */
+  public static Command interruptibleSpeakerPrepScoreSequence(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
+    return new SpeakerPrepScoreSequence(intake, elevator, shooter)
+        .finallyDo(
+            (boolean interrupted) -> {
+              new StopMostThings(intake, elevator, conveyor, shooter);
+            });
   }
 }
