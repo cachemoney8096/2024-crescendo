@@ -17,8 +17,13 @@ public class CRTGearRatioUtil {
   private final double secondaryGearRotationRatioTerm;
   private final int maxRotations;
   private final double mainGearCircumference;
+  private final double k; //kFactor
+  private final int verificationFractionDenominatorPerRotation = 6;
+  private final double doubleDivisionErrorFactor = 0.05;
+  private final double elevatorErrorFactor = 0.01;
 
   /**
+   * Input units will affect output units of some functions
    * 
    * @param mainGearRotationRatioTerm      for every mainGearRotationRatioTerm
    *                                       rotations of the main gear,
@@ -28,7 +33,7 @@ public class CRTGearRatioUtil {
    *                                       rotations of the main gear,
    *                                       the secondary gear rotates
    *                                       secondaryGearRotationRatioTerm times
-   * @param maxRotations                   the maximum number of rotations that
+   * @param maxRotations                   the desired maximum number of rotations that
    *                                       the main gear will make that involve
    *                                       unique positions of the object
    *                                       attached to it
@@ -57,6 +62,7 @@ public class CRTGearRatioUtil {
         / gcd(mainGearRotationRatioTerm, secondaryGearRotationRatioTerm));
     this.maxRotations = maxRotations;
     this.mainGearCircumference = mainGearCircumference;
+    this.k = kFactor();
   }
 
   /**
@@ -105,7 +111,6 @@ public class CRTGearRatioUtil {
    * @return Returns the number of full rotations of the main gear
    */
   public int getMainGearFullRotations(double mainGearRotationValue, double secondaryGearRotationValue) {
-    double k = kFactor();
     return (int) Math.round(mod(mainGearRotationRatioTerm, //mod the main gear rotation ratio term by the whole thing plus the simplified term to make 0 full rotations work properly
         mod(k * //this is the multiplier, see the comment in the returns statement of kFactor() for more details
         (mainGearRotationValue * secondaryGearRotationRatioTermSimplfied
@@ -120,22 +125,7 @@ public class CRTGearRatioUtil {
    *         max rotations, false otherwise
    */
   public boolean validateGearRatioWithMaxRotations() {
-    boolean works = true;
-    for (int i = 0; i < maxRotations * 6; i++) {
-      double elevatorPos = i * mainGearCircumference / 6; //set elevator positon (expected position that it will check with) through sixths of a rotation until max rotations is reached
-      double epoc = CRTGearRatioUtil.mod(elevatorPos / mainGearCircumference, 1) > 0.9 ? 0.0
-          : CRTGearRatioUtil.mod(elevatorPos / mainGearCircumference, 1) < 0.1 ? 0.0
-              : CRTGearRatioUtil.mod(elevatorPos / mainGearCircumference, 1); //calculate what the main gear encoder value would be at each position - the ternary operators account for annoying float division rounding problems on either end (0 and 1)
-      if (Math.abs(this.getAbsolutePositionOfMainObject(epoc, //the calculated main gear encoder value
-          CRTGearRatioUtil.mod(
-              elevatorPos / mainGearCircumference * secondaryGearRotationRatioTerm /
-                  mainGearRotationRatioTerm, //the calculated secondary gear encoder value
-              1))
-          - elevatorPos) > 0.01) { //check if the difference in what the function returns is greater than a small error factor, if it is, set working to false - this is a result more annoying float division problems, but will also not work if the gear ratio doesn't work
-        works = false;
-      }
-    }
-    return works;
+    return maxRotations*mainGearCircumference < wrapAroundAbsolutePosition();
   }
 
   /**
@@ -143,7 +133,7 @@ public class CRTGearRatioUtil {
    * @param mainGearRotationValue
    * @param secondaryGearRotationValue
    * @return Applies CRT to find the absolute position of the object attached to
-   *         the main gear
+   *         the main gear, units are based on the units of input circumferece
    */
   public double getAbsolutePositionOfMainObject(double mainGearRotationValue, double secondaryGearRotationValue) {
     return mainGearRotationValue * mainGearCircumference
@@ -154,7 +144,7 @@ public class CRTGearRatioUtil {
    * @return Returns the absolute position of the main object after one wrap around (my brain is cooked right now and the logic isn't logicing, somebody check this please)
    */
   public double wrapAroundAbsolutePosition(){
-    return mainGearCircumference*mainGearRotationRatioTermSimplified;
+    return mainGearCircumference*mainGearRotationRatioTerm;
   }
 
 }
