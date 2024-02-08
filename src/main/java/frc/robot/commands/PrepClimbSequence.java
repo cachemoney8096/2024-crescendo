@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -19,9 +20,7 @@ public class PrepClimbSequence extends SequentialCommandGroup {
     addRequirements(intake, elevator, shooter);
     addCommands(
         new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.DEPLOYED)),
-        new WaitUntilCommand(
-            intake::clearOfConveyorZone), // TODO only needs to do this wait if the elevator is NOT
-        // above the interference zone already
+        new ConditionalCommand(new InstantCommand(), new WaitUntilCommand(intake::clearOfConveyorZone), elevator::elevatorAboveInterferenceZone),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.PRE_CLIMB)),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.PRELATCH)));
   }
