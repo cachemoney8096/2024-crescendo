@@ -13,7 +13,7 @@ import frc.robot.subsystems.shooter.Shooter;
  * we will likely want a separate command group.
  */
 public class AmpScore extends SequentialCommandGroup {
-  public AmpScore(Conveyor conveyor) {
+  public AmpScore(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
     addRequirements(conveyor);
     addCommands(
         Conveyor.scoreTrapOrAmp(conveyor)
@@ -23,7 +23,7 @@ public class AmpScore extends SequentialCommandGroup {
 
   /** runs AmpScore but adds the layer that if the robot is interrupted, then everything is brought back to the prep state */
   public static Command interruptibleAmpScore(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
-    return new AmpScore(conveyor)
+    return new AmpScore(intake, elevator, conveyor, shooter)
         .finallyDo(
             (boolean interrupted) -> {
               AmpPrepScore.interruptibleAmpPrepScore(intake, elevator, conveyor, shooter);

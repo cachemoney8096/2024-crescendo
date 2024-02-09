@@ -18,7 +18,7 @@ import frc.robot.subsystems.shooter.Shooter;
  */
 public class AmpPrepScore extends SequentialCommandGroup {
   /** Creates a new AmpPreScore. */
-  public AmpPrepScore(Elevator elevator, Intake intake) {
+  public AmpPrepScore(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
     addRequirements(elevator, intake);
 
     SequentialCommandGroup moveWhenNotSafe =
@@ -41,9 +41,13 @@ public class AmpPrepScore extends SequentialCommandGroup {
             }));
   }
 
-  /** runs AmpPrepScore but adds the layer that if the robot is interrupted, then everything is brought to the home state */
-  public static Command interruptibleAmpPrepScore(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
-    return new AmpPrepScore(elevator, intake)
+  /**
+   * runs AmpPrepScore but adds the layer that if the robot is interrupted, then everything is
+   * brought to the home state
+   */
+  public static Command interruptibleAmpPrepScore(
+      Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
+    return new AmpPrepScore(intake, elevator, conveyor, shooter)
         .finallyDo(
             (boolean interrupted) -> {
               new StopMostThings(intake, elevator, conveyor, shooter);

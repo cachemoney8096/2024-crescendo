@@ -18,7 +18,7 @@ import frc.robot.subsystems.shooter.Shooter;
  * game piece Stops and stowes intake
  */
 public class IntakeSequence extends SequentialCommandGroup {
-  public IntakeSequence(Intake intake, Elevator elevator, Conveyor conveyor) {
+  public IntakeSequence(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
     addRequirements(intake, elevator, conveyor);
 
     addCommands(
@@ -46,7 +46,7 @@ public class IntakeSequence extends SequentialCommandGroup {
 
   /** runs IntakeSequence but adds the layer that if the robot is interrupted, then everything is brought back to the home state */
   public static Command interruptibleIntakeSequnce(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
-    return new IntakeSequence(intake, elevator, conveyor)
+    return new IntakeSequence(intake, elevator, conveyor, shooter)
         .finallyDo(
             (boolean interrupted) -> {
               new StopMostThings(intake, elevator, conveyor, shooter);

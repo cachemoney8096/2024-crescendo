@@ -15,7 +15,7 @@ import frc.robot.subsystems.shooter.Shooter.ShooterMode;
  * back to rest. this assumes that the robot is already prepared to shoot
  */
 public class SpeakerShootSequence extends SequentialCommandGroup {
-  public SpeakerShootSequence(Conveyor conveyor, Shooter shooter) {
+  public SpeakerShootSequence(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
     addRequirements(conveyor, shooter);
     addCommands(
         new WaitUntilCommand(
@@ -28,7 +28,7 @@ public class SpeakerShootSequence extends SequentialCommandGroup {
 
   /** runs SpeakerShootSequence but adds the layer that if the robot is interrupted, then everything is brought to the prep state */
   public static Command interruptibleSpeakerShootSequence(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
-    return new SpeakerShootSequence(conveyor, shooter)
+    return new SpeakerShootSequence(intake, elevator, conveyor, shooter)
         .finallyDo(
             (boolean interrupted) -> {
               SpeakerPrepScoreSequence.interruptibleSpeakerPrepScoreSequence(intake, elevator, conveyor, shooter);

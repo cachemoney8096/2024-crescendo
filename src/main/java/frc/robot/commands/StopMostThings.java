@@ -18,6 +18,6 @@ public class StopMostThings extends SequentialCommandGroup {
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.IDLE)),
         Conveyor.stop(conveyor),
         new InstantCommand(intake::stopRollers),
-        new GoHomeSequence(intake, elevator));
+        new GoHomeSequence(intake, elevator, conveyor, shooter));
   }
 }

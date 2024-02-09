@@ -18,7 +18,7 @@ import frc.robot.subsystems.shooter.Shooter.ShooterMode;
  * positions
  */
 public class PrepClimbSequence extends SequentialCommandGroup {
-  public PrepClimbSequence(Intake intake, Elevator elevator, Shooter shooter) {
+  public PrepClimbSequence(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
     addRequirements(intake, elevator, shooter);
     addCommands(
         new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.DEPLOYED)),
@@ -32,7 +32,7 @@ public class PrepClimbSequence extends SequentialCommandGroup {
 
   /** runs PrepClimbSequence but adds the layer that if the robot is interrupted, then everything is brought back to the home state */
   public static Command interruptiblePrepClimbSequence(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
-    return new PrepClimbSequence(intake, elevator, shooter)
+    return new PrepClimbSequence(intake, elevator, conveyor, shooter)
         .finallyDo(
             (boolean interrupted) -> {
               new StopMostThings(intake, elevator, conveyor, shooter);

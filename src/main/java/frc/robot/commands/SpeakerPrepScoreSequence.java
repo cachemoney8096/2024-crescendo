@@ -17,17 +17,17 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
   /** this is a specified distance from the speaker each time until we do limelight stuff */
   public final double SPEAKER_SHOOTER_DISTANCE_METERS = 5.0;
 
-  public SpeakerPrepScoreSequence(Intake intake, Elevator elevator, Shooter shooter) {
+  public SpeakerPrepScoreSequence(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
     addRequirements(intake, elevator, shooter);
     addCommands(
         new InstantCommand(() -> shooter.setShooterDistance(SPEAKER_SHOOTER_DISTANCE_METERS)),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
-        new GoHomeSequence(intake, elevator));
+        new GoHomeSequence(intake, elevator, conveyor, shooter));
   }
 
   /** runs SpeakerPrepScoreSequence but adds the layer that if the robot is interrupted, then everything is brought back to the home state */
   public static Command interruptibleSpeakerPrepScoreSequence(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
-    return new SpeakerPrepScoreSequence(intake, elevator, shooter)
+    return new SpeakerPrepScoreSequence(intake, elevator, conveyor, shooter)
         .finallyDo(
             (boolean interrupted) -> {
               new StopMostThings(intake, elevator, conveyor, shooter);

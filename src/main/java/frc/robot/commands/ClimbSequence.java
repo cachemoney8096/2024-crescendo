@@ -16,7 +16,7 @@ import frc.robot.subsystems.shooter.Shooter.ShooterMode;
  * the trap
  */
 public class ClimbSequence extends SequentialCommandGroup {
-  public ClimbSequence(Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor) {
+  public ClimbSequence(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
     addRequirements(intake, elevator, shooter, conveyor);
     addCommands(
         new WaitUntilCommand(
@@ -37,7 +37,7 @@ public class ClimbSequence extends SequentialCommandGroup {
 
   /** runs ClimbSequence but adds the layer that if the robot is interrupted, then everything is brought to the prep state */
   public static Command interruptibleClimbSequence(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
-    return new ClimbSequence(intake, elevator, shooter, conveyor)
+    return new ClimbSequence(intake, elevator, conveyor, shooter)
         .finallyDo(
             (boolean interrupted) -> {
               PrepClimbSequence.interruptiblePrepClimbSequence(intake, elevator, conveyor, shooter);
