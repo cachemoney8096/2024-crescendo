@@ -123,9 +123,8 @@ public class DriveSubsystem extends SubsystemBase {
       rearLeft.getPosition(),
       rearRight.getPosition()
     };
-  }
-  ;
-
+  }    
+  
   public void burnFlashSparks() {
     frontLeft.burnFlashSparks();
     frontRight.burnFlashSparks();

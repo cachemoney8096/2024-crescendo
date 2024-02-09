@@ -63,4 +63,7 @@ public class DriveConstants {
           new Translation2d(-WHEEL_BASE_METERS / 2, -DriveConstants.TRACK_WIDTH_METERS / 2));
 
   public static final boolean GYRO_REVERSED = false;
+
+  /** time needed for the robot to turn 180 degrees when passed into drive.turnInPlace */
+  public static final double TIME_TO_ROTATE_180_DEGREES = Constants.PLACEHOLDER_DOUBLE;
 }
