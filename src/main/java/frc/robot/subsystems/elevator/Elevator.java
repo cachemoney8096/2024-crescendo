@@ -200,6 +200,7 @@ public class Elevator extends SubsystemBase {
   @Override
   public void periodic() {
     controlPosition(desiredPosition);
+    elevatorIsHittingSpeaker();
   }
 
   public void burnFlashSparks() {
@@ -207,6 +208,10 @@ public class Elevator extends SubsystemBase {
     leftMotor.burnFlash();
     Timer.delay(0.005);
     rightMotor.burnFlash();
+  }
+
+  public boolean elevatorIsHittingSpeaker() {
+    return leftMotorEncoderRel.getVelocity() < ElevatorConstants.HITTING_SPEAKER_VELOCITY_THRESHHOLD && leftMotor.getOutputCurrent() > ElevatorConstants.HITTING_SPEAKER_AMP_THRESHHOLD;
   }
 
   @Override
@@ -224,4 +229,7 @@ public class Elevator extends SubsystemBase {
         "Elevator Right Abs Pos (deg)", rightMotorEncoderAbs::getPosition, null);
     builder.addBooleanProperty("Elevator at desired position", this::atDesiredPosition, null);
   }
+
+
+
 }
