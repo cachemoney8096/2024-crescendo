@@ -20,9 +20,10 @@ public class Lights {
     NOTELESS, //red
     INTAKING, //blue
     READY_TO_SHOOT, //green
-    NO_TAG, //purple
-    OFF, //grey
+    NO_TAG, //blinking purple
     ALIGNING_TO_TAG, //orange
+    HOLDING_NOTE, //yellow
+    OFF, //grey
     PARTY_MODE;
   }
 
@@ -35,10 +36,11 @@ public class Lights {
     lightOptionsMap = new TreeMap<LightCode, Integer[]>();
     lightOptionsMap.put(LightCode.NOTELESS, new Integer[] {255, 0, 0});
     lightOptionsMap.put(LightCode.INTAKING, new Integer[] {0, 0, 255});
-    lightOptionsMap.put(LightCode.ALIGNING_TO_TAG, new Integer[] {0, 255, 0});
+    lightOptionsMap.put(LightCode.READY_TO_SHOOT, new Integer[] {0, 255, 0});
     lightOptionsMap.put(LightCode.NO_TAG, new Integer[] {255, 0, 255});
-    lightOptionsMap.put(LightCode.OFF, new Integer[] {120, 120, 120});
+    lightOptionsMap.put(LightCode.OFF, new Integer[] {0, 0, 0});
     lightOptionsMap.put(LightCode.ALIGNING_TO_TAG, new Integer[] {255, 165, 0});
+    lightOptionsMap.put(LightCode.HOLDING_NOTE, new Integer[] {255, 255, 102});
   }
 
   public void toggleCode(LightCode light) {
@@ -64,12 +66,12 @@ public class Lights {
   }
 
   private void setNoTag() {
-    StrobeAnimation strobeAnim = new StrobeAnimation(0, 255, 0);
+    StrobeAnimation strobeAnim = new StrobeAnimation(255, 0, 255);
     candle.animate(strobeAnim);
   }
 
   public void setPartyMode() {
-      RainbowAnimation rainbowAnim = new RainbowAnimation(1, 0.5, LightsConstants.NUM_CANDLE_LEDS);
+      RainbowAnimation rainbowAnim = new RainbowAnimation(LightsConstants.LIGHT_BRIGHTNESS, LightsConstants.LIGHT_SPEED, LightsConstants.NUM_CANDLE_LEDS);
       candle.animate(rainbowAnim);
   }
 }

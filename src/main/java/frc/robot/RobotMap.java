@@ -32,7 +32,7 @@ public class RobotMap {
       INTAKING_FRONT_MOTOR_CAN_ID = Constants.PLACEHOLDER_INT,
       INTAKING_BACK_MOTOR_CAN_ID = Constants.PLACEHOLDER_INT;
 
-    /** CANdle for the lights */
+    
     public static final int CANDLE_CAN_ID = Constants.PLACEHOLDER_INT;
 
 }
