@@ -6,7 +6,9 @@ import edu.wpi.first.hal.SimBoolean;
 import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.hal.SimDevice.Direction;
 import edu.wpi.first.hal.SimDouble;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
@@ -18,6 +20,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import java.util.Optional;
+import frc.robot.utils.LimelightHelpers;
+import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
 
 /** Limelight for the intake to identify game pieces */
 public class IntakeLimelight extends SubsystemBase {
@@ -54,6 +58,11 @@ public class IntakeLimelight extends SubsystemBase {
   NetworkTableEntry tshort = table.getEntry("tshort");
   NetworkTableEntry tlong = table.getEntry("tlong");
 
+  //AprilTag detection
+  private Optional<Transform2d> robotToScoringLocation = Optional.empty();
+
+
+
   /**
    * Create an IntakeLimelight object
    *
@@ -66,7 +75,7 @@ public class IntakeLimelight extends SubsystemBase {
     kCameraAngleDegrees = angleDegrees;
     kCameraHeight = heightMeters;
     kTargetHeight = targetHeightMeters;
-    setLimelightValues(ledMode.OFF, camMode.VISION_PROCESSING, pipeline.PIPELINE3);
+    setLimelightValues(ledMode.OFF, camMode.VISION_PROCESSING, pipeline.PIPELINE0);
 
     m_simDevice = SimDevice.create("limelight-intake");
     if (m_simDevice != null) {
@@ -118,6 +127,100 @@ public class IntakeLimelight extends SubsystemBase {
     PIPELINE9
   }
 
+  private static Transform2d getBotFromTarget(Pose3d botPoseTargetSpace) {
+    /**
+     * Target space: 3d Cartesian Coordinate System with (0,0,0) at the center of the target.
+     *
+     * <p>X+ → Pointing to the right of the target (If you are looking at the target)
+     *
+     * <p>Y+ → Pointing downward
+     *
+     * <p>Z+ → Pointing out of the target (orthogonal to target’s plane).
+     */
+
+    /**
+     * We convert to 2d target space: X+ -> Out of the target Y+ -> Pointing to the right of the
+     * target (If you are looking at the target) This means positive yaw is based on Z+ being up
+     */
+    Translation2d translation =
+        new Translation2d(botPoseTargetSpace.getZ(), botPoseTargetSpace.getX());
+    // Rotation2d rot = Rotation2d.fromDegrees(-botPoseTargetSpace.getRotation().getY());
+
+    Rotation2d rot = Rotation2d.fromDegrees(0);
+    System.out.println("Tag at " + -botPoseTargetSpace.getRotation().getY() + " deg");
+    return new Transform2d(translation, rot);
+  }
+
+  private static boolean validScoringTag(double tagId) {
+    long tagIdRounded = Math.round(tagId);
+    if (tagIdRounded == 1
+        || tagIdRounded == 2
+        || tagIdRounded == 3
+        || tagIdRounded == 6
+        || tagIdRounded == 7
+        || tagIdRounded == 8) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  public static int chooseTag(LimelightTarget_Fiducial[] targets) {
+    int numTags = targets.length;
+    double minDistMeters = Double.MAX_VALUE;
+    int bestTag = 0;
+    for (int tagIndex = 0; tagIndex < numTags; tagIndex++) {
+      LimelightTarget_Fiducial target = targets[tagIndex];
+      if (!validScoringTag(target.fiducialID)) {
+        continue;
+      }
+      double targetDistance = target.getTargetPose_RobotSpace().getTranslation().getNorm();
+      if (targetDistance < minDistMeters) {
+        minDistMeters = targetDistance;
+        bestTag = tagIndex;
+      }
+    }
+    return bestTag;
+  }
+
+  private Transform2d getRobotToScoringLocation(Pose3d targetPoseRobotSpace) {
+    Transform2d targetFromBot = getBotFromTarget(targetPoseRobotSpace);
+    return targetFromBot;
+  }
+
+  public Optional<Transform2d> getRobotToScoringLocation() {
+    if (getPipeline() != pipeline.PIPELINE1) {
+      setPipeline(pipeline.PIPELINE1);
+    }
+    return robotToScoringLocation;
+  }
+
+  public Optional<Transform2d> checkForTag() {
+    if (getPipeline() != pipeline.PIPELINE1) {
+      setPipeline(pipeline.PIPELINE1);
+    }
+    if (!LimelightHelpers.getTV("")) {
+      robotToScoringLocation = Optional.empty();
+      return Optional.empty();
+    }
+    if (!validScoringTag(LimelightHelpers.getFiducialID(""))) {
+      robotToScoringLocation = Optional.empty();
+      return Optional.empty();
+    }
+    robotToScoringLocation =
+        Optional.of(getRobotToScoringLocation(LimelightHelpers.getTargetPose3d_RobotSpace("")));
+    return robotToScoringLocation;
+  }
+
+  public double getLatencySeconds() {
+    if (getPipeline() != pipeline.PIPELINE1) {
+      setPipeline(pipeline.PIPELINE1);
+    }
+    return (LimelightHelpers.getLatency_Capture("") + LimelightHelpers.getLatency_Pipeline(""))
+        / 1000.0;
+  }
+  
+  
   /**
    * Sets the led mode.
    *
