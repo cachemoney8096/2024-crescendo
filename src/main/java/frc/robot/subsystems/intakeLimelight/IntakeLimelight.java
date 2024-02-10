@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-
 import java.util.Optional;
 
 /** Limelight for the intake to identify game pieces */
@@ -102,6 +101,10 @@ public class IntakeLimelight extends SubsystemBase {
     DRIVER_CAMERA
   }
 
+  /** 
+   * 0 - ml note detection
+   * 1 - tag detection
+   */
   public static enum pipeline {
     PIPELINE0,
     PIPELINE1,
@@ -130,7 +133,7 @@ public class IntakeLimelight extends SubsystemBase {
    * @param mode Camera operating mode.
    */
   public void setCamMode(camMode mode) {
-    table.getEntry("ledMode").setNumber(mode.ordinal());
+    table.getEntry("camMode").setNumber(mode.ordinal());
   }
 
   /**
@@ -139,7 +142,15 @@ public class IntakeLimelight extends SubsystemBase {
    * @param line Pipeline index
    */
   public void setPipeline(pipeline line) {
-    table.getEntry("ledMode").setNumber(line.ordinal());
+    table.getEntry("pipeline").setNumber(line.ordinal());
+  }
+
+  /** Gets the current vision pipeline 
+   * 
+   * @return pipeline
+  */
+  public pipeline getPipeline() {
+    return pipeline.values()[(int) table.getEntry("getpipe").getDouble(0)];
   }
 
   public void setLimelightValues(ledMode ledMode, camMode camMode, pipeline line) {
@@ -207,7 +218,6 @@ public class IntakeLimelight extends SubsystemBase {
    * @return latency - The pipeline’s latency contribution in seconds. Add at least 11ms for image
    *     capture latency.
    */
-  // TODO double check this?
   public double getLatency() {
     if (m_simDevice != null) {
       return m_latency.get() + kImageCaptureLatency;
@@ -242,12 +252,8 @@ public class IntakeLimelight extends SubsystemBase {
   /**
    * @return true as long as limelight does not have value of -1
    */
-  public boolean CheckConnection() { // ??? this depends on return of null, -1?
-    if (getValidTarget() == -1.0) {
-      return false;
-    } else {
-      return true;
-    }
+  public boolean CheckConnection() {
+    return getValidTarget() != -1.0;
   }
 
   /**
@@ -390,15 +396,16 @@ public class IntakeLimelight extends SubsystemBase {
     return Optional.of(maxY - minY);
   }
 
-  public class ConeDetection {
+  public class NoteDetection {
     public double latencySec;
+
     /** Distance from camera */
     public double distanceMeters;
 
     /** CCW Angle */
     public double angleDeg;
 
-    public ConeDetection(double latencySec, double distanceMeters, double angleDeg) {
+    public NoteDetection(double latencySec, double distanceMeters, double angleDeg) {
       this.latencySec = latencySec;
       this.distanceMeters = distanceMeters;
       this.angleDeg = angleDeg;
@@ -406,22 +413,26 @@ public class IntakeLimelight extends SubsystemBase {
   }
 
   /**
-   * Looks for a cone
+   * Looks for a note
    *
-   * @return If empty, no cone detected. First value is cone yaw in degrees (ccw), second value is
+   * @return If empty, no note detected. First value is note yaw in degrees (ccw), second value is
    *     distance in meters.
    */
-  public Optional<ConeDetection> getConePos() {
+  public Optional<NoteDetection> getNotePos() {
+    if (getPipeline() != pipeline.PIPELINE0) {
+      setPipeline(pipeline.PIPELINE0);
+    }
+
     double[] corners = table.getEntry("tcornxy").getDoubleArray(new double[0]);
     Optional<Double> maybeXPixels = getXOfSmallestY(corners);
     Optional<Double> maybeYHeightPixels = getObjectHeightPx(corners);
 
-    if (!maybeXPixels.isPresent() || !maybeYHeightPixels.isPresent()) {
-      System.out.println("Didn't see cone");
+    if (!maybeXPixels.isPresent() || !maybeYHeightPixels.isPresent() || table.getEntry("tclass").getString("") != "note") {
+      System.out.println("Didn't see note");
       return Optional.empty();
     }
 
-    // Compute cone distance
+    // Compute note distance
     // kinda based on the same thing as below:
     // https://docs.limelightvision.io/en/latest/theory.html#from-pixels-to-angles
     final double vertFovDeg = 49.7;
@@ -444,15 +455,19 @@ public class IntakeLimelight extends SubsystemBase {
     double angleXDegrees = Units.radiansToDegrees(Math.atan2(viewplaneXPixels, 1));
     double angleAdjustDegrees = -3.0; // due to limelight yaw
     double adjustedAngleDegrees = angleXDegrees + angleAdjustDegrees;
-    return Optional.of(new ConeDetection(getLatency(), coneDistanceMeters, adjustedAngleDegrees));
+    return Optional.of(new NoteDetection(getLatency(), coneDistanceMeters, adjustedAngleDegrees));
   }
 
-  public Optional<Double> getAngleToConeDeg() {
+  public Optional<Double> getAngleToNoteDeg() {
+    if (getPipeline() != pipeline.PIPELINE0) {
+      setPipeline(pipeline.PIPELINE0);
+    }
+
     double[] corners = table.getEntry("tcornxy").getDoubleArray(new double[0]);
     Optional<Double> maybeXPixels = getXOfSmallestY(corners);
 
     if (!maybeXPixels.isPresent()) {
-      System.out.println("Didn't see cone");
+      System.out.println("Didn't see note");
       return Optional.empty();
     }
 
