@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.lights;
 
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
@@ -69,7 +69,7 @@ public class Lights {
   }
 
   public void setPartyMode() {
-      RainbowAnimation rainbowAnim = new RainbowAnimation(1, 0.5, Constants.NUM_CANDLE_LEDS);
+      RainbowAnimation rainbowAnim = new RainbowAnimation(1, 0.5, LightsConstants.NUM_CANDLE_LEDS);
       candle.animate(rainbowAnim);
   }
 }
