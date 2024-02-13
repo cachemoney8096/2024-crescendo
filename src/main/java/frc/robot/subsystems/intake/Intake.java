@@ -97,7 +97,7 @@ public class Intake extends SubsystemBase {
     TalonFXConfigurator cfgBack = intakeTalonFront.getConfigurator();
 
     TalonFXConfiguration toApply = new TalonFXConfiguration();
-    toApply.CurrentLimits.SupplyCurrentLimit = IntakeConstants.INTAKING_TALONS_CURRENT_LIMIT_AMPS;
+    toApply.CurrentLimits.SupplyCurrentLimit = IntakeCal.INTAKING_TALONS_CURRENT_LIMIT_AMPS;
     toApply.CurrentLimits.SupplyCurrentLimitEnable = true;
     toApply.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 

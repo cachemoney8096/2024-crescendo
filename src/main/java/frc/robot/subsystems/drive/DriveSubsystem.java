@@ -470,10 +470,10 @@ public class DriveSubsystem extends SubsystemBase {
         new PathPlannerPath(
             bezierTranslations,
             new PathConstraints(
-                DriveConstants.MEDIUM_LINEAR_SPEED_METERS_PER_SEC,
-                DriveConstants.MEDIUM_LINEAR_ACCELERATION_METERS_PER_SEC_SQ,
-                DriveConstants.MEDIUM_ANGULAR_SPEED_RAD_PER_SEC,
-                DriveConstants.MEDIUM_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ),
+                DriveCal.MEDIUM_LINEAR_SPEED_METERS_PER_SEC,
+                DriveCal.MEDIUM_LINEAR_ACCELERATION_METERS_PER_SEC_SQ,
+                DriveCal.MEDIUM_ANGULAR_SPEED_RAD_PER_SEC,
+                DriveCal.MEDIUM_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ),
             new GoalEndState(finalSpeedMetersPerSec, finalHolonomicRotation));
 
     return path;
@@ -497,12 +497,11 @@ public class DriveSubsystem extends SubsystemBase {
         new PathPlannerPath(
             bezierTranslations,
             new PathConstraints(
-                DriveConstants.SLOW_LINEAR_SPEED_METERS_PER_SEC,
-                DriveConstants.SLOW_LINEAR_ACCELERATION_METERS_PER_SEC_SQ,
-                DriveConstants.SLOW_ANGULAR_SPEED_RAD_PER_SEC,
-                DriveConstants.SLOW_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ),
-            new GoalEndState(
-                DriveConstants.SLOW_LINEAR_SPEED_METERS_PER_SEC, finalHolonomicRotation));
+                DriveCal.MEDIUM_LINEAR_SPEED_METERS_PER_SEC,
+                DriveCal.MEDIUM_LINEAR_ACCELERATION_METERS_PER_SEC_SQ,
+                DriveCal.MEDIUM_ANGULAR_SPEED_RAD_PER_SEC,
+                DriveCal.MEDIUM_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ),
+            new GoalEndState(0.0, finalHolonomicRotation));
 
     return Optional.of(path);
   }
