@@ -153,12 +153,12 @@ public class IntakeLimelight extends SubsystemBase {
 
   private static boolean validScoringTag(double tagId) {
     long tagIdRounded = Math.round(tagId);
-    if (tagIdRounded == 1
-        || tagIdRounded == 2
-        || tagIdRounded == 3
-        || tagIdRounded == 6
-        || tagIdRounded == 7
-        || tagIdRounded == 8) {
+    if (tagIdRounded == 11
+        || tagIdRounded == 12
+        || tagIdRounded == 13
+        || tagIdRounded == 14
+        || tagIdRounded == 15
+        || tagIdRounded == 16) {
       return true;
     } else {
       return false;
