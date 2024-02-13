@@ -1,7 +1,5 @@
 package frc.robot.subsystems.conveyor;
 
-import frc.robot.Constants;
-
 public class ConveyorCal {
   public static final int SPARK_INIT_RETRY_ATTEMPTS = 5;
 

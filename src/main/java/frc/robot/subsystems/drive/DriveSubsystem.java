@@ -501,8 +501,7 @@ public class DriveSubsystem extends SubsystemBase {
                 DriveCal.MEDIUM_LINEAR_ACCELERATION_METERS_PER_SEC_SQ,
                 DriveCal.MEDIUM_ANGULAR_SPEED_RAD_PER_SEC,
                 DriveCal.MEDIUM_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ),
-            new GoalEndState(
-                0.0, finalHolonomicRotation));
+            new GoalEndState(0.0, finalHolonomicRotation));
 
     return Optional.of(path);
   }

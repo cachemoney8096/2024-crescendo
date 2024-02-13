@@ -114,7 +114,8 @@ public class Shooter extends SubsystemBase {
 
     errors +=
         SparkMaxUtils.check(
-            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(pivotMotorAbsoluteEncoder, ShooterConstants.ABS_ENCODER_GEAR_RATIO));
+            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(
+                pivotMotorAbsoluteEncoder, ShooterConstants.ABS_ENCODER_GEAR_RATIO));
 
     return errors == 0;
   }

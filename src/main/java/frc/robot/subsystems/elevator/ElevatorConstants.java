@@ -12,5 +12,5 @@ public final class ElevatorConstants {
   public static final double ELEVATOR_LEFT_ABSOLUTE_ENCODER_RATIO = 1.0;
 
   /** Ratio from the right encoder to the drum. >1 meaning the encoder spins slower. */
-  public static final double ELEVATOR_RIGHT_ABSOLUTE_ENCODER_RATIO = 44.0/26.0;
+  public static final double ELEVATOR_RIGHT_ABSOLUTE_ENCODER_RATIO = 44.0 / 26.0;
 }

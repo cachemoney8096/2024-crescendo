@@ -29,15 +29,14 @@ public class IntakeCal {
   /** intake power [-1.0,1.0] */
   public static final double INTAKING_POWER = 1.0, REVERSE_INTAKING_POWER = -1.0;
 
-  /* input degrees, output volts 
+  /* input degrees, output volts
    * https://www.reca.lc/arm?armMass=%7B%22s%22%3A15%2C%22u%22%3A%22lbs%22%7D&comLength=%7B%22s%22%3A14%2C%22u%22%3A%22in%22%7D&currentLimit=%7B%22s%22%3A50%2C%22u%22%3A%22A%22%7D&efficiency=85&endAngle=%7B%22s%22%3A50%2C%22u%22%3A%22deg%22%7D&iterationLimit=10000&motor=%7B%22quantity%22%3A1%2C%22name%22%3A%22NEO%22%7D&ratio=%7B%22magnitude%22%3A97%2C%22ratioType%22%3A%22Reduction%22%7D&startAngle=%7B%22s%22%3A0%2C%22u%22%3A%22deg%22%7D
-  */
+   */
   public static final SimpleMotorFeedforward INTAKE_PIVOT_FEEDFORWARD =
       new SimpleMotorFeedforward(0.0, 0.033, 0.00070);
 
   /** Voltage needed to hold the pivot up when it's horizontal */
-  public static final double ARBITRARY_INTAKE_PIVOT_FEEDFORWARD_VOLTS =
-      0.76;
+  public static final double ARBITRARY_INTAKE_PIVOT_FEEDFORWARD_VOLTS = 0.76;
 
   /** Offset degrees for intake absolute encoder */
   public static final double INTAKE_ABSOLUTE_ENCODER_ZERO_OFFSET_DEG = Constants.PLACEHOLDER_DOUBLE;
