@@ -57,6 +57,8 @@ public class ShooterCal {
   /** Target shooter motor speeds (at the motor) */
   public static final double SHOOTER_MOTOR_SPEED_RPM = 4000.0;
 
-  /** What the abs encoder reads (in degrees) when the shooter is pointed down */
+  /** What the abs encoder reads (in degrees) when the shooter is pointed down.
+   * Acquired by pointing the encoder at 90 and subtracting 90 from that reading.
+   */
   public static final double PIVOT_ANGLE_OFFSET_DEGREES = Constants.PLACEHOLDER_DOUBLE;
 }

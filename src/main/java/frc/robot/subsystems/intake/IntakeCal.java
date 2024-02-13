@@ -22,8 +22,9 @@ public class IntakeCal {
       INTAKE_STOWED_POSITION_DEGREES = 155.0,
       INTAKE_SAFE_POSITION_DEGREES = 200.0; // exact safe position is 186.0
 
-  public static final double INTAKE_MARGIN_DEGREES = 1.0,
-      CONVEYOR_ZONE_THRESHOLD_DEGREES = 190.0;
+  public static final double INTAKE_MARGIN_DEGREES = 1.0;
+  /** Exact safe position is 186, so we use a higher threshold here to be safe */
+  public static final double CONVEYOR_ZONE_THRESHOLD_DEGREES = 190.0;
 
   /** intake power [-1.0,1.0] */
   public static final double INTAKING_POWER = 1.0, REVERSE_INTAKING_POWER = -1.0;

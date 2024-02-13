@@ -49,7 +49,7 @@ public class DriveConstants {
    * the allowed maximum speeds.
    * Max speed is 85% free speed
    */
-  public static final double MAX_SPEED_METERS_PER_SECOND = 0.85 * Units.feetToMeters(20.25),
+  public static final double FREE_SPEED_FUDGE_FACTOR = 0.85, MAX_SPEED_METERS_PER_SECOND = FREE_SPEED_FUDGE_FACTOR * Units.feetToMeters(20.25),
       MAX_ANGULAR_SPEED_RAD_PER_SECONDS = Math.PI * 2;
 
   /** Distance between front and back wheels on robot */
