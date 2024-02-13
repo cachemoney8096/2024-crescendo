@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.subsystems.intake.IntakeConstants;
+
 import java.util.Optional;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
@@ -75,7 +77,7 @@ public class IntakeLimelight extends SubsystemBase {
     kCameraAngleDegrees = angleDegrees;
     kCameraHeight = heightMeters;
     kTargetHeight = targetHeightMeters;
-    setLimelightValues(ledMode.OFF, camMode.VISION_PROCESSING, pipeline.PIPELINE0);
+    setLimelightValues(ledMode.OFF, camMode.VISION_PROCESSING, pipeline.NOTE_PIPELINE);
 
     m_simDevice = SimDevice.create("limelight-intake");
     if (m_simDevice != null) {
@@ -110,13 +112,11 @@ public class IntakeLimelight extends SubsystemBase {
     DRIVER_CAMERA
   }
 
-  /** 
-   * 0 - ml note detection
-   * 1 - tag detection
-   */
   public static enum pipeline {
-    PIPELINE0,
-    PIPELINE1,
+    /** Pipeline 0 in LL */
+    NOTE_PIPELINE,
+    /** Pipeline 1 in LL */
+    TAG_PIPELINE,
     PIPELINE2,
     PIPELINE3,
     PIPELINE4,
@@ -144,9 +144,8 @@ public class IntakeLimelight extends SubsystemBase {
      */
     Translation2d translation =
         new Translation2d(botPoseTargetSpace.getZ(), botPoseTargetSpace.getX());
-    // Rotation2d rot = Rotation2d.fromDegrees(-botPoseTargetSpace.getRotation().getY());
+    Rotation2d rot = Rotation2d.fromDegrees(-botPoseTargetSpace.getRotation().getY());
 
-    Rotation2d rot = Rotation2d.fromDegrees(0);
     System.out.println("Tag at " + -botPoseTargetSpace.getRotation().getY() + " deg");
     return new Transform2d(translation, rot);
   }
@@ -189,34 +188,31 @@ public class IntakeLimelight extends SubsystemBase {
   }
 
   public Optional<Transform2d> getRobotToScoringLocation() {
-    if (getPipeline() != pipeline.PIPELINE1) {
-      setPipeline(pipeline.PIPELINE1);
+    if (getPipeline() != pipeline.TAG_PIPELINE) {
+      setPipeline(pipeline.TAG_PIPELINE);
     }
     return robotToScoringLocation;
   }
 
   public Optional<Transform2d> checkForTag() {
-    if (getPipeline() != pipeline.PIPELINE1) {
-      setPipeline(pipeline.PIPELINE1);
+    if (getPipeline() != pipeline.TAG_PIPELINE) {
+      setPipeline(pipeline.TAG_PIPELINE);
     }
-    if (!LimelightHelpers.getTV("")) {
+    if (!LimelightHelpers.getTV(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME)) {
       robotToScoringLocation = Optional.empty();
       return Optional.empty();
     }
-    if (!validScoringTag(LimelightHelpers.getFiducialID(""))) {
+    if (!validScoringTag(LimelightHelpers.getFiducialID(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME))) {
       robotToScoringLocation = Optional.empty();
       return Optional.empty();
     }
     robotToScoringLocation =
-        Optional.of(getRobotToScoringLocation(LimelightHelpers.getTargetPose3d_RobotSpace("")));
+        Optional.of(getRobotToScoringLocation(LimelightHelpers.getTargetPose3d_RobotSpace(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME)));
     return robotToScoringLocation;
   }
 
   public double getLatencySeconds() {
-    if (getPipeline() != pipeline.PIPELINE1) {
-      setPipeline(pipeline.PIPELINE1);
-    }
-    return (LimelightHelpers.getLatency_Capture("") + LimelightHelpers.getLatency_Pipeline(""))
+    return (LimelightHelpers.getLatency_Capture(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME) + LimelightHelpers.getLatency_Pipeline(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME))
         / 1000.0;
   }
   
@@ -463,6 +459,7 @@ public class IntakeLimelight extends SubsystemBase {
     return getTargetTranslation(kTargetHeight);
   }
 
+  /** Gets the object lowest in the image */
   public Optional<Double> getXOfSmallestY(double[] corners) {
     // Format: x1 y1 x2 y2 x3 y3 . . .
     double minY = 10000000;
@@ -505,13 +502,13 @@ public class IntakeLimelight extends SubsystemBase {
     /** Distance from camera */
     public double distanceMeters;
 
-    /** CCW Angle */
-    public double angleDeg;
+    /** CCW Yaw Angle */
+    public double yawAngleDeg;
 
-    public NoteDetection(double latencySec, double distanceMeters, double angleDeg) {
+    public NoteDetection(double latencySec, double distanceMeters, double yawAngleDeg) {
       this.latencySec = latencySec;
       this.distanceMeters = distanceMeters;
-      this.angleDeg = angleDeg;
+      this.yawAngleDeg = yawAngleDeg;
     }
   }
 
@@ -522,15 +519,15 @@ public class IntakeLimelight extends SubsystemBase {
    *     distance in meters.
    */
   public Optional<NoteDetection> getNotePos() {
-    if (getPipeline() != pipeline.PIPELINE0) {
-      setPipeline(pipeline.PIPELINE0);
+    if (getPipeline() != pipeline.NOTE_PIPELINE) {
+      setPipeline(pipeline.NOTE_PIPELINE);
     }
 
     double[] corners = table.getEntry("tcornxy").getDoubleArray(new double[0]);
     Optional<Double> maybeXPixels = getXOfSmallestY(corners);
     Optional<Double> maybeYHeightPixels = getObjectHeightPx(corners);
 
-    if (!maybeXPixels.isPresent() || !maybeYHeightPixels.isPresent() || table.getEntry("tclass").getString("") != "note") {
+    if (!maybeXPixels.isPresent() || !maybeYHeightPixels.isPresent() || table.getEntry("tclass").getString(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME) != "note") {
       System.out.println("Didn't see note");
       return Optional.empty();
     }
@@ -544,8 +541,8 @@ public class IntakeLimelight extends SubsystemBase {
     double yPixels = maybeYHeightPixels.get();
     double normYPixels = (1 / halfResYPixels) * yPixels;
     double viewplaneYPixels = viewplaneHeightPixels / 2.0 * normYPixels;
-    final double CONE_HEIGHT_METERS = Units.inchesToMeters(13.0);
-    double coneDistanceMeters = CONE_HEIGHT_METERS / viewplaneYPixels;
+    final double NOTE_HEIGHT_METERS = Units.inchesToMeters(13.0);
+    double coneDistanceMeters = NOTE_HEIGHT_METERS / viewplaneYPixels;
 
     // Compute cone angle based on
     // https://docs.limelightvision.io/en/latest/theory.html#from-pixels-to-angles
@@ -555,44 +552,12 @@ public class IntakeLimelight extends SubsystemBase {
     double normXPixels = (1 / halfResXPixels) * ((halfResXPixels - 0.5) - xPixels);
     double viewplaneWidthPixels = 2.0 * Math.tan(Units.degreesToRadians(horizFovDeg / 2));
     double viewplaneXPixels = viewplaneWidthPixels / 2.0 * normXPixels;
-    double angleXDegrees = Units.radiansToDegrees(Math.atan2(viewplaneXPixels, 1));
-    double angleAdjustDegrees = -3.0; // due to limelight yaw
-    double adjustedAngleDegrees = angleXDegrees + angleAdjustDegrees;
-    return Optional.of(new NoteDetection(getLatency(), coneDistanceMeters, adjustedAngleDegrees));
+    double yawAngleXDegrees = Units.radiansToDegrees(Math.atan2(viewplaneXPixels, 1));
+    double yawAngleAdjustDegrees = -3.0; // due to limelight yaw
+    double adjustedYawAngleDegrees = yawAngleXDegrees + yawAngleAdjustDegrees;
+    return Optional.of(new NoteDetection(getLatency(), coneDistanceMeters, adjustedYawAngleDegrees));
   }
 
-  public Optional<Double> getAngleToNoteDeg() {
-    if (getPipeline() != pipeline.PIPELINE0) {
-      setPipeline(pipeline.PIPELINE0);
-    }
-
-    double[] corners = table.getEntry("tcornxy").getDoubleArray(new double[0]);
-    Optional<Double> maybeXPixels = getXOfSmallestY(corners);
-
-    if (!maybeXPixels.isPresent()) {
-      System.out.println("Didn't see note");
-      return Optional.empty();
-    }
-
-    double xPixels = maybeXPixels.get();
-    double halfResXPixels = RESOLUTION_X / 2.0;
-    double horizFovDeg = 59.6;
-
-    double normXPixels = (1 / halfResXPixels) * ((halfResXPixels - 0.5) - xPixels);
-
-    double viewplaneWidthPixels = 2.0 * Math.tan(Units.degreesToRadians(horizFovDeg / 2));
-
-    double viewplaneXPixels = viewplaneWidthPixels / 2.0 * normXPixels;
-
-    double angleXDegrees = Units.radiansToDegrees(Math.atan2(viewplaneXPixels, 1));
-
-    double angleAdjustDegrees = -3.0; // due to limelight yaw
-    double adjustedAngleDegrees = angleXDegrees + angleAdjustDegrees;
-
-    System.out.println("Cone at " + adjustedAngleDegrees);
-
-    return Optional.of(adjustedAngleDegrees);
-  }
 
   @Override
   public void initSendable(SendableBuilder builder) {
