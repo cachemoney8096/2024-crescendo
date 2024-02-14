@@ -27,7 +27,7 @@ import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
 
 /** Limelight for the intake to identify game pieces */
 public class IntakeLimelight extends SubsystemBase {
-  private final double kCameraAngleDegrees;
+  private final double kCameraPitchAngleDegrees;
   private final double kCameraHeight;
   private final double kTargetHeight;
   private final double kImageCaptureLatency = 11.0;
@@ -68,13 +68,13 @@ public class IntakeLimelight extends SubsystemBase {
   /**
    * Create an IntakeLimelight object
    *
-   * @param angleDegrees angle from normal in degress. Looking straight out is 0, and increasing as
+   * @param pitchAngleDegrees pitch angle from normal in degress. Looking straight out is 0, and increasing as
    *     the camera is tilted towards the ceiling.
    * @param heightMeters height of the camera measured from the lens to the ground in meters.
    * @param targetHeightMeters height to the center of the target in meters
    */
-  public IntakeLimelight(double angleDegrees, double heightMeters, double targetHeightMeters) {
-    kCameraAngleDegrees = angleDegrees;
+  public IntakeLimelight(double pitchAngleDegrees, double heightMeters, double targetHeightMeters) {
+    kCameraPitchAngleDegrees = pitchAngleDegrees;
     kCameraHeight = heightMeters;
     kTargetHeight = targetHeightMeters;
     setLimelightValues(ledMode.OFF, camMode.VISION_PROCESSING, pipeline.NOTE_PIPELINE);
@@ -363,7 +363,7 @@ public class IntakeLimelight extends SubsystemBase {
    * @return distance to the target in meters
    */
   public double getDistanceFromTargetMeters(double targetHeight) {
-    double angle = kCameraAngleDegrees + getOffSetY();
+    double angle = kCameraPitchAngleDegrees + getOffSetY();
     if (angle < 1 || angle > 89) {
       return 0;
     }
@@ -420,9 +420,14 @@ public class IntakeLimelight extends SubsystemBase {
 
     // Rotate vector by camera degrees around camera x axis
     Translation2d zy_translation =
-        new Translation2d(z_norm, y_norm).rotateBy(Rotation2d.fromDegrees(kCameraAngleDegrees));
+        new Translation2d(z_norm, y_norm).rotateBy(Rotation2d.fromDegrees(kCameraPitchAngleDegrees));
     z_norm = zy_translation.getX();
     y_norm = zy_translation.getY();
+
+    // prevent divide by zero
+    if (y_norm == 0) {
+      y_norm = 1e-4;
+    }
 
     /**
      * Find the intersection between the target in space, and the vector pointing to the target
@@ -519,6 +524,7 @@ public class IntakeLimelight extends SubsystemBase {
    *     distance in meters.
    */
   public Optional<NoteDetection> getNotePos() {
+    //TODO filter low confidence detection in LL dashboard, hopefully
     if (getPipeline() != pipeline.NOTE_PIPELINE) {
       setPipeline(pipeline.NOTE_PIPELINE);
     }
@@ -541,7 +547,7 @@ public class IntakeLimelight extends SubsystemBase {
     double yPixels = maybeYHeightPixels.get();
     double normYPixels = (1 / halfResYPixels) * yPixels;
     double viewplaneYPixels = viewplaneHeightPixels / 2.0 * normYPixels;
-    final double NOTE_HEIGHT_METERS = Units.inchesToMeters(13.0);
+    final double NOTE_HEIGHT_METERS = Units.inchesToMeters(1.0);
     double coneDistanceMeters = NOTE_HEIGHT_METERS / viewplaneYPixels;
 
     // Compute cone angle based on
