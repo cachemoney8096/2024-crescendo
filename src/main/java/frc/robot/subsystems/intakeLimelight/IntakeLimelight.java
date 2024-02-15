@@ -19,11 +19,11 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.subsystems.intake.IntakeConstants;
-
-import java.util.Optional;
+import frc.robot.subsystems.intake.IntakeCal;
 import frc.robot.utils.LimelightHelpers;
+import frc.robot.utils.LimelightHelpers.LimelightTarget_Detector;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
+import java.util.Optional;
 
 /** Limelight for the intake to identify game pieces */
 public class IntakeLimelight extends SubsystemBase {
@@ -60,16 +60,14 @@ public class IntakeLimelight extends SubsystemBase {
   NetworkTableEntry tshort = table.getEntry("tshort");
   NetworkTableEntry tlong = table.getEntry("tlong");
 
-  //AprilTag detection
+  // AprilTag detection
   private Optional<Transform2d> robotToScoringLocation = Optional.empty();
-
-
 
   /**
    * Create an IntakeLimelight object
    *
-   * @param pitchAngleDegrees pitch angle from normal in degress. Looking straight out is 0, and increasing as
-   *     the camera is tilted towards the ceiling.
+   * @param pitchAngleDegrees pitch angle from normal in degress. Looking straight out is 0, and
+   *     increasing as the camera is tilted towards the ceiling.
    * @param heightMeters height of the camera measured from the lens to the ground in meters.
    * @param targetHeightMeters height to the center of the target in meters
    */
@@ -202,21 +200,25 @@ public class IntakeLimelight extends SubsystemBase {
       robotToScoringLocation = Optional.empty();
       return Optional.empty();
     }
-    if (!validScoringTag(LimelightHelpers.getFiducialID(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME))) {
+    if (!validScoringTag(
+        LimelightHelpers.getFiducialID(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME))) {
       robotToScoringLocation = Optional.empty();
       return Optional.empty();
     }
     robotToScoringLocation =
-        Optional.of(getRobotToScoringLocation(LimelightHelpers.getTargetPose3d_RobotSpace(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME)));
+        Optional.of(
+            getRobotToScoringLocation(
+                LimelightHelpers.getTargetPose3d_RobotSpace(
+                    IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME)));
     return robotToScoringLocation;
   }
 
   public double getLatencySeconds() {
-    return (LimelightHelpers.getLatency_Capture(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME) + LimelightHelpers.getLatency_Pipeline(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME))
+    return (LimelightHelpers.getLatency_Capture(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME)
+            + LimelightHelpers.getLatency_Pipeline(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME))
         / 1000.0;
   }
-  
-  
+
   /**
    * Sets the led mode.
    *
@@ -244,10 +246,11 @@ public class IntakeLimelight extends SubsystemBase {
     table.getEntry("pipeline").setNumber(line.ordinal());
   }
 
-  /** Gets the current vision pipeline 
-   * 
+  /**
+   * Gets the current vision pipeline
+   *
    * @return pipeline
-  */
+   */
   public pipeline getPipeline() {
     return pipeline.values()[(int) table.getEntry("getpipe").getDouble(0)];
   }
@@ -420,13 +423,14 @@ public class IntakeLimelight extends SubsystemBase {
 
     // Rotate vector by camera degrees around camera x axis
     Translation2d zy_translation =
-        new Translation2d(z_norm, y_norm).rotateBy(Rotation2d.fromDegrees(kCameraPitchAngleDegrees));
+        new Translation2d(z_norm, y_norm)
+            .rotateBy(Rotation2d.fromDegrees(kCameraPitchAngleDegrees));
     z_norm = zy_translation.getX();
     y_norm = zy_translation.getY();
 
     // prevent divide by zero
-    if (y_norm == 0) {
-      y_norm = 1e-4;
+    if (Math.abs(y_norm) < 1e-4) {
+      y_norm = Math.signum(y_norm) * 1e-4;
     }
 
     /**
@@ -524,46 +528,37 @@ public class IntakeLimelight extends SubsystemBase {
    *     distance in meters.
    */
   public Optional<NoteDetection> getNotePos() {
-    //TODO filter low confidence detection in LL dashboard, hopefully
+    // TODO filter low confidence detection in LL dashboard, hopefully
     if (getPipeline() != pipeline.NOTE_PIPELINE) {
       setPipeline(pipeline.NOTE_PIPELINE);
     }
 
-    double[] corners = table.getEntry("tcornxy").getDoubleArray(new double[0]);
-    Optional<Double> maybeXPixels = getXOfSmallestY(corners);
-    Optional<Double> maybeYHeightPixels = getObjectHeightPx(corners);
+    LimelightHelpers.LimelightResults llresults =
+        LimelightHelpers.getLatestResults(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME);
+    LimelightTarget_Detector[] targets_Detector = llresults.targetingResults.targets_Detector;
 
-    if (!maybeXPixels.isPresent() || !maybeYHeightPixels.isPresent() || table.getEntry("tclass").getString(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME) != "note") {
+    if (targets_Detector.length == 0) {
       System.out.println("Didn't see note");
       return Optional.empty();
     }
 
-    // Compute note distance
-    // kinda based on the same thing as below:
-    // https://docs.limelightvision.io/en/latest/theory.html#from-pixels-to-angles
-    final double vertFovDeg = 49.7;
-    double halfResYPixels = RESOLUTION_Y / 2.0;
-    double viewplaneHeightPixels = 2.0 * Math.tan(Units.degreesToRadians(vertFovDeg / 2));
-    double yPixels = maybeYHeightPixels.get();
-    double normYPixels = (1 / halfResYPixels) * yPixels;
-    double viewplaneYPixels = viewplaneHeightPixels / 2.0 * normYPixels;
-    final double NOTE_HEIGHT_METERS = Units.inchesToMeters(1.0);
-    double coneDistanceMeters = NOTE_HEIGHT_METERS / viewplaneYPixels;
+    LimelightTarget_Detector lowestDetection = targets_Detector[0];
+    for (LimelightTarget_Detector detection : targets_Detector) {
+      if (detection.className == "note") {
+        if (detection.ty_pixels > lowestDetection.ty_pixels) { // lower in image = greater y value
+          lowestDetection = detection;
+        }
+      }
+    }
 
-    // Compute cone angle based on
-    // https://docs.limelightvision.io/en/latest/theory.html#from-pixels-to-angles
-    double xPixels = maybeXPixels.get();
-    double halfResXPixels = RESOLUTION_X / 2.0;
-    final double horizFovDeg = 59.6;
-    double normXPixels = (1 / halfResXPixels) * ((halfResXPixels - 0.5) - xPixels);
-    double viewplaneWidthPixels = 2.0 * Math.tan(Units.degreesToRadians(horizFovDeg / 2));
-    double viewplaneXPixels = viewplaneWidthPixels / 2.0 * normXPixels;
-    double yawAngleXDegrees = Units.radiansToDegrees(Math.atan2(viewplaneXPixels, 1));
-    double yawAngleAdjustDegrees = -3.0; // due to limelight yaw
-    double adjustedYawAngleDegrees = yawAngleXDegrees + yawAngleAdjustDegrees;
-    return Optional.of(new NoteDetection(getLatency(), coneDistanceMeters, adjustedYawAngleDegrees));
+    double angleLimelightToNote = IntakeLimelightConstants.INTAKE_LIMELIGHT_PITCH_DEGREES + lowestDetection.ty;
+    double noteDistanceMeters = IntakeLimelightConstants.INTAKE_LIMELIGHT_HEIGHT_METERS / Math.tan(Units.degreesToRadians(angleLimelightToNote));
+
+    double yawAngleXDegrees = lowestDetection.tx;
+    double adjustedYawAngleDegrees = yawAngleXDegrees + IntakeLimelightCal.LIMELIGHT_YAW;
+    return Optional.of(
+        new NoteDetection(getLatency(), noteDistanceMeters, adjustedYawAngleDegrees));
   }
-
 
   @Override
   public void initSendable(SendableBuilder builder) {
