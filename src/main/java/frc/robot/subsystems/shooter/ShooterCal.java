@@ -63,4 +63,7 @@ public class ShooterCal {
    * the encoder at 90 and subtracting 90 from that reading.
    */
   public static final double PIVOT_ANGLE_OFFSET_DEGREES = Constants.PLACEHOLDER_DOUBLE;
+
+  /** Position at which (or beyond) the shooter has potential to intersect the conveyor.  */
+  public static final double CONVEYOR_ZONE_THRESHOLD_DEGREES = Constants.PLACEHOLDER_DOUBLE;
 }
