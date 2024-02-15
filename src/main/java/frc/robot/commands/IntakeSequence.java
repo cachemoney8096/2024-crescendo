@@ -9,6 +9,8 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakePosition;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 
 /**
  * Puts the intake into the deployed position then gets elevator to home position Checks that
@@ -16,8 +18,8 @@ import frc.robot.subsystems.intake.Intake.IntakePosition;
  * game piece Stops and stowes intake
  */
 public class IntakeSequence extends SequentialCommandGroup {
-  public IntakeSequence(Intake intake, Elevator elevator, Conveyor conveyor) {
-    addRequirements(intake, elevator, conveyor);
+  public IntakeSequence(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
+    addRequirements(intake, elevator, conveyor, shooter);
 
     addCommands(
         new InstantCommand(
@@ -25,10 +27,16 @@ public class IntakeSequence extends SequentialCommandGroup {
               intake.setDesiredIntakePosition(IntakePosition.DEPLOYED);
             },
             intake),
+        new InstantCommand(
+            () -> {
+              shooter.setShooterMode(ShooterMode.IDLE);
+            }),
         new ConditionalCommand(
             new InstantCommand(),
-            new WaitUntilCommand(intake::clearOfConveyorZone),
-            elevator::elevatorAboveInterferenceZone),
+            new SequentialCommandGroup(
+                new WaitUntilCommand(intake::clearOfConveyorZone),
+                new WaitUntilCommand(shooter::clearOfConveyorZone)),
+            elevator::elevatorBelowInterferenceZone),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME)),
         new WaitUntilCommand(elevator::atDesiredPosition),
         new WaitUntilCommand(intake::atDesiredIntakePosition),

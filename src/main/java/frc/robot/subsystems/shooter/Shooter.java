@@ -26,7 +26,9 @@ public class Shooter extends SubsystemBase {
   public enum ShooterMode {
     /** Not doing anything */
     IDLE,
-    /** Shooting or spinning up to shoot */
+    /** Spin up the shooter but stay at home position */
+    SPIN_UP,
+    /** Both spinning up the shooter and going to the right elevation angle */
     SHOOT,
     /** Holding pivot such that we can climb */
     PRELATCH,
@@ -137,6 +139,10 @@ public class Shooter extends SubsystemBase {
         < ShooterCal.PIVOT_ANGLE_MARGIN_DEG;
   }
 
+  public boolean clearOfConveyorZone() {
+    return getPivotPosition() < ShooterCal.CONVEYOR_ZONE_THRESHOLD_DEGREES;
+  }
+
   public boolean isShooterSpunUp() {
     final boolean motorASpunUp =
         Math.abs(motorARelEncoder.getVelocity() - ShooterCal.SHOOTER_MOTOR_SPEED_RPM)
@@ -226,6 +232,10 @@ public class Shooter extends SubsystemBase {
     switch (shooterMode) {
       case IDLE:
         stopShooter();
+        controlPosition(ShooterCal.STARTING_POSITION_DEGREES);
+        break;
+      case SPIN_UP:
+        spinUpShooter();
         controlPosition(ShooterCal.STARTING_POSITION_DEGREES);
         break;
       case SHOOT:
