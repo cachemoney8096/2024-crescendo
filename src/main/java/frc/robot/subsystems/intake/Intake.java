@@ -131,7 +131,7 @@ public class Intake extends SubsystemBase {
   public double getCosineArmAngle() {
     return Math.cos(
         Units.degreesToRadians(
-            pivotAbsoluteEncoder.getPosition()
+            getOffsetAbsPositionDeg()
                 - IntakeConstants.INTAKE_POSITION_WHEN_HORIZONTAL_DEGREES));
   }
 
@@ -167,7 +167,7 @@ public class Intake extends SubsystemBase {
 
   public boolean atIntakePosition(IntakePosition pos) {
     double checkPositionDegrees = intakePositionMap.get(pos);
-    double intakePositionDegrees = pivotAbsoluteEncoder.getPosition();
+    double intakePositionDegrees = getOffsetAbsPositionDeg();
     return Math.abs(intakePositionDegrees - checkPositionDegrees)
         <= IntakeCal.INTAKE_MARGIN_DEGREES;
   }
@@ -177,7 +177,7 @@ public class Intake extends SubsystemBase {
    * zone would be greater than the threshold
    */
   public boolean clearOfConveyorZone() {
-    return pivotAbsoluteEncoder.getPosition() > IntakeCal.CONVEYOR_ZONE_THRESHOLD_DEGREES;
+    return getOffsetAbsPositionDeg() > IntakeCal.CONVEYOR_ZONE_THRESHOLD_DEGREES;
   }
 
   public void startRollers() {
