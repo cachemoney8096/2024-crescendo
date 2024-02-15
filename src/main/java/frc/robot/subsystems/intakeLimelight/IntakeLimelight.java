@@ -358,33 +358,6 @@ public class IntakeLimelight extends SubsystemBase {
   }
 
   /**
-   * Calculate the lateral distance to the target in meters for a target other than the one defined
-   * in the constructor.
-   *
-   * @param targetHeight height of the target in meters
-   * @return distance to the target in meters
-   */
-  public double getDistanceFromTargetMeters(double targetHeight) {
-    double angle = kCameraPitchAngleDegrees + getOffSetY();
-    if (angle < 1 || angle > 89) {
-      return 0;
-    }
-    double tanTerm = Math.tan(Math.toRadians(angle));
-    double distance = (targetHeight - kCameraHeight) / tanTerm;
-
-    return distance;
-  }
-
-  /**
-   * Get the lateral distance to the target as defined in the construtor.
-   *
-   * @return distance to the target in meters
-   */
-  public double getDistanceFromTargetMeters() {
-    return getDistanceFromTargetMeters(kTargetHeight);
-  }
-
-  /**
    * Get a 2d translation from the camera to the target, including normalization to handle the
    * effects of angle to target. See the below discussion.
    * https://www.chiefdelphi.com/t/what-does-limelight-skew-actually-measure/381167/7
@@ -467,43 +440,6 @@ public class IntakeLimelight extends SubsystemBase {
     return getTargetTranslation(kTargetHeight);
   }
 
-  /** Gets the object lowest in the image */
-  public Optional<Double> getXOfSmallestY(double[] corners) {
-    // Format: x1 y1 x2 y2 x3 y3 . . .
-    double minY = 10000000;
-    int minYIdx = 0;
-
-    if (corners.length == 0) {
-      return Optional.empty();
-    }
-
-    for (int i = 1; i < corners.length; i += 2) {
-      if (corners[i] < minY) {
-        minY = corners[i];
-        minYIdx = i;
-      }
-    }
-
-    return Optional.of(corners[minYIdx - 1]);
-  }
-
-  public Optional<Double> getObjectHeightPx(double[] corners) {
-    // Format: x1 y1 x2 y2 x3 y3 . . .
-    if (corners.length == 0) {
-      return Optional.empty();
-    }
-
-    double minY = Double.MAX_VALUE;
-    double maxY = Double.MIN_VALUE;
-
-    for (int i = 1; i < corners.length; i += 2) {
-      minY = Math.min(minY, corners[i]);
-      maxY = Math.max(maxY, corners[i]);
-    }
-
-    return Optional.of(maxY - minY);
-  }
-
   public class NoteDetection {
     public double latencySec;
 
@@ -550,15 +486,15 @@ public class IntakeLimelight extends SubsystemBase {
       }
     }
 
-    double angleLimelightToNote =
+    double angleLimelightToNoteDegrees =
         IntakeLimelightConstants.INTAKE_LIMELIGHT_PITCH_DEGREES + lowestDetection.ty;
     double noteDistanceMeters =
         (IntakeLimelightConstants.INTAKE_LIMELIGHT_HEIGHT_METERS
                 - Units.inchesToMeters(Constants.NOTE_HEIGHT_INCHES / 2))
-            / Math.tan(Units.degreesToRadians(angleLimelightToNote));
+            / Math.tan(Units.degreesToRadians(angleLimelightToNoteDegrees));
 
     double yawAngleXDegrees = lowestDetection.tx;
-    double adjustedYawAngleDegrees = yawAngleXDegrees + IntakeLimelightCal.LIMELIGHT_YAW;
+    double adjustedYawAngleDegrees = yawAngleXDegrees + IntakeLimelightCal.LIMELIGHT_YAW_DEGREES;
     return Optional.of(
         new NoteDetection(getLatency(), noteDistanceMeters, adjustedYawAngleDegrees));
   }
@@ -568,12 +504,8 @@ public class IntakeLimelight extends SubsystemBase {
     builder.addDoubleProperty("Target Area", () -> getTargetArea(), null);
     builder.addDoubleProperty("Skew", () -> getSkew(), null);
     builder.addDoubleProperty("Latency", () -> getLatency(), null);
-    builder.addDoubleProperty("Distance", () -> getDistanceFromTargetMeters(), null);
     builder.addDoubleProperty("Tx", () -> getOffSetX(), null);
     builder.addDoubleProperty("Ty", () -> getOffSetY(), null);
-    builder.addDoubleProperty("Translation Distance", () -> m_lastDistance, null);
-    builder.addDoubleProperty("Translation X", () -> m_lastX, null);
-    builder.addDoubleProperty("Translation Y", () -> m_lastY, null);
     builder.addBooleanProperty("Valid Target", () -> isValidTarget(), null);
   }
 }
