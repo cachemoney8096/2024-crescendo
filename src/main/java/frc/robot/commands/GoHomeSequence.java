@@ -12,7 +12,7 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 
 /**
- * Brings the elevator, intake, an shooter to their respective home positions in a "smart" way so
+ * Brings the elevator, intake, and shooter to their respective home positions in a "smart" way so
  * they do not end up attacking each other accidentally. Ends before everything is fully home.
  */
 public class GoHomeSequence extends SequentialCommandGroup {

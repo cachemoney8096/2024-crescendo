@@ -28,7 +28,7 @@ public class Shooter extends SubsystemBase {
     IDLE,
     /** Spin up the shooter but stay at home position */
     SPIN_UP,
-    /** Shooting or spinning up to shoot */
+    /** Both spinning up the shooter and going to the right elevation angle */
     SHOOT,
     /** Holding pivot such that we can climb */
     PRELATCH,
