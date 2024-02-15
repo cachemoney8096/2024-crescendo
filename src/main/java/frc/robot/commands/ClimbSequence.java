@@ -11,8 +11,8 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 
 /**
- * switches the elevator to use the climbing controller, then has the robot climb and then score in
- * the trap
+ * Switches the elevator to use the climbing controller, then has the robot climb and then score in
+ * the trap. Assumes that the robot is aleady lined up to the trap/chain.
  */
 public class ClimbSequence extends SequentialCommandGroup {
   public ClimbSequence(Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor) {
