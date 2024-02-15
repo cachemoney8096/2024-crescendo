@@ -36,7 +36,7 @@ public class TrapLineup extends Command{
       }
       double latencySeconds = tagLimelight.getLatencySeconds();
       targetLocked = true;
-      drive.setLimelightTargetFromTransform(new Transform2d(robotToScoringLocation.get().getX(), robotToScoringLocation.get().getY()+TRAP_SCORE_DISTANCE_ADJUSTMENT, robotToScoringLocation.get().getRotation()), latencySeconds);
+      drive.setLimelightTargetFromTransform(robotToScoringLocation.get(), latencySeconds);
     }
   }
 
