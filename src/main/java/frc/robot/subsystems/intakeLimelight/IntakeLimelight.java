@@ -487,7 +487,7 @@ public class IntakeLimelight extends SubsystemBase {
     }
 
     double angleLimelightToNoteDegrees =
-        IntakeLimelightConstants.INTAKE_LIMELIGHT_PITCH_DEGREES + lowestDetection.ty;
+        lowestDetection.ty - IntakeLimelightConstants.INTAKE_LIMELIGHT_PITCH_DEGREES;
     double noteDistanceMeters =
         (IntakeLimelightConstants.INTAKE_LIMELIGHT_HEIGHT_METERS
                 - Units.inchesToMeters(Constants.NOTE_HEIGHT_INCHES / 2))
