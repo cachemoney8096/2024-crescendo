@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.subsystems.intake.IntakeCal;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Detector;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
@@ -551,8 +550,12 @@ public class IntakeLimelight extends SubsystemBase {
       }
     }
 
-    double angleLimelightToNote = IntakeLimelightConstants.INTAKE_LIMELIGHT_PITCH_DEGREES + lowestDetection.ty;
-    double noteDistanceMeters = IntakeLimelightConstants.INTAKE_LIMELIGHT_HEIGHT_METERS / Math.tan(Units.degreesToRadians(angleLimelightToNote));
+    double angleLimelightToNote =
+        IntakeLimelightConstants.INTAKE_LIMELIGHT_PITCH_DEGREES + lowestDetection.ty;
+    double noteDistanceMeters =
+        (IntakeLimelightConstants.INTAKE_LIMELIGHT_HEIGHT_METERS
+                - Units.inchesToMeters(Constants.NOTE_HEIGHT_INCHES / 2))
+            / Math.tan(Units.degreesToRadians(angleLimelightToNote));
 
     double yawAngleXDegrees = lowestDetection.tx;
     double adjustedYawAngleDegrees = yawAngleXDegrees + IntakeLimelightCal.LIMELIGHT_YAW;
