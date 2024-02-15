@@ -143,7 +143,6 @@ public class Shooter extends SubsystemBase {
     return getPivotPosition() < ShooterCal.CONVEYOR_ZONE_THRESHOLD_DEGREES;
   }
 
-
   public boolean isShooterSpunUp() {
     final boolean motorASpunUp =
         Math.abs(motorARelEncoder.getVelocity() - ShooterCal.SHOOTER_MOTOR_SPEED_RPM)

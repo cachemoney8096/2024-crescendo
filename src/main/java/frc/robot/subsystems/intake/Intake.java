@@ -131,8 +131,7 @@ public class Intake extends SubsystemBase {
   public double getCosineArmAngle() {
     return Math.cos(
         Units.degreesToRadians(
-            getOffsetAbsPositionDeg()
-                - IntakeConstants.INTAKE_POSITION_WHEN_HORIZONTAL_DEGREES));
+            getOffsetAbsPositionDeg() - IntakeConstants.INTAKE_POSITION_WHEN_HORIZONTAL_DEGREES));
   }
 
   /** Gets the correctly zeroed position of the pivot. */

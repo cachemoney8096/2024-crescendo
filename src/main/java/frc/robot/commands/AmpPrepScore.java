@@ -24,8 +24,7 @@ public class AmpPrepScore extends SequentialCommandGroup {
         new SequentialCommandGroup(
             new InstantCommand(
                 () -> intake.setDesiredIntakePosition(IntakePosition.CLEAR_OF_CONVEYOR)),
-            new InstantCommand(
-                () -> shooter.setShooterMode(Shooter.ShooterMode.IDLE)),
+            new InstantCommand(() -> shooter.setShooterMode(Shooter.ShooterMode.IDLE)),
             new WaitUntilCommand(intake::clearOfConveyorZone),
             new WaitUntilCommand(shooter::clearOfConveyorZone),
             new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SCORE_AMP)),
