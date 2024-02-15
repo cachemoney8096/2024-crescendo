@@ -434,13 +434,13 @@ public class DriveSubsystem extends SubsystemBase {
     return pastPose;
   }
 
-  public void setLimelightTargetFromTransform(Transform2d transform, double latencySec) {
+  public void setLimelightTargetFromTransform(Transform2d transform, double latencySec, boolean usingFrontLimelight) {
     // Transform is to get the limelight to the correct location, not to get the
     // robot
     // Here we correct for that
     Transform2d flipTransform =
         new Transform2d(
-            new Translation2d(-transform.getX(), transform.getY()), transform.getRotation());
+            new Translation2d(usingFrontLimelight?(transform.getX()):(-transform.getX()), transform.getY()), transform.getRotation()); //TODO we're gonna fix this in like 20 minutes
 
     double latencyAdjustmentSec = 0.00;
 
