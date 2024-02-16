@@ -1,6 +1,6 @@
 // Code from team 3005
 
-package frc.robot.subsystems.intakeLimelight;
+package frc.robot.subsystems.shooterLimelight;
 
 import edu.wpi.first.hal.SimBoolean;
 import edu.wpi.first.hal.SimDevice;
@@ -10,7 +10,6 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -20,12 +19,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.utils.LimelightHelpers;
-import frc.robot.utils.LimelightHelpers.LimelightTarget_Detector;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
 import java.util.Optional;
 
-/** Limelight for the intake to identify game pieces */
-public class IntakeLimelight extends SubsystemBase {
+/** Limelight for the shooter to identify game pieces */
+public class ShooterLimelight extends SubsystemBase {
   private final double kCameraPitchAngleDegrees;
   private final double kCameraHeight;
   private final double kTargetHeight;
@@ -49,7 +47,8 @@ public class IntakeLimelight extends SubsystemBase {
   private double m_lastX = 0.0;
   private double m_lastY = 0.0;
 
-  NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight-intake");
+  NetworkTable table =
+      NetworkTableInstance.getDefault().getTable(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
   NetworkTableEntry tx = table.getEntry("tx");
   NetworkTableEntry ty = table.getEntry("ty");
   NetworkTableEntry ta = table.getEntry("ta");
@@ -63,20 +62,24 @@ public class IntakeLimelight extends SubsystemBase {
   private Optional<Transform2d> robotToScoringLocation = Optional.empty();
 
   /**
-   * Create an IntakeLimelight object
+   * Create an ShooterLimelight object
    *
    * @param pitchAngleDegrees pitch angle from normal in degress. Looking straight out is 0, and
    *     increasing as the camera is tilted towards the ceiling.
    * @param heightMeters height of the camera measured from the lens to the ground in meters.
    * @param targetHeightMeters height to the center of the target in meters
    */
-  public IntakeLimelight(double pitchAngleDegrees, double heightMeters, double targetHeightMeters) {
+  public ShooterLimelight(
+      double pitchAngleDegrees, double heightMeters, double targetHeightMeters) {
     kCameraPitchAngleDegrees = pitchAngleDegrees;
     kCameraHeight = heightMeters;
     kTargetHeight = targetHeightMeters;
-    setLimelightValues(Constants.limelightLedMode.OFF, Constants.limelightCamMode.VISION_PROCESSING, Constants.limelightPipeline.NOTE_PIPELINE);
+    setLimelightValues(
+        Constants.limelightLedMode.OFF,
+        Constants.limelightCamMode.VISION_PROCESSING,
+        Constants.limelightPipeline.TAG_PIPELINE);
 
-    m_simDevice = SimDevice.create("limelight-intake");
+    m_simDevice = SimDevice.create(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
     if (m_simDevice != null) {
       m_targetArea = m_simDevice.createDouble("Target Area", Direction.kBidir, 0.0);
       m_skew = m_simDevice.createDouble("Skew", Direction.kBidir, 0.0);
@@ -112,16 +115,7 @@ public class IntakeLimelight extends SubsystemBase {
 
   private static boolean validScoringTag(double tagId) {
     long tagIdRounded = Math.round(tagId);
-    if (tagIdRounded == 11
-        || tagIdRounded == 12
-        || tagIdRounded == 13
-        || tagIdRounded == 14
-        || tagIdRounded == 15
-        || tagIdRounded == 16) {
-      return true;
-    } else {
-      return false;
-    }
+    return (tagIdRounded == 3 || tagIdRounded == 4 || tagIdRounded == 7 || tagIdRounded == 8);
   }
 
   public static int chooseTag(LimelightTarget_Fiducial[] targets) {
@@ -144,26 +138,20 @@ public class IntakeLimelight extends SubsystemBase {
 
   private Transform2d getRobotToScoringLocation(Pose3d targetPoseRobotSpace) {
     Transform2d targetFromBot = getBotFromTarget(targetPoseRobotSpace);
-    return targetFromBot.plus(IntakeLimelightCal.TRAP_OFFSET);
+    return targetFromBot;
   }
 
   public Optional<Transform2d> getRobotToScoringLocation() {
-    if (getPipeline() != Constants.limelightPipeline.TAG_PIPELINE) {
-      setPipeline(Constants.limelightPipeline.TAG_PIPELINE);
-    }
     return robotToScoringLocation;
   }
 
   public Optional<Transform2d> checkForTag() {
-    if (getPipeline() != Constants.limelightPipeline.TAG_PIPELINE) {
-      setPipeline(Constants.limelightPipeline.TAG_PIPELINE);
-    }
-    if (!LimelightHelpers.getTV(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME)) {
+    if (!LimelightHelpers.getTV(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME)) {
       robotToScoringLocation = Optional.empty();
       return Optional.empty();
     }
     if (!validScoringTag(
-        LimelightHelpers.getFiducialID(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME))) {
+        LimelightHelpers.getFiducialID(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME))) {
       robotToScoringLocation = Optional.empty();
       return Optional.empty();
     }
@@ -171,13 +159,14 @@ public class IntakeLimelight extends SubsystemBase {
         Optional.of(
             getRobotToScoringLocation(
                 LimelightHelpers.getTargetPose3d_RobotSpace(
-                    IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME)));
+                    ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME)));
     return robotToScoringLocation;
   }
 
   public double getLatencySeconds() {
-    return (LimelightHelpers.getLatency_Capture(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME)
-            + LimelightHelpers.getLatency_Pipeline(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME))
+    return (LimelightHelpers.getLatency_Capture(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME)
+            + LimelightHelpers.getLatency_Pipeline(
+                ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME))
         / 1000.0;
   }
 
@@ -217,13 +206,17 @@ public class IntakeLimelight extends SubsystemBase {
     return Constants.limelightPipeline.values()[(int) table.getEntry("getpipe").getDouble(0)];
   }
 
-  public void setLimelightValues(Constants.limelightLedMode ledMode, Constants.limelightCamMode camMode, Constants.limelightPipeline line) {
+  public void setLimelightValues(
+      Constants.limelightLedMode ledMode,
+      Constants.limelightCamMode camMode,
+      Constants.limelightPipeline line) {
     setLedMode(ledMode);
     setCamMode(camMode);
     setPipeline(line);
 
     SmartDashboard.putString("LED Mode", ledMode.name());
     SmartDashboard.putString("Cam Mode", camMode.name());
+    SmartDashboard.putString("Pipeline", line.name());
   }
 
   /**
@@ -306,11 +299,7 @@ public class IntakeLimelight extends SubsystemBase {
    * @return true is limelight has made a target else false
    */
   public boolean isValidTarget() {
-    if (getValidTarget() > 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return getValidTarget() > 0;
   }
 
   /**
@@ -401,65 +390,6 @@ public class IntakeLimelight extends SubsystemBase {
    */
   public Translation2d getTargetTranslation() {
     return getTargetTranslation(kTargetHeight);
-  }
-
-  public class NoteDetection {
-    public double latencySec;
-
-    /** Distance from camera */
-    public double distanceMeters;
-
-    /** CCW Yaw Angle */
-    public double yawAngleDeg;
-
-    public NoteDetection(double latencySec, double distanceMeters, double yawAngleDeg) {
-      this.latencySec = latencySec;
-      this.distanceMeters = distanceMeters;
-      this.yawAngleDeg = yawAngleDeg;
-    }
-  }
-
-  /**
-   * Looks for a note
-   *
-   * @return If empty, no note detected. First value is note yaw in degrees (ccw), second value is
-   *     distance in meters.
-   */
-  public Optional<NoteDetection> getNotePos() {
-    // TODO filter low confidence detection in LL dashboard, hopefully
-    if (getPipeline() != Constants.limelightPipeline.NOTE_PIPELINE) {
-      setPipeline(Constants.limelightPipeline.NOTE_PIPELINE);
-    }
-
-    LimelightHelpers.LimelightResults llresults =
-        LimelightHelpers.getLatestResults(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME);
-    LimelightTarget_Detector[] targets_Detector = llresults.targetingResults.targets_Detector;
-
-    if (targets_Detector.length == 0) {
-      System.out.println("Didn't see note");
-      return Optional.empty();
-    }
-
-    LimelightTarget_Detector lowestDetection = targets_Detector[0];
-    for (LimelightTarget_Detector detection : targets_Detector) {
-      if (detection.className == "note") {
-        if (detection.ty_pixels > lowestDetection.ty_pixels) { // lower in image = greater y value
-          lowestDetection = detection;
-        }
-      }
-    }
-
-    double angleLimelightToNoteDegrees =
-        lowestDetection.ty - IntakeLimelightConstants.INTAKE_LIMELIGHT_PITCH_DEGREES;
-    double noteDistanceMeters =
-        (IntakeLimelightConstants.INTAKE_LIMELIGHT_HEIGHT_METERS
-                - Units.inchesToMeters(Constants.NOTE_HEIGHT_INCHES / 2))
-            / Math.tan(Units.degreesToRadians(angleLimelightToNoteDegrees));
-
-    double yawAngleXDegrees = lowestDetection.tx;
-    double adjustedYawAngleDegrees = yawAngleXDegrees + IntakeLimelightCal.LIMELIGHT_YAW_DEGREES;
-    return Optional.of(
-        new NoteDetection(getLatency(), noteDistanceMeters, adjustedYawAngleDegrees));
   }
 
   @Override
