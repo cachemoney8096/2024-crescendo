@@ -36,10 +36,12 @@ public class Shooter extends SubsystemBase {
     LATCH
   };
 
-  private final CANSparkMax motorA =
-      new CANSparkMax(RobotMap.SHOOTER_MOTOR_A_CAN_ID, MotorType.kBrushless);
-  private final CANSparkMax motorB =
-      new CANSparkMax(RobotMap.SHOOTER_MOTOR_B_CAN_ID, MotorType.kBrushless);
+  private final CANSparkMax motorRight =
+      new CANSparkMax(RobotMap.SHOOTER_MOTOR_RIGHT_CAN_ID, MotorType.kBrushless);
+  private final CANSparkMax motorLeftOne =
+      new CANSparkMax(RobotMap.SHOOTER_MOTOR_LEFT_ONE_CAN_ID, MotorType.kBrushless);
+  private final CANSparkMax motorLeftTwo =
+      new CANSparkMax(RobotMap.SHOOTER_MOTOR_LEFT_TWO_CAN_ID, MotorType.kBrushless);
   private final CANSparkMax pivotMotor =
       new CANSparkMax(RobotMap.SHOOTER_PIVOT_MOTOR_CAN_ID, MotorType.kBrushless);
   /** Configured to read degrees, zero is shooting straight down */
@@ -48,9 +50,9 @@ public class Shooter extends SubsystemBase {
 
   private double pivotDesiredPositionDegrees = ShooterCal.STARTING_POSITION_DEGREES;
   /** Not configured, defaults to Motor RPM. */
-  private final RelativeEncoder motorARelEncoder = motorA.getEncoder();
+  private final RelativeEncoder motorRightRelEncoder = motorRight.getEncoder();
   /** Not configured, defaults to Motor RPM. */
-  private final RelativeEncoder motorBRelEncoder = motorB.getEncoder();
+  private final RelativeEncoder motorLeftOneRelEncoder = motorLeftOne.getEncoder();
 
   /** FPGA timestamp from previous cycle. Empty for first cycle only. */
   private Optional<Double> prevTimestamp = Optional.empty();
@@ -61,8 +63,8 @@ public class Shooter extends SubsystemBase {
   /** Map from goal distance (meters) to pivot angle (degrees) */
   private InterpolatingDoubleTreeMap pivotAngleMap;
 
-  private final SparkPIDController controllerA = motorA.getPIDController();
-  private final SparkPIDController controllerB = motorB.getPIDController();
+  private final SparkPIDController controllerA = motorRight.getPIDController();
+  private final SparkPIDController controllerB = motorLeftOne.getPIDController();
   private final ProfiledPIDController pivotController =
       new ProfiledPIDController(
           ShooterCal.PIVOT_MOTOR_kP,
@@ -89,19 +91,25 @@ public class Shooter extends SubsystemBase {
   public boolean initSparks() {
     int errors = 0;
     errors += SparkMaxUtils.check(pivotMotor.restoreFactoryDefaults());
-    errors += SparkMaxUtils.check(motorA.restoreFactoryDefaults());
-    errors += SparkMaxUtils.check(motorB.restoreFactoryDefaults());
+    errors += SparkMaxUtils.check(motorRight.restoreFactoryDefaults());
+    errors += SparkMaxUtils.check(motorLeftOne.restoreFactoryDefaults());
+    errors += SparkMaxUtils.check(motorLeftTwo.restoreFactoryDefaults());
+
+    errors += SparkMaxUtils.check(motorLeftTwo.follow(motorLeftOne));
 
     errors += SparkMaxUtils.check(pivotMotor.setIdleMode(IdleMode.kBrake));
-    errors += SparkMaxUtils.check(motorA.setIdleMode(IdleMode.kCoast));
-    errors += SparkMaxUtils.check(motorB.setIdleMode(IdleMode.kCoast));
+    errors += SparkMaxUtils.check(motorRight.setIdleMode(IdleMode.kCoast));
+    errors += SparkMaxUtils.check(motorLeftOne.setIdleMode(IdleMode.kCoast));
+    errors += SparkMaxUtils.check(motorLeftTwo.setIdleMode(IdleMode.kCoast));
 
     errors +=
-        SparkMaxUtils.check(motorA.setSmartCurrentLimit(ShooterCal.SHOOTER_CURRENT_LIMIT_AMPS));
-    errors +=
-        SparkMaxUtils.check(motorB.setSmartCurrentLimit(ShooterCal.SHOOTER_CURRENT_LIMIT_AMPS));
-    errors +=
         SparkMaxUtils.check(pivotMotor.setSmartCurrentLimit(ShooterCal.SHOOTER_CURRENT_LIMIT_AMPS));
+    errors +=
+        SparkMaxUtils.check(motorRight.setSmartCurrentLimit(ShooterCal.SHOOTER_CURRENT_LIMIT_AMPS));
+    errors +=
+        SparkMaxUtils.check(motorLeftOne.setSmartCurrentLimit(ShooterCal.SHOOTER_CURRENT_LIMIT_AMPS));
+    errors +=
+        SparkMaxUtils.check(motorLeftTwo.setSmartCurrentLimit(ShooterCal.SHOOTER_CURRENT_LIMIT_AMPS));
 
     // PID Stuff
     errors += SparkMaxUtils.check(controllerA.setP(ShooterCal.MOTOR_A_kP));
@@ -144,13 +152,13 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isShooterSpunUp() {
-    final boolean motorASpunUp =
-        Math.abs(motorARelEncoder.getVelocity() - ShooterCal.SHOOTER_MOTOR_SPEED_RPM)
+    final boolean motorRightSpunUp =
+        Math.abs(motorRightRelEncoder.getVelocity() - ShooterCal.SHOOTER_MOTOR_SPEED_RPM)
             < ShooterCal.SHOOTER_SPEED_MARGIN_RPM;
-    final boolean motorBSpunUp =
-        Math.abs(motorBRelEncoder.getVelocity() - ShooterCal.SHOOTER_MOTOR_SPEED_RPM)
+    final boolean motorLeftOneSpunUp =
+        Math.abs(motorLeftOneRelEncoder.getVelocity() - ShooterCal.SHOOTER_MOTOR_SPEED_RPM)
             < ShooterCal.SHOOTER_SPEED_MARGIN_RPM;
-    return motorASpunUp && motorBSpunUp;
+    return motorRightSpunUp && motorLeftOneSpunUp;
   }
 
   private void spinUpShooter() {
@@ -159,8 +167,8 @@ public class Shooter extends SubsystemBase {
   }
 
   private void stopShooter() {
-    motorA.setVoltage(0);
-    motorB.setVoltage(0);
+    motorRight.setVoltage(0);
+    motorLeftOne.setVoltage(0);
   }
 
   /** Returns the cosine of the intake angle in degrees off of the horizontal. */
@@ -263,8 +271,8 @@ public class Shooter extends SubsystemBase {
     builder.addDoubleProperty(
         "pivot velocity (deg/sec)", pivotMotorAbsoluteEncoder::getVelocity, null);
     builder.addBooleanProperty("At desired pos", this::atDesiredPosition, null);
-    builder.addDoubleProperty("motor A velocity", motorARelEncoder::getVelocity, null);
-    builder.addDoubleProperty("motor B velocity", motorBRelEncoder::getVelocity, null);
+    builder.addDoubleProperty("motor A velocity", motorRightRelEncoder::getVelocity, null);
+    builder.addDoubleProperty("motor B velocity", motorLeftOneRelEncoder::getVelocity, null);
     builder.addBooleanProperty("At desired shooter speeds", this::isShooterSpunUp, null);
     builder.addStringProperty("Current Mode", () -> shooterMode.toString(), null);
     builder.addDoubleProperty("Shooter Dist (m)", () -> shooterDistanceMeters, null);
