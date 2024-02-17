@@ -15,7 +15,8 @@ public class AmpScore extends SequentialCommandGroup {
   public AmpScore(Conveyor conveyor, Intake intake, Elevator elevator) {
     addRequirements(conveyor, intake, elevator);
     addCommands(
-      new WaitUntilCommand(() -> {
+        new WaitUntilCommand(
+            () -> {
               return intake.clearOfConveyorZone() && elevator.atDesiredPosition();
             }),
         Conveyor.scoreTrapOrAmp(conveyor)
