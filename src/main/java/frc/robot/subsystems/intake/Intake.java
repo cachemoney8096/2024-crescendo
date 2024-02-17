@@ -92,6 +92,11 @@ public class Intake extends SubsystemBase {
     return errors == 0;
   }
 
+  public void burnFlashSpark() {
+    Timer.delay(0.005);
+    pivotMotor.burnFlash();
+  }
+
   public void initIntakeTalons() {
     // TODO check status codes
     TalonFXConfigurator cfgLeft = intakeTalonLeft.getConfigurator();

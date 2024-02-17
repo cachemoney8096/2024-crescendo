@@ -132,6 +132,17 @@ public class Shooter extends SubsystemBase {
     return errors == 0;
   }
 
+  public void burnFlashSparks() {
+    Timer.delay(0.005);
+    pivotMotor.burnFlash();
+    Timer.delay(0.005);
+    motorLeftOne.burnFlash();
+    Timer.delay(0.005);
+    motorLeftTwo.burnFlash();
+    Timer.delay(0.005);
+    motorRight.burnFlash();
+  }
+
   /** Set the shooter to a new mode. If shoot, make sure to also call setShooterDistance . */
   public void setShooterMode(ShooterMode newMode) {
     if (shooterMode != newMode) {
