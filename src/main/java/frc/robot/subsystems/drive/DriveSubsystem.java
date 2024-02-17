@@ -92,6 +92,9 @@ public class DriveSubsystem extends SubsystemBase {
     Pigeon2Configurator cfg = gyro.getConfigurator();
     Pigeon2Configuration blankGyroConfiguration = new Pigeon2Configuration();
     cfg.apply(blankGyroConfiguration);
+    final double fastUpdateFrequencyHz = 50.0; // todo update for better odometry
+    gyro.getYaw().setUpdateFrequency(fastUpdateFrequencyHz);
+    gyro.getAngularVelocityZWorld().setUpdateFrequency(fastUpdateFrequencyHz);
 
     // Set mount pose
     MountPoseConfigs gyroConfig = new MountPoseConfigs();

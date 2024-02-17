@@ -4,6 +4,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkBase.IdleMode;
@@ -32,8 +33,8 @@ public class Intake extends SubsystemBase {
   private final AbsoluteEncoder pivotAbsoluteEncoder =
       pivotMotor.getAbsoluteEncoder(Type.kDutyCycle);
 
-  private final TalonFX intakeTalonFront = new TalonFX(RobotMap.INTAKING_FRONT_MOTOR_CAN_ID);
-  private final TalonFX intakeTalonBack = new TalonFX(RobotMap.INTAKING_BACK_MOTOR_CAN_ID);
+  private final TalonFX intakeTalonLeft = new TalonFX(RobotMap.INTAKING_LEFT_MOTOR_CAN_ID);
+  private final TalonFX intakeTalonRight = new TalonFX(RobotMap.INTAKING_RIGHT_MOTOR_CAN_ID);
   private ProfiledPIDController pivotController =
       new ProfiledPIDController(
           IntakeCal.INTAKE_PIVOT_P,
@@ -93,18 +94,22 @@ public class Intake extends SubsystemBase {
 
   public void initIntakeTalons() {
     // TODO check status codes
-    TalonFXConfigurator cfgFront = intakeTalonFront.getConfigurator();
-    TalonFXConfigurator cfgBack = intakeTalonFront.getConfigurator();
+    TalonFXConfigurator cfgLeft = intakeTalonLeft.getConfigurator();
+    TalonFXConfigurator cfgRight = intakeTalonRight.getConfigurator();
 
     TalonFXConfiguration toApply = new TalonFXConfiguration();
+    toApply.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // this is invert = true
     toApply.CurrentLimits.SupplyCurrentLimit = IntakeCal.INTAKING_TALONS_CURRENT_LIMIT_AMPS;
     toApply.CurrentLimits.SupplyCurrentLimitEnable = true;
     toApply.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
-    cfgFront.apply(toApply);
-    cfgBack.apply(toApply);
+    cfgLeft.apply(toApply);
+    cfgRight.apply(toApply);
 
-    intakeTalonBack.setControl(new Follower(intakeTalonFront.getDeviceID(), false));
+    intakeTalonLeft.optimizeBusUtilization();
+    intakeTalonRight.optimizeBusUtilization();
+
+    intakeTalonRight.setControl(new Follower(intakeTalonLeft.getDeviceID(), false));
   }
 
   /**
@@ -180,15 +185,15 @@ public class Intake extends SubsystemBase {
   }
 
   public void startRollers() {
-    intakeTalonFront.set(IntakeCal.INTAKING_POWER);
+    intakeTalonLeft.set(IntakeCal.INTAKING_POWER);
   }
 
   public void stopRollers() {
-    intakeTalonFront.stopMotor();
+    intakeTalonLeft.stopMotor();
   }
 
   public void reverseRollers() {
-    intakeTalonFront.set(IntakeCal.REVERSE_INTAKING_POWER);
+    intakeTalonLeft.set(IntakeCal.REVERSE_INTAKING_POWER);
   }
 
   public void periodic() {
@@ -212,6 +217,6 @@ public class Intake extends SubsystemBase {
 
     builder.addBooleanProperty("intake at desired pos", this::atDesiredIntakePosition, null);
 
-    builder.addDoubleProperty("roller power in [-1,1]", intakeTalonFront::get, null);
+    builder.addDoubleProperty("roller power in [-1,1]", intakeTalonLeft::get, null);
   }
 }

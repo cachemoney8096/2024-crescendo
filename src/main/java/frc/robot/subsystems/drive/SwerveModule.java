@@ -116,6 +116,15 @@ public class SwerveModule implements Sendable {
     toApply.Slot0.kD = DriveCal.DRIVING_D;
     toApply.Slot0.kV = DriveCal.DRIVING_FF;
     cfg.apply(toApply);
+    final double fastUpdateFrequencyHz = 50.0; // TODO change to faster for better odometry
+    final double slowUpdateFrequencyHz = 50.0;
+    drivingTalon.getPosition().setUpdateFrequency(fastUpdateFrequencyHz);
+    drivingTalon.getVelocity().setUpdateFrequency(fastUpdateFrequencyHz);
+    drivingTalon.getClosedLoopProportionalOutput().setUpdateFrequency(slowUpdateFrequencyHz);
+    drivingTalon.getClosedLoopDerivativeOutput().setUpdateFrequency(slowUpdateFrequencyHz);
+    drivingTalon.getClosedLoopIntegratedOutput().setUpdateFrequency(slowUpdateFrequencyHz);
+    drivingTalon.getClosedLoopFeedForward().setUpdateFrequency(slowUpdateFrequencyHz);
+    drivingTalon.optimizeBusUtilization();
   }
 
   /**

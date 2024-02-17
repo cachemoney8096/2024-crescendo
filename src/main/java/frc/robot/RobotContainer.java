@@ -9,6 +9,11 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.subsystems.conveyor.Conveyor;
+import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.shooter.Shooter;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -17,15 +22,6 @@ import frc.robot.Constants.OperatorConstants;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
-
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
-  public RobotContainer() {
-    // Configure the trigger bindings
-    configureBindings();
-  }
 
   /**
    * This class stores the state of the match (the alliance color, and whether it's a real match)
@@ -47,6 +43,28 @@ public class RobotContainer {
   }
 
   public MatchState matchState = new MatchState(false, true);
+
+  // Replace with CommandPS4Controller or CommandJoystick if needed
+  private final CommandXboxController driverController =
+      new CommandXboxController(OperatorConstants.driverControllerPort);
+
+  private DriveSubsystem drive;
+  private Intake intake;
+  private Elevator elevator;
+  private Shooter shooter;
+  private Conveyor conveyor;
+
+  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  public RobotContainer() {
+    drive = new DriveSubsystem(matchState);
+    intake = new Intake();
+    elevator = new Elevator();
+    shooter = new Shooter();
+    conveyor = new Conveyor();
+
+    // Configure the trigger bindings
+    configureBindings();
+  }
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
