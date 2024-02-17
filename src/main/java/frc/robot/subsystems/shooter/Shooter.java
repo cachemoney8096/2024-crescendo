@@ -107,9 +107,11 @@ public class Shooter extends SubsystemBase {
     errors +=
         SparkMaxUtils.check(motorRight.setSmartCurrentLimit(ShooterCal.SHOOTER_CURRENT_LIMIT_AMPS));
     errors +=
-        SparkMaxUtils.check(motorLeftOne.setSmartCurrentLimit(ShooterCal.SHOOTER_CURRENT_LIMIT_AMPS));
+        SparkMaxUtils.check(
+            motorLeftOne.setSmartCurrentLimit(ShooterCal.SHOOTER_CURRENT_LIMIT_AMPS));
     errors +=
-        SparkMaxUtils.check(motorLeftTwo.setSmartCurrentLimit(ShooterCal.SHOOTER_CURRENT_LIMIT_AMPS));
+        SparkMaxUtils.check(
+            motorLeftTwo.setSmartCurrentLimit(ShooterCal.SHOOTER_CURRENT_LIMIT_AMPS));
 
     // PID Stuff
     errors += SparkMaxUtils.check(controllerA.setP(ShooterCal.MOTOR_A_kP));

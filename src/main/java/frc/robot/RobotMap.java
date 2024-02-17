@@ -22,11 +22,9 @@ public class RobotMap {
       REAR_RIGHT_TURNING_CAN_ID = 3;
 
   /** Conveyor SPARK MAX CAN IDs */
-  public static final int FRONT_CONVEYOR_CAN_ID = 18,
-      BACK_CONVEYOR_CAN_ID = 19;
+  public static final int FRONT_CONVEYOR_CAN_ID = 18, BACK_CONVEYOR_CAN_ID = 19;
 
-  public static final int LEFT_ELEVATOR_CAN_ID = 10,
-      RIGHT_ELEVATOR_CAN_ID = 7;
+  public static final int LEFT_ELEVATOR_CAN_ID = 10, RIGHT_ELEVATOR_CAN_ID = 7;
 
   /** Intake motor and talon CAN IDs */
   public static final int INTAKE_PIVOT_MOTOR_CAN_ID = 8,
