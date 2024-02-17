@@ -4,6 +4,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkBase.IdleMode;
@@ -94,9 +95,10 @@ public class Intake extends SubsystemBase {
   public void initIntakeTalons() {
     // TODO check status codes
     TalonFXConfigurator cfgLeft = intakeTalonLeft.getConfigurator();
-    TalonFXConfigurator cfgRight = intakeTalonLeft.getConfigurator();
+    TalonFXConfigurator cfgRight = intakeTalonRight.getConfigurator();
 
     TalonFXConfiguration toApply = new TalonFXConfiguration();
+    toApply.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // this is invert = true
     toApply.CurrentLimits.SupplyCurrentLimit = IntakeCal.INTAKING_TALONS_CURRENT_LIMIT_AMPS;
     toApply.CurrentLimits.SupplyCurrentLimitEnable = true;
     toApply.MotorOutput.NeutralMode = NeutralModeValue.Coast;

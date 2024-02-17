@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import org.ejml.ops.ConvertMatrixData;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -58,14 +56,14 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    drive = new DriveSubsystem(matchState);
+    intake = new Intake();
+    elevator = new Elevator();
+    shooter = new Shooter();
+    conveyor = new Conveyor();
+
     // Configure the trigger bindings
     configureBindings();
-
-    drive = new DriveSubsystem(matchState);
-    // intake = new Intake();
-    // elevator = new Elevator();
-    // shooter = new Shooter();
-    // conveyor = new Conveyor();
   }
 
   /**
