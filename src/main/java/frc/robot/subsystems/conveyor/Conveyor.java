@@ -16,9 +16,9 @@ import frc.robot.RobotMap;
 import frc.robot.utils.SparkMaxUtils;
 
 public class Conveyor extends SubsystemBase {
-  private CANSparkMax frontMotor =
+  public CANSparkMax frontMotor =
       new CANSparkMax(RobotMap.FRONT_CONVEYOR_CAN_ID, MotorType.kBrushless);
-  private CANSparkMax backMotor =
+  public CANSparkMax backMotor =
       new CANSparkMax(RobotMap.BACK_CONVEYOR_CAN_ID, MotorType.kBrushless);
 
   /** Configured to read inches, positive towards the shooter. */

@@ -27,7 +27,7 @@ import java.util.TreeMap;
 /** Intake pivot and rollers. */
 public class Intake extends SubsystemBase {
 
-  private final CANSparkMax pivotMotor =
+  public final CANSparkMax pivotMotor =
       new CANSparkMax(RobotMap.INTAKE_PIVOT_MOTOR_CAN_ID, MotorType.kBrushless);
   /** Configured to read degrees, zero is down. */
   private final AbsoluteEncoder pivotAbsoluteEncoder =
