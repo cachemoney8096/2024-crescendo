@@ -25,6 +25,7 @@ public class Lights {
     ALIGNING_TO_TAG, //orange
     HOLDING_NOTE, //yellow
     OFF, //no lights are on
+    NO_TAG,
     PARTY_MODE;
   }
 
@@ -38,9 +39,9 @@ public class Lights {
     lightOptionsMap.put(LightCode.NOTELESS, new Integer[] {255, 0, 0});
     lightOptionsMap.put(LightCode.INTAKING, new Integer[] {0, 0, 255});
     lightOptionsMap.put(LightCode.READY_TO_SHOOT, new Integer[] {0, 255, 0});
-    lightOptionsMap.put(LightCode.OFF, new Integer[] {0, 0, 0});
     lightOptionsMap.put(LightCode.ALIGNING_TO_TAG, new Integer[] {255, 165, 0});
     lightOptionsMap.put(LightCode.HOLDING_NOTE, new Integer[] {255, 255, 102});
+    lightOptionsMap.put(LightCode.OFF, new Integer[] {0, 0, 0});
   }
 
   public void toggleCode(LightCode light) {
