@@ -44,7 +44,7 @@ public class Intake extends SubsystemBase {
               IntakeCal.PIVOT_MAX_VELOCITY_DEG_PER_SECOND,
               IntakeCal.PIVOT_MAX_ACCELERATION_DEG_PER_SECOND_SQUARED));
 
-  /** FPGA timestamp fro3m previous cycle. Empty for first cycle only. */
+  /** FPGA timestamp from previous cycle. Empty for first cycle only. */
   private Optional<Double> lastControlledTime = Optional.empty();
   /** Profiled velocity setpoint from previous cycle (deg per sec) */
   private Optional<Double> prevVelocityDegPerSec = Optional.empty();
