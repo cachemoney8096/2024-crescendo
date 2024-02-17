@@ -104,6 +104,9 @@ public class Intake extends SubsystemBase {
     cfgLeft.apply(toApply);
     cfgRight.apply(toApply);
 
+    intakeTalonLeft.optimizeBusUtilization();
+    intakeTalonRight.optimizeBusUtilization();
+
     intakeTalonRight.setControl(new Follower(intakeTalonLeft.getDeviceID(), false));
   }
 
