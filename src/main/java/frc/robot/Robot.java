@@ -65,10 +65,6 @@ public class Robot extends TimedRobot {
       m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kCoast);
       m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kCoast);
       m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kCoast);
-      m_robotContainer.conveyor.frontMotor.setIdleMode(IdleMode.kCoast);
-      m_robotContainer.conveyor.backMotor.setIdleMode(IdleMode.kCoast);
-      m_robotContainer.shooter.motorA.setIdleMode(IdleMode.kCoast);
-      m_robotContainer.shooter.motorB.setIdleMode(IdleMode.kCoast);
       m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kCoast);
       m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kCoast);
       m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kCoast);
@@ -91,6 +87,17 @@ public class Robot extends TimedRobot {
     }
 
     setRobotContainerMatchState();
+
+    if (m_robotContainer.matchState.realMatch) {
+      m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
+    }
   }
 
   /** This function is called periodically during autonomous. */
@@ -108,6 +115,17 @@ public class Robot extends TimedRobot {
     }
 
     setRobotContainerMatchState();
+
+    if (m_robotContainer.matchState.realMatch) {
+      m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
+    }
   }
 
   /** This function is called periodically during operator control. */
