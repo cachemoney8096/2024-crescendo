@@ -273,8 +273,10 @@ public class Shooter extends SubsystemBase {
     builder.addDoubleProperty(
         "pivot velocity (deg/sec)", pivotMotorAbsoluteEncoder::getVelocity, null);
     builder.addBooleanProperty("At desired pos", this::atDesiredPosition, null);
-    builder.addDoubleProperty("Motor Right velocity (in per sec)", motorRightRelEncoder::getVelocity, null);
-    builder.addDoubleProperty("Motor Left One velocity (in per sec)", motorLeftOneRelEncoder::getVelocity, null);
+    builder.addDoubleProperty(
+        "Motor Right velocity (in per sec)", motorRightRelEncoder::getVelocity, null);
+    builder.addDoubleProperty(
+        "Motor Left One velocity (in per sec)", motorLeftOneRelEncoder::getVelocity, null);
     builder.addBooleanProperty("At desired shooter speeds", this::isShooterSpunUp, null);
     builder.addStringProperty("Current Mode", () -> shooterMode.toString(), null);
     builder.addDoubleProperty("Shooter Dist (m)", () -> shooterDistanceMeters, null);
