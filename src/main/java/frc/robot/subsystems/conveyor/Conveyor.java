@@ -6,6 +6,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkLimitSwitch;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -102,6 +103,13 @@ public class Conveyor extends SubsystemBase {
     errors += SparkMaxUtils.check(beamBreakSensorFour.enableLimitSwitch(false));
 
     return errors == 0;
+  }
+
+  public void burnFlashSparks() {
+    Timer.delay(0.005);
+    frontMotor.burnFlash();
+    Timer.delay(0.005);
+    backMotor.burnFlash();
   }
 
   /** Stops the conveyor rollers. */
