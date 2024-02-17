@@ -5,26 +5,27 @@ import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdleConfiguration;
 import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.RobotMap;
 import java.util.TreeMap;
 
 public class Lights {
-  /**Tree map of light code enums and integers that 
-     * represent the R, G, B values of each light code enum */
+  /**
+   * Tree map of light code enums and integers that represent the R, G, B values of each light code
+   * enum
+   */
   private TreeMap<LightCode, Integer[]> lightOptionsMap;
+
   private CANdle candle = new CANdle(RobotMap.CANDLE_CAN_ID);
   private CANdleConfiguration config = new CANdleConfiguration();
   private LightCode currentLightStatus = LightCode.OFF;
 
-  public enum LightCode{
-    NOTELESS, //red
-    INTAKING, //blue
-    READY_TO_SHOOT, //green
-    ALIGNING_TO_TAG, //orange
-    HOLDING_NOTE, //yellow
-    OFF, //no lights are on
+  public enum LightCode {
+    NOTELESS, // red
+    INTAKING, // blue
+    READY_TO_SHOOT, // green
+    ALIGNING_TO_TAG, // orange
+    HOLDING_NOTE, // yellow
+    OFF, // no lights are on
     NO_TAG,
     PARTY_MODE;
   }
@@ -34,7 +35,6 @@ public class Lights {
     config.brightnessScalar = 1.0;
     candle.configAllSettings(config);
 
-    
     lightOptionsMap = new TreeMap<LightCode, Integer[]>();
     lightOptionsMap.put(LightCode.NOTELESS, new Integer[] {255, 0, 0});
     lightOptionsMap.put(LightCode.INTAKING, new Integer[] {0, 0, 255});
@@ -60,9 +60,9 @@ public class Lights {
       setNoTag();
     } else {
       candle.setLEDs(
-        lightOptionsMap.get(currentLightStatus)[0],
-        lightOptionsMap.get(currentLightStatus)[1],
-        lightOptionsMap.get(currentLightStatus)[2]);
+          lightOptionsMap.get(currentLightStatus)[0],
+          lightOptionsMap.get(currentLightStatus)[1],
+          lightOptionsMap.get(currentLightStatus)[2]);
     }
   }
 
@@ -72,10 +72,11 @@ public class Lights {
   }
 
   public void setPartyMode() {
-      RainbowAnimation rainbowAnim = new RainbowAnimation(LightsConstants.LIGHT_BRIGHTNESS, LightsConstants.LIGHT_SPEED, LightsConstants.NUM_CANDLE_LEDS);
-      candle.animate(rainbowAnim);
+    RainbowAnimation rainbowAnim =
+        new RainbowAnimation(
+            LightsConstants.LIGHT_BRIGHTNESS,
+            LightsConstants.LIGHT_SPEED,
+            LightsConstants.NUM_CANDLE_LEDS);
+    candle.animate(rainbowAnim);
   }
 }
-
-
-
