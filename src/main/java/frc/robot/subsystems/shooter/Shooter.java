@@ -19,6 +19,7 @@ import frc.robot.RobotMap;
 import frc.robot.utils.SendableHelper;
 import frc.robot.utils.SparkMaxUtils;
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 
 /** Shooter pivot (for shooting and for latching) and shooter wheels (for shooting). */
 public class Shooter extends SubsystemBase {
@@ -78,11 +79,23 @@ public class Shooter extends SubsystemBase {
   /** How far are we away from the goal (in meters) */
   private double shooterDistanceMeters = 10.0;
 
-  public Shooter() {
+  private DoubleSupplier distanceGetter;
+
+  private Boolean distGetBool;
+
+  public Double getDistanceFromDistanceGetter(){
+    return distanceGetter.getAsDouble();
+  }
+
+  public void setDistanceGetterOff(){
+    distGetBool = false;
+  }
+//set off at end of score
+  public Shooter(DoubleSupplier inputDistanceGetter) {
     pivotAngleMap = new InterpolatingDoubleTreeMap();
     pivotAngleMap.put(0.0, 114.0);
     pivotAngleMap.put(100.0, 114.0);
-
+    distanceGetter = inputDistanceGetter;
     SparkMaxUtils.initWithRetry(this::initSparks, Constants.SPARK_INIT_RETRY_ATTEMPTS);
   }
 
@@ -229,6 +242,9 @@ public class Shooter extends SubsystemBase {
 
   @Override
   public void periodic() {
+    if (distGetBool){
+        setShooterDistance(distanceGetter.getAsDouble());  
+      }
     switch (shooterMode) {
       case IDLE:
         stopShooter();

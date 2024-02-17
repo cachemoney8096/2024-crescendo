@@ -12,14 +12,13 @@ import frc.robot.subsystems.shooter.Shooter.ShooterMode;
  * spins up the shooter
  */
 public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
-  /** this is a specified distance from the speaker each time until we do limelight stuff */
-  public final double SPEAKER_SHOOTER_DISTANCE_METERS = 5.0;
 
   public SpeakerPrepScoreSequence(Intake intake, Elevator elevator, Shooter shooter) {
     addRequirements(intake, elevator, shooter);
     addCommands(
-        new InstantCommand(() -> shooter.setShooterDistance(SPEAKER_SHOOTER_DISTANCE_METERS)),
+        new InstantCommand(() -> shooter.setShooterDistance(shooter.getDistanceFromDistanceGetter())),
         new GoHomeSequence(intake, elevator, shooter, true),
-        new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)));
+        new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
+        new InstantCommand(() -> shooter.setDistanceGetterOff()));
   }
 }
