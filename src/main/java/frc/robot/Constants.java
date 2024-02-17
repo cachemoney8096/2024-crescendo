@@ -27,4 +27,6 @@ public final class Constants {
 
   /* time between compute cycles */
   public static final double PERIOD_TIME_SECONDS = 0.02;
+
+  public static final double BROWNOUT_VOLTAGE = 5.0;
 }
