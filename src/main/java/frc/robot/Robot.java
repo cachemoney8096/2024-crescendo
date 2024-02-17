@@ -55,13 +55,10 @@ public class Robot extends TimedRobot {
   /** This function is called once each time the robot enters disabled mode. */
   @Override
   public void disabledInit() {
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
-    }
     LimelightHelpers.getLatestResults(
         IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME); // It takes 2.5-3s on first run
 
-    if (m_robotContainer.matchState.realMatch) {
+    if (!m_robotContainer.matchState.realMatch) {
       m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kCoast);
       m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kCoast);
       m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kCoast);
