@@ -97,7 +97,7 @@ public class Intake extends SubsystemBase {
     TalonFXConfigurator cfgBack = intakeTalonFront.getConfigurator();
 
     TalonFXConfiguration toApply = new TalonFXConfiguration();
-    toApply.CurrentLimits.SupplyCurrentLimit = IntakeConstants.INTAKING_TALONS_CURRENT_LIMIT_AMPS;
+    toApply.CurrentLimits.SupplyCurrentLimit = IntakeCal.INTAKING_TALONS_CURRENT_LIMIT_AMPS;
     toApply.CurrentLimits.SupplyCurrentLimitEnable = true;
     toApply.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
@@ -131,8 +131,7 @@ public class Intake extends SubsystemBase {
   public double getCosineArmAngle() {
     return Math.cos(
         Units.degreesToRadians(
-            pivotAbsoluteEncoder.getPosition()
-                - IntakeConstants.INTAKE_POSITION_WHEN_HORIZONTAL_DEGREES));
+            getOffsetAbsPositionDeg() - IntakeConstants.INTAKE_POSITION_WHEN_HORIZONTAL_DEGREES));
   }
 
   /** Gets the correctly zeroed position of the pivot. */
@@ -167,7 +166,7 @@ public class Intake extends SubsystemBase {
 
   public boolean atIntakePosition(IntakePosition pos) {
     double checkPositionDegrees = intakePositionMap.get(pos);
-    double intakePositionDegrees = pivotAbsoluteEncoder.getPosition();
+    double intakePositionDegrees = getOffsetAbsPositionDeg();
     return Math.abs(intakePositionDegrees - checkPositionDegrees)
         <= IntakeCal.INTAKE_MARGIN_DEGREES;
   }
@@ -177,7 +176,7 @@ public class Intake extends SubsystemBase {
    * zone would be greater than the threshold
    */
   public boolean clearOfConveyorZone() {
-    return pivotAbsoluteEncoder.getPosition() > IntakeCal.CONVEYOR_ZONE_THRESHOLD_DEGREES;
+    return getOffsetAbsPositionDeg() > IntakeCal.CONVEYOR_ZONE_THRESHOLD_DEGREES;
   }
 
   public void startRollers() {

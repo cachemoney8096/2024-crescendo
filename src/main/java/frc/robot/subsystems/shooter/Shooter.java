@@ -26,7 +26,9 @@ public class Shooter extends SubsystemBase {
   public enum ShooterMode {
     /** Not doing anything */
     IDLE,
-    /** Shooting or spinning up to shoot */
+    /** Spin up the shooter but stay at home position */
+    SPIN_UP,
+    /** Both spinning up the shooter and going to the right elevation angle */
     SHOOT,
     /** Holding pivot such that we can climb */
     PRELATCH,
@@ -78,8 +80,8 @@ public class Shooter extends SubsystemBase {
 
   public Shooter() {
     pivotAngleMap = new InterpolatingDoubleTreeMap();
-    pivotAngleMap.put(Constants.PLACEHOLDER_DOUBLE, Constants.PLACEHOLDER_DOUBLE);
-    pivotAngleMap.put(Constants.PLACEHOLDER_DOUBLE, Constants.PLACEHOLDER_DOUBLE);
+    pivotAngleMap.put(0.0, 114.0);
+    pivotAngleMap.put(100.0, 114.0);
 
     SparkMaxUtils.initWithRetry(this::initSparks, Constants.SPARK_INIT_RETRY_ATTEMPTS);
   }
@@ -114,7 +116,8 @@ public class Shooter extends SubsystemBase {
 
     errors +=
         SparkMaxUtils.check(
-            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(pivotMotorAbsoluteEncoder, 1.0));
+            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(
+                pivotMotorAbsoluteEncoder, ShooterConstants.ABS_ENCODER_GEAR_RATIO));
 
     return errors == 0;
   }
@@ -134,6 +137,10 @@ public class Shooter extends SubsystemBase {
   public boolean atDesiredPosition() {
     return Math.abs(getPivotPosition() - pivotDesiredPositionDegrees)
         < ShooterCal.PIVOT_ANGLE_MARGIN_DEG;
+  }
+
+  public boolean clearOfConveyorZone() {
+    return getPivotPosition() < ShooterCal.CONVEYOR_ZONE_THRESHOLD_DEGREES;
   }
 
   public boolean isShooterSpunUp() {
@@ -217,7 +224,7 @@ public class Shooter extends SubsystemBase {
   }
 
   private double getPivotPosition() {
-    return pivotMotorAbsoluteEncoder.getPosition() - ShooterConstants.PIVOT_ANGLE_OFFSET_DEGREES;
+    return pivotMotorAbsoluteEncoder.getPosition() - ShooterCal.PIVOT_ANGLE_OFFSET_DEGREES;
   }
 
   @Override
@@ -225,6 +232,10 @@ public class Shooter extends SubsystemBase {
     switch (shooterMode) {
       case IDLE:
         stopShooter();
+        controlPosition(ShooterCal.STARTING_POSITION_DEGREES);
+        break;
+      case SPIN_UP:
+        spinUpShooter();
         controlPosition(ShooterCal.STARTING_POSITION_DEGREES);
         break;
       case SHOOT:

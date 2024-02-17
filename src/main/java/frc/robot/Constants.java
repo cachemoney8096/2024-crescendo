@@ -29,4 +29,6 @@ public final class Constants {
   public static final double PERIOD_TIME_SECONDS = 0.02;
 
   public static final double BROWNOUT_VOLTAGE = 5.0;
+
+  public static final double NOTE_HEIGHT_INCHES = 2.0;
 }
