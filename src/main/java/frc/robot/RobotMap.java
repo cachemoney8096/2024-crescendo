@@ -31,4 +31,6 @@ public class RobotMap {
   public static final int INTAKE_PIVOT_MOTOR_CAN_ID = Constants.PLACEHOLDER_INT,
       INTAKING_FRONT_MOTOR_CAN_ID = Constants.PLACEHOLDER_INT,
       INTAKING_BACK_MOTOR_CAN_ID = Constants.PLACEHOLDER_INT;
+
+  public static final int CANDLE_CAN_ID = Constants.PLACEHOLDER_INT;
 }
