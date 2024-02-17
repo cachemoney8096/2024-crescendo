@@ -11,6 +11,8 @@ import frc.robot.RobotMap;
 import java.util.TreeMap;
 
 public class Lights {
+  /**Tree map of light code enums and integers that 
+     * represent the R, G, B values of each light code enum */
   private TreeMap<LightCode, Integer[]> lightOptionsMap;
   private CANdle candle = new CANdle(RobotMap.CANDLE_CAN_ID);
   private CANdleConfiguration config = new CANdleConfiguration();
@@ -20,10 +22,9 @@ public class Lights {
     NOTELESS, //red
     INTAKING, //blue
     READY_TO_SHOOT, //green
-    NO_TAG, //blinking purple
     ALIGNING_TO_TAG, //orange
     HOLDING_NOTE, //yellow
-    OFF, //grey
+    OFF, //no lights are on
     PARTY_MODE;
   }
 
@@ -32,12 +33,11 @@ public class Lights {
     config.brightnessScalar = 1.0;
     candle.configAllSettings(config);
 
-    //array of integers that represents the R, G, B values of each lightcode enum
+    
     lightOptionsMap = new TreeMap<LightCode, Integer[]>();
     lightOptionsMap.put(LightCode.NOTELESS, new Integer[] {255, 0, 0});
     lightOptionsMap.put(LightCode.INTAKING, new Integer[] {0, 0, 255});
     lightOptionsMap.put(LightCode.READY_TO_SHOOT, new Integer[] {0, 255, 0});
-    lightOptionsMap.put(LightCode.NO_TAG, new Integer[] {255, 0, 255});
     lightOptionsMap.put(LightCode.OFF, new Integer[] {0, 0, 0});
     lightOptionsMap.put(LightCode.ALIGNING_TO_TAG, new Integer[] {255, 165, 0});
     lightOptionsMap.put(LightCode.HOLDING_NOTE, new Integer[] {255, 255, 102});
