@@ -10,9 +10,18 @@ public final class ElevatorConstants {
   /** Elevator motor to drum. >1 meaning reduction. */
   public static final double ELEVATOR_GEAR_RATIO = Constants.PLACEHOLDER_DOUBLE;
 
-  /** Ratio from the left encoder to the drum. >1 meaning the encoder spins slower. */
+  /**
+   * Ratio from the left encoder to the drum. >1 meaning the encoder spins slower.
+   */
   public static final double ELEVATOR_LEFT_ABSOLUTE_ENCODER_RATIO = Constants.PLACEHOLDER_DOUBLE;
 
-  /** Ratio from the right encoder to the drum. >1 meaning the encoder spins slower. */
+  /**
+   * Ratio from the right encoder to the drum. >1 meaning the encoder spins
+   * slower.
+   */
   public static final double ELEVATOR_RIGHT_ABSOLUTE_ENCODER_RATIO = Constants.PLACEHOLDER_DOUBLE;
+
+  /** Threshhold for elevator hitting the speaker */
+  public static final double HITTING_SPEAKER_VELOCITY_THRESHHOLD = Constants.PLACEHOLDER_DOUBLE,
+      HITTING_SPEAKER_AMP_THRESHHOLD = Constants.PLACEHOLDER_DOUBLE;
 }
