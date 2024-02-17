@@ -22,19 +22,20 @@ public class SetTrapLineupPosition extends Command{
 
   @Override
   public void initialize() {
-    
+    targetLocked = false;
   }
 
   @Override
   public void execute() {
     if (!targetLocked) {
-      Optional<Transform2d> robotToScoringLocation = tagLimelight.checkForTag(); //TODO add offset to the getRobotToScoringLocation function
+      Optional<Transform2d> robotToScoringLocation = tagLimelight.checkForTag();
       if (!robotToScoringLocation.isPresent()) {
         robotToScoringLocation = Optional.empty();
         return;
       }
       double latencySeconds = tagLimelight.getLatencySeconds();
       targetLocked = true;
+      System.out.println(robotToScoringLocation.get());
       drive.setLimelightTargetFromTransform(robotToScoringLocation.get(), latencySeconds, true);
     }
   }

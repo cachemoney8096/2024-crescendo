@@ -23,6 +23,7 @@ import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Detector;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
 import java.util.Optional;
+import frc.robot.subsystems.intakeLimelight.IntakeLimelightCal;
 
 /** Limelight for the intake to identify game pieces */
 public class IntakeLimelight extends SubsystemBase {
@@ -181,7 +182,7 @@ public class IntakeLimelight extends SubsystemBase {
 
   private Transform2d getRobotToScoringLocation(Pose3d targetPoseRobotSpace) {
     Transform2d targetFromBot = getBotFromTarget(targetPoseRobotSpace);
-    return targetFromBot;
+    return targetFromBot.plus(IntakeLimelightCal.TRAP_OFFSET);
   }
 
   public Optional<Transform2d> getRobotToScoringLocation() {
