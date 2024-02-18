@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.revrobotics.CANSparkBase.IdleMode;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -51,11 +52,22 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
   }
 
-  /** This function is called once each time the robot enters Disabled mode. */
+  /** This function is called once each time the robot enters disabled mode. */
   @Override
   public void disabledInit() {
     LimelightHelpers.getLatestResults(
         IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME); // It takes 2.5-3s on first run
+
+    if (!m_robotContainer.matchState.realMatch) {
+      m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kCoast);
+      m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kCoast);
+      m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kCoast);
+      m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kCoast);
+      m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kCoast);
+      m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kCoast);
+      m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kCoast);
+      m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kCoast);
+    }
   }
 
   @Override
@@ -72,6 +84,17 @@ public class Robot extends TimedRobot {
     }
 
     setRobotContainerMatchState();
+
+    if (m_robotContainer.matchState.realMatch) {
+      m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
+    }
   }
 
   /** This function is called periodically during autonomous. */
@@ -89,6 +112,17 @@ public class Robot extends TimedRobot {
     }
 
     setRobotContainerMatchState();
+
+    if (m_robotContainer.matchState.realMatch) {
+      m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
+      m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
+    }
   }
 
   /** This function is called periodically during operator control. */

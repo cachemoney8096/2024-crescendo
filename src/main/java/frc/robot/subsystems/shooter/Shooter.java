@@ -42,7 +42,7 @@ public class Shooter extends SubsystemBase {
       new CANSparkMax(RobotMap.SHOOTER_MOTOR_LEFT_ONE_CAN_ID, MotorType.kBrushless);
   private final CANSparkMax motorLeftTwo =
       new CANSparkMax(RobotMap.SHOOTER_MOTOR_LEFT_TWO_CAN_ID, MotorType.kBrushless);
-  private final CANSparkMax pivotMotor =
+  public final CANSparkMax pivotMotor =
       new CANSparkMax(RobotMap.SHOOTER_PIVOT_MOTOR_CAN_ID, MotorType.kBrushless);
   /** Configured to read degrees, zero is shooting straight down */
   private final AbsoluteEncoder pivotMotorAbsoluteEncoder =

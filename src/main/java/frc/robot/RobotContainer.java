@@ -48,11 +48,11 @@ public class RobotContainer {
   private final CommandXboxController driverController =
       new CommandXboxController(OperatorConstants.driverControllerPort);
 
-  private DriveSubsystem drive;
-  private Intake intake;
-  private Elevator elevator;
-  private Shooter shooter;
-  private Conveyor conveyor;
+  public DriveSubsystem drive;
+  public Intake intake;
+  public Elevator elevator;
+  public Shooter shooter;
+  public Conveyor conveyor;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
