@@ -4,8 +4,12 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
@@ -14,6 +18,7 @@ import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.utils.JoystickUtil;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -56,6 +61,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    // Add subsystems
     drive = new DriveSubsystem(matchState);
     intake = new Intake();
     elevator = new Elevator();
@@ -64,6 +70,14 @@ public class RobotContainer {
 
     // Configure the trigger bindings
     configureBindings();
+
+    Shuffleboard.getTab("Subsystems").add(drive.getName(), drive);
+    Shuffleboard.getTab("Subsystems").add(intake.getName(), intake);
+    Shuffleboard.getTab("Subsystems").add(conveyor.getName(), conveyor);
+    Shuffleboard.getTab("Subsystems").add(shooter.getName(), shooter);
+    Shuffleboard.getTab("Subsystems").add(elevator.getName(), elevator);
+
+    burnFlashAllSparks();
   }
 
   /**
@@ -76,6 +90,16 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {}
+
+  private void burnFlashAllSparks() {
+    Timer.delay(0.25);
+    drive.burnFlashSparks();
+    intake.burnFlashSpark();
+    conveyor.burnFlashSparks();
+    elevator.burnFlashSparks();
+    shooter.burnFlashSparks();
+    Timer.delay(0.25);
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

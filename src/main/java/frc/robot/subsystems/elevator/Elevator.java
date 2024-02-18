@@ -90,16 +90,6 @@ public class Elevator extends SubsystemBase {
 
     errors += SparkMaxUtils.check(rightMotor.follow(leftMotor, true));
 
-    errors +=
-        SparkMaxUtils.check(
-            leftMotor.setSoftLimit(
-                SoftLimitDirection.kForward, ElevatorCal.ELEVATOR_POSITIVE_LIMIT_INCHES));
-    errors += SparkMaxUtils.check(leftMotor.enableSoftLimit(SoftLimitDirection.kForward, true));
-    errors +=
-        SparkMaxUtils.check(
-            leftMotor.setSoftLimit(
-                SoftLimitDirection.kReverse, ElevatorCal.ELEVATOR_NEGATIVE_LIMIT_INCHES));
-    errors += SparkMaxUtils.check(leftMotor.enableSoftLimit(SoftLimitDirection.kReverse, true));
 
     errors += SparkMaxUtils.check(leftMotor.setIdleMode(IdleMode.kBrake));
     errors += SparkMaxUtils.check(rightMotor.setIdleMode(IdleMode.kBrake));

@@ -11,6 +11,7 @@ import com.revrobotics.SparkPIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -47,6 +48,10 @@ public class Shooter extends SubsystemBase {
   /** Configured to read degrees, zero is shooting straight down */
   private final AbsoluteEncoder pivotMotorAbsoluteEncoder =
       pivotMotor.getAbsoluteEncoder(Type.kDutyCycle);
+  /** Configured to read degrees, zero is shooting straight down */
+  private final RelativeEncoder pivotMotorEncoder =
+      pivotMotor.getEncoder();
+
 
   private double pivotDesiredPositionDegrees = ShooterCal.STARTING_POSITION_DEGREES;
   /** Not configured, defaults to Motor RPM. */
@@ -58,7 +63,7 @@ public class Shooter extends SubsystemBase {
   private Optional<Double> prevTimestamp = Optional.empty();
 
   /** Profiled velocity setpoint from previous cycle (degrees per second) */
-  private double prevVelocityDegPerSec = 0;
+  private double prevDesiredVelocityDegPerSec = 0;
 
   /** Map from goal distance (meters) to pivot angle (degrees) */
   private InterpolatingDoubleTreeMap pivotAngleMap;
@@ -80,12 +85,27 @@ public class Shooter extends SubsystemBase {
   /** How far are we away from the goal (in meters) */
   private double shooterDistanceMeters = 10.0;
 
+  // Values just for debug
+  private double desiredAccelDegPerSecSq = 0.0;
+  private double actualAccelDegPerSecSq = 0.0;
+  private double desiredVelDegPerSec = 0.0;
+  private double actualVelDegPerSec = 0.0;
+  private double prevActualVelocitDegPerSec = 0.0;
+  private double periodSec = 0.0;
+  private double armDemandPidVolts = 0.0;
+  private double armDemandFfVolts = 0.0;
+  private double armDemandGravityVolts = 0.0;
+  private double armDemandPosKsVolts = 0.0;
+
   public Shooter() {
     pivotAngleMap = new InterpolatingDoubleTreeMap();
     pivotAngleMap.put(0.0, 114.0);
     pivotAngleMap.put(100.0, 114.0);
 
     SparkMaxUtils.initWithRetry(this::initSparks, Constants.SPARK_INIT_RETRY_ATTEMPTS);
+
+    pivotController.reset(getPivotPosition());
+    pivotMotorEncoder.setPosition(getPivotPositionFromAbs());
   }
 
   public boolean initSparks() {
@@ -95,6 +115,7 @@ public class Shooter extends SubsystemBase {
     errors += SparkMaxUtils.check(motorLeftOne.restoreFactoryDefaults());
     errors += SparkMaxUtils.check(motorLeftTwo.restoreFactoryDefaults());
 
+    motorLeftOne.setInverted(true);
     errors += SparkMaxUtils.check(motorLeftTwo.follow(motorLeftOne));
 
     errors += SparkMaxUtils.check(pivotMotor.setIdleMode(IdleMode.kBrake));
@@ -103,7 +124,7 @@ public class Shooter extends SubsystemBase {
     errors += SparkMaxUtils.check(motorLeftTwo.setIdleMode(IdleMode.kCoast));
 
     errors +=
-        SparkMaxUtils.check(pivotMotor.setSmartCurrentLimit(ShooterCal.SHOOTER_CURRENT_LIMIT_AMPS));
+        SparkMaxUtils.check(pivotMotor.setSmartCurrentLimit(ShooterCal.PIVOT_CURRENT_LIMIT_AMPS));
     errors +=
         SparkMaxUtils.check(motorRight.setSmartCurrentLimit(ShooterCal.SHOOTER_CURRENT_LIMIT_AMPS));
     errors +=
@@ -123,6 +144,12 @@ public class Shooter extends SubsystemBase {
     errors += SparkMaxUtils.check(controllerB.setI(ShooterCal.MOTOR_B_kI));
     errors += SparkMaxUtils.check(controllerB.setD(ShooterCal.MOTOR_B_kD));
     errors += SparkMaxUtils.check(controllerB.setFF(ShooterCal.MOTOR_B_kFF));
+
+    errors += SparkMaxUtils.check(
+      SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(
+        pivotMotorEncoder, ShooterConstants.PIVOT_MOTOR_GEAR_RATIO
+      )
+    );
 
     errors +=
         SparkMaxUtils.check(
@@ -186,7 +213,7 @@ public class Shooter extends SubsystemBase {
 
   /** Returns the cosine of the intake angle in degrees off of the horizontal. */
   private double getCosineArmAngle() {
-    return Math.cos(getPivotPosition() - ShooterConstants.POSITION_WHEN_HORIZONTAL_DEGREES);
+    return Math.cos(Units.degreesToRadians(getPivotPosition() - ShooterConstants.POSITION_WHEN_HORIZONTAL_DEGREES));
   }
 
   /**
@@ -220,32 +247,66 @@ public class Shooter extends SubsystemBase {
    * @param angleDeg Desired pivot position. *
    */
   private void controlPosition(double angleDeg) {
+    if (Math.abs(pivotController.getPositionError()) > ShooterCal.PIVOT_PROFILE_REPLANNING_THRESHOLD)
+    {
+      pivotController.reset(getPivotPosition());
+    }
+
     pivotDesiredPositionDegrees = angleDeg;
     pivotController.setGoal(angleDeg);
     final double timestamp = Timer.getFPGATimestamp();
+    actualVelDegPerSec = pivotMotorAbsoluteEncoder.getVelocity();
 
-    final double armDemandVoltsA = pivotController.calculate(getPivotPosition());
-    double armDemandVoltsB;
+    armDemandPidVolts = pivotController.calculate(getPivotPosition());
     if (!prevTimestamp.isEmpty()) {
-      armDemandVoltsB =
+      armDemandFfVolts =
           ShooterCal.PIVOT_MOTOR_FF.calculate(
-              prevVelocityDegPerSec,
+              prevDesiredVelocityDegPerSec,
               pivotController.getSetpoint().velocity,
               timestamp - prevTimestamp.get());
+              desiredAccelDegPerSecSq = 
+                (pivotController.getSetpoint().velocity - prevDesiredVelocityDegPerSec) /
+                (timestamp - prevTimestamp.get());
+              actualAccelDegPerSecSq = 
+                (actualVelDegPerSec - prevActualVelocitDegPerSec) /
+                (timestamp - prevTimestamp.get());
+              if (Math.abs(desiredAccelDegPerSecSq) > 50.0)
+              {
+                desiredAccelDegPerSecSq = 0.0;
+              }
+              periodSec = timestamp - prevTimestamp.get();
     } else {
-      armDemandVoltsB = ShooterCal.PIVOT_MOTOR_FF.calculate(pivotController.getSetpoint().velocity);
+      armDemandFfVolts = ShooterCal.PIVOT_MOTOR_FF.calculate(pivotController.getSetpoint().velocity);
     }
-    final double armDemandVoltsC =
-        ShooterCal.ARBITRARY_PIVOT_FEED_FORWARD_VOLTS * getCosineArmAngle();
+    armDemandGravityVolts =
+        ShooterCal.PIVOT_GRAVITY_FEED_FORWARD_VOLTS * getCosineArmAngle();
+    
+    armDemandPosKsVolts = Math.signum(pivotController.getPositionError()) * ShooterCal.PIVOT_POS_FEED_FORWARD_VOLTS;
 
-    pivotMotor.setVoltage(armDemandVoltsA + armDemandVoltsB + armDemandVoltsC);
+    pivotMotor.setVoltage(armDemandPidVolts + armDemandFfVolts + armDemandGravityVolts + armDemandPosKsVolts);
 
+    desiredVelDegPerSec = pivotController.getSetpoint().velocity;
+
+    prevActualVelocitDegPerSec = actualVelDegPerSec;
     prevTimestamp = Optional.of(timestamp);
-    prevVelocityDegPerSec = pivotController.getSetpoint().velocity;
+    prevDesiredVelocityDegPerSec = pivotController.getSetpoint().velocity;
+  }
+
+  private double getPivotPositionFromAbs() {
+    return pivotMotorAbsoluteEncoder.getPosition() - ShooterCal.PIVOT_ANGLE_OFFSET_DEGREES;
   }
 
   private double getPivotPosition() {
-    return pivotMotorAbsoluteEncoder.getPosition() - ShooterCal.PIVOT_ANGLE_OFFSET_DEGREES;
+    return pivotMotorEncoder.getPosition();
+  }
+
+  public void considerZeroingEncoder() {
+    if ( Math.abs(
+      getPivotPosition() - getPivotPositionFromAbs()) > ShooterCal.PIVOT_ENCODER_ZEROING_THRESHOLD
+    )
+    {
+      pivotMotorEncoder.setPosition(getPivotPositionFromAbs());
+    }
   }
 
   @Override
@@ -281,6 +342,7 @@ public class Shooter extends SubsystemBase {
     builder.addDoubleProperty("Pivot desired pos (deg)", () -> pivotDesiredPositionDegrees, null);
     builder.addDoubleProperty("abs enc pos (deg)", pivotMotorAbsoluteEncoder::getPosition, null);
     builder.addDoubleProperty("pivot pos (deg)", this::getPivotPosition, null);
+    builder.addDoubleProperty("pivot pos from abs (deg)", this::getPivotPositionFromAbs, null);
     builder.addDoubleProperty(
         "pivot velocity (deg/sec)", pivotMotorAbsoluteEncoder::getVelocity, null);
     builder.addBooleanProperty("At desired pos", this::atDesiredPosition, null);
@@ -291,5 +353,22 @@ public class Shooter extends SubsystemBase {
     builder.addBooleanProperty("At desired shooter speeds", this::isShooterSpunUp, null);
     builder.addStringProperty("Current Mode", () -> shooterMode.toString(), null);
     builder.addDoubleProperty("Shooter Dist (m)", () -> shooterDistanceMeters, null);
+    builder.addDoubleProperty("PID (V)", () -> armDemandPidVolts, null);
+    builder.addDoubleProperty("Feedforward (V)", () -> armDemandFfVolts, null);
+    builder.addDoubleProperty("Gravity Comp (V)", () -> armDemandGravityVolts, null);
+    builder.addDoubleProperty("PID KS (V)", () -> armDemandPosKsVolts, null);
+    builder.addDoubleProperty("Goal (deg)", () -> pivotController.getGoal().position, null);
+    builder.addDoubleProperty("Setpoint position (deg)", () -> pivotController.getSetpoint().position, null);
+    builder.addDoubleProperty("Setpoint Velocity (deg per s)", () -> pivotController.getSetpoint().velocity, null);
+    builder.addDoubleProperty("Actual Velocity (deg per s)", () -> actualVelDegPerSec, null);
+    builder.addDoubleProperty("Desired Velocity (deg per s)", () -> desiredVelDegPerSec, null);
+    builder.addDoubleProperty("Actual Accel (deg per s2)", () -> actualAccelDegPerSecSq, null);
+    builder.addDoubleProperty("Desired Accel (deg per s2)", () -> desiredAccelDegPerSecSq, null);
+    builder.addDoubleProperty("Position Error (deg)", () -> pivotController.getPositionError(), null);
+    builder.addDoubleProperty("Period (sec)", () -> periodSec, null);
+    builder.addDoubleProperty("Abs to Rel Diff (deg)", () -> {
+      return getPivotPosition() - getPivotPositionFromAbs();
+    }, null);
+
   }
 }
