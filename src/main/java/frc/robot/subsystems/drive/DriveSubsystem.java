@@ -440,7 +440,7 @@ public class DriveSubsystem extends SubsystemBase {
     // Here we correct for that
     Transform2d flipTransform =
         new Transform2d(
-            new Translation2d(usingFrontLimelight?(transform.getX()):(-transform.getX()), transform.getY()), transform.getRotation()); //TODO we're gonna fix this in like 20 minutes
+            new Translation2d(usingFrontLimelight?(transform.getX()):(-transform.getX()), usingFrontLimelight?(transform.getY()):(-transform.getY())), transform.getRotation()); 
 
     double latencyAdjustmentSec = 0.00;
 

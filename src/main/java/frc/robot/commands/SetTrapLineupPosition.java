@@ -7,12 +7,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelight;
 
+/** Set the final position in the drive subsystem to the location of the tag the limelight sees */
 public class SetTrapLineupPosition extends Command{
   private DriveSubsystem drive;
   private IntakeLimelight tagLimelight;
   private boolean targetLocked = false;
 
-  //Set the final position in the drive subsystem to the location of the tag the limelight sees
   public SetTrapLineupPosition(
       IntakeLimelight limelight, DriveSubsystem driveSubsystem) {
     // Note: does not require the drive subsystem itself! It just sets the final point in the drive.
