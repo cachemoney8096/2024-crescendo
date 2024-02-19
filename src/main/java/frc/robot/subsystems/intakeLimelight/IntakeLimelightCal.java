@@ -5,6 +5,6 @@ import frc.robot.Constants;
 
 public class IntakeLimelightCal {
   public static final double LIMELIGHT_YAW_DEGREES = 0.0;
-  /** offset from trap apriltag*/
+  /** offset from trap apriltag */
   public static final Transform2d TRAP_OFFSET = Constants.PLACEHOLDER_TRANSFORM2D;
 }
