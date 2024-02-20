@@ -181,7 +181,7 @@ public class IntakeLimelight extends SubsystemBase {
 
   private Transform2d getRobotToScoringLocation(Pose3d targetPoseRobotSpace) {
     Transform2d targetFromBot = getBotFromTarget(targetPoseRobotSpace);
-    return targetFromBot;
+    return targetFromBot.plus(IntakeLimelightCal.TRAP_OFFSET);
   }
 
   public Optional<Transform2d> getRobotToScoringLocation() {
