@@ -15,6 +15,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -43,6 +44,8 @@ public class Intake extends SubsystemBase {
           new TrapezoidProfile.Constraints(
               IntakeCal.PIVOT_MAX_VELOCITY_DEG_PER_SECOND,
               IntakeCal.PIVOT_MAX_ACCELERATION_DEG_PER_SECOND_SQUARED));
+
+  public DigitalInput beamBreakSensor = new DigitalInput(RobotMap.INTAKE_BEAM_BREAK_SENSOR_DIO);
 
   /** FPGA timestamp from previous cycle. Empty for first cycle only. */
   private Optional<Double> lastControlledTime = Optional.empty();

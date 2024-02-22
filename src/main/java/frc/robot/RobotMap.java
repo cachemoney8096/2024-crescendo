@@ -32,4 +32,6 @@ public class RobotMap {
       INTAKING_RIGHT_MOTOR_CAN_ID = 21;
 
   public static final int CANDLE_CAN_ID = Constants.PLACEHOLDER_INT;
+
+  public static final int INTAKE_BEAM_BREAK_SENSOR_DIO = 9;
 }
