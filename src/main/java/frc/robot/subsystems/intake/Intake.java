@@ -226,5 +226,6 @@ public class Intake extends SubsystemBase {
     builder.addBooleanProperty("intake at desired pos", this::atDesiredIntakePosition, null);
 
     builder.addDoubleProperty("roller power in [-1,1]", intakeTalonLeft::get, null);
+    builder.addBooleanProperty("Intake beam break sensor", beamBreakSensor::get, null);
   }
 }
