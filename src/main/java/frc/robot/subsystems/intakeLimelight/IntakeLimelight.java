@@ -74,7 +74,7 @@ public class IntakeLimelight extends SubsystemBase {
     kCameraPitchAngleDegrees = pitchAngleDegrees;
     kCameraHeight = heightMeters;
     kTargetHeight = targetHeightMeters;
-    setLimelightValues(ledMode.OFF, camMode.VISION_PROCESSING, pipeline.NOTE_PIPELINE);
+    setLimelightValues(Constants.limelightLedMode.OFF, Constants.limelightCamMode.VISION_PROCESSING, Constants.limelightPipeline.NOTE_PIPELINE);
 
     m_simDevice = SimDevice.create("limelight-intake");
     if (m_simDevice != null) {
@@ -85,43 +85,6 @@ public class IntakeLimelight extends SubsystemBase {
       m_ty = m_simDevice.createDouble("Ty", Direction.kBidir, 0.0);
       m_valid = m_simDevice.createBoolean("Valid", Direction.kBidir, false);
     }
-  }
-
-  /*
-   * 0 - whatever pipleine is on
-   * 1 - off
-   * 2 - blinking
-   * 3 - on
-   */
-  public static enum ledMode {
-    PIPELINE_MODE,
-    OFF,
-    BLINK,
-    ON
-  }
-
-  /*
-   * 0 - limelight
-   * 1 - driver
-   */
-  public static enum camMode {
-    VISION_PROCESSING,
-    DRIVER_CAMERA
-  }
-
-  public static enum pipeline {
-    /** Pipeline 0 in LL */
-    NOTE_PIPELINE,
-    /** Pipeline 1 in LL */
-    TAG_PIPELINE,
-    PIPELINE2,
-    PIPELINE3,
-    PIPELINE4,
-    PIPELINE5,
-    PIPELINE6,
-    PIPELINE7,
-    PIPELINE8,
-    PIPELINE9
   }
 
   private static Transform2d getBotFromTarget(Pose3d botPoseTargetSpace) {
@@ -185,15 +148,15 @@ public class IntakeLimelight extends SubsystemBase {
   }
 
   public Optional<Transform2d> getRobotToScoringLocation() {
-    if (getPipeline() != pipeline.TAG_PIPELINE) {
-      setPipeline(pipeline.TAG_PIPELINE);
+    if (getPipeline() != Constants.limelightPipeline.TAG_PIPELINE) {
+      setPipeline(Constants.limelightPipeline.TAG_PIPELINE);
     }
     return robotToScoringLocation;
   }
 
   public Optional<Transform2d> checkForTag() {
-    if (getPipeline() != pipeline.TAG_PIPELINE) {
-      setPipeline(pipeline.TAG_PIPELINE);
+    if (getPipeline() != Constants.limelightPipeline.TAG_PIPELINE) {
+      setPipeline(Constants.limelightPipeline.TAG_PIPELINE);
     }
     if (!LimelightHelpers.getTV(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME)) {
       robotToScoringLocation = Optional.empty();
@@ -223,7 +186,7 @@ public class IntakeLimelight extends SubsystemBase {
    *
    * @param mode LED operating mode.
    */
-  public void setLedMode(ledMode mode) {
+  public void setLedMode(Constants.limelightLedMode mode) {
     table.getEntry("ledMode").setNumber(mode.ordinal());
   }
 
@@ -232,7 +195,7 @@ public class IntakeLimelight extends SubsystemBase {
    *
    * @param mode Camera operating mode.
    */
-  public void setCamMode(camMode mode) {
+  public void setCamMode(Constants.limelightCamMode mode) {
     table.getEntry("camMode").setNumber(mode.ordinal());
   }
 
@@ -241,7 +204,7 @@ public class IntakeLimelight extends SubsystemBase {
    *
    * @param line Pipeline index
    */
-  public void setPipeline(pipeline line) {
+  public void setPipeline(Constants.limelightPipeline line) {
     table.getEntry("pipeline").setNumber(line.ordinal());
   }
 
@@ -250,11 +213,11 @@ public class IntakeLimelight extends SubsystemBase {
    *
    * @return pipeline
    */
-  public pipeline getPipeline() {
-    return pipeline.values()[(int) table.getEntry("getpipe").getDouble(0)];
+  public Constants.limelightPipeline getPipeline() {
+    return Constants.limelightPipeline.values()[(int) table.getEntry("getpipe").getDouble(0)];
   }
 
-  public void setLimelightValues(ledMode ledMode, camMode camMode, pipeline line) {
+  public void setLimelightValues(Constants.limelightLedMode ledMode, Constants.limelightCamMode camMode, Constants.limelightPipeline line) {
     setLedMode(ledMode);
     setCamMode(camMode);
     setPipeline(line);
@@ -464,8 +427,8 @@ public class IntakeLimelight extends SubsystemBase {
    */
   public Optional<NoteDetection> getNotePos() {
     // TODO filter low confidence detection in LL dashboard, hopefully
-    if (getPipeline() != pipeline.NOTE_PIPELINE) {
-      setPipeline(pipeline.NOTE_PIPELINE);
+    if (getPipeline() != Constants.limelightPipeline.NOTE_PIPELINE) {
+      setPipeline(Constants.limelightPipeline.NOTE_PIPELINE);
     }
 
     LimelightHelpers.LimelightResults llresults =

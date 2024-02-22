@@ -19,6 +19,43 @@ public final class Constants {
     public static final int driverControllerPort = 0;
   }
 
+  /*
+   * 0 - whatever pipleine is on
+   * 1 - off
+   * 2 - blinking
+   * 3 - on
+   */
+  public static enum limelightLedMode {
+    PIPELINE_MODE,
+    OFF,
+    BLINK,
+    ON
+  }
+
+  /*
+   * 0 - limelight
+   * 1 - driver
+   */
+  public static enum limelightCamMode {
+    VISION_PROCESSING,
+    DRIVER_CAMERA
+  }
+
+  public static enum limelightPipeline {
+    /** Pipeline 0 in LL */
+    NOTE_PIPELINE,
+    /** Pipeline 1 in LL */
+    TAG_PIPELINE,
+    PIPELINE2,
+    PIPELINE3,
+    PIPELINE4,
+    PIPELINE5,
+    PIPELINE6,
+    PIPELINE7,
+    PIPELINE8,
+    PIPELINE9
+  }
+
   public static final double NEO_FREE_SPEED_RPM = 5676.0;
 
   public static final double PLACEHOLDER_DOUBLE = 0.0;
