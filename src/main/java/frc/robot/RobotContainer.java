@@ -4,8 +4,11 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
@@ -65,6 +68,18 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
   }
+
+  Command rumbleBriefly =
+      new SequentialCommandGroup(
+          new InstantCommand(
+              () -> {
+                driverController.getHID().setRumble(RumbleType.kBothRumble, 1.0);
+              }),
+          new WaitCommand(0.25),
+          new InstantCommand(
+              () -> {
+                driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+              }));
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the

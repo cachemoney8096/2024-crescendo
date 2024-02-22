@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -18,7 +19,7 @@ import frc.robot.subsystems.shooter.Shooter.ShooterMode;
  * game piece Stops and stowes intake
  */
 public class IntakeSequence extends SequentialCommandGroup {
-  public IntakeSequence(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
+  public IntakeSequence(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter, Command rumbleBrieflyCommand) {
     addRequirements(intake, elevator, conveyor, shooter);
 
     addCommands(
@@ -42,11 +43,8 @@ public class IntakeSequence extends SequentialCommandGroup {
         new WaitUntilCommand(intake::atDesiredIntakePosition),
         new InstantCommand(intake::startRollers),
         Conveyor.receive(conveyor),
-        new InstantCommand(
-            () -> {
-              intake.stopRollers();
-            },
-            intake),
-        new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)));
+        new InstantCommand(intake::stopRollers, intake),
+        new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)),
+        rumbleBrieflyCommand);
   }
 }
