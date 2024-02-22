@@ -77,7 +77,7 @@ public class ShooterLimelight extends SubsystemBase {
     setLimelightValues(
         Constants.limelightLedMode.OFF,
         Constants.limelightCamMode.VISION_PROCESSING,
-        Constants.limelightPipeline.NOTE_PIPELINE);
+        Constants.limelightPipeline.TAG_PIPELINE);
 
     m_simDevice = SimDevice.create(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
     if (m_simDevice != null) {
@@ -142,16 +142,10 @@ public class ShooterLimelight extends SubsystemBase {
   }
 
   public Optional<Transform2d> getRobotToScoringLocation() {
-    if (getPipeline() != Constants.limelightPipeline.TAG_PIPELINE) {
-      setPipeline(Constants.limelightPipeline.TAG_PIPELINE);
-    }
     return robotToScoringLocation;
   }
 
   public Optional<Transform2d> checkForTag() {
-    if (getPipeline() != Constants.limelightPipeline.TAG_PIPELINE) {
-      setPipeline(Constants.limelightPipeline.TAG_PIPELINE);
-    }
     if (!LimelightHelpers.getTV(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME)) {
       robotToScoringLocation = Optional.empty();
       return Optional.empty();
