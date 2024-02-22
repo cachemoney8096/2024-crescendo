@@ -1,5 +1,6 @@
 package frc.robot.commands.autos;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -23,17 +24,19 @@ public class OneFiveLeave extends SequentialCommandGroup {
       Shooter shooter,
       Conveyor conveyor,
       DriveSubsystem drive,
-      MatchState matchState) {
+      MatchState matchState,
+      Command rumbleBrieflyCommand) {
     final double X_DISTANCE_TO_NOTE_METERS = 1.0; // guesstimate
     final double NO_Y_DISTANCE = 0.0;
     final boolean FIELD_RELATIVE = true;
     final double WAIT_BEFORE_DRIVE_SEC = 1.0;
+    Command rumbleCommand = rumbleBrieflyCommand;
 
     addRequirements(intake, elevator, shooter, conveyor, drive);
     addCommands(
         new ScoreThisNote(intake, elevator, shooter, conveyor),
         new ParallelCommandGroup(
-            new IntakeSequence(intake, elevator, conveyor, shooter)
+            new IntakeSequence(intake, elevator, conveyor, shooter, rumbleCommand)
                 .withTimeout(IntakeConstants.INTAKING_TIMEOUT_SEC),
             new SequentialCommandGroup(
                 new WaitCommand(WAIT_BEFORE_DRIVE_SEC),

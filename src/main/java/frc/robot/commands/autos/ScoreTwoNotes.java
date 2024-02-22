@@ -1,5 +1,6 @@
 package frc.robot.commands.autos;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer.MatchState;
 import frc.robot.commands.autos.components.ScoreThisNote;
@@ -20,11 +21,13 @@ public class ScoreTwoNotes extends SequentialCommandGroup {
       Shooter shooter,
       Conveyor conveyor,
       DriveSubsystem drive,
-      MatchState matchState) {
+      MatchState matchState,
+      Command rumbleBrieflyCommand) {
+        Command rumbleCommand = rumbleBrieflyCommand;
 
     addRequirements(intake, elevator, shooter, conveyor);
     addCommands(
-        new OneFiveLeave(intake, elevator, shooter, conveyor, drive, matchState),
+        new OneFiveLeave(intake, elevator, shooter, conveyor, drive, matchState, rumbleCommand),
         new ScoreThisNote(
             intake, elevator, shooter, conveyor) // goes home at the end of ScoreThisNote
         );
