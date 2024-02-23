@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -18,16 +17,12 @@ import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 public class ClimbPrepSequence extends SequentialCommandGroup {
   public ClimbPrepSequence(Intake intake, Elevator elevator, Shooter shooter) {
     addRequirements(intake, elevator, shooter);
-    SequentialCommandGroup waitTillSafe =
-        new SequentialCommandGroup(
-            new WaitUntilCommand(shooter::clearOfConveyorZone),
-            new WaitUntilCommand(intake::clearOfConveyorZone));
 
     addCommands(
         new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.DEPLOYED)),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.PRELATCH)),
-        new ConditionalCommand(
-            new InstantCommand(), waitTillSafe, elevator::elevatorAboveInterferenceZone),
-        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.PRE_CLIMB)));
+        new WaitUntilCommand(shooter::clearOfConveyorZone),
+        new WaitUntilCommand(intake::clearOfConveyorZone),
+        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.PRE_CLIMB, true)));
   }
 }
