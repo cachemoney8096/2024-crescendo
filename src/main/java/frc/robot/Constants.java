@@ -20,6 +20,7 @@ public final class Constants {
   }
 
   public static final double NEO_FREE_SPEED_RPM = 5676.0;
+  public static final double KRAKEN_FREE_SPEED_RPM = 6000.0;
 
   public static final double PLACEHOLDER_DOUBLE = 0.0;
   public static final int PLACEHOLDER_INT = 0;

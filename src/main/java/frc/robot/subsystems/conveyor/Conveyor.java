@@ -72,7 +72,7 @@ public class Conveyor extends SubsystemBase {
     errors += SparkMaxUtils.check(backMotor.restoreFactoryDefaults());
 
     errors += SparkMaxUtils.check(frontMotor.setIdleMode(IdleMode.kBrake));
-    errors += SparkMaxUtils.check(backMotor.setIdleMode(IdleMode.kBrake));
+    errors += SparkMaxUtils.check(backMotor.setIdleMode(IdleMode.kCoast));
 
     frontMotor.setInverted(ConveyorConstants.FRONT_MOTOR_INVERTED);
     backMotor.setInverted(ConveyorConstants.BACK_MOTOR_INVERTED);
@@ -102,6 +102,9 @@ public class Conveyor extends SubsystemBase {
     errors += SparkMaxUtils.check(beamBreakSensorThree.enableLimitSwitch(false));
     errors += SparkMaxUtils.check(beamBreakSensorFour.enableLimitSwitch(false));
 
+    backMotorEncoder.setPosition(0.0);
+    frontMotorEncoder.setPosition(0.0);
+
     return errors == 0;
   }
 
@@ -112,10 +115,30 @@ public class Conveyor extends SubsystemBase {
     backMotor.burnFlash();
   }
 
-  /** Stops the conveyor rollers. */
-  private void stopRollers() {
+  public void stopRollers() {
     frontMotor.set(0.0);
     backMotor.set(0.0);
+  }
+
+  public void startBackRollers(double power) {
+    backMotor.set(power);
+  }
+
+  public void stopBackRollers() {
+    backMotor.set(0.0);
+  }
+
+  public void startFrontRollers(double power) {
+    frontMotor.set(power);
+  }
+
+  public void stopFrontRollers() {
+    frontMotor.set(0.0);
+  }
+
+  public void startRollers(double power) {
+    frontMotor.set(power);
+    backMotor.set(power);
   }
 
   /** Send note to the shooter. */
@@ -134,8 +157,8 @@ public class Conveyor extends SubsystemBase {
   public static Command scoreTrapOrAmp(Conveyor conveyor) {
     return new SequentialCommandGroup(
         new InstantCommand(
-            () -> conveyor.frontMotor.set(ConveyorCal.SCORE_AMP_TRAP_FRONT_SPEED), conveyor),
-        new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.SCORE_AMP_TRAP_BACK_SPEED)),
+            () -> conveyor.frontMotor.set(ConveyorCal.SCORE_TRAP_FRONT_SPEED), conveyor),
+        new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.SCORE_TRAP_BACK_SPEED)),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
         new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_TRAP_AMP_SECONDS),
         Conveyor.stop(conveyor),
@@ -153,18 +176,13 @@ public class Conveyor extends SubsystemBase {
             () ->
                 Math.abs(conveyor.backMotorEncoder.getPosition())
                     > ConveyorCal.NOTE_POSITION_THRESHOLD_INCHES),
-        new InstantCommand(() -> conveyor.backMotorEncoder.setPosition(0.0)),
-        new InstantCommand(() -> conveyor.frontMotorEncoder.setPosition(0.0)),
-        new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.BACK_OFF_POWER)),
-        new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.BACK_OFF_POWER)),
-        new WaitUntilCommand(
-            () -> conveyor.frontMotorEncoder.getPosition() < ConveyorCal.BACK_OFF_INCHES),
+        new WaitCommand(0.25),
         Conveyor.stop(conveyor),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE));
   }
 
   /** Stop the conveor rollers. */
-  private static Command stop(Conveyor conveyor) {
+  public static Command stop(Conveyor conveyor) {
     return new InstantCommand(conveyor::stopRollers, conveyor);
   }
 
@@ -185,13 +203,13 @@ public class Conveyor extends SubsystemBase {
         },
         null);
     builder.addDoubleProperty(
-        "Front Motor Velocity (in/sec)",
+        "Front Motor Velocity (in per sec)",
         () -> {
           return frontMotorEncoder.getVelocity();
         },
         null);
     builder.addDoubleProperty(
-        "Back Motor Velocity (in/sec)",
+        "Back Motor Velocity (in per sec)",
         () -> {
           return backMotorEncoder.getVelocity();
         },

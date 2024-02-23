@@ -23,27 +23,29 @@ public class SparkMaxUtils {
     public static REVLibError setDegreesFromGearRatio(
         AbsoluteEncoder sparkMaxEncoder, double ratio) {
       double degreesPerRotation = 360.0 / ratio;
-      double degreesPerRotationPerSecond = degreesPerRotation / 60.0;
-      REVLibError error = sparkMaxEncoder.setPositionConversionFactor(degreesPerRotation);
+      REVLibError errorOne = sparkMaxEncoder.setPositionConversionFactor(degreesPerRotation);
+      REVLibError errorTwo = sparkMaxEncoder.setVelocityConversionFactor(degreesPerRotation);
 
-      if (error != REVLibError.kOk) {
-        return error;
+      if (errorOne != REVLibError.kOk) {
+        return errorOne;
+      }
+      if (errorTwo != REVLibError.kOk) {
+        return errorTwo;
       }
 
-      return sparkMaxEncoder.setVelocityConversionFactor(degreesPerRotationPerSecond);
+      return REVLibError.kOk;
     }
 
     /** Sets the encoder to read radians after some gear ratio. */
     public static REVLibError setRadsFromGearRatio(AbsoluteEncoder sparkMaxEncoder, double ratio) {
       double radsPerRotation = (2.0 * Math.PI) / ratio;
-      double radsPerRotationPerSecond = radsPerRotation / 60.0;
       REVLibError error = sparkMaxEncoder.setPositionConversionFactor(radsPerRotation);
 
       if (error != REVLibError.kOk) {
         return error;
       }
 
-      return sparkMaxEncoder.setVelocityConversionFactor(radsPerRotationPerSecond);
+      return sparkMaxEncoder.setVelocityConversionFactor(radsPerRotation);
     }
 
     /**
@@ -57,14 +59,13 @@ public class SparkMaxUtils {
     public static REVLibError setLinearFromGearRatio(
         AbsoluteEncoder sparkMaxEncoder, final double ratio, final double diameter) {
       double linearDistPerRotation = diameter * Math.PI / ratio;
-      double linearDistPerRotationPerSecond = linearDistPerRotation / 60.0;
       REVLibError error = sparkMaxEncoder.setPositionConversionFactor(linearDistPerRotation);
 
       if (error != REVLibError.kOk) {
         return error;
       }
 
-      return sparkMaxEncoder.setVelocityConversionFactor(linearDistPerRotationPerSecond);
+      return sparkMaxEncoder.setVelocityConversionFactor(linearDistPerRotation);
     }
 
     /** Sets the encoder to read degrees after some gear ratio. */
