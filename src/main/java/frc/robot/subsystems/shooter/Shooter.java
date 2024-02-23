@@ -85,14 +85,14 @@ public class Shooter extends SubsystemBase {
   /** Boolean saying if we are getting the distance */
   private Boolean distGetBool;
 
-  public Double getDistanceFromDistanceGetter(){
+  public Double getDistanceFromDistanceGetter() {
     return distanceGetter.getAsDouble();
   }
 
-  public void setDistanceGetterOff(){
+  public void setDistanceGetterOff() {
     distGetBool = false;
   }
-//set off at end of score
+  // set off at end of score
   public Shooter(DoubleSupplier inputDistanceGetter) {
     pivotAngleMap = new InterpolatingDoubleTreeMap();
     pivotAngleMap.put(0.0, 114.0);
@@ -244,9 +244,9 @@ public class Shooter extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if (distGetBool){
-        setShooterDistance(distanceGetter.getAsDouble());  
-      }
+    if (distGetBool) {
+      setShooterDistance(distanceGetter.getAsDouble());
+    }
     switch (shooterMode) {
       case IDLE:
         stopShooter();
