@@ -599,8 +599,13 @@ public class DriveSubsystem extends SubsystemBase {
     builder.addDoubleProperty(
         "Rear Right Velocity (mps)", () -> rearRight.getState().speedMetersPerSecond, null);
     builder.addDoubleProperty(
-        "Rear Right Desired Velocity (mps)", () -> rearRight.desiredState.speedMetersPerSecond, null);
+        "Rear Right Desired Velocity (mps)",
+        () -> rearRight.desiredState.speedMetersPerSecond,
+        null);
     builder.addDoubleProperty(
-        "Rear Right Velocity Error (mps)", () -> rearRight.desiredState.speedMetersPerSecond - rearRight.getState().speedMetersPerSecond, null);
+        "Rear Right Velocity Error (mps)",
+        () ->
+            rearRight.desiredState.speedMetersPerSecond - rearRight.getState().speedMetersPerSecond,
+        null);
   }
 }

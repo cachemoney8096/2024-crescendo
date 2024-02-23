@@ -1,7 +1,5 @@
 package frc.robot.subsystems.shooter;
 
-import com.pathplanner.lib.util.PIDConstants;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import frc.robot.Constants;
@@ -13,7 +11,7 @@ public class ShooterCal {
       MOTOR_A_kD = 0.00,
       MOTOR_A_kFF = 0.0;
   /** Motor B PID, Unit Inputs: RPM. output [-1,1] */
-  public static final double MOTOR_B_kP = 0.000, //0.0006
+  public static final double MOTOR_B_kP = 0.000, // 0.0006
       MOTOR_B_kI = Constants.PLACEHOLDER_DOUBLE,
       MOTOR_B_kD = 0.0,
       MOTOR_B_kFF = 0.0;
@@ -29,7 +27,7 @@ public class ShooterCal {
       PIVOT_MOTOR_HOLD_kD = 0.01;
 
   public static final PIDController PIVOT_MOTOR_HOLD_PID =
-    new PIDController(PIVOT_MOTOR_HOLD_kP, PIVOT_MOTOR_HOLD_kI, PIVOT_MOTOR_HOLD_kD);
+      new PIDController(PIVOT_MOTOR_HOLD_kP, PIVOT_MOTOR_HOLD_kI, PIVOT_MOTOR_HOLD_kD);
 
   /**
    * Pivot Motor Feedforward. Inputs: Degrees. output Volts.
@@ -55,7 +53,7 @@ public class ShooterCal {
 
   /** Pivot motor voltage to hold the pivot in place at */
   public static final double ARBITRARY_PIVOT_FEED_FORWARD_VOLTS = 0.28;
-  
+
   public static final double ARBITRARY_PIVOT_FEED_FORWARD_VOLTS_KS = 0.1;
 
   /** Pivot motor voltage to add when holding the robot latched */

@@ -28,12 +28,9 @@ import frc.robot.commands.SpeakerShootSequence;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.Intake.IntakePosition;
 import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.utils.JoystickUtil;
 
 /**
@@ -121,7 +118,6 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-
   private void configureBindings() {
     driverController
         .leftTrigger()
@@ -138,8 +134,16 @@ public class RobotContainer {
                 this::preppedSpeaker)); // score based on prep
     driverController
         .leftBumper()
-        .onTrue(new SequentialCommandGroup(new SpeakerPrepScoreSequence(intake, elevator, shooter, conveyor), new InstantCommand(() -> setSpeakerPrep(true))));
-    driverController.rightBumper().onTrue(new SequentialCommandGroup(new AmpPrepScore(elevator, conveyor, intake, shooter), new InstantCommand(() -> setSpeakerPrep(false))));
+        .onTrue(
+            new SequentialCommandGroup(
+                new SpeakerPrepScoreSequence(intake, elevator, shooter, conveyor),
+                new InstantCommand(() -> setSpeakerPrep(true))));
+    driverController
+        .rightBumper()
+        .onTrue(
+            new SequentialCommandGroup(
+                new AmpPrepScore(elevator, conveyor, intake, shooter),
+                new InstantCommand(() -> setSpeakerPrep(false))));
     driverController.x().onTrue(new GoHomeSequence(intake, elevator, shooter, conveyor, false));
     driverController.start().onTrue(new InstantCommand(drive::resetYaw));
     driverController.y().onTrue(new ClimbPrepSequence(intake, elevator, shooter));
@@ -169,12 +173,16 @@ public class RobotContainer {
     Timer.delay(0.25);
   }
 
-  /** @param true if speaker was just prepped, false if amp was just prepped */
+  /**
+   * @param true if speaker was just prepped, false if amp was just prepped
+   */
   private void setSpeakerPrep(boolean prepSpeaker) {
     this.speakerPrepped = prepSpeaker;
   }
 
-  /** @return true if speaker was prepped, false if amp was prepped */
+  /**
+   * @return true if speaker was prepped, false if amp was prepped
+   */
   private boolean preppedSpeaker() {
     return this.speakerPrepped;
   }

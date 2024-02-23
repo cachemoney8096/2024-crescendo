@@ -17,7 +17,8 @@ import frc.robot.subsystems.shooter.Shooter.ShooterMode;
  * they do not end up attacking each other accidentally. Ends before everything is fully home.
  */
 public class GoHomeSequence extends SequentialCommandGroup {
-  public GoHomeSequence(Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor, boolean spinUpShooter) {
+  public GoHomeSequence(
+      Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor, boolean spinUpShooter) {
     final ShooterMode desiredShooterMode = spinUpShooter ? ShooterMode.SPIN_UP : ShooterMode.IDLE;
     final SequentialCommandGroup goHomeWhenSafe =
         new SequentialCommandGroup(
@@ -27,8 +28,7 @@ public class GoHomeSequence extends SequentialCommandGroup {
 
     final SequentialCommandGroup goHomeWhenNotSafe =
         new SequentialCommandGroup(
-            new InstantCommand(
-                () -> intake.setDesiredIntakePosition(IntakePosition.DEPLOYED)),
+            new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.DEPLOYED)),
             new InstantCommand(() -> shooter.setShooterMode(desiredShooterMode)),
             new WaitUntilCommand(intake::clearOfConveyorZone),
             new WaitUntilCommand(shooter::clearOfConveyorZone),

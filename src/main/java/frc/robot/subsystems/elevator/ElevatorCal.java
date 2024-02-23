@@ -1,13 +1,10 @@
 package frc.robot.subsystems.elevator;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import frc.robot.Constants;
 
 public final class ElevatorCal {
   /** Feedback parameters for elevator when not climbing. Input in, output Volts */
-  public static final double NOTE_SCORING_P = 1.0,
-      NOTE_SCORING_I = 0,
-      NOTE_SCORING_D = 0;
+  public static final double NOTE_SCORING_P = 1.0, NOTE_SCORING_I = 0, NOTE_SCORING_D = 0;
   /**
    * Feedforward parameters for the elevator when not climbing. Input in/s, output Volts.
    * https://www.reca.lc/linear?angle=%7B%22s%22%3A90%2C%22u%22%3A%22deg%22%7D&currentLimit=%7B%22s%22%3A50%2C%22u%22%3A%22A%22%7D&efficiency=85&limitAcceleration=0&limitDeceleration=0&limitVelocity=0&limitedAcceleration=%7B%22s%22%3A400%2C%22u%22%3A%22in%2Fs2%22%7D&limitedDeceleration=%7B%22s%22%3A50%2C%22u%22%3A%22in%2Fs2%22%7D&limitedVelocity=%7B%22s%22%3A10%2C%22u%22%3A%22in%2Fs%22%7D&load=%7B%22s%22%3A19.5%2C%22u%22%3A%22lbs%22%7D&motor=%7B%22quantity%22%3A2%2C%22name%22%3A%22NEO%22%7D&ratio=%7B%22magnitude%22%3A7.92%2C%22ratioType%22%3A%22Reduction%22%7D&spoolDiameter=%7B%22s%22%3A1%2C%22u%22%3A%22in%22%7D&travelDistance=%7B%22s%22%3A17%2C%22u%22%3A%22in%22%7D
@@ -20,9 +17,7 @@ public final class ElevatorCal {
       new SimpleMotorFeedforward(0.0, NOTE_SCORING_KV, NOTE_SCORING_KA);
 
   /** Feedback parameters for elevator when climbing. Input in/s, output Volts. */
-  public static final double CLIMBING_P = 1.0,
-      CLIMBING_I = 0,
-      CLIMBING_D = 0;
+  public static final double CLIMBING_P = 1.0, CLIMBING_I = 0, CLIMBING_D = 0;
   /**
    * Feedforward parameters for the elevator when climbing. Input in/s, output Volts.
    * https://www.reca.lc/linear?angle=%7B%22s%22%3A90%2C%22u%22%3A%22deg%22%7D&currentLimit=%7B%22s%22%3A70%2C%22u%22%3A%22A%22%7D&efficiency=85&limitAcceleration=0&limitDeceleration=0&limitVelocity=0&limitedAcceleration=%7B%22s%22%3A400%2C%22u%22%3A%22in%2Fs2%22%7D&limitedDeceleration=%7B%22s%22%3A50%2C%22u%22%3A%22in%2Fs2%22%7D&limitedVelocity=%7B%22s%22%3A10%2C%22u%22%3A%22in%2Fs%22%7D&load=%7B%22s%22%3A110%2C%22u%22%3A%22lbs%22%7D&motor=%7B%22quantity%22%3A2%2C%22name%22%3A%22NEO%22%7D&ratio=%7B%22magnitude%22%3A7.92%2C%22ratioType%22%3A%22Reduction%22%7D&spoolDiameter=%7B%22s%22%3A1%2C%22u%22%3A%22in%22%7D&travelDistance=%7B%22s%22%3A17%2C%22u%22%3A%22in%22%7D

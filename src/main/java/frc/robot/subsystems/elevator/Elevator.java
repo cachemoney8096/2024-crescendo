@@ -2,7 +2,6 @@ package frc.robot.subsystems.elevator;
 
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVLibError;
@@ -165,11 +164,12 @@ public class Elevator extends SubsystemBase {
     } else {
       elevatorDemandVoltsB = currentFeedforward.calculate(nextVelocityInPerSec);
     }
-    elevatorDemandVoltsC = currentlyUsingNoteControl ? ElevatorCal.NOTE_SCORING_KS : ElevatorCal.CLIMBING_KS;
-    
+    elevatorDemandVoltsC =
+        currentlyUsingNoteControl ? ElevatorCal.NOTE_SCORING_KS : ElevatorCal.CLIMBING_KS;
+
     desiredSetpointPosition = currentPIDController.getSetpoint().position;
     desiredSetpointVelocity = currentPIDController.getSetpoint().velocity;
-    
+
     double voltageToSet = elevatorDemandVoltsA + elevatorDemandVoltsB + elevatorDemandVoltsC;
     if (desiredPosition == ElevatorPosition.HOME && nearHome() && !currentlyUsingNoteControl) {
       voltageToSet = ElevatorCal.CLIMBING_KS;
@@ -231,24 +231,30 @@ public class Elevator extends SubsystemBase {
         leftMotorEncoderRel::getPosition,
         leftMotorEncoderRel::setPosition);
     builder.addDoubleProperty(
-        "Right Motor Position (rots)",
-        () -> rightMotor.getEncoder().getPosition(),
-        null);
+        "Right Motor Position (rots)", () -> rightMotor.getEncoder().getPosition(), null);
     builder.addDoubleProperty("Elevator Vel (in per s)", leftMotorEncoderRel::getVelocity, null);
     builder.addDoubleProperty(
         "Elevator Left Abs Pos (deg)", leftMotorEncoderAbs::getPosition, null);
     builder.addDoubleProperty(
         "Elevator Right Abs Pos (deg)", rightMotorEncoderAbs::getPosition, null);
-    builder.addDoubleProperty("Elevator Desired Position (in)", () -> elevatorPositions.get(desiredPosition), null);
+    builder.addDoubleProperty(
+        "Elevator Desired Position (in)", () -> elevatorPositions.get(desiredPosition), null);
     builder.addBooleanProperty("Elevator at desired position", this::atDesiredPosition, null);
-    builder.addBooleanProperty("Elevator above intererence", this::elevatorAboveIntakeInterferenceZone, null);
-    builder.addBooleanProperty("Elevator below interference", this::elevatorBelowInterferenceZone, null);
-    builder.addDoubleProperty("Elevator Desired Setpoint (in)", () -> desiredSetpointPosition, null);
-    builder.addDoubleProperty("Elevator Desired Vel (in per s)", () -> desiredSetpointVelocity, null);
+    builder.addBooleanProperty(
+        "Elevator above intererence", this::elevatorAboveIntakeInterferenceZone, null);
+    builder.addBooleanProperty(
+        "Elevator below interference", this::elevatorBelowInterferenceZone, null);
+    builder.addDoubleProperty(
+        "Elevator Desired Setpoint (in)", () -> desiredSetpointPosition, null);
+    builder.addDoubleProperty(
+        "Elevator Desired Vel (in per s)", () -> desiredSetpointVelocity, null);
     builder.addDoubleProperty("Demand PID (V)", () -> elevatorDemandVoltsA, null);
     builder.addDoubleProperty("Demand Feedforward (V)", () -> elevatorDemandVoltsB, null);
     builder.addDoubleProperty("Demand Gravity (V)", () -> elevatorDemandVoltsC, null);
     builder.addBooleanProperty("Near home", this::nearHome, null);
-    builder.addBooleanProperty("Holding climb home position", () -> desiredPosition == ElevatorPosition.HOME && nearHome() && !currentlyUsingNoteControl, null);
+    builder.addBooleanProperty(
+        "Holding climb home position",
+        () -> desiredPosition == ElevatorPosition.HOME && nearHome() && !currentlyUsingNoteControl,
+        null);
   }
 }

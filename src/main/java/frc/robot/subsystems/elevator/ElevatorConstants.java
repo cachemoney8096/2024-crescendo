@@ -5,7 +5,10 @@ public final class ElevatorConstants {
 
   public static final double ELEVATOR_DRUM_DIAMETER_FUDGE_FACTOR = 1.03;
 
-  /** Fudge factor based on empirical measurements. Value multiplied based on actual drum diameter plus one diameter of string. */
+  /**
+   * Fudge factor based on empirical measurements. Value multiplied based on actual drum diameter
+   * plus one diameter of string.
+   */
   public static final double ELEVATOR_DRUM_DIAMETER_IN = ELEVATOR_DRUM_DIAMETER_FUDGE_FACTOR * 1.07;
 
   /** Elevator motor to drum. >1 meaning reduction. */

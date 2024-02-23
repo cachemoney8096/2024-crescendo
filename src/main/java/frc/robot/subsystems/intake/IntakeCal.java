@@ -1,7 +1,6 @@
 package frc.robot.subsystems.intake;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import frc.robot.Constants;
 
 public class IntakeCal {
 
@@ -16,27 +15,26 @@ public class IntakeCal {
 
   public static final double INTAKE_HOLD_DEPLOYED_VOLTS = 0.75;
 
-  /** Offset degrees for intake absolute encoder.
-   * Real world degrees minus what the encoder read at that position.
-  */
+  /**
+   * Offset degrees for intake absolute encoder. Real world degrees minus what the encoder read at
+   * that position.
+   */
   public static final double INTAKE_ABSOLUTE_ENCODER_ZERO_OFFSET_DEG = 155.4 - 56.89;
 
   public static final double PIVOT_ENCODER_ZEROING_THRESHOLD_DEG = 5.0;
   public static final double PIVOT_PROFILE_REPLANNING_THRESHOLD_DEG = 20.0;
 
-  /** The absolute encoder wraps every 120 degrees. At most stowed,
-   * it will read 5-10 degrees higher than at most deployed
-   * (actually 110-115 deg lower).
-   * For positions at most deployed, the real value is 120 deg greater due to wrap.
-   * This value is between the readings at the max travel in each direction.
-   * If the reading is above vs. below, this indicates whether 120 deg needs to be added to the reading.
+  /**
+   * The absolute encoder wraps every 120 degrees. At most stowed, it will read 5-10 degrees higher
+   * than at most deployed (actually 110-115 deg lower). For positions at most deployed, the real
+   * value is 120 deg greater due to wrap. This value is between the readings at the max travel in
+   * each direction. If the reading is above vs. below, this indicates whether 120 deg needs to be
+   * added to the reading.
    */
   public static final double INTAKE_ABSOLUTE_ENCODER_WRAP_POINT_DEG = 55.0;
 
   /** PID values for the intake pivot motor input degrees, output volts */
-  public static final double INTAKE_PIVOT_P = 0.2,
-      INTAKE_PIVOT_I = 0,
-      INTAKE_PIVOT_D = 0;
+  public static final double INTAKE_PIVOT_P = 0.2, INTAKE_PIVOT_I = 0, INTAKE_PIVOT_D = 0;
 
   /** Motion profile max velocity and acceleration (deg per second) for intake pivot motor */
   public static final double PIVOT_MAX_VELOCITY_DEG_PER_SECOND = 330.0,

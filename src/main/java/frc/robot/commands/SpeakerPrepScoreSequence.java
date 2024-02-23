@@ -16,7 +16,8 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
   /** this is a specified distance from the speaker each time until we do limelight stuff */
   public final double SPEAKER_SHOOTER_DISTANCE_METERS = 5.0;
 
-  public SpeakerPrepScoreSequence(Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor) {
+  public SpeakerPrepScoreSequence(
+      Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor) {
     addRequirements(intake, elevator, shooter, conveyor);
     addCommands(
         new InstantCommand(() -> shooter.setShooterDistance(SPEAKER_SHOOTER_DISTANCE_METERS)),

@@ -2,7 +2,6 @@ package frc.robot.subsystems.drive;
 
 import com.pathplanner.lib.util.PIDConstants;
 import edu.wpi.first.math.controller.PIDController;
-import frc.robot.Constants;
 
 public class DriveCal {
   public static final int SPARK_INIT_RETRY_ATTEMPTS = 5;

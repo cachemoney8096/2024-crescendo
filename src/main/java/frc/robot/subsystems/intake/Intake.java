@@ -163,8 +163,7 @@ public class Intake extends SubsystemBase {
   /** Gets the correctly zeroed position of the pivot. */
   public double getPivotPositionFromAbs() {
     double readingDeg = pivotAbsoluteEncoder.getPosition();
-    if (readingDeg < IntakeCal.INTAKE_ABSOLUTE_ENCODER_WRAP_POINT_DEG)
-    {
+    if (readingDeg < IntakeCal.INTAKE_ABSOLUTE_ENCODER_WRAP_POINT_DEG) {
       readingDeg = readingDeg + IntakeConstants.INPUT_ABS_ENCODER_WRAP_INCREMENT_DEGREES;
     }
     return (readingDeg + IntakeCal.INTAKE_ABSOLUTE_ENCODER_ZERO_OFFSET_DEG) % 360.0;
@@ -175,10 +174,8 @@ public class Intake extends SubsystemBase {
   }
 
   public void considerZeroingEncoder() {
-    if ( Math.abs(
-      getPivotPosition() - getPivotPositionFromAbs()) > IntakeCal.PIVOT_ENCODER_ZEROING_THRESHOLD_DEG
-    )
-    {
+    if (Math.abs(getPivotPosition() - getPivotPositionFromAbs())
+        > IntakeCal.PIVOT_ENCODER_ZEROING_THRESHOLD_DEG) {
       pivotRelativeEncoder.setPosition(getPivotPositionFromAbs());
       pivotController.reset(pivotRelativeEncoder.getPosition());
     }
@@ -186,8 +183,8 @@ public class Intake extends SubsystemBase {
 
   /** Sends the pivot towards the input position. Should be called every cycle. */
   private void controlPosition(double inputPositionDeg) {
-    if (Math.abs(pivotController.getPositionError()) > IntakeCal.PIVOT_PROFILE_REPLANNING_THRESHOLD_DEG)
-    {
+    if (Math.abs(pivotController.getPositionError())
+        > IntakeCal.PIVOT_PROFILE_REPLANNING_THRESHOLD_DEG) {
       pivotController.reset(getPivotPosition());
     }
 
@@ -201,13 +198,11 @@ public class Intake extends SubsystemBase {
           IntakeCal.INTAKE_PIVOT_FEEDFORWARD.calculate(
               prevVelocityDegPerSec.get(), currentVelocity, getTimeDifference());
     }
-    intakeDemandVoltsC =
-        IntakeCal.ARBITRARY_INTAKE_PIVOT_FEEDFORWARD_VOLTS * getCosineArmAngle();
+    intakeDemandVoltsC = IntakeCal.ARBITRARY_INTAKE_PIVOT_FEEDFORWARD_VOLTS * getCosineArmAngle();
 
     double voltageToSet = intakeDemandVoltsA + intakeDemandVoltsB + intakeDemandVoltsC;
-    if (deployedDesired() && nearDeployed())
-    {
-        voltageToSet = IntakeCal.INTAKE_HOLD_DEPLOYED_VOLTS;
+    if (deployedDesired() && nearDeployed()) {
+      voltageToSet = IntakeCal.INTAKE_HOLD_DEPLOYED_VOLTS;
     }
 
     pivotMotor.setVoltage(voltageToSet);
@@ -262,7 +257,6 @@ public class Intake extends SubsystemBase {
     intakeTalonRight.set(IntakeCal.REVERSE_INTAKING_POWER);
   }
 
-
   public void periodic() {
     controlPosition(intakePositionMap.get(desiredPosition));
   }
@@ -279,34 +273,51 @@ public class Intake extends SubsystemBase {
     builder.addDoubleProperty("Pivot Vel (deg)", pivotRelativeEncoder::getVelocity, null);
     builder.addDoubleProperty("Pivot setpoint pos (deg)", () -> desiredSetpointPosition, null);
     builder.addDoubleProperty("Pivot setpoint Vel (deg)", () -> desiredSetpointVelocity, null);
-    builder.addDoubleProperty("Pivot setpoint error (deg)", () -> {
-      double val = pivotController.getPositionError();
-      if (Math.abs(val) > 30.0)
-      {
-        val = 0.0;
-      }
-      return val;
-    }, null);
+    builder.addDoubleProperty(
+        "Pivot setpoint error (deg)",
+        () -> {
+          double val = pivotController.getPositionError();
+          if (Math.abs(val) > 30.0) {
+            val = 0.0;
+          }
+          return val;
+        },
+        null);
     builder.addBooleanProperty("intake at desired pos", this::atDesiredIntakePosition, null);
     builder.addDoubleProperty("roller power in [-1,1]", intakeTalonLeft::get, null);
     builder.addDoubleProperty("Demand PID (V)", () -> intakeDemandVoltsA, null);
     builder.addDoubleProperty("Demand FF (V)", () -> intakeDemandVoltsB, null);
     builder.addDoubleProperty("Demand Gravity (V)", () -> intakeDemandVoltsC, null);
-    builder.addDoubleProperty("Demand Total (V)", () -> {
-      return intakeDemandVoltsA + intakeDemandVoltsB + intakeDemandVoltsC;
-    }, null);
-    builder.addDoubleProperty("Motor Set Speed", () -> {
-      return pivotMotor.get();
-    }, null);
-    builder.addDoubleProperty("Motor Out -1 to 1", () -> {
-      return pivotMotor.getAppliedOutput();
-    }, null);
-    builder.addDoubleProperty("Bus Voltage at spark", () -> {
-      return pivotMotor.getBusVoltage();
-    }, null);
-    builder.addDoubleProperty("Motor Current (A)", () -> {
-      return pivotMotor.getOutputCurrent();
-    }, null);
+    builder.addDoubleProperty(
+        "Demand Total (V)",
+        () -> {
+          return intakeDemandVoltsA + intakeDemandVoltsB + intakeDemandVoltsC;
+        },
+        null);
+    builder.addDoubleProperty(
+        "Motor Set Speed",
+        () -> {
+          return pivotMotor.get();
+        },
+        null);
+    builder.addDoubleProperty(
+        "Motor Out -1 to 1",
+        () -> {
+          return pivotMotor.getAppliedOutput();
+        },
+        null);
+    builder.addDoubleProperty(
+        "Bus Voltage at spark",
+        () -> {
+          return pivotMotor.getBusVoltage();
+        },
+        null);
+    builder.addDoubleProperty(
+        "Motor Current (A)",
+        () -> {
+          return pivotMotor.getOutputCurrent();
+        },
+        null);
     builder.addBooleanProperty("clear of conveyor", this::clearOfConveyorZone, null);
     builder.addBooleanProperty("near deployed", () -> nearDeployed(), null);
     builder.addBooleanProperty("deployed desired", () -> deployedDesired(), null);

@@ -49,14 +49,14 @@ public class Shooter extends SubsystemBase {
   private final AbsoluteEncoder pivotMotorAbsoluteEncoder =
       pivotMotor.getAbsoluteEncoder(Type.kDutyCycle);
   /** Configured to read degrees, zero is shooting straight down */
-  private final RelativeEncoder pivotMotorEncoder =
-      pivotMotor.getEncoder();
+  private final RelativeEncoder pivotMotorEncoder = pivotMotor.getEncoder();
 
   private double pivotDesiredPositionDegrees = ShooterCal.STARTING_POSITION_DEGREES;
   /** Not configured, defaults to Motor RPM. */
   private final RelativeEncoder motorRightRelEncoder = motorRight.getEncoder();
   /** Not configured, defaults to Motor RPM. */
   private final RelativeEncoder motorLeftOneRelEncoder = motorLeftOne.getEncoder();
+
   private final RelativeEncoder motorLeftTwoRelEncoder = motorLeftTwo.getEncoder();
 
   /** FPGA timestamp from previous cycle. Empty for first cycle only. */
@@ -145,11 +145,10 @@ public class Shooter extends SubsystemBase {
     errors += SparkMaxUtils.check(controllerB.setD(ShooterCal.MOTOR_B_kD));
     errors += SparkMaxUtils.check(controllerB.setFF(ShooterCal.MOTOR_B_kFF));
 
-    errors += SparkMaxUtils.check(
-      SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(
-        pivotMotorEncoder, ShooterConstants.PIVOT_MOTOR_GEAR_RATIO
-      )
-    );
+    errors +=
+        SparkMaxUtils.check(
+            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(
+                pivotMotorEncoder, ShooterConstants.PIVOT_MOTOR_GEAR_RATIO));
 
     errors +=
         SparkMaxUtils.check(
@@ -213,7 +212,9 @@ public class Shooter extends SubsystemBase {
 
   /** Returns the cosine of the intake angle in degrees off of the horizontal. */
   private double getCosineArmAngle() {
-    return Math.cos(Units.degreesToRadians(getPivotPosition() - ShooterConstants.POSITION_WHEN_HORIZONTAL_DEGREES));
+    return Math.cos(
+        Units.degreesToRadians(
+            getPivotPosition() - ShooterConstants.POSITION_WHEN_HORIZONTAL_DEGREES));
   }
 
   /**
@@ -255,8 +256,8 @@ public class Shooter extends SubsystemBase {
    * @param angleDeg Desired pivot position. *
    */
   private void controlPosition(double angleDeg, boolean holdLatchVoltage) {
-    if (Math.abs(pivotController.getPositionError()) > ShooterCal.PIVOT_PROFILE_REPLANNING_THRESHOLD_DEG)
-    {
+    if (Math.abs(pivotController.getPositionError())
+        > ShooterCal.PIVOT_PROFILE_REPLANNING_THRESHOLD_DEG) {
       pivotController.reset(getPivotPosition());
     }
 
@@ -272,26 +273,28 @@ public class Shooter extends SubsystemBase {
               prevDesiredVelocityDegPerSec,
               pivotController.getSetpoint().velocity,
               timestamp - prevTimestamp.get());
-              desiredAccelDegPerSecSq = 
-                (pivotController.getSetpoint().velocity - prevDesiredVelocityDegPerSec) /
-                (timestamp - prevTimestamp.get());
-              actualAccelDegPerSecSq = 
-                (actualVelDegPerSec - prevActualVelocitDegPerSec) /
-                (timestamp - prevTimestamp.get());
-              if (Math.abs(desiredAccelDegPerSecSq) > 50.0)
-              {
-                desiredAccelDegPerSecSq = 0.0;
-              }
-              periodSec = timestamp - prevTimestamp.get();
+      desiredAccelDegPerSecSq =
+          (pivotController.getSetpoint().velocity - prevDesiredVelocityDegPerSec)
+              / (timestamp - prevTimestamp.get());
+      actualAccelDegPerSecSq =
+          (actualVelDegPerSec - prevActualVelocitDegPerSec) / (timestamp - prevTimestamp.get());
+      if (Math.abs(desiredAccelDegPerSecSq) > 50.0) {
+        desiredAccelDegPerSecSq = 0.0;
+      }
+      periodSec = timestamp - prevTimestamp.get();
     } else {
       armDemandVoltsB = ShooterCal.PIVOT_MOTOR_FF.calculate(pivotController.getSetpoint().velocity);
     }
-    armDemandVoltsC =
-        ShooterCal.ARBITRARY_PIVOT_FEED_FORWARD_VOLTS * getCosineArmAngle();
-    
-    armDemandVoltsD = Math.signum(pivotController.getPositionError()) * ShooterCal.ARBITRARY_PIVOT_FEED_FORWARD_VOLTS_KS;
+    armDemandVoltsC = ShooterCal.ARBITRARY_PIVOT_FEED_FORWARD_VOLTS * getCosineArmAngle();
 
-    pivotMotor.setVoltage(holdLatchVoltage ? ShooterCal.HOLD_LATCH_ARBITRARY_ADDITION_VOLTS : (armDemandVoltsA + armDemandVoltsB + armDemandVoltsC + armDemandVoltsD));
+    armDemandVoltsD =
+        Math.signum(pivotController.getPositionError())
+            * ShooterCal.ARBITRARY_PIVOT_FEED_FORWARD_VOLTS_KS;
+
+    pivotMotor.setVoltage(
+        holdLatchVoltage
+            ? ShooterCal.HOLD_LATCH_ARBITRARY_ADDITION_VOLTS
+            : (armDemandVoltsA + armDemandVoltsB + armDemandVoltsC + armDemandVoltsD));
 
     desiredVelDegPerSec = pivotController.getSetpoint().velocity;
 
@@ -309,17 +312,16 @@ public class Shooter extends SubsystemBase {
   }
 
   public void considerZeroingEncoder() {
-    if ( Math.abs(
-      getPivotPosition() - getPivotPositionFromAbs()) > ShooterCal.PIVOT_ENCODER_ZEROING_THRESHOLD_DEG
-    )
-    {
+    if (Math.abs(getPivotPosition() - getPivotPositionFromAbs())
+        > ShooterCal.PIVOT_ENCODER_ZEROING_THRESHOLD_DEG) {
       pivotMotorEncoder.setPosition(getPivotPositionFromAbs());
       pivotController.reset(pivotMotorEncoder.getPosition());
     }
   }
 
   private boolean closeToLatch() {
-    return shooterMode == ShooterMode.LATCH && getPivotPosition() > ShooterCal.LATCH_ANGLE_DEGREES - 2.0;
+    return shooterMode == ShooterMode.LATCH
+        && getPivotPosition() > ShooterCal.LATCH_ANGLE_DEGREES - 2.0;
   }
 
   @Override
@@ -339,7 +341,7 @@ public class Shooter extends SubsystemBase {
         break;
       case LATCH:
         stopShooter();
-        if (closeToLatch()){
+        if (closeToLatch()) {
           controlPositionToHoldLatch();
         } else {
           controlPositionToLatch();
@@ -367,7 +369,7 @@ public class Shooter extends SubsystemBase {
         "Motor Right velocity (rpm)", motorRightRelEncoder::getVelocity, null);
     builder.addDoubleProperty(
         "Motor Left One velocity (rpm)", motorLeftOneRelEncoder::getVelocity, null);
-        builder.addDoubleProperty(
+    builder.addDoubleProperty(
         "Motor Left Two velocity (rpm)", motorLeftTwoRelEncoder::getVelocity, null);
     // builder.addDoubleProperty("", controllerA.get)
     builder.addBooleanProperty("At desired shooter speeds", this::isShooterSpunUp, null);
@@ -378,17 +380,23 @@ public class Shooter extends SubsystemBase {
     builder.addDoubleProperty("Gravity Comp (V)", () -> armDemandVoltsC, null);
     builder.addDoubleProperty("PID KS (V)", () -> armDemandVoltsD, null);
     builder.addDoubleProperty("Goal (deg)", () -> pivotController.getGoal().position, null);
-    builder.addDoubleProperty("Setpoint position (deg)", () -> pivotController.getSetpoint().position, null);
-    builder.addDoubleProperty("Setpoint Velocity (deg per s)", () -> pivotController.getSetpoint().velocity, null);
+    builder.addDoubleProperty(
+        "Setpoint position (deg)", () -> pivotController.getSetpoint().position, null);
+    builder.addDoubleProperty(
+        "Setpoint Velocity (deg per s)", () -> pivotController.getSetpoint().velocity, null);
     builder.addDoubleProperty("Actual Velocity (deg per s)", () -> actualVelDegPerSec, null);
     builder.addDoubleProperty("Desired Velocity (deg per s)", () -> desiredVelDegPerSec, null);
     builder.addDoubleProperty("Actual Accel (deg per s2)", () -> actualAccelDegPerSecSq, null);
     builder.addDoubleProperty("Desired Accel (deg per s2)", () -> desiredAccelDegPerSecSq, null);
-    builder.addDoubleProperty("Position Error (deg)", () -> pivotController.getPositionError(), null);
+    builder.addDoubleProperty(
+        "Position Error (deg)", () -> pivotController.getPositionError(), null);
     builder.addDoubleProperty("Period (sec)", () -> periodSec, null);
-    builder.addDoubleProperty("Abs to Rel Diff (deg)", () -> {
-      return getPivotPosition() - getPivotPositionFromAbs();
-    }, null);
+    builder.addDoubleProperty(
+        "Abs to Rel Diff (deg)",
+        () -> {
+          return getPivotPosition() - getPivotPositionFromAbs();
+        },
+        null);
     builder.addBooleanProperty("Clear of conveyor", this::clearOfConveyorZone, null);
     builder.addBooleanProperty("Close to latch", this::closeToLatch, null);
   }

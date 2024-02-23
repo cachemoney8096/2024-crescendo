@@ -184,7 +184,8 @@ public class SwerveModule implements Sendable {
     this.desiredState = optimizedDesiredState;
 
     // Command driving and turning SPARKS MAX towards their respective setpoints.
-    drivingTalon.setControl(new VelocityDutyCycle(optimizedDesiredState.speedMetersPerSecond).withSlot(0));
+    drivingTalon.setControl(
+        new VelocityDutyCycle(optimizedDesiredState.speedMetersPerSecond).withSlot(0));
     turningPIDController.setReference(
         optimizedDesiredState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
   }
