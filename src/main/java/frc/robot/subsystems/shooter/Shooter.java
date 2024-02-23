@@ -79,8 +79,10 @@ public class Shooter extends SubsystemBase {
   /** How far are we away from the goal (in meters) */
   private double shooterDistanceMeters = 10.0;
 
+  /** Double Supplier to use the shooter look up map to get distance */
   private DoubleSupplier distanceGetter;
 
+  /** Boolean saying if we are getting the distance */
   private Boolean distGetBool;
 
   public Double getDistanceFromDistanceGetter(){

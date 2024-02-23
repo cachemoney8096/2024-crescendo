@@ -21,5 +21,6 @@ public class SpeakerShootSequence extends SequentialCommandGroup {
             }),
         Conveyor.shoot(conveyor),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.IDLE)));
+        new InstantCommand(() -> shooter.setDistanceGetterOff());
   }
 }
