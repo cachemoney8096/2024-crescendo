@@ -23,17 +23,20 @@ public class AmpPrepScore extends SequentialCommandGroup {
     SequentialCommandGroup moveWhenNotSafe =
         new SequentialCommandGroup(
             new InstantCommand(
-                () -> intake.setDesiredIntakePosition(IntakePosition.CLEAR_OF_CONVEYOR)),
+                () -> intake.setDesiredIntakePosition(IntakePosition.DEPLOYED)),
             new InstantCommand(() -> shooter.setShooterMode(Shooter.ShooterMode.IDLE)),
             new WaitUntilCommand(intake::clearOfConveyorZone),
             new WaitUntilCommand(shooter::clearOfConveyorZone),
-            new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SCORE_AMP)),
-            new WaitUntilCommand(elevator::elevatorAboveInterferenceZone));
+            new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SCORE_AMP, true)),
+            new WaitUntilCommand(elevator::elevatorAboveIntakeInterferenceZone));
 
     addCommands(
         new ConditionalCommand(
-            new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SCORE_AMP)),
+              new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SCORE_AMP, true)),
             moveWhenNotSafe,
-            () -> elevator.elevatorAboveInterferenceZone()));
+            () -> elevator.elevatorAboveIntakeInterferenceZone()),
+            
+            new InstantCommand(
+                () -> intake.setDesiredIntakePosition(IntakePosition.STOWED)));
   }
 }

@@ -32,7 +32,7 @@ public class SwerveModule implements Sendable {
   private double chassisAngularOffsetRadians = 0;
 
   /** Desired velocity and angle. This angle includes the chassis offset. */
-  private SwerveModuleState desiredState = new SwerveModuleState(0.0, new Rotation2d());
+  public SwerveModuleState desiredState = new SwerveModuleState(0.0, new Rotation2d());
 
   /**
    * Constructs a SwerveModule and configures the driving and turning motor, encoder, and PID
@@ -184,7 +184,7 @@ public class SwerveModule implements Sendable {
     this.desiredState = optimizedDesiredState;
 
     // Command driving and turning SPARKS MAX towards their respective setpoints.
-    drivingTalon.setControl(new VelocityDutyCycle(optimizedDesiredState.speedMetersPerSecond));
+    drivingTalon.setControl(new VelocityDutyCycle(optimizedDesiredState.speedMetersPerSecond).withSlot(0));
     turningPIDController.setReference(
         optimizedDesiredState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
   }

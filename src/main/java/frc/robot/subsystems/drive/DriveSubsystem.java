@@ -105,6 +105,8 @@ public class DriveSubsystem extends SubsystemBase {
 
     // Reset position to zero, this may be overwritten by a path at the start of auto
     gyro.reset();
+    Timer.delay(0.1);
+    gyro.reset();
   }
 
   @Override
@@ -345,9 +347,9 @@ public class DriveSubsystem extends SubsystemBase {
   public int convertCardinalDirections(int povAngleDeg) {
     // TODO: figure out what angles the robot should turn to
     if (povAngleDeg == 270) {
-      povAngleDeg += 90;
+      povAngleDeg += 0;
     } else if (povAngleDeg == 90) {
-      povAngleDeg -= 90;
+      povAngleDeg -= 0;
     }
     // targetHeadingDegrees is counterclockwise so need to flip povAngle
     povAngleDeg = 360 - povAngleDeg;
@@ -594,5 +596,11 @@ public class DriveSubsystem extends SubsystemBase {
         "Rear Left Distance (m)", () -> rearLeft.getPosition().distanceMeters, null);
     builder.addDoubleProperty(
         "Rear Right Distance (m)", () -> rearRight.getPosition().distanceMeters, null);
+    builder.addDoubleProperty(
+        "Rear Right Velocity (mps)", () -> rearRight.getState().speedMetersPerSecond, null);
+    builder.addDoubleProperty(
+        "Rear Right Desired Velocity (mps)", () -> rearRight.desiredState.speedMetersPerSecond, null);
+    builder.addDoubleProperty(
+        "Rear Right Velocity Error (mps)", () -> rearRight.desiredState.speedMetersPerSecond - rearRight.getState().speedMetersPerSecond, null);
   }
 }

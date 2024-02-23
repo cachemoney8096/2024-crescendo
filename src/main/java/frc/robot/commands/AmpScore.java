@@ -17,7 +17,7 @@ public class AmpScore extends SequentialCommandGroup {
     addCommands(
         new WaitUntilCommand(
             () -> {
-              return intake.clearOfConveyorZone() && elevator.atDesiredPosition();
+              return elevator.atDesiredPosition();
             }),
         Conveyor.scoreTrapOrAmp(conveyor)
         // TODO "smartly" go home (e.g. go home once we've driven away from the wall)

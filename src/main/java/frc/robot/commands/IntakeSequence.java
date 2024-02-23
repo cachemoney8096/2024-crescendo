@@ -37,9 +37,9 @@ public class IntakeSequence extends SequentialCommandGroup {
                 new WaitUntilCommand(intake::clearOfConveyorZone),
                 new WaitUntilCommand(shooter::clearOfConveyorZone)),
             elevator::elevatorBelowInterferenceZone),
-        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME)),
+        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME, true)),
         new WaitUntilCommand(elevator::atDesiredPosition),
-        new WaitUntilCommand(intake::atDesiredIntakePosition),
+        new WaitUntilCommand(intake::nearDeployed),
         new InstantCommand(intake::startRollers),
         Conveyor.receive(conveyor),
         new InstantCommand(

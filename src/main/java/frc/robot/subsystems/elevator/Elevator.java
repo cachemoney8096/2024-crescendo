@@ -29,8 +29,7 @@ public class Elevator extends SubsystemBase {
     HOME,
     SCORE_TRAP,
     SCORE_AMP,
-    PRE_CLIMB,
-    POST_CLIMB
+    PRE_CLIMB
   }
 
   public CANSparkMax leftMotor =
@@ -57,9 +56,10 @@ public class Elevator extends SubsystemBase {
           ElevatorCal.CLIMBING_I,
           ElevatorCal.CLIMBING_D,
           new TrapezoidProfile.Constraints(
-              ElevatorCal.MAX_VELOCITY_IN_PER_SECOND,
-              ElevatorCal.MAX_ACCELERATION_IN_PER_SECOND_SQUARED));
+              ElevatorCal.MAX_VELOCITY_IN_PER_SECOND_CLIMB,
+              ElevatorCal.MAX_ACCELERATION_IN_PER_SECOND_SQUARED_CLIMB));
 
+  private boolean currentlyUsingNoteControl = true;
   private ProfiledPIDController currentPIDController = noteScoringElevatorController;
   private SimpleMotorFeedforward currentFeedforward = ElevatorCal.NOTE_SCORING_FF;
 
@@ -73,6 +73,13 @@ public class Elevator extends SubsystemBase {
   /** Profiled velocity setpoint from previous cycle (inches per sec) */
   private double prevVelocityInPerSec = 0;
 
+  // Things for debug
+  private double elevatorDemandVoltsA = 0.0;
+  private double elevatorDemandVoltsB = 0.0;
+  private double elevatorDemandVoltsC = 0.0;
+  private double desiredSetpointPosition = 0.0;
+  private double desiredSetpointVelocity = 0.0;
+
   public Elevator() {
     SparkMaxUtils.initWithRetry(this::initSparks, ElevatorConstants.MAX_INIT_RETRY_ATTEMPTS);
     elevatorPositions = new TreeMap<ElevatorPosition, Double>();
@@ -80,7 +87,8 @@ public class Elevator extends SubsystemBase {
     elevatorPositions.put(ElevatorPosition.SCORE_AMP, ElevatorCal.POSITION_SCORE_AMP_INCHES);
     elevatorPositions.put(ElevatorPosition.SCORE_TRAP, ElevatorCal.POSITION_SCORE_TRAP_INCHES);
     elevatorPositions.put(ElevatorPosition.PRE_CLIMB, ElevatorCal.POSITION_PRE_CLIMB_INCHES);
-    elevatorPositions.put(ElevatorPosition.POST_CLIMB, ElevatorCal.POSITION_POST_CLIMB_INCHES);
+
+    setControlParams(true);
   }
 
   private boolean initSparks() {
@@ -89,17 +97,6 @@ public class Elevator extends SubsystemBase {
     errors += SparkMaxUtils.check(rightMotor.restoreFactoryDefaults());
 
     errors += SparkMaxUtils.check(rightMotor.follow(leftMotor, true));
-
-    errors +=
-        SparkMaxUtils.check(
-            leftMotor.setSoftLimit(
-                SoftLimitDirection.kForward, ElevatorCal.ELEVATOR_POSITIVE_LIMIT_INCHES));
-    errors += SparkMaxUtils.check(leftMotor.enableSoftLimit(SoftLimitDirection.kForward, true));
-    errors +=
-        SparkMaxUtils.check(
-            leftMotor.setSoftLimit(
-                SoftLimitDirection.kReverse, ElevatorCal.ELEVATOR_NEGATIVE_LIMIT_INCHES));
-    errors += SparkMaxUtils.check(leftMotor.enableSoftLimit(SoftLimitDirection.kReverse, true));
 
     errors += SparkMaxUtils.check(leftMotor.setIdleMode(IdleMode.kBrake));
     errors += SparkMaxUtils.check(rightMotor.setIdleMode(IdleMode.kBrake));
@@ -135,11 +132,12 @@ public class Elevator extends SubsystemBase {
   /** Zeroes leftMotorEncoderRel so it returns inches from home. */
   private REVLibError setZeroFromAbsolute() {
     // TODO absolute encoder zeroing
-    return leftMotorEncoderRel.setPosition(0.0);
+    return leftMotorEncoderRel.setPosition(ElevatorCal.POSITION_HOME_INCHES);
   }
 
   /** If true, use elevator control parameters for note scoring as opposed to climbing */
   public void setControlParams(boolean useNoteControlParams) {
+    currentlyUsingNoteControl = useNoteControlParams;
     if (useNoteControlParams) {
       currentPIDController = noteScoringElevatorController;
       currentFeedforward = ElevatorCal.NOTE_SCORING_FF;
@@ -150,27 +148,42 @@ public class Elevator extends SubsystemBase {
     currentPIDController.reset(leftMotorEncoderRel.getPosition());
   }
 
+  private boolean nearHome() {
+    return leftMotorEncoderRel.getPosition() < (elevatorPositions.get(ElevatorPosition.HOME) + 1.0);
+  }
+
   /** Sets elevator motor voltage based on input position. Should be called every cycle. */
-  private void controlPosition(ElevatorPosition pos) {
-    currentPIDController.setGoal(elevatorPositions.get(pos));
-    double elevatorDemandVolts = currentPIDController.calculate(leftMotorEncoderRel.getPosition());
+  private void controlPosition(double inputPositionInch) {
+    currentPIDController.setGoal(inputPositionInch);
+    elevatorDemandVoltsA = currentPIDController.calculate(leftMotorEncoderRel.getPosition());
     final double timestamp = Timer.getFPGATimestamp();
     final double nextVelocityInPerSec = currentPIDController.getSetpoint().velocity;
     if (prevTimestamp.isPresent()) {
-      elevatorDemandVolts +=
+      elevatorDemandVoltsB =
           currentFeedforward.calculate(
               prevVelocityInPerSec, nextVelocityInPerSec, timestamp - prevTimestamp.get());
     } else {
-      elevatorDemandVolts += currentFeedforward.calculate(nextVelocityInPerSec);
+      elevatorDemandVoltsB = currentFeedforward.calculate(nextVelocityInPerSec);
     }
-    leftMotor.setVoltage(elevatorDemandVolts);
+    elevatorDemandVoltsC = currentlyUsingNoteControl ? ElevatorCal.NOTE_SCORING_KS : ElevatorCal.CLIMBING_KS;
+    
+    desiredSetpointPosition = currentPIDController.getSetpoint().position;
+    desiredSetpointVelocity = currentPIDController.getSetpoint().velocity;
+    
+    double voltageToSet = elevatorDemandVoltsA + elevatorDemandVoltsB + elevatorDemandVoltsC;
+    if (desiredPosition == ElevatorPosition.HOME && nearHome() && !currentlyUsingNoteControl) {
+      voltageToSet = ElevatorCal.CLIMBING_KS;
+    }
+
+    leftMotor.setVoltage(voltageToSet);
 
     prevVelocityInPerSec = nextVelocityInPerSec;
     prevTimestamp = Optional.of(timestamp);
   }
 
-  public void setDesiredPosition(ElevatorPosition inputPosition) {
+  public void setDesiredPosition(ElevatorPosition inputPosition, boolean useNoteParams) {
     this.desiredPosition = inputPosition;
+    setControlParams(useNoteParams);
   }
 
   public boolean atDesiredPosition() {
@@ -192,14 +205,14 @@ public class Elevator extends SubsystemBase {
    * @return true if the elevator's current position is greater than the elevator-intake
    *     interference zone
    */
-  public boolean elevatorAboveInterferenceZone() {
+  public boolean elevatorAboveIntakeInterferenceZone() {
     return leftMotorEncoderRel.getPosition()
         > ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES;
   }
 
   @Override
   public void periodic() {
-    controlPosition(desiredPosition);
+    controlPosition(elevatorPositions.get(desiredPosition));
   }
 
   public void burnFlashSparks() {
@@ -217,11 +230,25 @@ public class Elevator extends SubsystemBase {
         "Elevator Position (in)",
         leftMotorEncoderRel::getPosition,
         leftMotorEncoderRel::setPosition);
-    builder.addDoubleProperty("Elevator Vel (in/s)", leftMotorEncoderRel::getVelocity, null);
+    builder.addDoubleProperty(
+        "Right Motor Position (rots)",
+        () -> rightMotor.getEncoder().getPosition(),
+        null);
+    builder.addDoubleProperty("Elevator Vel (in per s)", leftMotorEncoderRel::getVelocity, null);
     builder.addDoubleProperty(
         "Elevator Left Abs Pos (deg)", leftMotorEncoderAbs::getPosition, null);
     builder.addDoubleProperty(
         "Elevator Right Abs Pos (deg)", rightMotorEncoderAbs::getPosition, null);
+    builder.addDoubleProperty("Elevator Desired Position (in)", () -> elevatorPositions.get(desiredPosition), null);
     builder.addBooleanProperty("Elevator at desired position", this::atDesiredPosition, null);
+    builder.addBooleanProperty("Elevator above intererence", this::elevatorAboveIntakeInterferenceZone, null);
+    builder.addBooleanProperty("Elevator below interference", this::elevatorBelowInterferenceZone, null);
+    builder.addDoubleProperty("Elevator Desired Setpoint (in)", () -> desiredSetpointPosition, null);
+    builder.addDoubleProperty("Elevator Desired Vel (in per s)", () -> desiredSetpointVelocity, null);
+    builder.addDoubleProperty("Demand PID (V)", () -> elevatorDemandVoltsA, null);
+    builder.addDoubleProperty("Demand Feedforward (V)", () -> elevatorDemandVoltsB, null);
+    builder.addDoubleProperty("Demand Gravity (V)", () -> elevatorDemandVoltsC, null);
+    builder.addBooleanProperty("Near home", this::nearHome, null);
+    builder.addBooleanProperty("Holding climb home position", () -> desiredPosition == ElevatorPosition.HOME && nearHome() && !currentlyUsingNoteControl, null);
   }
 }

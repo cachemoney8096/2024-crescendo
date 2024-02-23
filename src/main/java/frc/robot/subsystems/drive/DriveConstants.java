@@ -16,9 +16,11 @@ public class DriveConstants {
   /** Multiplier for wheel diameter based on empirical on-field measurement */
   public static final double WHEEL_DIAMETER_FUDGE_FACTOR = 1.0;
 
+  public static final double inchesToMeters = 0.0254;
+
   /** Calculations required for driving motor conversion factors and feed forward */
-  public static final double DRIVING_MOTOR_FREE_SPEED_RPS = Constants.NEO_FREE_SPEED_RPM / 60,
-      WHEEL_DIAMETER_METERS = Units.inchesToMeters(3) * WHEEL_DIAMETER_FUDGE_FACTOR,
+  public static final double DRIVING_MOTOR_FREE_SPEED_RPS = Constants.KRAKEN_FREE_SPEED_RPM / 60,
+      WHEEL_DIAMETER_METERS = 3 * inchesToMeters * WHEEL_DIAMETER_FUDGE_FACTOR,
       WHEEL_CIRCUMFERENCE_METERS = WHEEL_DIAMETER_METERS * Math.PI;
 
   /** the distance from the center of the robot to the furthest module */
@@ -48,7 +50,7 @@ public class DriveConstants {
    * Driving Parameters - Note that these are not the maximum capable speeds of the robot, rather
    * the allowed maximum speeds. Max speed is 85% free speed
    */
-  public static final double FREE_SPEED_FUDGE_FACTOR = 0.85,
+  public static final double FREE_SPEED_FUDGE_FACTOR = 0.95,
       MAX_SPEED_METERS_PER_SECOND = FREE_SPEED_FUDGE_FACTOR * Units.feetToMeters(20.25),
       MAX_ANGULAR_SPEED_RAD_PER_SECONDS = Math.PI * 2;
 

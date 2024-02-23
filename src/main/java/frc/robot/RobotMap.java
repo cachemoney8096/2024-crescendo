@@ -31,5 +31,5 @@ public class RobotMap {
       INTAKING_LEFT_MOTOR_CAN_ID = 22,
       INTAKING_RIGHT_MOTOR_CAN_ID = 21;
 
-  public static final int CANDLE_CAN_ID = Constants.PLACEHOLDER_INT;
+  public static final int CANDLE_CAN_ID = 17;
 }

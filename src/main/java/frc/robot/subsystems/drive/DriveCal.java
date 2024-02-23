@@ -8,10 +8,10 @@ public class DriveCal {
   public static final int SPARK_INIT_RETRY_ATTEMPTS = 5;
 
   /** Input meters/second, output [-1,1] */
-  public static final double DRIVING_P = 0.1,
+  public static final double DRIVING_P = 0.2,
       DRIVING_I = 0.0,
-      DRIVING_D = 0.1,
-      DRIVING_FF = 0.95 / DriveConstants.DRIVE_WHEEL_FREE_SPEED_METERS_PER_SECOND;
+      DRIVING_D = 0.003,
+      DRIVING_FF = 1.05 / DriveConstants.DRIVE_WHEEL_FREE_SPEED_METERS_PER_SECOND;
 
   /** Input radians, output [-1,1] */
   public static final double TURNING_P = 0.8, TURNING_I = 0.0, TURNING_D = 0.1, TURNING_FF = 0.00;
@@ -20,10 +20,10 @@ public class DriveCal {
    * Angular offset of the modules relative to the zeroing fixture in radians. Ideally should be
    * relative to the fixture but they are actually slightly different.
    */
-  public static double SWERVE_FRONT_LEFT_ANGULAR_OFFSET_RAD = Constants.PLACEHOLDER_DOUBLE,
-      SWERVE_FRONT_RIGHT_ANGULAR_OFFSET_RAD = Constants.PLACEHOLDER_DOUBLE,
-      SWERVE_BACK_LEFT_ANGULAR_OFFSET_RAD = Constants.PLACEHOLDER_DOUBLE,
-      SWERVE_BACK_RIGHT_ANGULAR_OFFSET_RAD = Constants.PLACEHOLDER_DOUBLE;
+  public static double SWERVE_FRONT_LEFT_ANGULAR_OFFSET_RAD = 3.672,
+      SWERVE_FRONT_RIGHT_ANGULAR_OFFSET_RAD = 0.490 + Math.PI,
+      SWERVE_BACK_LEFT_ANGULAR_OFFSET_RAD = 0.466 + Math.PI,
+      SWERVE_BACK_RIGHT_ANGULAR_OFFSET_RAD = 3.537;
 
   /**
    * Angular offsets of the modules relative to the chassis in radians. The modules form an O when
@@ -33,11 +33,11 @@ public class DriveCal {
       FRONT_LEFT_CHASSIS_ANGULAR_OFFSET_RAD =
           SWERVE_FRONT_LEFT_ANGULAR_OFFSET_RAD - (3.0 * Math.PI / 4.0),
       FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET_RAD =
-          SWERVE_FRONT_RIGHT_ANGULAR_OFFSET_RAD - (Math.PI / 4.0),
+          SWERVE_FRONT_RIGHT_ANGULAR_OFFSET_RAD + (3.0 * Math.PI / 4.0),
       BACK_LEFT_CHASSIS_ANGULAR_OFFSET_RAD =
-          SWERVE_BACK_LEFT_ANGULAR_OFFSET_RAD + (3.0 * Math.PI / 4.0),
+          SWERVE_BACK_LEFT_ANGULAR_OFFSET_RAD - (1.0 * Math.PI / 4.0),
       BACK_RIGHT_CHASSIS_ANGULAR_OFFSET_RAD =
-          SWERVE_BACK_RIGHT_ANGULAR_OFFSET_RAD + (Math.PI / 4.0);
+          SWERVE_BACK_RIGHT_ANGULAR_OFFSET_RAD + (1.0 * Math.PI / 4.0);
 
   /** Controller on module speed for rotating to target, input degrees [-180,180], output [0,1]. */
   public static final PIDController ROTATE_TO_TARGET_PID_CONTROLLER =
