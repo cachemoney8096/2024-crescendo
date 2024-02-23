@@ -76,6 +76,7 @@ public class Shooter extends SubsystemBase {
 
   /** What the shooter is currently doing */
   private ShooterMode shooterMode = ShooterMode.IDLE;
+  private boolean setRealDesired = false;
 
   /** How far are we away from the goal (in meters) */
   private double shooterDistanceMeters = 10.0;
@@ -149,6 +150,15 @@ public class Shooter extends SubsystemBase {
       pivotController.reset(getPivotPosition());
     }
     shooterMode = newMode;
+    this.setRealDesired = true;
+  }
+
+  public void setRealDesiredToFalse() {
+    this.setRealDesired = false;
+  }
+
+  public void resetShooterController() {
+    this.pivotController.reset(pivotController.getSetpoint());
   }
 
   public void setShooterDistance(double newDistanceMeters) {
@@ -250,27 +260,29 @@ public class Shooter extends SubsystemBase {
 
   @Override
   public void periodic() {
-    switch (shooterMode) {
-      case IDLE:
-        stopShooter();
-        controlPosition(ShooterCal.STARTING_POSITION_DEGREES);
-        break;
-      case SPIN_UP:
-        spinUpShooter();
-        controlPosition(ShooterCal.STARTING_POSITION_DEGREES);
-        break;
-      case SHOOT:
-        spinUpShooter();
-        controlPositionWithDistance(shooterDistanceMeters);
-        break;
-      case LATCH:
-        stopShooter();
-        controlPositionToLatch();
-        break;
-      case PRELATCH:
-        stopShooter();
-        controlPositionToPreLatch();
-        break;
+    if (setRealDesired) {
+      switch (shooterMode) {
+        case IDLE:
+          stopShooter();
+          controlPosition(ShooterCal.STARTING_POSITION_DEGREES);
+          break;
+        case SPIN_UP:
+          spinUpShooter();
+          controlPosition(ShooterCal.STARTING_POSITION_DEGREES);
+          break;
+        case SHOOT:
+          spinUpShooter();
+          controlPositionWithDistance(shooterDistanceMeters);
+          break;
+        case LATCH:
+          stopShooter();
+          controlPositionToLatch();
+          break;
+        case PRELATCH:
+          stopShooter();
+          controlPositionToPreLatch();
+          break;
+      }
     }
   }
 

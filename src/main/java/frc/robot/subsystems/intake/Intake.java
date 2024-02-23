@@ -58,6 +58,8 @@ public class Intake extends SubsystemBase {
   private TreeMap<IntakePosition, Double> intakePositionMap;
   private IntakePosition desiredPosition = IntakePosition.STOWED;
 
+  private boolean setRealDesired = false;
+
   public Intake() {
     initPivotMotor();
     initIntakeTalons();
@@ -135,6 +137,15 @@ public class Intake extends SubsystemBase {
 
   public void setDesiredIntakePosition(IntakePosition pos) {
     this.desiredPosition = pos;
+    this.setRealDesired = true;
+  }
+
+  public void setRealDesiredToFalse() {
+    this.setRealDesired = false;
+  }
+
+  public void resetIntakeController() {
+    this.pivotController.reset(pivotController.getSetpoint());
   }
 
   /** Returns the cosine of the arm angle in degrees off of the horizontal. */
@@ -202,7 +213,9 @@ public class Intake extends SubsystemBase {
   }
 
   public void periodic() {
-    moveToPos(desiredPosition);
+    if (setRealDesired) {
+      moveToPos(desiredPosition);
+    }
   }
 
   public void initSendable(SendableBuilder builder) {

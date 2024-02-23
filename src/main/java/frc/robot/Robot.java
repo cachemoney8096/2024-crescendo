@@ -123,6 +123,14 @@ public class Robot extends TimedRobot {
       m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
       m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
     }
+
+    m_robotContainer.intake.setRealDesiredToFalse();
+    m_robotContainer.elevator.setRealDesiredToFalse();
+    m_robotContainer.shooter.setRealDesiredToFalse();
+
+    m_robotContainer.intake.resetIntakeController();
+    m_robotContainer.elevator.resetElevatorControllers();
+    m_robotContainer.shooter.resetShooterController();
   }
 
   /** This function is called periodically during operator control. */

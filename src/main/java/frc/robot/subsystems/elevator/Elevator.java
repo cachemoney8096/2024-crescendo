@@ -67,6 +67,8 @@ public class Elevator extends SubsystemBase {
 
   private ElevatorPosition desiredPosition = ElevatorPosition.HOME;
 
+  private boolean setRealDesired = false;
+
   /** FPGA timestamp from previous cycle. Empty for first cycle only. */
   private Optional<Double> prevTimestamp = Optional.empty();
 
@@ -171,6 +173,16 @@ public class Elevator extends SubsystemBase {
 
   public void setDesiredPosition(ElevatorPosition inputPosition) {
     this.desiredPosition = inputPosition;
+    this.setRealDesired = true;
+  }
+
+  public void setRealDesiredToFalse() {
+    this.setRealDesired = false;
+  }
+
+  public void resetElevatorControllers() {
+    this.noteScoringElevatorController.reset(noteScoringElevatorController.getSetpoint());
+    this.chainGrabberElevatorController.reset(chainGrabberElevatorController.getSetpoint());
   }
 
   public boolean atDesiredPosition() {
@@ -199,7 +211,9 @@ public class Elevator extends SubsystemBase {
 
   @Override
   public void periodic() {
-    controlPosition(desiredPosition);
+    if (setRealDesired) {
+      controlPosition(desiredPosition);
+    }
   }
 
   public void burnFlashSparks() {
