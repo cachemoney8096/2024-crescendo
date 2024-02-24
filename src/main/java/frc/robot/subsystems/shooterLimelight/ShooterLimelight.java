@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -82,7 +83,7 @@ public class ShooterLimelight extends SubsystemBase {
     setLimelightValues(
         Constants.limelightLedMode.OFF,
         Constants.limelightCamMode.VISION_PROCESSING,
-        Constants.limelightPipeline.TAG_PIPELINE);
+        Constants.limelightPipeline.NOTE_PIPELINE);
 
     m_simDevice = SimDevice.create(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
     if (m_simDevice != null) {
@@ -173,7 +174,7 @@ public class ShooterLimelight extends SubsystemBase {
     }
 
     /** Offset from center = 0,0 space to wpi blue origin space */
-    Translation2d fieldCenterToCornerOffset = new Translation2d(-8.31, 4.10);
+    Translation2d fieldCenterToCornerOffset = new Translation2d(-8.31, -4.10);
 
     /** Position of center speaker tags aon the field */
     Pose2d speakerCenterTagPoseBlue = new Pose2d(-8.31, 1.44, new Rotation2d(0.0));
@@ -186,8 +187,13 @@ public class ShooterLimelight extends SubsystemBase {
       new Transform2d(fieldCenterToCornerOffset, new Rotation2d(0.0)).inverse());
     
     Translation2d robotToTag = speakerCenterTagPose_wpiBlue.getTranslation().minus(getBotPose2d_wpiBlue().getSecond().getTranslation());
-    Rotation2d angleToTag = robotToTag.getAngle();
+    Rotation2d angleToTag = robotToTag.getAngle().plus(new Rotation2d(Units.degreesToRadians(180.0))).plus(new Rotation2d(Units.degreesToRadians(ShooterLimelightCal.LIMELIGHT_DETECTION_OFFSET_DEGREES)));
     double distanceToTagMeters = robotToTag.getNorm();
+
+    System.out.println("Tag angle from pose deg: " + speakerCenterTagPose_wpiBlue.getRotation().getDegrees());
+    System.out.println("Angle to tag deg: " + angleToTag);
+    System.out.println("Robot translation2d: " + getBotPose2d_wpiBlue().getSecond().getTranslation());
+    System.out.println("Tag translation2d: " + speakerCenterTagPose_wpiBlue.getTranslation());
 
     return Optional.of(Pair.of(angleToTag, distanceToTagMeters));
   }
