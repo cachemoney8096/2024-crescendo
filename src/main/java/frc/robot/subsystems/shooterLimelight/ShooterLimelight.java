@@ -6,6 +6,8 @@ import edu.wpi.first.hal.SimBoolean;
 import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.hal.SimDevice.Direction;
 import edu.wpi.first.hal.SimDouble;
+import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -88,6 +90,11 @@ public class ShooterLimelight extends SubsystemBase {
       m_ty = m_simDevice.createDouble("Ty", Direction.kBidir, 0.0);
       m_valid = m_simDevice.createBoolean("Valid", Direction.kBidir, false);
     }
+  }
+
+  public Pair<Double, Pose2d> getBotPose2d_wpiBlue()
+  {
+    return LimelightHelpers.getTimedBotPose2d_wpiBlue(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
   }
 
   private static Transform2d getBotFromTarget(Pose3d botPoseTargetSpace) {
