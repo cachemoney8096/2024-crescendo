@@ -128,6 +128,9 @@ public class Intake extends SubsystemBase {
     toApply.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // this is don't invert
     cfgRight.apply(toApply);
 
+    intakeTalonLeft.getDutyCycle().setUpdateFrequency(50);
+    intakeTalonRight.getDutyCycle().setUpdateFrequency(50);
+
     intakeTalonLeft.optimizeBusUtilization();
     intakeTalonRight.optimizeBusUtilization();
   }

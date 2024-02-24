@@ -23,6 +23,7 @@ import frc.robot.commands.ClimbPrepSequence;
 import frc.robot.commands.ClimbSequence;
 import frc.robot.commands.GoHomeSequence;
 import frc.robot.commands.IntakeSequence;
+import frc.robot.commands.RotateToSpeaker;
 import frc.robot.commands.SpeakerPrepScoreSequence;
 import frc.robot.commands.SpeakerShootSequence;
 import frc.robot.subsystems.conveyor.Conveyor;
@@ -150,6 +151,7 @@ public class RobotContainer {
     driverController.start().onTrue(new InstantCommand(drive::resetYaw));
     driverController.y().onTrue(new ClimbPrepSequence(intake, elevator, shooter));
     driverController.b().onTrue(new ClimbSequence(intake, elevator, shooter, conveyor));
+    driverController.a().whileTrue(new RotateToSpeaker(drive, shooterLimelight));
 
     drive.setDefaultCommand(
         new RunCommand(
