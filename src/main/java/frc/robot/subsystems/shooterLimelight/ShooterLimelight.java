@@ -7,6 +7,7 @@ import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.hal.SimDevice.Direction;
 import edu.wpi.first.hal.SimDouble;
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -22,6 +23,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer.MatchState;
+import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
 import java.util.Optional;
@@ -149,6 +151,18 @@ public class ShooterLimelight extends SubsystemBase {
     return bestTag;
   }
 
+  public Pose3d getBotPose3d(){
+    return LimelightHelpers.getBotPose3d(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
+  }
+
+  public void disabledPeriodicInit(SwerveDrivePoseEstimator poseEstimator, DriveSubsystem drive){
+    if(Math.abs(getBotPose3d().getZ()) < ShooterLimelightCal.LARGE_VALUE_CORRECTOR_MARGIN && checkForTag().isPresent()){
+      poseEstimator.update(getBotPose2d_wpiBlue().getSecond().getRotation(), drive.getModulePositions());
+      poseEstimator.addVisionMeasurement(getBotPose2d_wpiBlue().getSecond(), Timer.getFPGATimestamp());
+      drive.resetOdometry(poseEstimator.getEstimatedPosition());
+    }
+  }
+
   private Transform2d getRobotToScoringLocation(Pose3d targetPoseRobotSpace) {
     Transform2d targetFromBot = getBotFromTarget(targetPoseRobotSpace);
     return targetFromBot;
@@ -164,11 +178,13 @@ public class ShooterLimelight extends SubsystemBase {
   }
 
   /**  */
+  private int targetsCount = 0;
   public Optional<Pair<Rotation2d,Double>> checkForTag() {
     LimelightHelpers.LimelightResults llresults =
         LimelightHelpers.getLatestResults(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
     LimelightTarget_Fiducial[] targets = llresults.targetingResults.targets_Fiducials;
 
+    targetsCount = targets.length;
     if (targets.length != 2) {
       return Optional.empty();
     }
@@ -435,5 +451,11 @@ public class ShooterLimelight extends SubsystemBase {
     builder.addDoubleProperty("Tx", () -> getOffSetX(), null);
     builder.addDoubleProperty("Ty", () -> getOffSetY(), null);
     builder.addBooleanProperty("Valid Target", () -> isValidTarget(), null);
+    if(Math.abs(getBotPose3d().getZ()) < ShooterLimelightCal.LARGE_VALUE_CORRECTOR_MARGIN && checkForTag().isPresent()){
+      builder.addDoubleProperty("Limelight odometry X", ()->{return getBotPose2d_wpiBlue().getSecond().getX();}, null);
+      builder.addDoubleProperty("Limelight odometry Y", ()->{return getBotPose2d_wpiBlue().getSecond().getY();}, null);
+      builder.addDoubleProperty("Limelight odometry yaw", ()->{return getBotPose2d_wpiBlue().getSecond().getRotation().getDegrees();}, null);
+    }
+    builder.addIntegerProperty("Targets seen", ()->{return targetsCount;}, null);
   }
 }
