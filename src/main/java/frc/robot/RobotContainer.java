@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -99,7 +100,7 @@ public class RobotContainer {
     shooter = new Shooter();
     conveyor = new Conveyor();
     lights = new Lights();
-    shooterLimelight = new ShooterLimelight(0, 0, 0, matchState);
+    shooterLimelight = new ShooterLimelight(25, Units.inchesToMeters(26), 1.45, matchState);
 
     // Configure the trigger bindings
     configureBindings();
@@ -109,6 +110,7 @@ public class RobotContainer {
     Shuffleboard.getTab("Subsystems").add(conveyor.getName(), conveyor);
     Shuffleboard.getTab("Subsystems").add(shooter.getName(), shooter);
     Shuffleboard.getTab("Subsystems").add(elevator.getName(), elevator);
+    Shuffleboard.getTab("Subsystems").add("Shooter limelight",shooterLimelight);
 
     burnFlashAllSparks();
   }
