@@ -39,8 +39,11 @@ import java.util.Optional;
 public class DriveSubsystem extends SubsystemBase {
   private double targetHeadingDegrees;
 
+  double tagTargetHeading = 0.0;
+
   public void setTargetHeadingDegrees(double targetHeadingDegrees) {
     this.targetHeadingDegrees = targetHeadingDegrees;
+    tagTargetHeading = targetHeadingDegrees;
   }
 
   // Create SwerveModules
@@ -279,7 +282,7 @@ public class DriveSubsystem extends SubsystemBase {
     frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
     rearLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
     rearRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-    targetHeadingDegrees = getHeadingDegrees();
+    // targetHeadingDegrees = getHeadingDegrees();
   }
 
   /**
@@ -623,5 +626,7 @@ public class DriveSubsystem extends SubsystemBase {
     builder.addDoubleProperty("Keep Heading PID [0,1]", () -> KeepHeadingPID, null);
     builder.addDoubleProperty("Keep Heading FF [0,1]", () -> KeepHeadingFF, null);
     builder.addDoubleProperty("Rotation Controller Input", () -> rotControllerInput, null);
+    builder.addDoubleProperty("Yaw error", () -> targetHeadingDegrees - gyro.getYaw().getValue(), null);
+    builder.addDoubleProperty("Target Heading (tag detection)", () -> tagTargetHeading, null);
   }
 }

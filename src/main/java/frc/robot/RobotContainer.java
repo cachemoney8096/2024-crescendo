@@ -99,6 +99,7 @@ public class RobotContainer {
     shooter = new Shooter();
     conveyor = new Conveyor();
     lights = new Lights();
+    shooterLimelight = new ShooterLimelight(0, 0, 0, matchState);
 
     // Configure the trigger bindings
     configureBindings();
