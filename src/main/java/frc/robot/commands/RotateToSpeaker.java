@@ -19,12 +19,12 @@ public class RotateToSpeaker extends SequentialCommandGroup {
     addRequirements(drive);
 
     Optional<Transform2d> robotToTarget = Optional.empty();
-    Rotation2d robotToTag;
+    Double angleToTag = 0.0;
 
     addCommands(
         new InstantCommand(
             () -> {
-              // robotToTarget = limelight.checkForTag();
+              // new InstantCommand(() -> angleToTag = limelight.checkForTag().get)
             }),
         new ConditionalCommand(null, null, () -> robotToTarget.isPresent()));
   }

@@ -1,9 +1,11 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
@@ -23,6 +25,8 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
         new InstantCommand(() -> shooter.setShooterDistance(SPEAKER_SHOOTER_DISTANCE_METERS)),
         new GoHomeSequence(intake, elevator, shooter, conveyor, true),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
-        Conveyor.backUpNote(conveyor));
+        new InstantCommand(() -> conveyor.startBackRollers(1.0)),
+        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SPEAKER_PREP, true)));
+        // Conveyor.backUpNote(conveyor));
   }
 }

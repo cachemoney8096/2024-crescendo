@@ -157,7 +157,7 @@ public class Conveyor extends SubsystemBase {
     return new SequentialCommandGroup(
         new InstantCommand(() -> conveyor.backMotorEncoder.setPosition(0.0), conveyor),
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.FRONT_BACKUP_SPEED)),
-        new InstantCommand(() -> conveyor.backMotor.set(0.0)),
+        new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.FRONT_BACKUP_SPEED)),
 
         new WaitCommand(0.25),
         Conveyor.stop(conveyor),
@@ -183,11 +183,11 @@ public class Conveyor extends SubsystemBase {
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.FRONT_RECEIVE_SPEED)),
         new InstantCommand(() -> conveyor.backMotor.set(0.0)),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
-        new WaitUntilCommand(
-            () ->
-                Math.abs(conveyor.backMotorEncoder.getPosition())
-                    > ConveyorCal.NOTE_POSITION_THRESHOLD_INCHES),
-        new WaitCommand(0.75),
+        new WaitUntilCommand(() -> Math.abs(conveyor.backMotorEncoder.getPosition()) > ConveyorCal.NOTE_POSITION_THRESHOLD_INCHES),
+        new InstantCommand(() -> conveyor.frontMotorEncoder.setPosition(0.0), conveyor),
+        new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.BACK_OFF_POWER)),
+        new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.BACK_OFF_POWER)),
+        new WaitUntilCommand(() -> conveyor.frontMotorEncoder.getPosition() < ConveyorCal.BACK_OFF_INCHES),
         Conveyor.stop(conveyor),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE));
   }

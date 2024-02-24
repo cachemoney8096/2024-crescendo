@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelightConstants;
+import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.LimelightHelpers;
 
@@ -70,6 +71,8 @@ public class Robot extends TimedRobot {
       m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kCoast);
       m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kCoast);
     }
+
+    m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);
   }
 
   @Override
