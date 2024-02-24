@@ -28,7 +28,8 @@ public class Elevator extends SubsystemBase {
     HOME,
     SCORE_TRAP,
     SCORE_AMP,
-    PRE_CLIMB
+    PRE_CLIMB,
+    SPEAKER_PREP
   }
 
   public CANSparkMax leftMotor =
@@ -86,6 +87,7 @@ public class Elevator extends SubsystemBase {
     elevatorPositions.put(ElevatorPosition.SCORE_AMP, ElevatorCal.POSITION_SCORE_AMP_INCHES);
     elevatorPositions.put(ElevatorPosition.SCORE_TRAP, ElevatorCal.POSITION_SCORE_TRAP_INCHES);
     elevatorPositions.put(ElevatorPosition.PRE_CLIMB, ElevatorCal.POSITION_PRE_CLIMB_INCHES);
+    elevatorPositions.put(ElevatorPosition.SPEAKER_PREP, ElevatorCal.POSITION_SPEAKER_PREP_INCHES);
 
     setControlParams(true);
   }

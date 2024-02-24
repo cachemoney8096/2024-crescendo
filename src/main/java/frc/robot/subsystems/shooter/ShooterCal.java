@@ -68,7 +68,7 @@ public class ShooterCal {
   public static final double PRE_LATCH_ANGLE_DEGREES = 80.0;
 
   /** How close to goal position to be considered "there" */
-  public static final double PIVOT_ANGLE_MARGIN_DEG = 1.0;
+  public static final double PIVOT_ANGLE_MARGIN_DEG = 2.0;
 
   /** Target shooter motor speeds (at the motor) */
   public static final double SHOOTER_MOTOR_SPEED_RPM = 4000.0;
