@@ -40,7 +40,7 @@ public class DriveCal {
 
   /** Controller on module speed for rotating to target, input degrees [-180,180], output [0,1]. */
   public static final PIDController ROTATE_TO_TARGET_PID_CONTROLLER =
-      new PIDController(0.015, 0, 0.000); // From 2022
+      new PIDController(0.012, 0, 0.000); // From 2022
 
   /** Feed forward for rotating to target, gets added to or subtracted from PID controller. */
   public static final double ROTATE_TO_TARGET_FF = 0.01;

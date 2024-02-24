@@ -70,6 +70,9 @@ public class DriveSubsystem extends SubsystemBase {
 
   public PoseBuffer poseBuffer = new PoseBuffer();
 
+  double KeepHeadingPID = 0.0;
+  double KeepHeadingFF = 0.0;
+
   SwerveDriveOdometry odometry =
       new SwerveDriveOdometry(
           DriveConstants.DRIVE_KINEMATICS,
@@ -78,6 +81,8 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Multiplier for drive speed, does not affect trajectory following */
   private double throttleMultiplier = 1.0;
+
+  private double rotControllerInput = 0.0;
 
   /** Provides info on our alliance color and whether this is a real match. */
   private MatchState matchState;
@@ -240,7 +245,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
     if (xSpeed == 0 && ySpeed == 0 && rot == 0) {
-      setNoMove();
+      setX();
       return;
     }
     xSpeed *= DriveConstants.MAX_SPEED_METERS_PER_SECOND;
@@ -330,6 +335,9 @@ public class DriveSubsystem extends SubsystemBase {
         DriveCal.ROTATE_TO_TARGET_PID_CONTROLLER.calculate(offsetHeadingDegrees, 0.0);
     double ffRotation = Math.signum(offsetHeadingDegrees) * DriveCal.ROTATE_TO_TARGET_FF;
 
+    KeepHeadingPID = pidRotation;
+    KeepHeadingFF = ffRotation;
+
     double desiredRotation = pidRotation - ffRotation;
 
     if (Math.abs(desiredRotation) < DriveCal.ROTATION_DEADBAND_THRESHOLD) {
@@ -368,11 +376,10 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void rotateOrKeepHeading(
       double x, double y, double rot, boolean fieldRelative, int povAngleDeg) {
+        rotControllerInput = rot;
     if (povAngleDeg != -1) {
       targetHeadingDegrees = convertCardinalDirections(povAngleDeg);
       keepHeading(x, y, fieldRelative);
-    } else if (rot == 0 && x == 0 && y == 0) {
-      setX();
     } else if (rot == 0) {
       keepHeading(x, y, fieldRelative);
     } else {
@@ -609,5 +616,8 @@ public class DriveSubsystem extends SubsystemBase {
         () ->
             rearRight.desiredState.speedMetersPerSecond - rearRight.getState().speedMetersPerSecond,
         null);
+    builder.addDoubleProperty("Keep Heading PID [0,1]", () -> KeepHeadingPID, null);
+    builder.addDoubleProperty("Keep Heading FF [0,1]", () -> KeepHeadingFF, null);
+    builder.addDoubleProperty("Rotation Controller Input", () -> rotControllerInput, null);
   }
 }

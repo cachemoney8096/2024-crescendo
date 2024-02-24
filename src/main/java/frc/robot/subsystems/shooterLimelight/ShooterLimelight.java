@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.RobotContainer.MatchState;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
 import java.util.Optional;
@@ -63,6 +64,8 @@ public class ShooterLimelight extends SubsystemBase {
   // AprilTag detection
   private Optional<Transform2d> robotToScoringLocation = Optional.empty();
 
+  private MatchState matchState;
+
   /**
    * Create an ShooterLimelight object
    *
@@ -72,7 +75,7 @@ public class ShooterLimelight extends SubsystemBase {
    * @param targetHeightMeters height to the center of the target in meters
    */
   public ShooterLimelight(
-      double pitchAngleDegrees, double heightMeters, double targetHeightMeters) {
+      double pitchAngleDegrees, double heightMeters, double targetHeightMeters, MatchState matchState) {
     kCameraPitchAngleDegrees = pitchAngleDegrees;
     kCameraHeight = heightMeters;
     kTargetHeight = targetHeightMeters;
@@ -90,11 +93,13 @@ public class ShooterLimelight extends SubsystemBase {
       m_ty = m_simDevice.createDouble("Ty", Direction.kBidir, 0.0);
       m_valid = m_simDevice.createBoolean("Valid", Direction.kBidir, false);
     }
+
+    this.matchState = matchState;
   }
 
-  public Pair<Double, Pose2d> getBotPose2d_wpiBlue()
-  {
-    return LimelightHelpers.getTimedBotPose2d_wpiBlue(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
+  public Pair<Double, Pose2d> getBotPose2d_wpiBlue() {
+    return LimelightHelpers.getTimedBotPose2d_wpiBlue(
+        ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
   }
 
   private static Transform2d getBotFromTarget(Pose3d botPoseTargetSpace) {
@@ -148,26 +153,43 @@ public class ShooterLimelight extends SubsystemBase {
     return targetFromBot;
   }
 
+  public Rotation2d getRobotRotationToScoringLocation(Pose3d targetPoseRobotSpace) {
+    Transform2d transform = getRobotToScoringLocation(targetPoseRobotSpace);
+    return transform.getRotation();
+  }
+
   public Optional<Transform2d> getRobotToScoringLocation() {
     return robotToScoringLocation;
   }
 
-  public Optional<Transform2d> checkForTag() {
-    if (!LimelightHelpers.getTV(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME)) {
-      robotToScoringLocation = Optional.empty();
+  /**  */
+  public Optional<Pair<Rotation2d,Double>> checkForTag() {
+    LimelightHelpers.LimelightResults llresults =
+        LimelightHelpers.getLatestResults(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
+    LimelightTarget_Fiducial[] targets = llresults.targetingResults.targets_Fiducials;
+
+    if (targets.length != 2) {
       return Optional.empty();
     }
-    if (!validScoringTag(
-        LimelightHelpers.getFiducialID(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME))) {
-      robotToScoringLocation = Optional.empty();
-      return Optional.empty();
-    }
-    robotToScoringLocation =
-        Optional.of(
-            getRobotToScoringLocation(
-                LimelightHelpers.getTargetPose3d_RobotSpace(
-                    ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME)));
-    return robotToScoringLocation;
+
+    /** Offset from center = 0,0 space to wpi blue origin space */
+    Translation2d fieldCenterToCornerOffset = new Translation2d(-8.31, 4.10);
+
+    /** Position of center speaker tags aon the field */
+    Pose2d speakerCenterTagPoseBlue = new Pose2d(-8.31, 1.44, new Rotation2d(0.0));
+    Pose2d speakerCenterTagPoseRed = new Pose2d(8.31, 1.44, new Rotation2d(0.0));
+
+    Pose2d speakerCenterTagPose = matchState.blue ? speakerCenterTagPoseBlue : speakerCenterTagPoseRed;
+
+
+    Pose2d speakerCenterTagPose_wpiBlue = speakerCenterTagPose.plus(
+      new Transform2d(fieldCenterToCornerOffset, new Rotation2d(0.0)).inverse());
+    
+    Translation2d robotToTag = speakerCenterTagPose_wpiBlue.getTranslation().minus(getBotPose2d_wpiBlue().getSecond().getTranslation());
+    Rotation2d angleToTag = robotToTag.getAngle();
+    double distanceToTagMeters = robotToTag.getNorm();
+
+    return Optional.of(Pair.of(angleToTag, distanceToTagMeters));
   }
 
   public double getLatencySeconds() {

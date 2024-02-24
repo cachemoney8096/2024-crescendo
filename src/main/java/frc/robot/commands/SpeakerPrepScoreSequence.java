@@ -22,6 +22,7 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
     addCommands(
         new InstantCommand(() -> shooter.setShooterDistance(SPEAKER_SHOOTER_DISTANCE_METERS)),
         new GoHomeSequence(intake, elevator, shooter, conveyor, true),
-        new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)));
+        new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
+        Conveyor.backUpNote(conveyor));
   }
 }

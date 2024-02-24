@@ -80,7 +80,7 @@ public class ShooterCal {
    * What the abs encoder reads (in degrees) when the shooter is pointed down. Acquired by pointing
    * the encoder at 90 and subtracting 90 from that reading.
    */
-  public static final double PIVOT_ANGLE_OFFSET_DEGREES = 94.47 - 90.0;
+  public static final double PIVOT_ANGLE_OFFSET_DEGREES = 102.55 - 90.0;
 
   /** Position at which (or beyond) the shooter has potential to intersect the conveyor. */
   public static final double CONVEYOR_ZONE_THRESHOLD_DEGREES = 110.0;
