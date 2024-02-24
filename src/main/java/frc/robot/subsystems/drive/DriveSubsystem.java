@@ -39,6 +39,10 @@ import java.util.Optional;
 public class DriveSubsystem extends SubsystemBase {
   private double targetHeadingDegrees;
 
+  public void setTargetHeadingDegrees(double targetHeadingDegrees) {
+    this.targetHeadingDegrees = targetHeadingDegrees;
+  }
+
   // Create SwerveModules
   public final SwerveModule frontLeft =
       new SwerveModule(
