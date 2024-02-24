@@ -31,6 +31,7 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 import frc.robot.utils.JoystickUtil;
 
 /**
@@ -84,6 +85,7 @@ public class RobotContainer {
   public Shooter shooter;
   public Conveyor conveyor;
   public Lights lights;
+  public ShooterLimelight shooterLimelight;
 
   public boolean speakerPrepped;
 
@@ -129,7 +131,7 @@ public class RobotContainer {
         .rightTrigger()
         .onTrue(
             new ConditionalCommand(
-                new SpeakerShootSequence(conveyor, shooter),
+                new SpeakerShootSequence(conveyor, shooter).finallyDo(conveyor::stopRollers),
                 new AmpScore(conveyor, intake, elevator),
                 this::preppedSpeaker)); // score based on prep
     driverController
@@ -144,7 +146,7 @@ public class RobotContainer {
             new SequentialCommandGroup(
                 new AmpPrepScore(elevator, conveyor, intake, shooter),
                 new InstantCommand(() -> setSpeakerPrep(false))));
-    driverController.x().onTrue(new GoHomeSequence(intake, elevator, shooter, conveyor, false));
+    driverController.back().onTrue(new GoHomeSequence(intake, elevator, shooter, conveyor, false));
     driverController.start().onTrue(new InstantCommand(drive::resetYaw));
     driverController.y().onTrue(new ClimbPrepSequence(intake, elevator, shooter));
     driverController.b().onTrue(new ClimbSequence(intake, elevator, shooter, conveyor));

@@ -99,8 +99,8 @@ public class Shooter extends SubsystemBase {
 
   public Shooter() {
     pivotAngleMap = new InterpolatingDoubleTreeMap();
-    pivotAngleMap.put(0.0, 120.0);
-    pivotAngleMap.put(200.0, 120.0);
+    pivotAngleMap.put(0.0, 140.0);
+    pivotAngleMap.put(200.0, 140.0);
 
     SparkMaxUtils.initWithRetry(this::initSparks, Constants.SPARK_INIT_RETRY_ATTEMPTS);
 
@@ -191,18 +191,20 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isShooterSpunUp() {
-    final boolean motorRightSpunUp =
-        Math.abs(motorRightRelEncoder.getVelocity() - ShooterCal.SHOOTER_MOTOR_SPEED_RPM)
-            < ShooterCal.SHOOTER_SPEED_MARGIN_RPM;
-    final boolean motorLeftOneSpunUp =
-        Math.abs(motorLeftOneRelEncoder.getVelocity() - ShooterCal.SHOOTER_MOTOR_SPEED_RPM)
-            < ShooterCal.SHOOTER_SPEED_MARGIN_RPM;
-    return motorRightSpunUp && motorLeftOneSpunUp;
+    // final boolean motorRightSpunUp =
+    //     Math.abs(motorRightRelEncoder.getVelocity() - ShooterCal.SHOOTER_MOTOR_SPEED_RPM)
+    //         < ShooterCal.SHOOTER_SPEED_MARGIN_RPM;
+    // final boolean motorLeftOneSpunUp =
+    //     Math.abs(motorLeftOneRelEncoder.getVelocity() - ShooterCal.SHOOTER_MOTOR_SPEED_RPM)
+    //         < ShooterCal.SHOOTER_SPEED_MARGIN_RPM;
+    return motorRightRelEncoder.getVelocity() > 2000 && motorLeftOneRelEncoder.getVelocity() > 2000 && motorLeftTwoRelEncoder.getVelocity() > 2000;
   }
 
   public void spinUpShooter() {
-    controllerA.setReference(ShooterCal.SHOOTER_MOTOR_SPEED_RPM, ControlType.kVelocity);
-    controllerB.setReference(ShooterCal.SHOOTER_MOTOR_SPEED_RPM, ControlType.kVelocity);
+    // controllerA.setReference(ShooterCal.SHOOTER_MOTOR_SPEED_RPM, ControlType.kVelocity);
+    // controllerB.setReference(ShooterCal.SHOOTER_MOTOR_SPEED_RPM, ControlType.kVelocity);
+    motorRight.setVoltage(8.0);
+    motorLeftOne.setVoltage(8.0);
   }
 
   private void stopShooter() {

@@ -153,6 +153,17 @@ public class Conveyor extends SubsystemBase {
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.NO_NOTE));
   }
 
+  public static Command backUpNote(Conveyor conveyor) {
+    return new SequentialCommandGroup(
+        new InstantCommand(() -> conveyor.backMotorEncoder.setPosition(0.0), conveyor),
+        new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.FRONT_BACKUP_SPEED)),
+        new InstantCommand(() -> conveyor.backMotor.set(0.0)),
+
+        new WaitCommand(0.25),
+        Conveyor.stop(conveyor),
+        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE));
+  }
+
   /** Score note into the trap or the amp */
   public static Command scoreTrapOrAmp(Conveyor conveyor) {
     return new SequentialCommandGroup(
@@ -176,7 +187,7 @@ public class Conveyor extends SubsystemBase {
             () ->
                 Math.abs(conveyor.backMotorEncoder.getPosition())
                     > ConveyorCal.NOTE_POSITION_THRESHOLD_INCHES),
-        new WaitCommand(0.25),
+        new WaitCommand(0.75),
         Conveyor.stop(conveyor),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE));
   }
