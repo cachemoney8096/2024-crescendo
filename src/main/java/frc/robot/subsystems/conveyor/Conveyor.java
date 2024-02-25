@@ -158,7 +158,6 @@ public class Conveyor extends SubsystemBase {
         new InstantCommand(() -> conveyor.backMotorEncoder.setPosition(0.0), conveyor),
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.FRONT_BACKUP_SPEED)),
         new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.FRONT_BACKUP_SPEED)),
-
         new WaitCommand(0.25),
         Conveyor.stop(conveyor),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE));
@@ -183,11 +182,15 @@ public class Conveyor extends SubsystemBase {
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.FRONT_RECEIVE_SPEED)),
         new InstantCommand(() -> conveyor.backMotor.set(0.0)),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
-        new WaitUntilCommand(() -> Math.abs(conveyor.backMotorEncoder.getPosition()) > ConveyorCal.NOTE_POSITION_THRESHOLD_INCHES),
+        new WaitUntilCommand(
+            () ->
+                Math.abs(conveyor.backMotorEncoder.getPosition())
+                    > ConveyorCal.NOTE_POSITION_THRESHOLD_INCHES),
         new InstantCommand(() -> conveyor.frontMotorEncoder.setPosition(0.0), conveyor),
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.BACK_OFF_POWER)),
         new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.BACK_OFF_POWER)),
-        new WaitUntilCommand(() -> conveyor.frontMotorEncoder.getPosition() < ConveyorCal.BACK_OFF_INCHES),
+        new WaitUntilCommand(
+            () -> conveyor.frontMotorEncoder.getPosition() < ConveyorCal.BACK_OFF_INCHES),
         Conveyor.stop(conveyor),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE));
   }
@@ -195,6 +198,21 @@ public class Conveyor extends SubsystemBase {
   /** Stop the conveor rollers. */
   public static Command stop(Conveyor conveyor) {
     return new InstantCommand(conveyor::stopRollers, conveyor);
+  }
+
+  /** backs the currently held note a little bit back into the conveyor to crush it */
+  public static Command crushNote(Conveyor conveyor) {
+    return new SequentialCommandGroup(
+        new InstantCommand(() -> conveyor.backMotorEncoder.setPosition(0.0), conveyor),
+        new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.FRONT_RECEIVE_SPEED)),
+        new InstantCommand(() -> conveyor.backMotor.set(0.0)),
+        new WaitUntilCommand(
+                () ->
+                    Math.abs(conveyor.backMotorEncoder.getPosition())
+                        > ConveyorCal.NOTE_POSITION_THRESHOLD_INCHES)
+            .withTimeout(1.0),
+        new WaitCommand(0.25),
+        Conveyor.stop(conveyor));
   }
 
   @Override
