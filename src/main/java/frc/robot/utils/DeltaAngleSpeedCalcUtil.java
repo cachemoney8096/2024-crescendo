@@ -2,14 +2,15 @@ package frc.robot.utils;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.util.Units;
-import frc.robot.Constants;
 
 public class DeltaAngleSpeedCalcUtil {
   // value pulled from game manual
   private static final double SPEAKER_HEIGHT_METERS = Units.inchesToMeters(77.9528);
   // guess-timated value for now
-  private static final double SHOOTER_SPEED_MPS = 9.144;
-  public DeltaAngleSpeedCalcUtil() {};
+  public static double SHOOTER_SPEED_MPS = 9.144;
+  public DeltaAngleSpeedCalcUtil(double speed) {
+    SHOOTER_SPEED_MPS = speed;
+  };
   /**
    *
    * @param tangentialVelocityMPS: see google doc
