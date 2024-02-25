@@ -24,13 +24,16 @@ import frc.robot.commands.ClimbPrepSequence;
 import frc.robot.commands.ClimbSequence;
 import frc.robot.commands.GoHomeSequence;
 import frc.robot.commands.IntakeSequence;
+import frc.robot.commands.PIDToPoint;
 import frc.robot.commands.RotateToSpeaker;
+import frc.robot.commands.SetTrapLineupPosition;
 import frc.robot.commands.SpeakerPrepScoreSequence;
 import frc.robot.commands.SpeakerShootSequence;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intakeLimelight.IntakeLimelight;
 import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
@@ -88,6 +91,7 @@ public class RobotContainer {
   public Conveyor conveyor;
   public Lights lights;
   public ShooterLimelight shooterLimelight;
+  public IntakeLimelight intakeLimelight;
 
   public boolean speakerPrepped;
 
@@ -101,6 +105,7 @@ public class RobotContainer {
     conveyor = new Conveyor();
     lights = new Lights();
     shooterLimelight = new ShooterLimelight(25, Units.inchesToMeters(26), 1.45, matchState);
+    intakeLimelight = new IntakeLimelight(0, 0, 0); //we aren't using these values so they're still 0
 
     // Configure the trigger bindings
     configureBindings();
@@ -154,8 +159,9 @@ public class RobotContainer {
     driverController.start().onTrue(new InstantCommand(drive::resetYaw));
     driverController.y().onTrue(new ClimbPrepSequence(intake, elevator, shooter));
     driverController.b().onTrue(new ClimbSequence(intake, elevator, shooter, conveyor));
-    driverController.a().whileTrue(new RotateToSpeaker(drive, shooterLimelight));
-
+    driverController.x().whileTrue(new SetTrapLineupPosition(intakeLimelight, drive).ignoringDisable(true));
+    driverController.a().whileTrue(new PIDToPoint(drive).ignoringDisable(true));
+    
     drive.setDefaultCommand(
         new RunCommand(
                 () ->

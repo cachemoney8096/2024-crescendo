@@ -43,9 +43,9 @@ public final class Constants {
 
   public static enum limelightPipeline {
     /** Pipeline 0 in LL */
-    NOTE_PIPELINE,
-    /** Pipeline 1 in LL */
     TAG_PIPELINE,
+    /** Pipeline 1 in LL */
+    NOTE_PIPELINE,
     PIPELINE2,
     PIPELINE3,
     PIPELINE4,
