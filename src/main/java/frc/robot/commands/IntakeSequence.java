@@ -48,9 +48,13 @@ public class IntakeSequence extends SequentialCommandGroup {
         new WaitUntilCommand(elevator::atDesiredPosition),
         new WaitUntilCommand(intake::atDesiredIntakePosition),
         new InstantCommand(intake::startRollers),
-        new ParallelCommandGroup(
+        new ParallelDeadlineGroup(
             Conveyor.receive(conveyor),
-            new WaitUntilCommand(() -> intake.beamBreakSensor.get())), // TODO test true or false
+            new SequentialCommandGroup(
+                new WaitUntilCommand(() -> intake.beamBreakSensor.get())), // TODO test true or false
+                new InstantCommand(intake::stopRollers, intake),
+                new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)),
+            )),
         new InstantCommand(intake::stopRollers, intake),
         new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)),
         rumbleBrieflyCommand);
