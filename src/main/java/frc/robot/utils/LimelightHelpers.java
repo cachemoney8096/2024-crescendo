@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
@@ -393,6 +394,11 @@ public class LimelightHelpers {
     Translation2d tran2d = new Translation2d(inData[0], inData[1]);
     Rotation2d r2d = new Rotation2d(Units.degreesToRadians(inData[5]));
     return new Pose2d(tran2d, r2d);
+  }
+
+  /** Returns a Pose3d of the target pose in robot space, using the tag chosen by the Limelight */
+  public static Pose3d getTargetPoseCameraSpace(String limelightName){
+    return toPose3D(getTargetPose_CameraSpace(limelightName));
   }
 
   public static NetworkTable getLimelightNTTable(String tableName) {

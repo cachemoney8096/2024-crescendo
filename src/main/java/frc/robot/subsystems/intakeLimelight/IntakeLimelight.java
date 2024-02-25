@@ -6,6 +6,8 @@ import edu.wpi.first.hal.SimBoolean;
 import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.hal.SimDevice.Direction;
 import edu.wpi.first.hal.SimDouble;
+import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -19,10 +21,14 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.subsystems.shooterLimelight.ShooterLimelightCal;
+import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Detector;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
 import java.util.Optional;
+
+import javax.xml.crypto.dsig.Transform;
 
 /** Limelight for the intake to identify game pieces */
 public class IntakeLimelight extends SubsystemBase {
@@ -74,7 +80,7 @@ public class IntakeLimelight extends SubsystemBase {
     kCameraPitchAngleDegrees = pitchAngleDegrees;
     kCameraHeight = heightMeters;
     kTargetHeight = targetHeightMeters;
-    setLimelightValues(Constants.limelightLedMode.OFF, Constants.limelightCamMode.VISION_PROCESSING, Constants.limelightPipeline.NOTE_PIPELINE);
+    setLimelightValues(Constants.limelightLedMode.OFF, Constants.limelightCamMode.VISION_PROCESSING, Constants.limelightPipeline.TAG_PIPELINE);
 
     m_simDevice = SimDevice.create("limelight-intake");
     if (m_simDevice != null) {
@@ -142,37 +148,21 @@ public class IntakeLimelight extends SubsystemBase {
     return bestTag;
   }
 
-  private Transform2d getRobotToScoringLocation(Pose3d targetPoseRobotSpace) {
-    Transform2d targetFromBot = getBotFromTarget(targetPoseRobotSpace);
-    return targetFromBot.plus(IntakeLimelightCal.TRAP_OFFSET);
-  }
-
-  public Optional<Transform2d> getRobotToScoringLocation() {
-    if (getPipeline() != Constants.limelightPipeline.TAG_PIPELINE) {
-      setPipeline(Constants.limelightPipeline.TAG_PIPELINE);
-    }
-    return robotToScoringLocation;
-  }
-
   public Optional<Transform2d> checkForTag() {
-    if (getPipeline() != Constants.limelightPipeline.TAG_PIPELINE) {
-      setPipeline(Constants.limelightPipeline.TAG_PIPELINE);
-    }
-    if (!LimelightHelpers.getTV(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME)) {
-      robotToScoringLocation = Optional.empty();
+    if (getValidTarget() != 1){
+      System.out.println("no valid targets");
       return Optional.empty();
     }
-    if (!validScoringTag(
-        LimelightHelpers.getFiducialID(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME))) {
-      robotToScoringLocation = Optional.empty();
-      return Optional.empty();
-    }
-    robotToScoringLocation =
-        Optional.of(
-            getRobotToScoringLocation(
-                LimelightHelpers.getTargetPose3d_RobotSpace(
-                    IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME)));
-    return robotToScoringLocation;
+
+    Pose3d cameraToTag = LimelightHelpers.getTargetPoseCameraSpace(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME);
+    Transform2d robotToTag = new Transform2d(new Translation2d(cameraToTag.getZ(), -cameraToTag.getX()), Rotation2d.fromRadians(-cameraToTag.getRotation().getY()));
+    
+
+    System.out.println("robotToTag: " + robotToTag);
+    System.out.println("trap offset: " + IntakeLimelightCal.TRAP_OFFSET);
+    System.out.println("sum: " + robotToTag.plus(IntakeLimelightCal.TRAP_OFFSET));
+
+    return Optional.of(robotToTag.plus(IntakeLimelightCal.TRAP_OFFSET));
   }
 
   public double getLatencySeconds() {

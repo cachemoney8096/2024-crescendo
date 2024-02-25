@@ -186,11 +186,7 @@ public class DriveSubsystem extends SubsystemBase {
    * @param pose The pose to which to set the odometry.
    */
   public void resetOdometry(Pose2d pose) {
-    // Just update the translation, not the yaw
-    Pose2d resetPose =
-        new Pose2d(pose.getTranslation(), Rotation2d.fromDegrees(gyro.getYaw().getValue()));
-    odometry.resetPosition(
-        Rotation2d.fromDegrees(gyro.getYaw().getValue()), getModulePositions(), resetPose);
+    odometry.resetPosition(gyro.getRotation2d(), getModulePositions(), pose);
   }
 
   public void resetYawToAngle(double yawDeg) {
@@ -472,7 +468,7 @@ public class DriveSubsystem extends SubsystemBase {
     Pose2d pastPose = getPastBufferedPose(latencyAdjustmentSec);
     // TODO: see if we can get this working with the real latencySec
 
-    final boolean useLatencyAdjustment = true;
+    final boolean useLatencyAdjustment = false;
 
     targetPose =
         useLatencyAdjustment

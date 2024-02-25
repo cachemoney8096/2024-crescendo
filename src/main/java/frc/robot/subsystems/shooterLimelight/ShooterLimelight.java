@@ -78,14 +78,17 @@ public class ShooterLimelight extends SubsystemBase {
    * @param targetHeightMeters height to the center of the target in meters
    */
   public ShooterLimelight(
-      double pitchAngleDegrees, double heightMeters, double targetHeightMeters, MatchState matchState) {
+      double pitchAngleDegrees,
+      double heightMeters,
+      double targetHeightMeters,
+      MatchState matchState) {
     kCameraPitchAngleDegrees = pitchAngleDegrees;
     kCameraHeight = heightMeters;
     kTargetHeight = targetHeightMeters;
     setLimelightValues(
         Constants.limelightLedMode.OFF,
         Constants.limelightCamMode.VISION_PROCESSING,
-        Constants.limelightPipeline.NOTE_PIPELINE);
+        Constants.limelightPipeline.TAG_PIPELINE);
 
     m_simDevice = SimDevice.create(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
     if (m_simDevice != null) {
@@ -101,8 +104,9 @@ public class ShooterLimelight extends SubsystemBase {
   }
 
   public Pair<Double, Pose2d> getBotPose2d_wpiBlue() {
-    return LimelightHelpers.getTimedBotPose2d_wpiBlue(
+    Pair<Double, Pose2d> limelightPoseFieldSpace = LimelightHelpers.getTimedBotPose2d_wpiBlue(
         ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
+    return new Pair<Double, Pose2d>(limelightPoseFieldSpace.getFirst(), new Pose2d(limelightPoseFieldSpace.getSecond().getTranslation(), limelightPoseFieldSpace.getSecond().getRotation().plus(Rotation2d.fromDegrees(187))));
   }
 
   private static Transform2d getBotFromTarget(Pose3d botPoseTargetSpace) {
@@ -151,14 +155,18 @@ public class ShooterLimelight extends SubsystemBase {
     return bestTag;
   }
 
-  public Pose3d getBotPose3d(){
+  public Pose3d getBotPose3d() {
     return LimelightHelpers.getBotPose3d(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
   }
 
-  public void disabledPeriodicInit(SwerveDrivePoseEstimator poseEstimator, DriveSubsystem drive){
-    if(Math.abs(getBotPose3d().getZ()) < ShooterLimelightCal.LARGE_VALUE_CORRECTOR_MARGIN && checkForTag().isPresent()){
-      poseEstimator.update(getBotPose2d_wpiBlue().getSecond().getRotation(), drive.getModulePositions());
-      poseEstimator.addVisionMeasurement(getBotPose2d_wpiBlue().getSecond(), Timer.getFPGATimestamp());
+  public void disabledPeriodicInit(SwerveDrivePoseEstimator poseEstimator, DriveSubsystem drive) {
+    if (Math.abs(getBotPose3d().getZ()) < ShooterLimelightCal.LARGE_VALUE_CORRECTOR_MARGIN
+        && checkForTag().isPresent()) {
+      poseEstimator.update(
+          getBotPose2d_wpiBlue().getSecond().getRotation(), drive.getModulePositions());
+      poseEstimator.addVisionMeasurement(
+          getBotPose2d_wpiBlue().getSecond(), Timer.getFPGATimestamp());
+      drive.resetYawToAngle(poseEstimator.getEstimatedPosition().getRotation().getDegrees());
       drive.resetOdometry(poseEstimator.getEstimatedPosition());
     }
   }
@@ -177,9 +185,10 @@ public class ShooterLimelight extends SubsystemBase {
     return robotToScoringLocation;
   }
 
-  /**  */
+  /** */
   private int targetsCount = 0;
-  public Optional<Pair<Rotation2d,Double>> checkForTag() {
+
+  public Optional<Pair<Rotation2d, Double>> checkForTag() {
     LimelightHelpers.LimelightResults llresults =
         LimelightHelpers.getLatestResults(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
     LimelightTarget_Fiducial[] targets = llresults.targetingResults.targets_Fiducials;
@@ -192,24 +201,30 @@ public class ShooterLimelight extends SubsystemBase {
     /** Offset from center = 0,0 space to wpi blue origin space */
     Translation2d fieldCenterToCornerOffset = new Translation2d(-8.31, -4.10);
 
-    /** Position of center speaker tags aon the field */
+    /** Position of center speaker tags on the field */
     Pose2d speakerCenterTagPoseBlue = new Pose2d(-8.31, 1.44, new Rotation2d(0.0));
     Pose2d speakerCenterTagPoseRed = new Pose2d(8.31, 1.44, new Rotation2d(0.0));
 
-    Pose2d speakerCenterTagPose = matchState.blue ? speakerCenterTagPoseBlue : speakerCenterTagPoseRed;
+    Pose2d speakerCenterTagPose =
+        matchState.blue ? speakerCenterTagPoseBlue : speakerCenterTagPoseRed;
 
+    Pose2d speakerCenterTagPose_wpiBlue =
+        speakerCenterTagPose.plus(
+            new Transform2d(fieldCenterToCornerOffset, new Rotation2d(0.0)).inverse());
 
-    Pose2d speakerCenterTagPose_wpiBlue = speakerCenterTagPose.plus(
-      new Transform2d(fieldCenterToCornerOffset, new Rotation2d(0.0)).inverse());
-    
-    Translation2d robotToTag = speakerCenterTagPose_wpiBlue.getTranslation().minus(getBotPose2d_wpiBlue().getSecond().getTranslation());
-    Rotation2d angleToTag = robotToTag.getAngle().plus(new Rotation2d(Units.degreesToRadians(180.0))).plus(new Rotation2d(Units.degreesToRadians(ShooterLimelightCal.LIMELIGHT_DETECTION_OFFSET_DEGREES)));
+    Translation2d robotToTag =
+        speakerCenterTagPose_wpiBlue
+            .getTranslation()
+            .minus(getBotPose2d_wpiBlue().getSecond().getTranslation());
+    Rotation2d angleToTag =
+        robotToTag
+            .getAngle()
+            .plus(new Rotation2d(Units.degreesToRadians(180.0)))
+            .plus(
+                new Rotation2d(
+                    Units.degreesToRadians(
+                        ShooterLimelightCal.LIMELIGHT_DETECTION_OFFSET_DEGREES)));
     double distanceToTagMeters = robotToTag.getNorm();
-
-    System.out.println("Tag angle from pose deg: " + speakerCenterTagPose_wpiBlue.getRotation().getDegrees());
-    System.out.println("Angle to tag deg: " + angleToTag);
-    System.out.println("Robot translation2d: " + getBotPose2d_wpiBlue().getSecond().getTranslation());
-    System.out.println("Tag translation2d: " + speakerCenterTagPose_wpiBlue.getTranslation());
 
     return Optional.of(Pair.of(angleToTag, distanceToTagMeters));
   }
@@ -451,11 +466,32 @@ public class ShooterLimelight extends SubsystemBase {
     builder.addDoubleProperty("Tx", () -> getOffSetX(), null);
     builder.addDoubleProperty("Ty", () -> getOffSetY(), null);
     builder.addBooleanProperty("Valid Target", () -> isValidTarget(), null);
-    if(Math.abs(getBotPose3d().getZ()) < ShooterLimelightCal.LARGE_VALUE_CORRECTOR_MARGIN && checkForTag().isPresent()){
-      builder.addDoubleProperty("Limelight odometry X", ()->{return getBotPose2d_wpiBlue().getSecond().getX();}, null);
-      builder.addDoubleProperty("Limelight odometry Y", ()->{return getBotPose2d_wpiBlue().getSecond().getY();}, null);
-      builder.addDoubleProperty("Limelight odometry yaw", ()->{return getBotPose2d_wpiBlue().getSecond().getRotation().getDegrees();}, null);
+    if (Math.abs(getBotPose3d().getZ()) < ShooterLimelightCal.LARGE_VALUE_CORRECTOR_MARGIN
+        && checkForTag().isPresent()) {
+      builder.addDoubleProperty(
+          "Limelight odometry X",
+          () -> {
+            return getBotPose2d_wpiBlue().getSecond().getX();
+          },
+          null);
+      builder.addDoubleProperty(
+          "Limelight odometry Y",
+          () -> {
+            return getBotPose2d_wpiBlue().getSecond().getY();
+          },
+          null);
+      builder.addDoubleProperty(
+          "Limelight odometry yaw",
+          () -> {
+            return getBotPose2d_wpiBlue().getSecond().getRotation().getDegrees();
+          },
+          null);
     }
-    builder.addIntegerProperty("Targets seen", ()->{return targetsCount;}, null);
+    builder.addIntegerProperty(
+        "Targets seen",
+        () -> {
+          return targetsCount;
+        },
+        null);
   }
 }

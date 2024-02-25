@@ -21,6 +21,7 @@ public class SetTrapLineupPosition extends Command {
   @Override
   public void initialize() {
     targetLocked = false;
+    System.out.println("running");
   }
 
   @Override
@@ -28,6 +29,7 @@ public class SetTrapLineupPosition extends Command {
     if (!targetLocked) {
       Optional<Transform2d> robotToScoringLocation = tagLimelight.checkForTag();
       if (!robotToScoringLocation.isPresent()) {
+        System.out.println("not present");
         robotToScoringLocation = Optional.empty();
         return;
       }

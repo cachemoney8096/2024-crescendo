@@ -177,7 +177,7 @@ public class Elevator extends SubsystemBase {
       voltageToSet = ElevatorCal.CLIMBING_KS;
     }
 
-    leftMotor.setVoltage(voltageToSet);
+    // leftMotor.setVoltage(voltageToSet);
 
     prevVelocityInPerSec = nextVelocityInPerSec;
     prevTimestamp = Optional.of(timestamp);
@@ -214,7 +214,7 @@ public class Elevator extends SubsystemBase {
 
   @Override
   public void periodic() {
-    controlPosition(elevatorPositions.get(desiredPosition));
+    // controlPosition(elevatorPositions.get(desiredPosition));
   }
 
   public void burnFlashSparks() {
