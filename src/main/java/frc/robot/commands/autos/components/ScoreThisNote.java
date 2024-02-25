@@ -8,15 +8,16 @@ import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 
 /**
  * score the already loaded (intake-ed/intook?) note into the speaker and return to the home state
  */
 public class ScoreThisNote extends SequentialCommandGroup {
-  public ScoreThisNote(Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor) {
+  public ScoreThisNote(Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor, ShooterLimelight limelight) {
     addRequirements(intake, elevator, shooter, conveyor);
     addCommands(
-        new SpeakerPrepScoreSequence(intake, elevator, shooter, conveyor),
+        new SpeakerPrepScoreSequence(intake, elevator, shooter, conveyor, limelight),
         new SpeakerShootSequence(conveyor, shooter),
         new GoHomeSequence(intake, elevator, shooter, conveyor, false));
   }

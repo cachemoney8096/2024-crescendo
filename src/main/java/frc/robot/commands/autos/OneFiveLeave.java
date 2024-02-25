@@ -14,6 +14,7 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 
 /** score the preloaded note into the speaker, then get another note, return to home state */
 public class OneFiveLeave extends SequentialCommandGroup {
@@ -23,7 +24,8 @@ public class OneFiveLeave extends SequentialCommandGroup {
       Shooter shooter,
       Conveyor conveyor,
       DriveSubsystem drive,
-      MatchState matchState) {
+      MatchState matchState,
+      ShooterLimelight limelight) {
     final double X_DISTANCE_TO_NOTE_METERS = 1.0; // guesstimate
     final double NO_Y_DISTANCE = 0.0;
     final boolean FIELD_RELATIVE = true;
@@ -31,7 +33,7 @@ public class OneFiveLeave extends SequentialCommandGroup {
 
     addRequirements(intake, elevator, shooter, conveyor, drive);
     addCommands(
-        new ScoreThisNote(intake, elevator, shooter, conveyor),
+        new ScoreThisNote(intake, elevator, shooter, conveyor, limelight),
         new ParallelCommandGroup(
             new IntakeSequence(intake, elevator, conveyor, shooter)
                 .withTimeout(IntakeConstants.INTAKING_TIMEOUT_SEC),

@@ -147,7 +147,7 @@ public class RobotContainer {
         .leftBumper()
         .onTrue(
             new SequentialCommandGroup(
-                new SpeakerPrepScoreSequence(intake, elevator, shooter, conveyor),
+                new SpeakerPrepScoreSequence(intake, elevator, shooter, conveyor, shooterLimelight),
                 new InstantCommand(() -> setSpeakerPrep(true))));
     driverController
         .rightBumper()

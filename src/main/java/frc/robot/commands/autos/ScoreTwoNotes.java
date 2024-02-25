@@ -8,6 +8,7 @@ import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 
 /**
  * score the preloaded note into the speaker, then get another note and score it in the speaker,
@@ -20,13 +21,14 @@ public class ScoreTwoNotes extends SequentialCommandGroup {
       Shooter shooter,
       Conveyor conveyor,
       DriveSubsystem drive,
-      MatchState matchState) {
+      MatchState matchState,
+      ShooterLimelight limelight) {
 
     addRequirements(intake, elevator, shooter, conveyor);
     addCommands(
-        new OneFiveLeave(intake, elevator, shooter, conveyor, drive, matchState),
+        new OneFiveLeave(intake, elevator, shooter, conveyor, drive, matchState, limelight),
         new ScoreThisNote(
-            intake, elevator, shooter, conveyor) // goes home at the end of ScoreThisNote
+            intake, elevator, shooter, conveyor, limelight) // goes home at the end of ScoreThisNote
         );
   }
 }

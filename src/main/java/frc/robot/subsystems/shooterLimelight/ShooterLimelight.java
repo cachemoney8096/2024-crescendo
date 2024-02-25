@@ -104,9 +104,14 @@ public class ShooterLimelight extends SubsystemBase {
   }
 
   public Pair<Double, Pose2d> getBotPose2d_wpiBlue() {
-    Pair<Double, Pose2d> limelightPoseFieldSpace = LimelightHelpers.getTimedBotPose2d_wpiBlue(
-        ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
-    return new Pair<Double, Pose2d>(limelightPoseFieldSpace.getFirst(), new Pose2d(limelightPoseFieldSpace.getSecond().getTranslation(), limelightPoseFieldSpace.getSecond().getRotation().plus(Rotation2d.fromDegrees(187))));
+    Pair<Double, Pose2d> limelightPoseFieldSpace =
+        LimelightHelpers.getTimedBotPose2d_wpiBlue(
+            ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
+    return new Pair<Double, Pose2d>(
+        limelightPoseFieldSpace.getFirst(),
+        new Pose2d(
+            limelightPoseFieldSpace.getSecond().getTranslation(),
+            limelightPoseFieldSpace.getSecond().getRotation().plus(Rotation2d.fromDegrees(187))));
   }
 
   private static Transform2d getBotFromTarget(Pose3d botPoseTargetSpace) {
@@ -491,6 +496,16 @@ public class ShooterLimelight extends SubsystemBase {
         "Targets seen",
         () -> {
           return targetsCount;
+        },
+        null);
+    builder.addDoubleProperty(
+        "Distance to tag (m)",
+        () -> {
+          Optional<Pair<Rotation2d, Double>> tagCheck = checkForTag();
+          if (tagCheck.isEmpty()) {
+            return 0.0;
+          }
+          return tagCheck.get().getSecond();
         },
         null);
   }

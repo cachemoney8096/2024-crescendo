@@ -185,7 +185,7 @@ public class Conveyor extends SubsystemBase {
         new WaitUntilCommand(
             () ->
                 Math.abs(conveyor.backMotorEncoder.getPosition())
-                    > ConveyorCal.NOTE_POSITION_THRESHOLD_INCHES),
+                    > ConveyorCal.NOTE_POSITION_THRESHOLD_INCHES).withTimeout(),
         new InstantCommand(() -> conveyor.frontMotorEncoder.setPosition(0.0), conveyor),
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.BACK_OFF_POWER)),
         new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.BACK_OFF_POWER)),

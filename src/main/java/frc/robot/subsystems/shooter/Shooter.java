@@ -101,8 +101,9 @@ public class Shooter extends SubsystemBase {
 
   public Shooter() {
     pivotAngleMap = new InterpolatingDoubleTreeMap();
-    pivotAngleMap.put(0.0, 120.0);
-    pivotAngleMap.put(200.0, 120.0);
+    pivotAngleMap.put(0.0, 122.0);
+    pivotAngleMap.put(2.77, 122.0);
+    pivotAngleMap.put(200.0, 122.0);
 
     SparkMaxUtils.initWithRetry(this::initSparks, Constants.SPARK_INIT_RETRY_ATTEMPTS);
 
@@ -212,8 +213,8 @@ public class Shooter extends SubsystemBase {
   public void spinUpShooter() {
     // controllerA.setReference(ShooterCal.SHOOTER_MOTOR_SPEED_RPM, ControlType.kVelocity);
     // controllerB.setReference(ShooterCal.SHOOTER_MOTOR_SPEED_RPM, ControlType.kVelocity);
-    motorRight.setVoltage(10.0);
-    motorLeftOne.setVoltage(10.0);
+    motorRight.setVoltage(7.0);
+    motorLeftOne.setVoltage(7.0);
   }
 
   private void stopShooter() {
