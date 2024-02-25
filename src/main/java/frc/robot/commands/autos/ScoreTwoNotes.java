@@ -21,13 +21,11 @@ public class ScoreTwoNotes extends SequentialCommandGroup {
       Shooter shooter,
       Conveyor conveyor,
       DriveSubsystem drive,
-      MatchState matchState,
-      Command rumbleBrieflyCommand) {
-        Command rumbleCommand = rumbleBrieflyCommand;
+      MatchState matchState) {
 
     addRequirements(intake, elevator, shooter, conveyor);
     addCommands(
-        new OneFiveLeave(intake, elevator, shooter, conveyor, drive, matchState, rumbleCommand),
+        new OneFiveLeave(intake, elevator, shooter, conveyor, drive, matchState),
         new ScoreThisNote(
             intake, elevator, shooter, conveyor) // goes home at the end of ScoreThisNote
         );
