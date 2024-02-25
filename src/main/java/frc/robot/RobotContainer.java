@@ -22,6 +22,7 @@ import frc.robot.commands.AmpPrepScore;
 import frc.robot.commands.AmpScore;
 import frc.robot.commands.ClimbPrepSequence;
 import frc.robot.commands.ClimbSequence;
+import frc.robot.commands.FeedPrepScore;
 import frc.robot.commands.GoHomeSequence;
 import frc.robot.commands.IntakeSequence;
 import frc.robot.commands.PIDToPoint;
@@ -131,6 +132,13 @@ public class RobotContainer {
    */
   private void configureBindings() {
     driverController
+      .a()
+      .onTrue(
+            new SequentialCommandGroup(
+                new FeedPrepScore(elevator, conveyor, intake, shooter, drive, matchState),
+                new InstantCommand(() -> setSpeakerPrep(true))));
+
+    driverController
         .leftTrigger()
         .whileTrue(new IntakeSequence(intake, elevator, conveyor, shooter));
     driverController
@@ -160,7 +168,7 @@ public class RobotContainer {
     driverController.y().onTrue(new ClimbPrepSequence(intake, elevator, shooter, conveyor, intakeLimelight));
     driverController.b().onTrue(new ClimbSequence(intake, elevator, shooter, conveyor));
     driverController.x().whileTrue(new SetTrapLineupPosition(intakeLimelight, drive).ignoringDisable(true));
-    driverController.a().whileTrue(new PIDToPoint(drive).ignoringDisable(true));
+    // driverController.a().whileTrue(new PIDToPoint(drive).ignoringDisable(true));
     
     drive.setDefaultCommand(
         new RunCommand(
