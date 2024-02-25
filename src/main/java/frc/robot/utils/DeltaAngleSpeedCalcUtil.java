@@ -7,7 +7,7 @@ public class DeltaAngleSpeedCalcUtil {
   // value pulled from game manual
   private static final double SPEAKER_HEIGHT_METERS = Units.inchesToMeters(77.9528);
   // guess-timated value for now
-  public static double SHOOTER_SPEED_MPS = 9.144;
+  public static double SHOOTER_SPEED_MPS;
   public DeltaAngleSpeedCalcUtil(double speed) {
     SHOOTER_SPEED_MPS = speed;
   };
