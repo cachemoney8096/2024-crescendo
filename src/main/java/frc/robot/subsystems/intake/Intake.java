@@ -58,6 +58,7 @@ public class Intake extends SubsystemBase {
 
   private TreeMap<IntakePosition, Double> intakePositionMap;
   private IntakePosition desiredPosition = IntakePosition.STOWED;
+  private boolean allowIntakeMovement = false;
 
   // Stuff for debug
   private double intakeDemandVoltsA = 0.0;
@@ -154,6 +155,13 @@ public class Intake extends SubsystemBase {
 
   public void setDesiredIntakePosition(IntakePosition pos) {
     this.desiredPosition = pos;
+    this.allowIntakeMovement = true;
+    pivotController.reset(getPivotPosition());
+  }
+
+  public void dontAllowIntakeMovement() {
+    this.allowIntakeMovement = false;
+    pivotMotor.setVoltage(0.0);
   }
 
   /** Returns the cosine of the arm angle in degrees off of the horizontal. */
@@ -261,7 +269,9 @@ public class Intake extends SubsystemBase {
   }
 
   public void periodic() {
-    controlPosition(intakePositionMap.get(desiredPosition));
+    if (allowIntakeMovement) {
+      controlPosition(intakePositionMap.get(desiredPosition));
+    }
   }
 
   public void initSendable(SendableBuilder builder) {
