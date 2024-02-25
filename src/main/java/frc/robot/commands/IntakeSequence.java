@@ -24,18 +24,13 @@ public class IntakeSequence extends SequentialCommandGroup {
     addCommands(
         new InstantCommand(
             () -> {
-              intake.setDesiredIntakePosition(IntakePosition.DEPLOYED);
-            },
-            intake),
-        new InstantCommand(
-            () -> {
               shooter.setShooterMode(ShooterMode.IDLE);
             }),
+        new WaitUntilCommand(shooter::clearOfConveyorZone),
+        new SafeDeploy(intake, elevator),
         new ConditionalCommand(
             new InstantCommand(),
-            new SequentialCommandGroup(
-                new WaitUntilCommand(intake::clearOfConveyorZone),
-                new WaitUntilCommand(shooter::clearOfConveyorZone)),
+            new WaitUntilCommand(intake::clearOfConveyorZone),
             elevator::elevatorBelowInterferenceZone),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME, true)),
         new WaitUntilCommand(elevator::atDesiredPosition),

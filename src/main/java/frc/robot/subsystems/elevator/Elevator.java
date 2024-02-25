@@ -67,6 +67,8 @@ public class Elevator extends SubsystemBase {
 
   private ElevatorPosition desiredPosition = ElevatorPosition.HOME;
 
+  private boolean allowElevatorMovement = false;
+
   /** FPGA timestamp from previous cycle. Empty for first cycle only. */
   private Optional<Double> prevTimestamp = Optional.empty();
 
@@ -186,6 +188,13 @@ public class Elevator extends SubsystemBase {
   public void setDesiredPosition(ElevatorPosition inputPosition, boolean useNoteParams) {
     this.desiredPosition = inputPosition;
     setControlParams(useNoteParams);
+    this.allowElevatorMovement = true;
+  }
+
+  public void dontAllowElevatorMovement() {
+    this.allowElevatorMovement = false;
+    leftMotor.setVoltage(0.0);
+    rightMotor.setVoltage(0.0);
   }
 
   public boolean atDesiredPosition() {
@@ -212,9 +221,22 @@ public class Elevator extends SubsystemBase {
         > ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES;
   }
 
+  /**
+   * @return true if the elevator's current position is towards the top of the elevator-intake
+   *     interference zone
+   */
+  public boolean eleavtorAtTopOfIntakeInterferenceZone() {
+    return (leftMotorEncoderRel.getPosition()
+            < ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES
+        && leftMotorEncoderRel.getPosition()
+            > (ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES - 3));
+  }
+
   @Override
   public void periodic() {
-    controlPosition(elevatorPositions.get(desiredPosition));
+    if (allowElevatorMovement) {
+      controlPosition(elevatorPositions.get(desiredPosition));
+    }
   }
 
   public void burnFlashSparks() {
@@ -244,6 +266,8 @@ public class Elevator extends SubsystemBase {
     builder.addBooleanProperty("Elevator at desired position", this::atDesiredPosition, null);
     builder.addBooleanProperty(
         "Elevator above intererence", this::elevatorAboveIntakeInterferenceZone, null);
+    builder.addBooleanProperty(
+        "Elevator at top of intererence", this::eleavtorAtTopOfIntakeInterferenceZone, null);
     builder.addBooleanProperty(
         "Elevator below interference", this::elevatorBelowInterferenceZone, null);
     builder.addDoubleProperty(

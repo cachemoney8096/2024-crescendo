@@ -95,6 +95,10 @@ public class Robot extends TimedRobot {
     }
 
     m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);
+
+    m_robotContainer.intake.dontAllowIntakeMovement();
+    m_robotContainer.elevator.dontAllowElevatorMovement();
+    m_robotContainer.shooter.dontAllowShooterMovement();
   }
 
   @Override

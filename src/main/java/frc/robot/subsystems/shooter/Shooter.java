@@ -82,6 +82,8 @@ public class Shooter extends SubsystemBase {
   /** What the shooter is currently doing */
   private ShooterMode shooterMode = ShooterMode.IDLE;
 
+  private boolean allowShooterMovement = false;
+
   /** How far are we away from the goal (in meters) */
   private double shooterDistanceMeters = 10.0;
 
@@ -175,6 +177,15 @@ public class Shooter extends SubsystemBase {
       pivotController.reset(getPivotPosition());
     }
     shooterMode = newMode;
+    pivotController.reset(getPivotPosition());
+    this.allowShooterMovement = true;
+  }
+
+  public void dontAllowShooterMovement() {
+    this.allowShooterMovement = false;
+    pivotMotor.setVoltage(0.0);
+    motorRight.setVoltage(0.0);
+    motorLeftOne.setVoltage(0.0);
   }
 
   public void setShooterDistance(double newDistanceMeters) {
@@ -329,31 +340,33 @@ public class Shooter extends SubsystemBase {
 
   @Override
   public void periodic() {
-    switch (shooterMode) {
-      case IDLE:
-        stopShooter();
-        controlPosition(ShooterCal.STARTING_POSITION_DEGREES, false);
-        break;
-      case SPIN_UP:
-        spinUpShooter();
-        controlPosition(ShooterCal.STARTING_POSITION_DEGREES, false);
-        break;
-      case SHOOT:
-        spinUpShooter();
-        controlPositionWithDistance(shooterDistanceMeters);
-        break;
-      case LATCH:
-        stopShooter();
-        if (closeToLatch()) {
-          controlPositionToHoldLatch();
-        } else {
-          controlPositionToLatch();
-        }
-        break;
-      case PRELATCH:
-        stopShooter();
-        controlPositionToPreLatch();
-        break;
+    if (allowShooterMovement) {
+      switch (shooterMode) {
+        case IDLE:
+          stopShooter();
+          controlPosition(ShooterCal.STARTING_POSITION_DEGREES, false);
+          break;
+        case SPIN_UP:
+          spinUpShooter();
+          controlPosition(ShooterCal.STARTING_POSITION_DEGREES, false);
+          break;
+        case SHOOT:
+          spinUpShooter();
+          controlPositionWithDistance(shooterDistanceMeters);
+          break;
+        case LATCH:
+          stopShooter();
+          if (closeToLatch()) {
+            controlPositionToHoldLatch();
+          } else {
+            controlPositionToLatch();
+          }
+          break;
+        case PRELATCH:
+          stopShooter();
+          controlPositionToPreLatch();
+          break;
+      }
     }
   }
 
