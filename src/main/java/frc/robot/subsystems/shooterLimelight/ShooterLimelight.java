@@ -279,7 +279,7 @@ public class ShooterLimelight extends SubsystemBase {
     if (m_simDevice != null) {
       return m_latency.get() + kImageCaptureLatency;
     }
-    return (table.getEntry("tl").getDouble(0.0) + kImageCaptureLatency) / 1e3;
+    return (table.getEntry("tl").getDouble(0.0) + table.getEntry("cl").getDouble(0.0)) / 1e3;
   }
 
   /**
