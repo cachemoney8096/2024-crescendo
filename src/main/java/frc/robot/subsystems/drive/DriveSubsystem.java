@@ -622,7 +622,7 @@ public class DriveSubsystem extends SubsystemBase {
     builder.addDoubleProperty("Keep Heading PID [0,1]", () -> KeepHeadingPID, null);
     builder.addDoubleProperty("Keep Heading FF [0,1]", () -> KeepHeadingFF, null);
     builder.addDoubleProperty("Rotation Controller Input", () -> rotControllerInput, null);
-    builder.addDoubleProperty("Yaw error", () -> targetHeadingDegrees - gyro.getYaw().getValue(), null);
+    builder.addDoubleProperty("Yaw error", () -> targetHeadingDegrees - getPose().getRotation().getDegrees(), null);
     builder.addDoubleProperty("Target Heading (tag detection)", () -> tagTargetHeading, null);
   }
 }

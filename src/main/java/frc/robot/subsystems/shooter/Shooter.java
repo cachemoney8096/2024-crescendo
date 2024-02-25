@@ -173,9 +173,6 @@ public class Shooter extends SubsystemBase {
 
   /** Set the shooter to a new mode. If shoot, make sure to also call setShooterDistance . */
   public void setShooterMode(ShooterMode newMode) {
-    if (shooterMode != newMode) {
-      pivotController.reset(getPivotPosition());
-    }
     shooterMode = newMode;
     pivotController.reset(getPivotPosition());
     this.allowShooterMovement = true;
