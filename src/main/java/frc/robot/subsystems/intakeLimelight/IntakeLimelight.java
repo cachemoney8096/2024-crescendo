@@ -80,7 +80,7 @@ public class IntakeLimelight extends SubsystemBase {
     kCameraPitchAngleDegrees = pitchAngleDegrees;
     kCameraHeight = heightMeters;
     kTargetHeight = targetHeightMeters;
-    setLimelightValues(Constants.limelightLedMode.OFF, Constants.limelightCamMode.VISION_PROCESSING, Constants.limelightPipeline.TAG_PIPELINE);
+    setLimelightValues(Constants.limelightLedMode.OFF, Constants.limelightCamMode.DRIVER_CAMERA, Constants.limelightPipeline.PIPELINE2);
 
     m_simDevice = SimDevice.create("limelight-intake");
     if (m_simDevice != null) {
