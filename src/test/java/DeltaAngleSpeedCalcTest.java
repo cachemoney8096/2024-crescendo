@@ -81,7 +81,7 @@ public class DeltaAngleSpeedCalcTest {
   // (only elevation will have a change. azimuth does not get affected by this
   // whatsoever.)
   @Test
-  public void randomDistancesFromSpeakerP() {
+  public void randomDistancesFromSpeaker() {
     DeltaAngleSpeedCalcUtil deltaAngleSpeedCalc = new DeltaAngleSpeedCalcUtil(9.144);
     // distance from speaker = 5meters
     distFromSpeakerMeters = 5;
