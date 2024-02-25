@@ -26,7 +26,7 @@ public class ClimbPrepSequence extends SequentialCommandGroup {
             new WaitUntilCommand(intake::clearOfConveyorZone),
             new InstantCommand(
                 () -> elevator.setDesiredPosition(ElevatorPosition.PRE_CLIMB, true)));
-    addRequirements(intake, elevator, shooter);
+    addRequirements(intake, elevator, shooter, conveyor);
 
     addCommands(
         new ParallelCommandGroup(Conveyor.crushNote(conveyor), restOfPrep));

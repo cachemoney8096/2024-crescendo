@@ -157,7 +157,7 @@ public class RobotContainer {
                 new InstantCommand(() -> setSpeakerPrep(false))));
     driverController.back().onTrue(new GoHomeSequence(intake, elevator, shooter, conveyor, false));
     driverController.start().onTrue(new InstantCommand(drive::resetYaw));
-    driverController.y().onTrue(new ClimbPrepSequence(intake, elevator, shooter));
+    driverController.y().onTrue(new ClimbPrepSequence(intake, elevator, shooter, conveyor));
     driverController.b().onTrue(new ClimbSequence(intake, elevator, shooter, conveyor));
     driverController.x().whileTrue(new SetTrapLineupPosition(intakeLimelight, drive).ignoringDisable(true));
     driverController.a().whileTrue(new PIDToPoint(drive).ignoringDisable(true));
