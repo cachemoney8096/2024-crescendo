@@ -194,10 +194,10 @@ public class Intake extends SubsystemBase {
 
   /** Sends the pivot towards the input position. Should be called every cycle. */
   private void controlPosition(double inputPositionDeg) {
-    if (Math.abs(pivotController.getPositionError())
-        > IntakeCal.PIVOT_PROFILE_REPLANNING_THRESHOLD_DEG) {
-      pivotController.reset(getPivotPosition());
-    }
+    // if (Math.abs(pivotController.getPositionError())
+    //     > IntakeCal.PIVOT_PROFILE_REPLANNING_THRESHOLD_DEG) {
+    //   pivotController.reset(getPivotPosition());
+    // }
 
     pivotController.setGoal(inputPositionDeg);
     intakeDemandVoltsA = pivotController.calculate(getPivotPosition());

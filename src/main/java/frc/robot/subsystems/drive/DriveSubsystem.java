@@ -248,7 +248,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
     if (xSpeed == 0 && ySpeed == 0 && rot == 0) {
-      setX();
+      setNoMove();
       return;
     }
     xSpeed *= DriveConstants.MAX_SPEED_METERS_PER_SECOND;

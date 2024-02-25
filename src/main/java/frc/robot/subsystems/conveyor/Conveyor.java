@@ -6,9 +6,12 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkLimitSwitch;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -26,6 +29,9 @@ public class Conveyor extends SubsystemBase {
   private RelativeEncoder frontMotorEncoder = frontMotor.getEncoder();
   /** Configured to read inches, positive towards the shooter. */
   private RelativeEncoder backMotorEncoder = backMotor.getEncoder();
+
+  /** False is blocked (i.e. there is a note) */
+  public DigitalInput intakeBeamBreakSensor = new DigitalInput(RobotMap.INTAKE_BEAM_BREAK_DIO);
 
   /**
    * These aren't actually limit switches; we just use SparkLimitSwitch objects to access them
@@ -61,8 +67,11 @@ public class Conveyor extends SubsystemBase {
 
   private ConveyorPosition currentNotePosition = ConveyorPosition.NO_NOTE;
 
-  public Conveyor() {
+  Command rumbleCommand;
+
+  public Conveyor(Command rumbleCommand) {
     SparkMaxUtils.initWithRetry(this::setUpConveyorSparks, ConveyorCal.SPARK_INIT_RETRY_ATTEMPTS);
+    this.rumbleCommand = rumbleCommand;
   }
 
   /** Does all the initialization for the sparks, return true on success */
@@ -181,11 +190,16 @@ public class Conveyor extends SubsystemBase {
         new InstantCommand(() -> conveyor.backMotorEncoder.setPosition(0.0), conveyor),
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.FRONT_RECEIVE_SPEED)),
         new InstantCommand(() -> conveyor.backMotor.set(0.0)),
-        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
-        new WaitUntilCommand(
-            () ->
-                Math.abs(conveyor.backMotorEncoder.getPosition())
-                    > ConveyorCal.NOTE_POSITION_THRESHOLD_INCHES).withTimeout(),
+        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE), 
+        new ParallelRaceGroup(
+          new WaitUntilCommand(
+              () ->
+                  Math.abs(conveyor.backMotorEncoder.getPosition())
+                      > ConveyorCal.NOTE_POSITION_THRESHOLD_INCHES).andThen(new InstantCommand(() -> System.out.println("Ended because of back conveyor position"))),
+          new WaitUntilCommand(() -> !conveyor.intakeBeamBreakSensor.get()).andThen(new WaitCommand(0.25)).andThen(new InstantCommand(() -> System.out.println("Ended because of intake beam break")))
+        ),
+        conveyor.rumbleCommand,
+        new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", true)),
         new InstantCommand(() -> conveyor.frontMotorEncoder.setPosition(0.0), conveyor),
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.BACK_OFF_POWER)),
         new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.BACK_OFF_POWER)),
@@ -243,5 +257,6 @@ public class Conveyor extends SubsystemBase {
           return backMotorEncoder.getVelocity();
         },
         null);
+    builder.addBooleanProperty("Intake Sensor", () -> intakeBeamBreakSensor.get(), null);
   }
 }

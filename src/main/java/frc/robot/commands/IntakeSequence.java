@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -22,6 +23,7 @@ public class IntakeSequence extends SequentialCommandGroup {
     addRequirements(intake, elevator, conveyor, shooter);
 
     addCommands(
+        new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", false)),
         new InstantCommand(
             () -> {
               shooter.setShooterMode(ShooterMode.IDLE);

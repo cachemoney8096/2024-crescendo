@@ -4,11 +4,15 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.PathPlannerTrajectory;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -29,6 +33,8 @@ import frc.robot.commands.RotateToSpeaker;
 import frc.robot.commands.SetTrapLineupPosition;
 import frc.robot.commands.SpeakerPrepScoreSequence;
 import frc.robot.commands.SpeakerShootSequence;
+import frc.robot.commands.autos.ScoreTwoNotes;
+import frc.robot.commands.autos.TwoWithCenterNote;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
@@ -82,7 +88,7 @@ public class RobotContainer {
           new InstantCommand(
               () -> {
                 driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
-              }));
+              })).finallyDo(() -> driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0));
 
   public DriveSubsystem drive;
   public Intake intake;
@@ -102,7 +108,7 @@ public class RobotContainer {
     elevator = new Elevator();
     intake = new Intake();
     shooter = new Shooter();
-    conveyor = new Conveyor();
+    conveyor = new Conveyor(rumbleBriefly);
     lights = new Lights();
     shooterLimelight = new ShooterLimelight(25, Units.inchesToMeters(26), 1.45, matchState);
     intakeLimelight = new IntakeLimelight(0, 0, 0); //we aren't using these values so they're still 0
@@ -117,7 +123,12 @@ public class RobotContainer {
     Shuffleboard.getTab("Subsystems").add(elevator.getName(), elevator);
     Shuffleboard.getTab("Subsystems").add("Shooter limelight",shooterLimelight);
 
+    SmartDashboard.putBoolean("Have Note", false);
+
     burnFlashAllSparks();
+
+    driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+
   }
 
   /**
@@ -159,8 +170,8 @@ public class RobotContainer {
     driverController.start().onTrue(new InstantCommand(drive::resetYaw));
     driverController.y().onTrue(new ClimbPrepSequence(intake, elevator, shooter, conveyor, intakeLimelight));
     driverController.b().onTrue(new ClimbSequence(intake, elevator, shooter, conveyor));
-    driverController.x().whileTrue(new SetTrapLineupPosition(intakeLimelight, drive).ignoringDisable(true));
-    driverController.a().whileTrue(new PIDToPoint(drive).ignoringDisable(true));
+    // driverController.x().whileTrue(new SetTrapLineupPosition(intakeLimelight, drive).ignoringDisable(true));
+    // driverController.a().whileTrue(new PIDToPoint(drive).ignoringDisable(true));
     
     drive.setDefaultCommand(
         new RunCommand(
@@ -206,6 +217,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new InstantCommand();
+    // return new ScoreTwoNotes(intake, elevator, shooter, conveyor, drive, matchState, shooterLimelight);
+    return new TwoWithCenterNote(drive, intake, elevator, shooter, conveyor, shooterLimelight);
   }
 }

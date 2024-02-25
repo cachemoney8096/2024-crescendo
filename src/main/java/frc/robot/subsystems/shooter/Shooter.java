@@ -101,9 +101,11 @@ public class Shooter extends SubsystemBase {
 
   public Shooter() {
     pivotAngleMap = new InterpolatingDoubleTreeMap();
-    pivotAngleMap.put(0.0, 122.0);
+    // pivotAngleMap.put(0.0, 140.0);
+    pivotAngleMap.put(1.16, 144.0);
     pivotAngleMap.put(2.77, 122.0);
-    pivotAngleMap.put(200.0, 122.0);
+    pivotAngleMap.put(4.66, 112.0);
+    // pivotAngleMap.put(200.0, 140.0);
 
     SparkMaxUtils.initWithRetry(this::initSparks, Constants.SPARK_INIT_RETRY_ATTEMPTS);
 
@@ -117,6 +119,8 @@ public class Shooter extends SubsystemBase {
     errors += SparkMaxUtils.check(motorRight.restoreFactoryDefaults());
     errors += SparkMaxUtils.check(motorLeftOne.restoreFactoryDefaults());
     errors += SparkMaxUtils.check(motorLeftTwo.restoreFactoryDefaults());
+
+    Timer.delay(0.1);
 
     motorLeftOne.setInverted(true);
     errors += SparkMaxUtils.check(motorLeftTwo.follow(motorLeftOne));
@@ -200,6 +204,10 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isShooterSpunUp() {
+    final double leftSpeedRpm = motorLeftOneRelEncoder.getVelocity();
+    final double rightSpeedRpm = motorRightRelEncoder.getVelocity();
+    final double thresholdRpm = 2000.0;
+    return leftSpeedRpm > thresholdRpm && rightSpeedRpm > thresholdRpm;
     // final boolean motorRightSpunUp =
     //     Math.abs(motorRightRelEncoder.getVelocity() - ShooterCal.SHOOTER_MOTOR_SPEED_RPM)
     //         < ShooterCal.SHOOTER_SPEED_MARGIN_RPM;
@@ -207,7 +215,8 @@ public class Shooter extends SubsystemBase {
     //     Math.abs(motorLeftOneRelEncoder.getVelocity() - ShooterCal.SHOOTER_MOTOR_SPEED_RPM)
     //         < ShooterCal.SHOOTER_SPEED_MARGIN_RPM;
     // return motorRightRelEncoder.getVelocity() > 2000 && motorLeftOneRelEncoder.getVelocity() > 2000 && motorLeftTwoRelEncoder.getVelocity() > 2000;
-    return true;
+    //TODO this
+    // return true;
   }
 
   public void spinUpShooter() {
