@@ -84,6 +84,8 @@ public class Conveyor extends SubsystemBase {
     errors += SparkMaxUtils.check(frontMotor.setIdleMode(IdleMode.kBrake));
     errors += SparkMaxUtils.check(backMotor.setIdleMode(IdleMode.kCoast));
 
+    Timer.delay(0.1);
+
     frontMotor.setInverted(ConveyorConstants.FRONT_MOTOR_INVERTED);
     backMotor.setInverted(ConveyorConstants.BACK_MOTOR_INVERTED);
 

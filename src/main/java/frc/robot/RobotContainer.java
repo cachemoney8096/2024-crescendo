@@ -23,8 +23,11 @@ import frc.robot.commands.AmpPrepScore;
 import frc.robot.commands.AmpScore;
 import frc.robot.commands.ClimbPrepSequence;
 import frc.robot.commands.ClimbSequence;
+import frc.robot.commands.FeedPrepScore;
 import frc.robot.commands.GoHomeSequence;
 import frc.robot.commands.IntakeSequence;
+import frc.robot.commands.PIDToPoint;
+import frc.robot.commands.SetTrapLineupPosition;
 import frc.robot.commands.SpeakerPrepScoreSequence;
 import frc.robot.commands.SpeakerShootSequence;
 import frc.robot.commands.autos.ScoreTwoNotes;
@@ -171,14 +174,19 @@ public class RobotContainer {
                 .beforeStarting(() -> driveFieldRelative = true));
     driverController.start().onTrue(new InstantCommand(drive::resetYaw));
     driverController
+      .a()
+      .onTrue(
+            new SequentialCommandGroup(
+                new FeedPrepScore(elevator, conveyor, intake, shooter, drive, matchState),
+                new InstantCommand(() -> setSpeakerPrep(true))));
+    driverController.b().onTrue(new ClimbSequence(intake, elevator, shooter, conveyor));
+    driverController
         .y()
         .onTrue(
             new ClimbPrepSequence(intake, elevator, shooter, conveyor, intakeLimelight)
                 .finallyDo(() -> driveFieldRelative = false));
-    driverController.b().onTrue(new ClimbSequence(intake, elevator, shooter, conveyor));
-    // driverController.x().whileTrue(new SetTrapLineupPosition(intakeLimelight,
-    // drive).ignoringDisable(true));
-    // driverController.a().whileTrue(new PIDToPoint(drive).ignoringDisable(true));
+    driverController.x().whileTrue(new SetTrapLineupPosition(intakeLimelight,
+    drive).andThen(new PIDToPoint(drive)));
 
     drive.setDefaultCommand(
         new RunCommand(

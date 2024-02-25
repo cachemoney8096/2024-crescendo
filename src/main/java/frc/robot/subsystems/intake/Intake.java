@@ -86,6 +86,8 @@ public class Intake extends SubsystemBase {
     int errors = 0;
     errors += SparkMaxUtils.check(pivotMotor.restoreFactoryDefaults());
 
+    Timer.delay(0.1);
+
     pivotMotor.setInverted(false);
 
     errors += SparkMaxUtils.check(pivotMotor.setIdleMode(IdleMode.kBrake));
@@ -99,7 +101,8 @@ public class Intake extends SubsystemBase {
             SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(
                 pivotAbsoluteEncoder, IntakeConstants.INPUT_ABS_ENCODER_GEAR_RATIO));
 
-    pivotAbsoluteEncoder.setInverted(true);
+    errors +=
+        SparkMaxUtils.check(pivotAbsoluteEncoder.setInverted(true));
 
     errors +=
         SparkMaxUtils.check(
