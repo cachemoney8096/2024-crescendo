@@ -102,8 +102,13 @@ public class Robot extends TimedRobot {
   public void disabledPeriodic() {
     m_robotContainer.shooter.considerZeroingEncoder();
     m_robotContainer.intake.considerZeroingEncoder();
+<<<<<<< HEAD
     m_robotContainer.shooterLimelight.resetOdometryWithTags(
         m_PoseEstimator, m_robotContainer.drive);
+=======
+    m_robotContainer.elevator.considerZeroingFromAbsolute();
+    m_robotContainer.shooterLimelight.disabledPeriodicInit(m_PoseEstimator, m_robotContainer.drive);
+>>>>>>> e1743ba (elevator zeroing)
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
