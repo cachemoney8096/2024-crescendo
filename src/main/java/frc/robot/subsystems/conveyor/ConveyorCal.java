@@ -31,7 +31,7 @@ public class ConveyorCal {
       NOTE_EXIT_TIME_TRAP_AMP_SECONDS = 1.0;
 
   /** The position to back off when receiving a note */
-  public static final double BACK_OFF_INCHES = -1.5;
+  public static final double BACK_OFF_INCHES = -2.5;
 
   /** The power to use when backing off a note */
   public static final double BACK_OFF_POWER = -0.4;

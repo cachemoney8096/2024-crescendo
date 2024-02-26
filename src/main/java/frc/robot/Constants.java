@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 public final class Constants {
   public static class OperatorConstants {
     public static final int driverControllerPort = 0;
+    public static final int operatorControllerPort = 1;
   }
 
   /*

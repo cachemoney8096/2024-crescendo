@@ -277,10 +277,10 @@ public class Shooter extends SubsystemBase {
    * @param angleDeg Desired pivot position. *
    */
   private void controlPosition(double angleDeg, boolean holdLatchVoltage) {
-    if (Math.abs(pivotController.getPositionError())
-        > ShooterCal.PIVOT_PROFILE_REPLANNING_THRESHOLD_DEG) {
-      pivotController.reset(getPivotPosition());
-    }
+    // if (Math.abs(pivotController.getPositionError())
+    //     > ShooterCal.PIVOT_PROFILE_REPLANNING_THRESHOLD_DEG) {
+    //   pivotController.reset(getPivotPosition());
+    // }
 
     pivotDesiredPositionDegrees = angleDeg;
     pivotController.setGoal(angleDeg);

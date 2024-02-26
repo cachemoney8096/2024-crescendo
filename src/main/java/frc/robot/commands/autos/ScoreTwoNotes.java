@@ -45,7 +45,7 @@ public class ScoreTwoNotes extends SequentialCommandGroup {
         new RotateToSpeaker(drive, limelight),
         drive.turnInPlace(0.5),
         new ScoreThisNote(
-            intake, elevator, shooter, conveyor, limelight // goes home at the end of ScoreThisNote
+            intake, elevator, shooter, conveyor, limelight, drive // goes home at the end of ScoreThisNote
             ),
         new InstantCommand(drive::setForwardTargetHeading),
         drive.turnInPlace(0.5),

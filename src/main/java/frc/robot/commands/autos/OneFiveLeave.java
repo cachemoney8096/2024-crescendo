@@ -39,7 +39,7 @@ public class OneFiveLeave extends SequentialCommandGroup {
     addCommands(
         new RotateToSpeaker(drive, limelight),
         drive.turnInPlace(1.0),
-        new ScoreThisNote(intake, elevator, shooter, conveyor, limelight),
+        new ScoreThisNote(intake, elevator, shooter, conveyor, limelight, drive),
         new ParallelCommandGroup(
             new IntakeSequence(intake, elevator, conveyor, shooter)
                 .withTimeout(IntakeConstants.INTAKING_TIMEOUT_SEC),

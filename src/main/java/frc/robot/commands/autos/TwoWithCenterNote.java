@@ -33,7 +33,7 @@ public class TwoWithCenterNote extends SequentialCommandGroup {
     middleNoteAuto = PathPlannerPath.fromPathFile("Middle Note Auto");
     addCommands(
       drive.followTrajectoryCommand(middleNoteAuto, true),
-      new SpeakerPrepScoreSequence(intake, elevator, shooter, conveyor, limelight),
+      new SpeakerPrepScoreSequence(intake, elevator, shooter, conveyor, limelight, drive).withTimeout(5.0),
       new WaitUntilCommand(() -> shooter.isShooterSpunUp()),
       new SpeakerShootSequence(conveyor, shooter)
     );

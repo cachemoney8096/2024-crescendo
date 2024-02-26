@@ -29,7 +29,7 @@ public final class ElevatorCal {
 
   /** Elevator trapezoidal motion profile constraints. */
   public static final double MAX_VELOCITY_IN_PER_SECOND = 40.0,
-      MAX_ACCELERATION_IN_PER_SECOND_SQUARED = 80.0;
+      MAX_ACCELERATION_IN_PER_SECOND_SQUARED = 640.0;
   /** Elevator trapezoidal motion profile constraints. */
   public static final double MAX_VELOCITY_IN_PER_SECOND_CLIMB = 40.0,
       MAX_ACCELERATION_IN_PER_SECOND_SQUARED_CLIMB = 40.0;

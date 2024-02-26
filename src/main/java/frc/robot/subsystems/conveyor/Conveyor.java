@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -196,7 +197,7 @@ public class Conveyor extends SubsystemBase {
               () ->
                   Math.abs(conveyor.backMotorEncoder.getPosition())
                       > ConveyorCal.NOTE_POSITION_THRESHOLD_INCHES).andThen(new InstantCommand(() -> System.out.println("Ended because of back conveyor position"))),
-          new WaitUntilCommand(() -> !conveyor.intakeBeamBreakSensor.get()).andThen(new WaitCommand(0.25)).andThen(new InstantCommand(() -> System.out.println("Ended because of intake beam break")))
+          new WaitUntilCommand(() -> conveyor.beamBreakSensorOne.isPressed()).andThen(new InstantCommand()).andThen(new InstantCommand(() -> System.out.println("Ended because of conveyor beam break")))
         ),
         conveyor.rumbleCommand,
         new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", true)),
@@ -204,7 +205,8 @@ public class Conveyor extends SubsystemBase {
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.BACK_OFF_POWER)),
         new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.BACK_OFF_POWER)),
         new WaitUntilCommand(
-            () -> conveyor.frontMotorEncoder.getPosition() < ConveyorCal.BACK_OFF_INCHES),
+              () -> !conveyor.beamBreakSensorOne.isPressed()
+          ),
         Conveyor.stop(conveyor),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE));
   }
@@ -257,6 +259,7 @@ public class Conveyor extends SubsystemBase {
           return backMotorEncoder.getVelocity();
         },
         null);
+    builder.addBooleanProperty("beamBreakSensorOne", () -> beamBreakSensorOne.isPressed(), null);
     builder.addBooleanProperty("Intake Sensor", () -> intakeBeamBreakSensor.get(), null);
   }
 }

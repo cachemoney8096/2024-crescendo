@@ -29,6 +29,7 @@ public class RotateToSpeaker extends SequentialCommandGroup {
               return robotToTarget.isPresent();
             }),
         new InstantCommand(
-            () -> drive.setTargetHeadingDegrees(robotToTarget.get().getFirst().getDegrees())));
+            () -> drive.setTargetHeadingDegrees(robotToTarget.get().getFirst().getDegrees()))
+            );
   }
 }

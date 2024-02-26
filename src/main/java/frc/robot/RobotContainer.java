@@ -4,9 +4,6 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.path.PathPlannerTrajectory;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -28,13 +25,9 @@ import frc.robot.commands.ClimbPrepSequence;
 import frc.robot.commands.ClimbSequence;
 import frc.robot.commands.GoHomeSequence;
 import frc.robot.commands.IntakeSequence;
-import frc.robot.commands.PIDToPoint;
-import frc.robot.commands.RotateToSpeaker;
-import frc.robot.commands.SetTrapLineupPosition;
 import frc.robot.commands.SpeakerPrepScoreSequence;
 import frc.robot.commands.SpeakerShootSequence;
 import frc.robot.commands.autos.ScoreTwoNotes;
-import frc.robot.commands.autos.TwoWithCenterNote;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
@@ -74,21 +67,23 @@ public class RobotContainer {
 
   public MatchState matchState = new MatchState(false, true);
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController driverController =
       new CommandXboxController(OperatorConstants.driverControllerPort);
+  private final CommandXboxController operatorController =
+      new CommandXboxController(OperatorConstants.operatorControllerPort);
 
   Command rumbleBriefly =
       new SequentialCommandGroup(
-          new InstantCommand(
-              () -> {
-                driverController.getHID().setRumble(RumbleType.kBothRumble, 1.0);
-              }),
-          new WaitCommand(0.25),
-          new InstantCommand(
-              () -> {
-                driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
-              })).finallyDo(() -> driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0));
+              new InstantCommand(
+                  () -> {
+                    driverController.getHID().setRumble(RumbleType.kBothRumble, 1.0);
+                  }),
+              new WaitCommand(0.25),
+              new InstantCommand(
+                  () -> {
+                    driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+                  }))
+          .finallyDo(() -> driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0));
 
   public DriveSubsystem drive;
   public Intake intake;
@@ -100,6 +95,7 @@ public class RobotContainer {
   public IntakeLimelight intakeLimelight;
 
   public boolean speakerPrepped;
+  public boolean driveFieldRelative = true;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -111,24 +107,25 @@ public class RobotContainer {
     conveyor = new Conveyor(rumbleBriefly);
     lights = new Lights();
     shooterLimelight = new ShooterLimelight(25, Units.inchesToMeters(26), 1.45, matchState);
-    intakeLimelight = new IntakeLimelight(0, 0, 0); //we aren't using these values so they're still 0
+    intakeLimelight =
+        new IntakeLimelight(0, 0, 0); // we aren't using these values so they're still 0
 
     // Configure the trigger bindings
     configureBindings();
+    configureOperator();
 
     Shuffleboard.getTab("Subsystems").add(drive.getName(), drive);
     Shuffleboard.getTab("Subsystems").add(intake.getName(), intake);
     Shuffleboard.getTab("Subsystems").add(conveyor.getName(), conveyor);
     Shuffleboard.getTab("Subsystems").add(shooter.getName(), shooter);
     Shuffleboard.getTab("Subsystems").add(elevator.getName(), elevator);
-    Shuffleboard.getTab("Subsystems").add("Shooter limelight",shooterLimelight);
+    Shuffleboard.getTab("Subsystems").add("Shooter limelight", shooterLimelight);
 
     SmartDashboard.putBoolean("Have Note", false);
 
     burnFlashAllSparks();
 
     driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
-
   }
 
   /**
@@ -146,33 +143,43 @@ public class RobotContainer {
         .whileTrue(new IntakeSequence(intake, elevator, conveyor, shooter));
     driverController
         .leftTrigger()
-        .onFalse(new GoHomeSequence(intake, elevator, shooter, conveyor, speakerPrepped));
+        .onFalse(new GoHomeSequence(intake, elevator, shooter, conveyor, false));
     driverController
         .rightTrigger()
         .onTrue(
             new ConditionalCommand(
                 new SpeakerShootSequence(conveyor, shooter).finallyDo(conveyor::stopRollers),
-                new AmpScore(conveyor, intake, elevator),
+                new AmpScore(drive, conveyor, intake, shooter, elevator),
                 this::preppedSpeaker)); // score based on prep
     driverController
         .leftBumper()
         .onTrue(
             new SequentialCommandGroup(
-                new SpeakerPrepScoreSequence(intake, elevator, shooter, conveyor, shooterLimelight),
-                new InstantCommand(() -> setSpeakerPrep(true))));
+                new InstantCommand(() -> setSpeakerPrep(true)),
+                new SpeakerPrepScoreSequence(
+                    intake, elevator, shooter, conveyor, shooterLimelight, drive)));
     driverController
         .rightBumper()
         .onTrue(
             new SequentialCommandGroup(
                 new AmpPrepScore(elevator, conveyor, intake, shooter),
                 new InstantCommand(() -> setSpeakerPrep(false))));
-    driverController.back().onTrue(new GoHomeSequence(intake, elevator, shooter, conveyor, false));
+    driverController
+        .back()
+        .onTrue(
+            new GoHomeSequence(intake, elevator, shooter, conveyor, false)
+                .beforeStarting(() -> driveFieldRelative = true));
     driverController.start().onTrue(new InstantCommand(drive::resetYaw));
-    driverController.y().onTrue(new ClimbPrepSequence(intake, elevator, shooter, conveyor, intakeLimelight));
+    driverController
+        .y()
+        .onTrue(
+            new ClimbPrepSequence(intake, elevator, shooter, conveyor, intakeLimelight)
+                .finallyDo(() -> driveFieldRelative = false));
     driverController.b().onTrue(new ClimbSequence(intake, elevator, shooter, conveyor));
-    // driverController.x().whileTrue(new SetTrapLineupPosition(intakeLimelight, drive).ignoringDisable(true));
+    // driverController.x().whileTrue(new SetTrapLineupPosition(intakeLimelight,
+    // drive).ignoringDisable(true));
     // driverController.a().whileTrue(new PIDToPoint(drive).ignoringDisable(true));
-    
+
     drive.setDefaultCommand(
         new RunCommand(
                 () ->
@@ -181,10 +188,19 @@ public class RobotContainer {
                         MathUtil.applyDeadband(-driverController.getRightX(), 0.1),
                         JoystickUtil.squareAxis(
                             MathUtil.applyDeadband(-driverController.getLeftX(), 0.05)),
-                        true, // always field relative
+                        driveFieldRelative, // always field relative
                         driverController.getHID().getPOV()),
                 drive)
             .withName("Manual Drive"));
+  }
+
+  private void configureOperator() {
+    operatorController.x().onTrue(new InstantCommand(() -> conveyor.startRollers(1.0)));
+    operatorController.x().onFalse(new InstantCommand(() -> conveyor.stopRollers()));
+    operatorController.b().onTrue(new InstantCommand(() -> conveyor.startRollers(-1.0)));
+    operatorController.b().onFalse(new InstantCommand(() -> conveyor.stopRollers()));
+    operatorController.a().onTrue(new InstantCommand(() -> shooter.setShooterDistance(1.16)));
+    operatorController.y().onTrue(new InstantCommand(() -> shooter.setShooterDistance(2.77)));
   }
 
   private void burnFlashAllSparks() {
@@ -217,7 +233,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // return new ScoreTwoNotes(intake, elevator, shooter, conveyor, drive, matchState, shooterLimelight);
-    return new TwoWithCenterNote(drive, intake, elevator, shooter, conveyor, shooterLimelight);
+    return new ScoreTwoNotes(
+        intake, elevator, shooter, conveyor, drive, matchState, shooterLimelight);
+    // return new TwoWithCenterNote(drive, intake, elevator, shooter, conveyor, shooterLimelight);
   }
 }
