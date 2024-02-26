@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.autos.ScoreFourFromCenterLine;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelightConstants;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
@@ -133,6 +134,7 @@ public class Robot extends TimedRobot {
       m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
       m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
     }
+    new ScoreFourFromCenterLine(false, null, null, null, null, null, null);
   }
 
   /** This function is called periodically during autonomous. */

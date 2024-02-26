@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -113,6 +114,12 @@ public class RobotContainer {
     intakeLimelight =
         new IntakeLimelight(0, 0, 0); // we aren't using these values so they're still 0
 
+    // Register Named Commands
+    NamedCommands.registerCommand("speakerPrep", new SpeakerPrepScoreSequence(intake, elevator, shooter, conveyor, shooterLimelight, drive));
+    NamedCommands.registerCommand("speakerScore", new SpeakerShootSequence(conveyor, shooter));
+    NamedCommands.registerCommand("deployIntake", new IntakeSequence(intake, elevator, conveyor, shooter));
+    // NamedCommands.registerCommand("deployIntake", new IntakeSequence(intake, elevator, conveyor, shooter));
+
     // Configure the trigger bindings
     configureBindings();
     configureOperator();
@@ -174,8 +181,8 @@ public class RobotContainer {
                 .beforeStarting(() -> driveFieldRelative = true));
     driverController.start().onTrue(new InstantCommand(drive::resetYaw));
     driverController
-      .a()
-      .onTrue(
+        .a()
+        .onTrue(
             new SequentialCommandGroup(
                 new FeedPrepScore(elevator, conveyor, intake, shooter, drive, matchState),
                 new InstantCommand(() -> setSpeakerPrep(true))));
@@ -185,8 +192,10 @@ public class RobotContainer {
         .onTrue(
             new ClimbPrepSequence(intake, elevator, shooter, conveyor, intakeLimelight)
                 .finallyDo(() -> driveFieldRelative = false));
-    driverController.x().whileTrue(new SetTrapLineupPosition(intakeLimelight,
-    drive).andThen(new PIDToPoint(drive)));
+    driverController
+        .x()
+        .whileTrue(
+            new SetTrapLineupPosition(intakeLimelight, drive).andThen(new PIDToPoint(drive)));
 
     drive.setDefaultCommand(
         new RunCommand(
