@@ -114,14 +114,6 @@ public class Elevator extends SubsystemBase {
     errors += SparkMaxUtils.check(leftMotorEncoderAbs.setInverted(false));
     errors +=
         SparkMaxUtils.check(
-            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(
-                leftMotorEncoderAbs, ElevatorConstants.ELEVATOR_LEFT_ABSOLUTE_ENCODER_RATIO));
-    errors +=
-        SparkMaxUtils.check(
-            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(
-                rightMotorEncoderAbs, ElevatorConstants.ELEVATOR_RIGHT_ABSOLUTE_ENCODER_RATIO));
-    errors +=
-        SparkMaxUtils.check(
             SparkMaxUtils.UnitConversions.setLinearFromGearRatio(
                 leftMotorEncoderRel,
                 ElevatorConstants.ELEVATOR_GEAR_RATIO,
