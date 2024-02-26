@@ -29,7 +29,7 @@ public class AmpScore extends SequentialCommandGroup {
             }),
         Conveyor.scoreTrapOrAmp(conveyor),
         new WaitUntilCommand(
-          () -> Math.abs(drive.getPose().minus(initialPose).getTranslation().getY()) > 0.1
+          () -> Math.abs(drive.getPose().getTranslation().minus(initialPose.getTranslation()).getY()) > 0.1
         ),
         new GoHomeSequence(intake, elevator, shooter, conveyor, false)
         );
