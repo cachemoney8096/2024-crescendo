@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -17,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
@@ -32,7 +32,6 @@ import frc.robot.commands.SetTrapLineupPosition;
 import frc.robot.commands.SpeakerPrepScoreSequence;
 import frc.robot.commands.SpeakerShootSequence;
 import frc.robot.commands.autos.ScoreFourFromCenterLine;
-import frc.robot.commands.autos.ScoreTwoNotes;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
@@ -169,28 +168,33 @@ public class RobotContainer {
             new SequentialCommandGroup(
                 new AmpPrepScore(elevator, conveyor, intake, shooter),
                 new InstantCommand(() -> setSpeakerPrep(false))));
+    // bottom right back button
     driverController
-        .back()
+        .povLeft()
         .onTrue(
             new GoHomeSequence(intake, elevator, shooter, conveyor, false)
-                .beforeStarting(() -> driveFieldRelative = true));
+                .beforeStarting(() -> driveFieldRelative = true)
+                .beforeStarting(() -> drive.throttle(1.0)));
     driverController.start().onTrue(new InstantCommand(drive::resetYaw));
+    // top right back button
     driverController
         .povDown()
         .onTrue(
             new SequentialCommandGroup(
                 new FeedPrepScore(elevator, conveyor, intake, shooter, drive, matchState),
                 new InstantCommand(() -> setSpeakerPrep(true))));
+    // bottom left back button
     driverController.povRight().onTrue(new ClimbSequence(intake, elevator, shooter, conveyor));
+    // top left back button
     driverController
         .povUp()
         .onTrue(
             new ClimbPrepSequence(intake, elevator, shooter, conveyor, intakeLimelight)
+                .andThen(new WaitUntilCommand(() -> elevator.atDesiredPosition()))
+                .andThen(new SetTrapLineupPosition(intakeLimelight, drive))
+                .andThen(new PIDToPoint(drive))
+                .andThen(new InstantCommand(() -> drive.throttle(0.5)))
                 .finallyDo(() -> driveFieldRelative = false));
-    driverController
-        .povLeft()
-        .whileTrue(
-            new SetTrapLineupPosition(intakeLimelight, drive).andThen(new PIDToPoint(drive)));
 
     drive.setDefaultCommand(
         new RunCommand(
@@ -204,6 +208,62 @@ public class RobotContainer {
                         -1),
                 drive)
             .withName("Manual Drive"));
+
+    driverController
+        .y()
+        .whileTrue(
+            new RunCommand(
+                () ->
+                    drive.rotateOrKeepHeading(
+                        MathUtil.applyDeadband(-driverController.getLeftY(), 0.1),
+                        MathUtil.applyDeadband(-driverController.getLeftX(), 0.1),
+                        JoystickUtil.squareAxis(
+                            MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
+                        driveFieldRelative, // always field relative
+                        0),
+                drive));
+
+    driverController
+        .b()
+        .whileTrue(
+            new RunCommand(
+                () ->
+                    drive.rotateOrKeepHeading(
+                        MathUtil.applyDeadband(-driverController.getLeftY(), 0.1),
+                        MathUtil.applyDeadband(-driverController.getLeftX(), 0.1),
+                        JoystickUtil.squareAxis(
+                            MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
+                        driveFieldRelative, // always field relative
+                        90),
+                drive));
+
+    driverController
+        .a()
+        .whileTrue(
+            new RunCommand(
+                () ->
+                    drive.rotateOrKeepHeading(
+                        MathUtil.applyDeadband(-driverController.getLeftY(), 0.1),
+                        MathUtil.applyDeadband(-driverController.getLeftX(), 0.1),
+                        JoystickUtil.squareAxis(
+                            MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
+                        driveFieldRelative, // always field relative
+                        180),
+                drive));
+
+    driverController
+        .x()
+        .whileTrue(
+            new RunCommand(
+                () ->
+                    drive.rotateOrKeepHeading(
+                        MathUtil.applyDeadband(-driverController.getLeftY(), 0.1),
+                        MathUtil.applyDeadband(-driverController.getLeftX(), 0.1),
+                        JoystickUtil.squareAxis(
+                            MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
+                        driveFieldRelative, // always field relative
+                        270),
+                drive));
   }
 
   private void configureOperator() {
@@ -247,7 +307,8 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // return new ScoreTwoNotes(
     //     intake, elevator, shooter, conveyor, drive, matchState, shooterLimelight);
-    return new ScoreFourFromCenterLine(false, drive, intake, elevator, shooter, conveyor, shooterLimelight);
+    return new ScoreFourFromCenterLine(
+        false, drive, intake, elevator, shooter, conveyor, shooterLimelight);
     // return new TwoWithCenterNote(drive, intake, elevator, shooter, conveyor, shooterLimelight);
   }
 }
