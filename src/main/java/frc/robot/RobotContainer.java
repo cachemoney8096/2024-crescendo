@@ -31,6 +31,7 @@ import frc.robot.commands.PIDToPoint;
 import frc.robot.commands.SetTrapLineupPosition;
 import frc.robot.commands.SpeakerPrepScoreSequence;
 import frc.robot.commands.SpeakerShootSequence;
+import frc.robot.commands.autos.ScoreFourFromCenterLine;
 import frc.robot.commands.autos.ScoreTwoNotes;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
@@ -113,12 +114,6 @@ public class RobotContainer {
     shooterLimelight = new ShooterLimelight(25, Units.inchesToMeters(26), 1.45, matchState);
     intakeLimelight =
         new IntakeLimelight(0, 0, 0); // we aren't using these values so they're still 0
-
-    // Register Named Commands
-    NamedCommands.registerCommand("speakerPrep", new SpeakerPrepScoreSequence(intake, elevator, shooter, conveyor, shooterLimelight, drive));
-    NamedCommands.registerCommand("speakerScore", new SpeakerShootSequence(conveyor, shooter));
-    NamedCommands.registerCommand("deployIntake", new IntakeSequence(intake, elevator, conveyor, shooter));
-    // NamedCommands.registerCommand("deployIntake", new IntakeSequence(intake, elevator, conveyor, shooter));
 
     // Configure the trigger bindings
     configureBindings();
@@ -250,8 +245,9 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new ScoreTwoNotes(
-        intake, elevator, shooter, conveyor, drive, matchState, shooterLimelight);
+    // return new ScoreTwoNotes(
+    //     intake, elevator, shooter, conveyor, drive, matchState, shooterLimelight);
+    return new ScoreFourFromCenterLine(false, drive, intake, elevator, shooter, conveyor, shooterLimelight);
     // return new TwoWithCenterNote(drive, intake, elevator, shooter, conveyor, shooterLimelight);
   }
 }

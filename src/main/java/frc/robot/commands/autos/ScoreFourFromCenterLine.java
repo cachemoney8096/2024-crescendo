@@ -18,8 +18,9 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 
 public class ScoreFourFromCenterLine extends SequentialCommandGroup {
+  private final String pathName = "Copy of 4 NOTE - CENTER LINE - SOURCE";
   private PathPlannerPath autoPath =
-      PathPlannerPath.fromPathFile("Copy of 4 NOTE - CENTER LINE - SOURCE");
+      PathPlannerPath.fromPathFile(pathName);
 
   public ScoreFourFromCenterLine(boolean red, 
       DriveSubsystem drive,

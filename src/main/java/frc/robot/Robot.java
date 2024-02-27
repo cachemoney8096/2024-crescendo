@@ -134,7 +134,6 @@ public class Robot extends TimedRobot {
       m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
       m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
     }
-    new ScoreFourFromCenterLine(false, null, null, null, null, null, null);
   }
 
   /** This function is called periodically during autonomous. */
