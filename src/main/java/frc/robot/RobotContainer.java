@@ -204,59 +204,6 @@ public class RobotContainer {
                         -1),
                 drive)
             .withName("Manual Drive"));
-    
-    driverController.y().onTrue(
-      new RunCommand(
-                () ->
-                    drive.rotateOrKeepHeading(
-                        MathUtil.applyDeadband(-driverController.getLeftY(), 0.1),
-                        MathUtil.applyDeadband(-driverController.getLeftX(), 0.1),
-                        JoystickUtil.squareAxis(
-                            MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
-                        driveFieldRelative, // always field relative
-                        0),
-                drive)
-    );
-
-    driverController.b().onTrue(
-      new RunCommand(
-                () ->
-                    drive.rotateOrKeepHeading(
-                        MathUtil.applyDeadband(-driverController.getLeftY(), 0.1),
-                        MathUtil.applyDeadband(-driverController.getLeftX(), 0.1),
-                        JoystickUtil.squareAxis(
-                            MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
-                        driveFieldRelative, // always field relative
-                        90),
-                drive)
-    );
-
-    driverController.a().onTrue(
-      new RunCommand(
-                () ->
-                    drive.rotateOrKeepHeading(
-                        MathUtil.applyDeadband(-driverController.getLeftY(), 0.1),
-                        MathUtil.applyDeadband(-driverController.getLeftX(), 0.1),
-                        JoystickUtil.squareAxis(
-                            MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
-                        driveFieldRelative, // always field relative
-                        180),
-                drive)
-    );
-
-    driverController.x().onTrue(
-      new RunCommand(
-                () ->
-                    drive.rotateOrKeepHeading(
-                        MathUtil.applyDeadband(-driverController.getLeftY(), 0.1),
-                        MathUtil.applyDeadband(-driverController.getLeftX(), 0.1),
-                        JoystickUtil.squareAxis(
-                            MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
-                        driveFieldRelative, // always field relative
-                        270),
-                drive)
-    );
-  }
 
   private void configureOperator() {
     operatorController.x().onTrue(new InstantCommand(() -> conveyor.startRollers(1.0)));
