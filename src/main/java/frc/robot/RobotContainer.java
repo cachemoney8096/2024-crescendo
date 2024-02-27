@@ -5,9 +5,11 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -21,16 +23,24 @@ import frc.robot.commands.AmpPrepScore;
 import frc.robot.commands.AmpScore;
 import frc.robot.commands.ClimbPrepSequence;
 import frc.robot.commands.ClimbSequence;
+import frc.robot.commands.FeedPrepScore;
 import frc.robot.commands.GoHomeSequence;
 import frc.robot.commands.IntakeSequence;
+import frc.robot.commands.PIDToPoint;
+import frc.robot.commands.SetTrapLineupPosition;
 import frc.robot.commands.SpeakerPrepScoreSequence;
 import frc.robot.commands.SpeakerShootSequence;
+import frc.robot.commands.autos.ScoreTwoNotes;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intakeLimelight.IntakeLimelight;
+import frc.robot.subsystems.intakeLimelight.IntakeLimelightConstants;
 import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
+import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.JoystickUtil;
 
 /**
@@ -62,21 +72,23 @@ public class RobotContainer {
 
   public MatchState matchState = new MatchState(false, true);
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController driverController =
-      new CommandXboxController(OperatorConstants.driverControllerPort);
+      new CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT);
+  private final CommandXboxController operatorController =
+      new CommandXboxController(OperatorConstants.OPERATOR_CONTROLLER_PORT);
 
   Command rumbleBriefly =
       new SequentialCommandGroup(
-          new InstantCommand(
-              () -> {
-                driverController.getHID().setRumble(RumbleType.kBothRumble, 1.0);
-              }),
-          new WaitCommand(0.25),
-          new InstantCommand(
-              () -> {
-                driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
-              }));
+              new InstantCommand(
+                  () -> {
+                    driverController.getHID().setRumble(RumbleType.kBothRumble, 1.0);
+                  }),
+              new WaitCommand(0.25),
+              new InstantCommand(
+                  () -> {
+                    driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+                  }))
+          .finallyDo(() -> driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0));
 
   public DriveSubsystem drive;
   public Intake intake;
@@ -84,8 +96,11 @@ public class RobotContainer {
   public Shooter shooter;
   public Conveyor conveyor;
   public Lights lights;
+  public ShooterLimelight shooterLimelight;
+  public IntakeLimelight intakeLimelight;
 
   public boolean speakerPrepped;
+  public boolean driveFieldRelative = true;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -94,19 +109,28 @@ public class RobotContainer {
     elevator = new Elevator();
     intake = new Intake();
     shooter = new Shooter();
-    conveyor = new Conveyor();
+    conveyor = new Conveyor(rumbleBriefly);
     lights = new Lights();
+    shooterLimelight = new ShooterLimelight(ShooterLimelightConstants.SHOOTER_LIMELIGHT_PITCH_DEGREES, ShooterLimelightConstants.SHOOTER_LIMELIGHT_HEIGHT_METERS, ShooterLimelightConstants.SHOOTER_LIMELIGHT_TARGET_HEIGHT_METERS, matchState);
+    intakeLimelight =
+        new IntakeLimelight(IntakeLimelightConstants.INTAKE_LIMELIGHT_PITCH_DEGREES, IntakeLimelightConstants.INTAKE_LIMELIGHT_HEIGHT_METERS, 0); // we aren't using the target height so 0 is fine
 
-    // Configure the trigger bindings
-    configureBindings();
+    // Configure the controller bindings
+    configureDriver();
+    configureOperator();
 
     Shuffleboard.getTab("Subsystems").add(drive.getName(), drive);
     Shuffleboard.getTab("Subsystems").add(intake.getName(), intake);
     Shuffleboard.getTab("Subsystems").add(conveyor.getName(), conveyor);
     Shuffleboard.getTab("Subsystems").add(shooter.getName(), shooter);
     Shuffleboard.getTab("Subsystems").add(elevator.getName(), elevator);
+    Shuffleboard.getTab("Subsystems").add("Shooter limelight", shooterLimelight);
+
+    SmartDashboard.putBoolean("Have Note", false);
 
     burnFlashAllSparks();
+
+    driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
   }
 
   /**
@@ -118,36 +142,53 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  private void configureBindings() {
+  private void configureDriver() {
     driverController
         .leftTrigger()
         .whileTrue(new IntakeSequence(intake, elevator, conveyor, shooter));
     driverController
         .leftTrigger()
-        .onFalse(new GoHomeSequence(intake, elevator, shooter, conveyor, speakerPrepped));
+        .onFalse(new GoHomeSequence(intake, elevator, shooter, conveyor, false));
     driverController
         .rightTrigger()
         .onTrue(
             new ConditionalCommand(
-                new SpeakerShootSequence(conveyor, shooter),
-                new AmpScore(conveyor, intake, elevator),
+                new SpeakerShootSequence(conveyor, shooter).finallyDo(conveyor::stopRollers),
+                new AmpScore(drive, conveyor, intake, shooter, elevator),
                 this::preppedSpeaker)); // score based on prep
     driverController
         .leftBumper()
         .onTrue(
             new SequentialCommandGroup(
-                new SpeakerPrepScoreSequence(intake, elevator, shooter, conveyor),
-                new InstantCommand(() -> setSpeakerPrep(true))));
+                new InstantCommand(() -> setSpeakerPrep(true)),
+                new SpeakerPrepScoreSequence(
+                    intake, elevator, shooter, conveyor, shooterLimelight, drive)));
     driverController
         .rightBumper()
         .onTrue(
             new SequentialCommandGroup(
                 new AmpPrepScore(elevator, conveyor, intake, shooter),
                 new InstantCommand(() -> setSpeakerPrep(false))));
-    driverController.x().onTrue(new GoHomeSequence(intake, elevator, shooter, conveyor, false));
+    driverController
+        .back()
+        .onTrue(
+            new GoHomeSequence(intake, elevator, shooter, conveyor, false)
+                .beforeStarting(() -> driveFieldRelative = true));
     driverController.start().onTrue(new InstantCommand(drive::resetYaw));
-    driverController.y().onTrue(new ClimbPrepSequence(intake, elevator, shooter));
+    driverController
+      .a()
+      .onTrue(
+            new SequentialCommandGroup(
+                new FeedPrepScore(elevator, conveyor, intake, shooter, drive, matchState),
+                new InstantCommand(() -> setSpeakerPrep(true))));
     driverController.b().onTrue(new ClimbSequence(intake, elevator, shooter, conveyor));
+    driverController
+        .y()
+        .onTrue(
+            new ClimbPrepSequence(intake, elevator, shooter, conveyor, intakeLimelight)
+                .finallyDo(() -> driveFieldRelative = false));
+    driverController.x().whileTrue(new SetTrapLineupPosition(intakeLimelight,
+    drive).andThen(new PIDToPoint(drive)));
 
     drive.setDefaultCommand(
         new RunCommand(
@@ -157,10 +198,19 @@ public class RobotContainer {
                         MathUtil.applyDeadband(-driverController.getRightX(), 0.1),
                         JoystickUtil.squareAxis(
                             MathUtil.applyDeadband(-driverController.getLeftX(), 0.05)),
-                        true, // always field relative
+                        driveFieldRelative, // field relative unless in climb prep
                         driverController.getHID().getPOV()),
                 drive)
             .withName("Manual Drive"));
+  }
+
+  private void configureOperator() {
+    operatorController.x().onTrue(new InstantCommand(() -> conveyor.startRollers(1.0)));
+    operatorController.x().onFalse(new InstantCommand(() -> conveyor.stopRollers()));
+    operatorController.b().onTrue(new InstantCommand(() -> conveyor.startRollers(-1.0)));
+    operatorController.b().onFalse(new InstantCommand(() -> conveyor.stopRollers()));
+    operatorController.a().onTrue(new InstantCommand(() -> shooter.setShooterDistance(1.16)));
+    operatorController.y().onTrue(new InstantCommand(() -> shooter.setShooterDistance(2.77)));
   }
 
   private void burnFlashAllSparks() {

@@ -38,7 +38,7 @@ public class IntakeCal {
 
   /** Motion profile max velocity and acceleration (deg per second) for intake pivot motor */
   public static final double PIVOT_MAX_VELOCITY_DEG_PER_SECOND = 330.0,
-      PIVOT_MAX_ACCELERATION_DEG_PER_SECOND_SQUARED = 550.0;
+      PIVOT_MAX_ACCELERATION_DEG_PER_SECOND_SQUARED = 950.0;
 
   /**
    * intake positions (degrees) where 90 degrees represents the intake at the shooter and 0 degrees
@@ -57,4 +57,6 @@ public class IntakeCal {
 
   public static final int PIVOT_MOTOR_CURRENT_LIMIT_AMPS = 50;
   public static final double INTAKING_TALONS_CURRENT_LIMIT_AMPS = 50.0;
+
+  public static final double TALON_DUTY_CYCLE_UPDATE_FREQ_HZ = 50.0;
 }

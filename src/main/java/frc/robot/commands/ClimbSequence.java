@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.elevator.Elevator;
@@ -20,7 +21,7 @@ public class ClimbSequence extends SequentialCommandGroup {
     addCommands(
         new WaitUntilCommand(
             () -> {
-              return intake.atDesiredIntakePosition()
+              return intake.nearDeployed()
                   && elevator.atDesiredPosition()
                   && shooter.atDesiredPosition();
             }),
@@ -31,6 +32,7 @@ public class ClimbSequence extends SequentialCommandGroup {
         new WaitUntilCommand(shooter::atDesiredPosition),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SCORE_TRAP, true)),
         new WaitUntilCommand(elevator::atDesiredPosition),
+        new WaitCommand(0.25),
         Conveyor.scoreTrapOrAmp(conveyor));
   }
 }

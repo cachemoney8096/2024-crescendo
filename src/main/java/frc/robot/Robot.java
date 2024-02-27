@@ -5,18 +5,27 @@
 package frc.robot;
 
 import com.revrobotics.CANSparkBase.IdleMode;
+
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelightConstants;
+import frc.robot.subsystems.shooter.Shooter.ShooterMode;
+import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.LimelightHelpers;
 
 /**
- * The VM is configured to automatically run this class, and to call the functions corresponding to
- * each mode, as described in the TimedRobot documentation. If you change the name of this class or
- * the package after creating this project, you must also update the build.gradle file in the
+ * The VM is configured to automatically run this class, and to call the
+ * functions corresponding to
+ * each mode, as described in the TimedRobot documentation. If you change the
+ * name of this class or
+ * the package after creating this project, you must also update the
+ * build.gradle file in the
  * project.
  */
 public class Robot extends TimedRobot {
@@ -24,30 +33,45 @@ public class Robot extends TimedRobot {
 
   private RobotContainer m_robotContainer;
 
+  private SwerveDrivePoseEstimator m_PoseEstimator;
+
   /**
-   * This function is run when the robot is first started up and should be used for any
+   * This function is run when the robot is first started up and should be used
+   * for any
    * initialization code.
    */
   @Override
   public void robotInit() {
-    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-    // autonomous chooser on the dashboard.
+    /** Instantiate our RobotContainer. This will perform all our button bindings,
+    * and put our
+    autonomous chooser on the dashboard. */
     m_robotContainer = new RobotContainer();
     RobotController.setBrownoutVoltage(Constants.BROWNOUT_VOLTAGE);
+    m_PoseEstimator = new SwerveDrivePoseEstimator(
+        DriveConstants.DRIVE_KINEMATICS,
+        m_robotContainer.drive.getGyro().getRotation2d(),
+        m_robotContainer.drive.getModulePositions(),
+        new Pose2d());
   }
 
   /**
-   * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
+   * This function is called every 20 ms, no matter the mode. Use this for items
+   * like diagnostics
    * that you want ran during disabled, autonomous, teleoperated and test.
    *
-   * <p>This runs after the mode specific periodic functions, but before LiveWindow and
+   * <p>
+   * This runs after the mode specific periodic functions, but before LiveWindow
+   * and
    * SmartDashboard integrated updating.
    */
   @Override
   public void robotPeriodic() {
-    // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
-    // commands, running already-scheduled commands, removing finished or interrupted commands,
-    // and running subsystem periodic() methods.  This must be called from the robot's periodic
+    // Runs the Scheduler. This is responsible for polling buttons, adding
+    // newly-scheduled
+    // commands, running already-scheduled commands, removing finished or
+    // interrupted commands,
+    // and running subsystem periodic() methods. This must be called from the
+    // robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
   }
@@ -57,6 +81,7 @@ public class Robot extends TimedRobot {
   public void disabledInit() {
     LimelightHelpers.getLatestResults(
         IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME); // It takes 2.5-3s on first run
+    LimelightHelpers.getLatestResults(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
 
     if (!m_robotContainer.matchState.realMatch) {
       m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kCoast);
@@ -68,15 +93,25 @@ public class Robot extends TimedRobot {
       m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kCoast);
       m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kCoast);
     }
+
+    m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);
+
+    m_robotContainer.intake.dontAllowIntakeMovement();
+    m_robotContainer.elevator.dontAllowElevatorMovement();
+    m_robotContainer.shooter.dontAllowShooterMovement();
   }
 
   @Override
   public void disabledPeriodic() {
     m_robotContainer.shooter.considerZeroingEncoder();
     m_robotContainer.intake.considerZeroingEncoder();
+    m_robotContainer.shooterLimelight.resetOdometryWithTags(m_PoseEstimator, m_robotContainer.drive);
   }
 
-  /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
+  /**
+   * This autonomous runs the autonomous command selected by your
+   * {@link RobotContainer} class.
+   */
   @Override
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
@@ -102,7 +137,8 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+  }
 
   @Override
   public void teleopInit() {
@@ -130,7 +166,8 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+  }
 
   @Override
   public void testInit() {
@@ -140,15 +177,18 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+  }
 
   /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() {}
+  public void simulationInit() {
+  }
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+  }
 
   private void setRobotContainerMatchState() {
     boolean realMatch = DriverStation.getMatchTime() > 1.0;

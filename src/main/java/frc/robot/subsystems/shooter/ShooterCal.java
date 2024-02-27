@@ -68,7 +68,7 @@ public class ShooterCal {
   public static final double PRE_LATCH_ANGLE_DEGREES = 80.0;
 
   /** How close to goal position to be considered "there" */
-  public static final double PIVOT_ANGLE_MARGIN_DEG = 1.0;
+  public static final double PIVOT_ANGLE_MARGIN_DEG = 2.0;
 
   /** Target shooter motor speeds (at the motor) */
   public static final double SHOOTER_MOTOR_SPEED_RPM = 4000.0;
@@ -80,8 +80,11 @@ public class ShooterCal {
    * What the abs encoder reads (in degrees) when the shooter is pointed down. Acquired by pointing
    * the encoder at 90 and subtracting 90 from that reading.
    */
-  public static final double PIVOT_ANGLE_OFFSET_DEGREES = 94.47 - 90.0;
+  public static final double PIVOT_ANGLE_OFFSET_DEGREES = 102.55 - 90.0;
 
   /** Position at which (or beyond) the shooter has potential to intersect the conveyor. */
   public static final double CONVEYOR_ZONE_THRESHOLD_DEGREES = 110.0;
+
+  public static final double SHOOT_CLEAR_STAGE_ANGLE_DEGREES = 125.0;
+  public static final double SHOOT_CLEAR_STAGE_VOLTAGE = 5.5;
 }
