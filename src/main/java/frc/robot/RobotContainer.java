@@ -176,19 +176,19 @@ public class RobotContainer {
                 .beforeStarting(() -> driveFieldRelative = true));
     driverController.start().onTrue(new InstantCommand(drive::resetYaw));
     driverController
-        .a()
+        .povDown()
         .onTrue(
             new SequentialCommandGroup(
                 new FeedPrepScore(elevator, conveyor, intake, shooter, drive, matchState),
                 new InstantCommand(() -> setSpeakerPrep(true))));
-    driverController.b().onTrue(new ClimbSequence(intake, elevator, shooter, conveyor));
+    driverController.povRight().onTrue(new ClimbSequence(intake, elevator, shooter, conveyor));
     driverController
-        .y()
+        .povUp()
         .onTrue(
             new ClimbPrepSequence(intake, elevator, shooter, conveyor, intakeLimelight)
                 .finallyDo(() -> driveFieldRelative = false));
     driverController
-        .x()
+        .povLeft()
         .whileTrue(
             new SetTrapLineupPosition(intakeLimelight, drive).andThen(new PIDToPoint(drive)));
 
@@ -196,14 +196,66 @@ public class RobotContainer {
         new RunCommand(
                 () ->
                     drive.rotateOrKeepHeading(
-                        MathUtil.applyDeadband(-driverController.getRightY(), 0.1),
-                        MathUtil.applyDeadband(-driverController.getRightX(), 0.1),
+                        MathUtil.applyDeadband(-driverController.getLeftY(), 0.1),
+                        MathUtil.applyDeadband(-driverController.getLeftX(), 0.1),
                         JoystickUtil.squareAxis(
-                            MathUtil.applyDeadband(-driverController.getLeftX(), 0.05)),
+                            MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
                         driveFieldRelative, // always field relative
-                        driverController.getHID().getPOV()),
+                        -1),
                 drive)
             .withName("Manual Drive"));
+    
+    driverController.y().onTrue(
+      new RunCommand(
+                () ->
+                    drive.rotateOrKeepHeading(
+                        MathUtil.applyDeadband(-driverController.getLeftY(), 0.1),
+                        MathUtil.applyDeadband(-driverController.getLeftX(), 0.1),
+                        JoystickUtil.squareAxis(
+                            MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
+                        driveFieldRelative, // always field relative
+                        0),
+                drive)
+    );
+
+    driverController.b().onTrue(
+      new RunCommand(
+                () ->
+                    drive.rotateOrKeepHeading(
+                        MathUtil.applyDeadband(-driverController.getLeftY(), 0.1),
+                        MathUtil.applyDeadband(-driverController.getLeftX(), 0.1),
+                        JoystickUtil.squareAxis(
+                            MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
+                        driveFieldRelative, // always field relative
+                        90),
+                drive)
+    );
+
+    driverController.a().onTrue(
+      new RunCommand(
+                () ->
+                    drive.rotateOrKeepHeading(
+                        MathUtil.applyDeadband(-driverController.getLeftY(), 0.1),
+                        MathUtil.applyDeadband(-driverController.getLeftX(), 0.1),
+                        JoystickUtil.squareAxis(
+                            MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
+                        driveFieldRelative, // always field relative
+                        180),
+                drive)
+    );
+
+    driverController.x().onTrue(
+      new RunCommand(
+                () ->
+                    drive.rotateOrKeepHeading(
+                        MathUtil.applyDeadband(-driverController.getLeftY(), 0.1),
+                        MathUtil.applyDeadband(-driverController.getLeftX(), 0.1),
+                        JoystickUtil.squareAxis(
+                            MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
+                        driveFieldRelative, // always field relative
+                        270),
+                drive)
+    );
   }
 
   private void configureOperator() {
