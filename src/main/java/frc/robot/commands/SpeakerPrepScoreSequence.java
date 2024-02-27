@@ -16,6 +16,7 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 import java.util.Optional;
+import frc.robot.utils.DeltaAngleSpeedCalcUtil;
 
 /**
  * gets the robot ready to shoot a ring into the speaker. gets intake and elevator into position,
@@ -23,7 +24,7 @@ import java.util.Optional;
  */
 public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
 
-  Optional<Pair<Rotation2d, Double>> tagDetection;
+  Optional<Pair<Rotation2d, Double>> tagDetection = Optional.empty();
   double distanceFromSpeakerMeters = 0.0;
 
   public SpeakerPrepScoreSequence(
@@ -58,6 +59,8 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                   Translation2d currentSpeedsXY =
                       new Translation2d(
                           currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
+                  DeltaAngleSpeedCalcUtil DeltaAngleSpeedCalcUtil = new DeltaAngleSpeedCalcUtil(tagDetection.get().getSecond());      
+                  Pair<Double, Double> calcDeltaAngles = DeltaAngleSpeedCalcUtil.calcDeltaAngle(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond, tagDetection.get().getSecond()); 
                   boolean currentlyStatic = currentSpeedsXY.getNorm() < 0.1;
                   return tagDetection.isPresent() && currentlyStatic;
                 }));
