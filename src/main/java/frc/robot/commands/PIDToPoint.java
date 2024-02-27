@@ -63,7 +63,7 @@ public class PIDToPoint extends SequentialCommandGroup {
 
               double xOutputClamped = clamp(xOutput, 0.1);
               double yOutputClamped = clamp(yOutput, 0.1);
-              
+
               drive.rotateOrKeepHeading(xOutputClamped, yOutputClamped, 0.0, true, -1);
 
               SmartDashboard.putNumber("x error", xController.getPositionError());

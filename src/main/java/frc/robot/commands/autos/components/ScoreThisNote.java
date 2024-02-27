@@ -15,10 +15,17 @@ import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
  * score the already loaded (intake-ed/intook?) note into the speaker and return to the home state
  */
 public class ScoreThisNote extends SequentialCommandGroup {
-  public ScoreThisNote(Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor, ShooterLimelight limelight, DriveSubsystem drive) {
+  public ScoreThisNote(
+      Intake intake,
+      Elevator elevator,
+      Shooter shooter,
+      Conveyor conveyor,
+      ShooterLimelight limelight,
+      DriveSubsystem drive) {
     addRequirements(intake, elevator, shooter, conveyor);
     addCommands(
-        new SpeakerPrepScoreSequence(intake, elevator, shooter, conveyor, limelight, drive).withTimeout(5.0),
+        new SpeakerPrepScoreSequence(intake, elevator, shooter, conveyor, limelight, drive)
+            .withTimeout(5.0),
         new SpeakerShootSequence(conveyor, shooter),
         new GoHomeSequence(intake, elevator, shooter, conveyor, false));
   }

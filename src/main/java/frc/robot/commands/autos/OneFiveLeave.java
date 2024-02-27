@@ -1,18 +1,14 @@
 package frc.robot.commands.autos;
 
-import javax.management.InstanceAlreadyExistsException;
-
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.RobotContainer.MatchState;
 import frc.robot.commands.IntakeSequence;
 import frc.robot.commands.RotateToSpeaker;
 import frc.robot.commands.autos.components.DriveDistance;
 import frc.robot.commands.autos.components.ScoreThisNote;
 import frc.robot.subsystems.conveyor.Conveyor;
-import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
@@ -44,8 +40,9 @@ public class OneFiveLeave extends SequentialCommandGroup {
                 .withTimeout(IntakeConstants.INTAKING_TIMEOUT_SEC),
             new SequentialCommandGroup(
                 new InstantCommand(
-                    () -> {drive.setForwardTargetHeading();}
-                ),
+                    () -> {
+                      drive.setForwardTargetHeading();
+                    }),
                 drive.turnInPlace(1.0),
                 new DriveDistance(
                     drive,

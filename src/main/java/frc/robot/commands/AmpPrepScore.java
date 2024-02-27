@@ -22,7 +22,7 @@ public class AmpPrepScore extends SequentialCommandGroup {
 
     SequentialCommandGroup moveWhenNotSafe =
         new SequentialCommandGroup(
-          new InstantCommand(() -> shooter.setShooterMode(Shooter.ShooterMode.IDLE)),
+            new InstantCommand(() -> shooter.setShooterMode(Shooter.ShooterMode.IDLE)),
             new SafeDeploy(intake, elevator),
             new WaitUntilCommand(intake::clearOfConveyorZone),
             new WaitUntilCommand(shooter::clearOfConveyorZone),

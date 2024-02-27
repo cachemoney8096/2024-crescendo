@@ -17,7 +17,9 @@ import frc.robot.subsystems.shooter.Shooter;
  */
 public class AmpScore extends SequentialCommandGroup {
   Pose2d initialPose;
-  public AmpScore(DriveSubsystem drive, Conveyor conveyor, Intake intake, Shooter shooter, Elevator elevator) {
+
+  public AmpScore(
+      DriveSubsystem drive, Conveyor conveyor, Intake intake, Shooter shooter, Elevator elevator) {
     // Drive not a requirement
     addRequirements(conveyor, intake, elevator, shooter);
 
@@ -29,9 +31,10 @@ public class AmpScore extends SequentialCommandGroup {
             }),
         Conveyor.scoreTrapOrAmp(conveyor),
         new WaitUntilCommand(
-          () -> Math.abs(drive.getPose().getTranslation().minus(initialPose.getTranslation()).getY()) > 0.1
-        ),
-        new GoHomeSequence(intake, elevator, shooter, conveyor, false)
-        );
+            () ->
+                Math.abs(
+                        drive.getPose().getTranslation().minus(initialPose.getTranslation()).getY())
+                    > 0.1),
+        new GoHomeSequence(intake, elevator, shooter, conveyor, false));
   }
 }

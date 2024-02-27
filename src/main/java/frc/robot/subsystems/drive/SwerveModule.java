@@ -62,7 +62,7 @@ public class SwerveModule implements Sendable {
     errors += SparkMaxUtils.check(turningSparkMax.restoreFactoryDefaults());
 
     Timer.delay(0.1);
-  
+
     turningSparkMax.setInverted(false);
 
     AbsoluteEncoder turningEncoderTmp = turningSparkMax.getAbsoluteEncoder(Type.kDutyCycle);

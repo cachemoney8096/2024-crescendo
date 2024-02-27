@@ -6,8 +6,6 @@ import edu.wpi.first.hal.SimBoolean;
 import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.hal.SimDevice.Direction;
 import edu.wpi.first.hal.SimDouble;
-import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -21,14 +19,10 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.subsystems.shooterLimelight.ShooterLimelightCal;
-import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Detector;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
 import java.util.Optional;
-
-import javax.xml.crypto.dsig.Transform;
 
 /** Limelight for the intake to identify game pieces */
 public class IntakeLimelight extends SubsystemBase {
@@ -80,7 +74,10 @@ public class IntakeLimelight extends SubsystemBase {
     kCameraPitchAngleDegrees = pitchAngleDegrees;
     kCameraHeight = heightMeters;
     kTargetHeight = targetHeightMeters;
-    setLimelightValues(Constants.limelightLedMode.OFF, Constants.limelightCamMode.DRIVER_CAMERA, Constants.limelightPipeline.PIPELINE2);
+    setLimelightValues(
+        Constants.limelightLedMode.OFF,
+        Constants.limelightCamMode.DRIVER_CAMERA,
+        Constants.limelightPipeline.PIPELINE2);
 
     m_simDevice = SimDevice.create("limelight-intake");
     if (m_simDevice != null) {
@@ -149,13 +146,17 @@ public class IntakeLimelight extends SubsystemBase {
   }
 
   public Optional<Transform2d> checkForTag() {
-    if (getValidTarget() != 1){
+    if (getValidTarget() != 1) {
       System.out.println("no valid targets");
       return Optional.empty();
     }
 
-    Pose3d cameraToTag = LimelightHelpers.getTargetPoseCameraSpace(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME);
-    Transform2d robotToTag = new Transform2d(new Translation2d(cameraToTag.getZ(), -cameraToTag.getX()), Rotation2d.fromRadians(-cameraToTag.getRotation().getY()));
+    Pose3d cameraToTag =
+        LimelightHelpers.getTargetPoseCameraSpace(IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME);
+    Transform2d robotToTag =
+        new Transform2d(
+            new Translation2d(cameraToTag.getZ(), -cameraToTag.getX()),
+            Rotation2d.fromRadians(-cameraToTag.getRotation().getY()));
 
     System.out.println("robotToTag: " + robotToTag);
     System.out.println("trap offset: " + IntakeLimelightCal.TRAP_OFFSET);
@@ -206,7 +207,10 @@ public class IntakeLimelight extends SubsystemBase {
     return Constants.limelightPipeline.values()[(int) table.getEntry("getpipe").getDouble(0)];
   }
 
-  public void setLimelightValues(Constants.limelightLedMode ledMode, Constants.limelightCamMode camMode, Constants.limelightPipeline line) {
+  public void setLimelightValues(
+      Constants.limelightLedMode ledMode,
+      Constants.limelightCamMode camMode,
+      Constants.limelightPipeline line) {
     setLedMode(ledMode);
     setCamMode(camMode);
     setPipeline(line);

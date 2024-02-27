@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -36,7 +35,8 @@ public class Conveyor extends SubsystemBase {
 
   /**
    * These aren't actually limit switches; we just use SparkLimitSwitch objects to access them
-   * easily. At the moment, these are unused. Sensor one is the closest to the intake. TODO: If we use these, add them to Shuffleboard.
+   * easily. At the moment, these are unused. Sensor one is the closest to the intake. TODO: If we
+   * use these, add them to Shuffleboard.
    */
   SparkLimitSwitch
       beamBreakSensorOne = frontMotor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen),
@@ -183,22 +183,25 @@ public class Conveyor extends SubsystemBase {
         new InstantCommand(() -> conveyor.backMotorEncoder.setPosition(0.0), conveyor),
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.FRONT_RECEIVE_SPEED)),
         new InstantCommand(() -> conveyor.backMotor.set(0.0)),
-        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE), 
+        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
         new ParallelRaceGroup(
-          new WaitUntilCommand(
-              () ->
-                  Math.abs(conveyor.backMotorEncoder.getPosition())
-                      > ConveyorCal.NOTE_POSITION_THRESHOLD_INCHES).andThen(new InstantCommand(() -> System.out.println("Ended because of back conveyor position"))),
-          new WaitUntilCommand(() -> conveyor.beamBreakSensorOne.isPressed()).andThen(new InstantCommand(() -> System.out.println("Ended because of conveyor beam break")))
-        ),
+            new WaitUntilCommand(
+                    () ->
+                        Math.abs(conveyor.backMotorEncoder.getPosition())
+                            > ConveyorCal.NOTE_POSITION_THRESHOLD_INCHES)
+                .andThen(
+                    new InstantCommand(
+                        () -> System.out.println("Ended because of back conveyor position"))),
+            new WaitUntilCommand(() -> conveyor.beamBreakSensorOne.isPressed())
+                .andThen(
+                    new InstantCommand(
+                        () -> System.out.println("Ended because of conveyor beam break")))),
         conveyor.rumbleCommand,
         new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", true)),
         new InstantCommand(() -> conveyor.frontMotorEncoder.setPosition(0.0), conveyor),
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.BACK_OFF_POWER)),
         new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.BACK_OFF_POWER)),
-        new WaitUntilCommand(
-              () -> !conveyor.beamBreakSensorOne.isPressed()
-          ),
+        new WaitUntilCommand(() -> !conveyor.beamBreakSensorOne.isPressed()),
         Conveyor.stop(conveyor),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE));
   }

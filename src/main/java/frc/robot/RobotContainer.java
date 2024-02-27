@@ -5,7 +5,6 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -30,7 +29,6 @@ import frc.robot.commands.PIDToPoint;
 import frc.robot.commands.SetTrapLineupPosition;
 import frc.robot.commands.SpeakerPrepScoreSequence;
 import frc.robot.commands.SpeakerShootSequence;
-import frc.robot.commands.autos.ScoreTwoNotes;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
@@ -111,9 +109,17 @@ public class RobotContainer {
     shooter = new Shooter();
     conveyor = new Conveyor(rumbleBriefly);
     lights = new Lights();
-    shooterLimelight = new ShooterLimelight(ShooterLimelightConstants.SHOOTER_LIMELIGHT_PITCH_DEGREES, ShooterLimelightConstants.SHOOTER_LIMELIGHT_HEIGHT_METERS, ShooterLimelightConstants.SHOOTER_LIMELIGHT_TARGET_HEIGHT_METERS, matchState);
+    shooterLimelight =
+        new ShooterLimelight(
+            ShooterLimelightConstants.SHOOTER_LIMELIGHT_PITCH_DEGREES,
+            ShooterLimelightConstants.SHOOTER_LIMELIGHT_HEIGHT_METERS,
+            ShooterLimelightConstants.SHOOTER_LIMELIGHT_TARGET_HEIGHT_METERS,
+            matchState);
     intakeLimelight =
-        new IntakeLimelight(IntakeLimelightConstants.INTAKE_LIMELIGHT_PITCH_DEGREES, IntakeLimelightConstants.INTAKE_LIMELIGHT_HEIGHT_METERS, 0); // we aren't using the target height so 0 is fine
+        new IntakeLimelight(
+            IntakeLimelightConstants.INTAKE_LIMELIGHT_PITCH_DEGREES,
+            IntakeLimelightConstants.INTAKE_LIMELIGHT_HEIGHT_METERS,
+            0); // we aren't using the target height so 0 is fine
 
     // Configure the controller bindings
     configureDriver();
@@ -176,8 +182,8 @@ public class RobotContainer {
                 .beforeStarting(() -> driveFieldRelative = true));
     driverController.start().onTrue(new InstantCommand(drive::resetYaw));
     driverController
-      .a()
-      .onTrue(
+        .a()
+        .onTrue(
             new SequentialCommandGroup(
                 new FeedPrepScore(elevator, conveyor, intake, shooter, drive, matchState),
                 new InstantCommand(() -> setSpeakerPrep(true))));
@@ -187,8 +193,10 @@ public class RobotContainer {
         .onTrue(
             new ClimbPrepSequence(intake, elevator, shooter, conveyor, intakeLimelight)
                 .finallyDo(() -> driveFieldRelative = false));
-    driverController.x().whileTrue(new SetTrapLineupPosition(intakeLimelight,
-    drive).andThen(new PIDToPoint(drive)));
+    driverController
+        .x()
+        .whileTrue(
+            new SetTrapLineupPosition(intakeLimelight, drive).andThen(new PIDToPoint(drive)));
 
     drive.setDefaultCommand(
         new RunCommand(
