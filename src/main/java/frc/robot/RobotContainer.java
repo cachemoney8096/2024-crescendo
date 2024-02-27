@@ -204,6 +204,7 @@ public class RobotContainer {
                         -1),
                 drive)
             .withName("Manual Drive"));
+  }
 
   private void configureOperator() {
     operatorController.x().onTrue(new InstantCommand(() -> conveyor.startRollers(1.0)));
