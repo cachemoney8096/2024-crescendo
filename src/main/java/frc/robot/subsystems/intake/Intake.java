@@ -58,6 +58,7 @@ public class Intake extends SubsystemBase {
 
   private TreeMap<IntakePosition, Double> intakePositionMap;
   private IntakePosition desiredPosition = IntakePosition.STOWED;
+  private boolean allowIntakeMovement = false;
 
   // Stuff for debug
   private double intakeDemandVoltsA = 0.0;
@@ -85,6 +86,8 @@ public class Intake extends SubsystemBase {
     int errors = 0;
     errors += SparkMaxUtils.check(pivotMotor.restoreFactoryDefaults());
 
+    Timer.delay(0.1);
+
     pivotMotor.setInverted(false);
 
     errors += SparkMaxUtils.check(pivotMotor.setIdleMode(IdleMode.kBrake));
@@ -98,7 +101,7 @@ public class Intake extends SubsystemBase {
             SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(
                 pivotAbsoluteEncoder, IntakeConstants.INPUT_ABS_ENCODER_GEAR_RATIO));
 
-    pivotAbsoluteEncoder.setInverted(true);
+    errors += SparkMaxUtils.check(pivotAbsoluteEncoder.setInverted(true));
 
     errors +=
         SparkMaxUtils.check(
@@ -128,6 +131,9 @@ public class Intake extends SubsystemBase {
     toApply.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // this is don't invert
     cfgRight.apply(toApply);
 
+    intakeTalonLeft.getDutyCycle().setUpdateFrequency(IntakeCal.TALON_DUTY_CYCLE_UPDATE_FREQ_HZ);
+    intakeTalonRight.getDutyCycle().setUpdateFrequency(IntakeCal.TALON_DUTY_CYCLE_UPDATE_FREQ_HZ);
+
     intakeTalonLeft.optimizeBusUtilization();
     intakeTalonRight.optimizeBusUtilization();
   }
@@ -151,6 +157,13 @@ public class Intake extends SubsystemBase {
 
   public void setDesiredIntakePosition(IntakePosition pos) {
     this.desiredPosition = pos;
+    this.allowIntakeMovement = true;
+    pivotController.reset(getPivotPosition());
+  }
+
+  public void dontAllowIntakeMovement() {
+    this.allowIntakeMovement = false;
+    pivotMotor.setVoltage(0.0);
   }
 
   /** Returns the cosine of the arm angle in degrees off of the horizontal. */
@@ -183,11 +196,6 @@ public class Intake extends SubsystemBase {
 
   /** Sends the pivot towards the input position. Should be called every cycle. */
   private void controlPosition(double inputPositionDeg) {
-    if (Math.abs(pivotController.getPositionError())
-        > IntakeCal.PIVOT_PROFILE_REPLANNING_THRESHOLD_DEG) {
-      pivotController.reset(getPivotPosition());
-    }
-
     pivotController.setGoal(inputPositionDeg);
     intakeDemandVoltsA = pivotController.calculate(getPivotPosition());
     double currentVelocity = pivotController.getSetpoint().velocity;
@@ -258,7 +266,9 @@ public class Intake extends SubsystemBase {
   }
 
   public void periodic() {
-    controlPosition(intakePositionMap.get(desiredPosition));
+    if (allowIntakeMovement) {
+      controlPosition(intakePositionMap.get(desiredPosition));
+    }
   }
 
   public void initSendable(SendableBuilder builder) {

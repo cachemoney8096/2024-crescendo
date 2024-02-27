@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,6 +19,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Timer;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -391,6 +393,11 @@ public class LimelightHelpers {
     return new Pose2d(tran2d, r2d);
   }
 
+  /** Returns a Pose3d of the target pose in robot space, using the tag chosen by the Limelight */
+  public static Pose3d getTargetPoseCameraSpace(String limelightName) {
+    return toPose3D(getTargetPose_CameraSpace(limelightName));
+  }
+
   public static NetworkTable getLimelightNTTable(String tableName) {
     return NetworkTableInstance.getDefault().getTable(sanitizeName(tableName));
   }
@@ -587,6 +594,19 @@ public class LimelightHelpers {
 
     double[] result = getBotPose_wpiBlue(limelightName);
     return toPose2D(result);
+  }
+
+  /**
+   * Gets the Pose2d for easy use with Odometry vision pose estimator (addVisionMeasurement)
+   *
+   * @param limelightName
+   * @return
+   */
+  public static Pair<Double, Pose2d> getTimedBotPose2d_wpiBlue(String limelightName) {
+
+    double[] result = getBotPose_wpiBlue(limelightName);
+    final double timestamp = Timer.getFPGATimestamp() - (result[6] / 1000.0);
+    return new Pair<Double, Pose2d>(timestamp, toPose2D(result));
   }
 
   /**

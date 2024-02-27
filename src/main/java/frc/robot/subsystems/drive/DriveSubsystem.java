@@ -39,6 +39,13 @@ import java.util.Optional;
 public class DriveSubsystem extends SubsystemBase {
   private double targetHeadingDegrees;
 
+  double tagTargetHeading = 0.0;
+
+  public void setTargetHeadingDegrees(double targetHeadingDegrees) {
+    this.targetHeadingDegrees = targetHeadingDegrees;
+    tagTargetHeading = targetHeadingDegrees;
+  }
+
   // Create SwerveModules
   public final SwerveModule frontLeft =
       new SwerveModule(
@@ -70,6 +77,9 @@ public class DriveSubsystem extends SubsystemBase {
 
   public PoseBuffer poseBuffer = new PoseBuffer();
 
+  double KeepHeadingPID = 0.0;
+  double KeepHeadingFF = 0.0;
+
   SwerveDriveOdometry odometry =
       new SwerveDriveOdometry(
           DriveConstants.DRIVE_KINEMATICS,
@@ -78,6 +88,8 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Multiplier for drive speed, does not affect trajectory following */
   private double throttleMultiplier = 1.0;
+
+  private double rotControllerInput = 0.0;
 
   /** Provides info on our alliance color and whether this is a real match. */
   private MatchState matchState;
@@ -174,11 +186,7 @@ public class DriveSubsystem extends SubsystemBase {
    * @param pose The pose to which to set the odometry.
    */
   public void resetOdometry(Pose2d pose) {
-    // Just update the translation, not the yaw
-    Pose2d resetPose =
-        new Pose2d(pose.getTranslation(), Rotation2d.fromDegrees(gyro.getYaw().getValue()));
-    odometry.resetPosition(
-        Rotation2d.fromDegrees(gyro.getYaw().getValue()), getModulePositions(), resetPose);
+    odometry.resetPosition(gyro.getRotation2d(), getModulePositions(), pose);
   }
 
   public void resetYawToAngle(double yawDeg) {
@@ -270,7 +278,6 @@ public class DriveSubsystem extends SubsystemBase {
     frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
     rearLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
     rearRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-    targetHeadingDegrees = getHeadingDegrees();
   }
 
   /**
@@ -330,6 +337,9 @@ public class DriveSubsystem extends SubsystemBase {
         DriveCal.ROTATE_TO_TARGET_PID_CONTROLLER.calculate(offsetHeadingDegrees, 0.0);
     double ffRotation = Math.signum(offsetHeadingDegrees) * DriveCal.ROTATE_TO_TARGET_FF;
 
+    KeepHeadingPID = pidRotation;
+    KeepHeadingFF = ffRotation;
+
     double desiredRotation = pidRotation - ffRotation;
 
     if (Math.abs(desiredRotation) < DriveCal.ROTATION_DEADBAND_THRESHOLD) {
@@ -368,6 +378,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void rotateOrKeepHeading(
       double x, double y, double rot, boolean fieldRelative, int povAngleDeg) {
+    rotControllerInput = rot;
     if (povAngleDeg != -1) {
       targetHeadingDegrees = convertCardinalDirections(povAngleDeg);
       keepHeading(x, y, fieldRelative);
@@ -456,7 +467,7 @@ public class DriveSubsystem extends SubsystemBase {
     Pose2d pastPose = getPastBufferedPose(latencyAdjustmentSec);
     // TODO: see if we can get this working with the real latencySec
 
-    final boolean useLatencyAdjustment = true;
+    final boolean useLatencyAdjustment = false;
 
     targetPose =
         useLatencyAdjustment
@@ -607,5 +618,11 @@ public class DriveSubsystem extends SubsystemBase {
         () ->
             rearRight.desiredState.speedMetersPerSecond - rearRight.getState().speedMetersPerSecond,
         null);
+    builder.addDoubleProperty("Keep Heading PID [0,1]", () -> KeepHeadingPID, null);
+    builder.addDoubleProperty("Keep Heading FF [0,1]", () -> KeepHeadingFF, null);
+    builder.addDoubleProperty("Rotation Controller Input", () -> rotControllerInput, null);
+    builder.addDoubleProperty(
+        "Yaw error", () -> targetHeadingDegrees - getPose().getRotation().getDegrees(), null);
+    builder.addDoubleProperty("Target Heading (tag detection)", () -> tagTargetHeading, null);
   }
 }

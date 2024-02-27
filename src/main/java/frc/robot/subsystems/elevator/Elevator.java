@@ -28,7 +28,8 @@ public class Elevator extends SubsystemBase {
     HOME,
     SCORE_TRAP,
     SCORE_AMP,
-    PRE_CLIMB
+    PRE_CLIMB,
+    SPEAKER_PREP
   }
 
   public CANSparkMax leftMotor =
@@ -66,6 +67,8 @@ public class Elevator extends SubsystemBase {
 
   private ElevatorPosition desiredPosition = ElevatorPosition.HOME;
 
+  private boolean allowElevatorMovement = false;
+
   /** FPGA timestamp from previous cycle. Empty for first cycle only. */
   private Optional<Double> prevTimestamp = Optional.empty();
 
@@ -86,6 +89,7 @@ public class Elevator extends SubsystemBase {
     elevatorPositions.put(ElevatorPosition.SCORE_AMP, ElevatorCal.POSITION_SCORE_AMP_INCHES);
     elevatorPositions.put(ElevatorPosition.SCORE_TRAP, ElevatorCal.POSITION_SCORE_TRAP_INCHES);
     elevatorPositions.put(ElevatorPosition.PRE_CLIMB, ElevatorCal.POSITION_PRE_CLIMB_INCHES);
+    elevatorPositions.put(ElevatorPosition.SPEAKER_PREP, ElevatorCal.POSITION_SPEAKER_PREP_INCHES);
 
     setControlParams(true);
   }
@@ -108,14 +112,6 @@ public class Elevator extends SubsystemBase {
             rightMotor.setSmartCurrentLimit(ElevatorCal.ELEVATOR_CURRENT_LIMIT_AMPS));
 
     errors += SparkMaxUtils.check(leftMotorEncoderAbs.setInverted(false));
-    errors +=
-        SparkMaxUtils.check(
-            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(
-                leftMotorEncoderAbs, ElevatorConstants.ELEVATOR_LEFT_ABSOLUTE_ENCODER_RATIO));
-    errors +=
-        SparkMaxUtils.check(
-            SparkMaxUtils.UnitConversions.setDegreesFromGearRatio(
-                rightMotorEncoderAbs, ElevatorConstants.ELEVATOR_RIGHT_ABSOLUTE_ENCODER_RATIO));
     errors +=
         SparkMaxUtils.check(
             SparkMaxUtils.UnitConversions.setLinearFromGearRatio(
@@ -184,6 +180,13 @@ public class Elevator extends SubsystemBase {
   public void setDesiredPosition(ElevatorPosition inputPosition, boolean useNoteParams) {
     this.desiredPosition = inputPosition;
     setControlParams(useNoteParams);
+    this.allowElevatorMovement = true;
+  }
+
+  public void dontAllowElevatorMovement() {
+    this.allowElevatorMovement = false;
+    leftMotor.setVoltage(0.0);
+    rightMotor.setVoltage(0.0);
   }
 
   public boolean atDesiredPosition() {
@@ -210,9 +213,22 @@ public class Elevator extends SubsystemBase {
         > ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES;
   }
 
+  /**
+   * @return true if the elevator's current position is towards the top of the elevator-intake
+   *     interference zone
+   */
+  public boolean elevatorAtTopOfIntakeInterferenceZone() {
+    return (leftMotorEncoderRel.getPosition()
+            < ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES
+        && leftMotorEncoderRel.getPosition()
+            > (ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES - 3));
+  }
+
   @Override
   public void periodic() {
-    controlPosition(elevatorPositions.get(desiredPosition));
+    if (allowElevatorMovement) {
+      controlPosition(elevatorPositions.get(desiredPosition));
+    }
   }
 
   public void burnFlashSparks() {
@@ -242,6 +258,8 @@ public class Elevator extends SubsystemBase {
     builder.addBooleanProperty("Elevator at desired position", this::atDesiredPosition, null);
     builder.addBooleanProperty(
         "Elevator above intererence", this::elevatorAboveIntakeInterferenceZone, null);
+    builder.addBooleanProperty(
+        "Elevator at top of intererence", this::elevatorAtTopOfIntakeInterferenceZone, null);
     builder.addBooleanProperty(
         "Elevator below interference", this::elevatorBelowInterferenceZone, null);
     builder.addDoubleProperty(

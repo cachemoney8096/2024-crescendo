@@ -14,7 +14,7 @@ public class DriveConstants {
   public static final boolean TURNING_ENCODER_INVERTED = true;
 
   /** Multiplier for wheel diameter based on empirical on-field measurement */
-  public static final double WHEEL_DIAMETER_FUDGE_FACTOR = 1.0;
+  public static final double WHEEL_DIAMETER_FUDGE_FACTOR = 1.035;
 
   public static final double inchesToMeters = 0.0254;
 

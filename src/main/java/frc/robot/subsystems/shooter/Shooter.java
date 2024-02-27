@@ -1,7 +1,6 @@
 package frc.robot.subsystems.shooter;
 
 import com.revrobotics.AbsoluteEncoder;
-import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
@@ -34,7 +33,9 @@ public class Shooter extends SubsystemBase {
     /** Holding pivot such that we can climb */
     PRELATCH,
     /** Holding pivot onto the chain */
-    LATCH
+    LATCH,
+    /** Shooter set high enough to shoot note over stage */
+    SHOOT_CLEAR_STAGE
   };
 
   private final CANSparkMax motorRight =
@@ -82,6 +83,8 @@ public class Shooter extends SubsystemBase {
   /** What the shooter is currently doing */
   private ShooterMode shooterMode = ShooterMode.IDLE;
 
+  private boolean allowShooterMovement = false;
+
   /** How far are we away from the goal (in meters) */
   private double shooterDistanceMeters = 10.0;
 
@@ -99,12 +102,13 @@ public class Shooter extends SubsystemBase {
 
   public Shooter() {
     pivotAngleMap = new InterpolatingDoubleTreeMap();
-    pivotAngleMap.put(0.0, 120.0);
-    pivotAngleMap.put(200.0, 120.0);
+    pivotAngleMap.put(1.16, 144.0);
+    pivotAngleMap.put(2.77, 122.0);
+    pivotAngleMap.put(4.66, 112.0);
 
     SparkMaxUtils.initWithRetry(this::initSparks, Constants.SPARK_INIT_RETRY_ATTEMPTS);
 
-    pivotController.reset(getPivotPosition());
+    pivotController.reset(getPivotPositionDegrees());
     pivotMotorEncoder.setPosition(getPivotPositionFromAbs());
   }
 
@@ -114,6 +118,8 @@ public class Shooter extends SubsystemBase {
     errors += SparkMaxUtils.check(motorRight.restoreFactoryDefaults());
     errors += SparkMaxUtils.check(motorLeftOne.restoreFactoryDefaults());
     errors += SparkMaxUtils.check(motorLeftTwo.restoreFactoryDefaults());
+
+    Timer.delay(0.1);
 
     motorLeftOne.setInverted(true);
     errors += SparkMaxUtils.check(motorLeftTwo.follow(motorLeftOne));
@@ -171,10 +177,16 @@ public class Shooter extends SubsystemBase {
 
   /** Set the shooter to a new mode. If shoot, make sure to also call setShooterDistance . */
   public void setShooterMode(ShooterMode newMode) {
-    if (shooterMode != newMode) {
-      pivotController.reset(getPivotPosition());
-    }
     shooterMode = newMode;
+    pivotController.reset(getPivotPositionDegrees());
+    this.allowShooterMovement = true;
+  }
+
+  public void dontAllowShooterMovement() {
+    this.allowShooterMovement = false;
+    pivotMotor.setVoltage(0.0);
+    motorRight.setVoltage(0.0);
+    motorLeftOne.setVoltage(0.0);
   }
 
   public void setShooterDistance(double newDistanceMeters) {
@@ -182,27 +194,29 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean atDesiredPosition() {
-    return Math.abs(getPivotPosition() - pivotDesiredPositionDegrees)
+    return Math.abs(getPivotPositionDegrees() - pivotDesiredPositionDegrees)
         < ShooterCal.PIVOT_ANGLE_MARGIN_DEG;
   }
 
   public boolean clearOfConveyorZone() {
-    return getPivotPosition() < ShooterCal.CONVEYOR_ZONE_THRESHOLD_DEGREES;
+    return getPivotPositionDegrees() < ShooterCal.CONVEYOR_ZONE_THRESHOLD_DEGREES;
   }
 
   public boolean isShooterSpunUp() {
-    final boolean motorRightSpunUp =
-        Math.abs(motorRightRelEncoder.getVelocity() - ShooterCal.SHOOTER_MOTOR_SPEED_RPM)
-            < ShooterCal.SHOOTER_SPEED_MARGIN_RPM;
-    final boolean motorLeftOneSpunUp =
-        Math.abs(motorLeftOneRelEncoder.getVelocity() - ShooterCal.SHOOTER_MOTOR_SPEED_RPM)
-            < ShooterCal.SHOOTER_SPEED_MARGIN_RPM;
-    return motorRightSpunUp && motorLeftOneSpunUp;
+    final double leftSpeedRpm = motorLeftOneRelEncoder.getVelocity();
+    final double rightSpeedRpm = motorRightRelEncoder.getVelocity();
+    final double thresholdRpm = 2000.0;
+    return leftSpeedRpm > thresholdRpm && rightSpeedRpm > thresholdRpm;
   }
 
   public void spinUpShooter() {
-    controllerA.setReference(ShooterCal.SHOOTER_MOTOR_SPEED_RPM, ControlType.kVelocity);
-    controllerB.setReference(ShooterCal.SHOOTER_MOTOR_SPEED_RPM, ControlType.kVelocity);
+    motorRight.setVoltage(7.0);
+    motorLeftOne.setVoltage(7.0);
+  }
+
+  public void spinUpShooter(double voltage) {
+    motorRight.setVoltage(voltage);
+    motorLeftOne.setVoltage(voltage);
   }
 
   private void stopShooter() {
@@ -214,7 +228,7 @@ public class Shooter extends SubsystemBase {
   private double getCosineArmAngle() {
     return Math.cos(
         Units.degreesToRadians(
-            getPivotPosition() - ShooterConstants.POSITION_WHEN_HORIZONTAL_DEGREES));
+            getPivotPositionDegrees() - ShooterConstants.POSITION_WHEN_HORIZONTAL_DEGREES));
   }
 
   /**
@@ -224,6 +238,7 @@ public class Shooter extends SubsystemBase {
   private void controlPositionToPreLatch() {
     controlPosition(ShooterCal.PRE_LATCH_ANGLE_DEGREES, false);
   }
+
   /**
    * Sends pivot to the latch position (applies controlPosition()). Should be called every cycle
    * when this is desired.
@@ -256,17 +271,12 @@ public class Shooter extends SubsystemBase {
    * @param angleDeg Desired pivot position. *
    */
   private void controlPosition(double angleDeg, boolean holdLatchVoltage) {
-    if (Math.abs(pivotController.getPositionError())
-        > ShooterCal.PIVOT_PROFILE_REPLANNING_THRESHOLD_DEG) {
-      pivotController.reset(getPivotPosition());
-    }
-
     pivotDesiredPositionDegrees = angleDeg;
     pivotController.setGoal(angleDeg);
     final double timestamp = Timer.getFPGATimestamp();
     actualVelDegPerSec = pivotMotorAbsoluteEncoder.getVelocity();
 
-    armDemandVoltsA = pivotController.calculate(getPivotPosition());
+    armDemandVoltsA = pivotController.calculate(getPivotPositionDegrees());
     if (!prevTimestamp.isEmpty()) {
       armDemandVoltsB =
           ShooterCal.PIVOT_MOTOR_FF.calculate(
@@ -307,12 +317,12 @@ public class Shooter extends SubsystemBase {
     return pivotMotorAbsoluteEncoder.getPosition() - ShooterCal.PIVOT_ANGLE_OFFSET_DEGREES;
   }
 
-  private double getPivotPosition() {
+  private double getPivotPositionDegrees() {
     return pivotMotorEncoder.getPosition();
   }
 
   public void considerZeroingEncoder() {
-    if (Math.abs(getPivotPosition() - getPivotPositionFromAbs())
+    if (Math.abs(getPivotPositionDegrees() - getPivotPositionFromAbs())
         > ShooterCal.PIVOT_ENCODER_ZEROING_THRESHOLD_DEG) {
       pivotMotorEncoder.setPosition(getPivotPositionFromAbs());
       pivotController.reset(pivotMotorEncoder.getPosition());
@@ -321,36 +331,42 @@ public class Shooter extends SubsystemBase {
 
   private boolean closeToLatch() {
     return shooterMode == ShooterMode.LATCH
-        && getPivotPosition() > ShooterCal.LATCH_ANGLE_DEGREES - 2.0;
+        && getPivotPositionDegrees() > ShooterCal.LATCH_ANGLE_DEGREES - 2.0;
   }
 
   @Override
   public void periodic() {
-    switch (shooterMode) {
-      case IDLE:
-        stopShooter();
-        controlPosition(ShooterCal.STARTING_POSITION_DEGREES, false);
-        break;
-      case SPIN_UP:
-        spinUpShooter();
-        controlPosition(ShooterCal.STARTING_POSITION_DEGREES, false);
-        break;
-      case SHOOT:
-        spinUpShooter();
-        controlPositionWithDistance(shooterDistanceMeters);
-        break;
-      case LATCH:
-        stopShooter();
-        if (closeToLatch()) {
-          controlPositionToHoldLatch();
-        } else {
-          controlPositionToLatch();
-        }
-        break;
-      case PRELATCH:
-        stopShooter();
-        controlPositionToPreLatch();
-        break;
+    if (allowShooterMovement) {
+      switch (shooterMode) {
+        case IDLE:
+          stopShooter();
+          controlPosition(ShooterCal.STARTING_POSITION_DEGREES, false);
+          break;
+        case SPIN_UP:
+          spinUpShooter();
+          controlPosition(ShooterCal.STARTING_POSITION_DEGREES, false);
+          break;
+        case SHOOT:
+          spinUpShooter();
+          controlPositionWithDistance(shooterDistanceMeters);
+          break;
+        case SHOOT_CLEAR_STAGE:
+          spinUpShooter(ShooterCal.SHOOT_CLEAR_STAGE_VOLTAGE);
+          controlPosition(ShooterCal.SHOOT_CLEAR_STAGE_ANGLE_DEGREES, false);
+          break;
+        case LATCH:
+          stopShooter();
+          if (closeToLatch()) {
+            controlPositionToHoldLatch();
+          } else {
+            controlPositionToLatch();
+          }
+          break;
+        case PRELATCH:
+          stopShooter();
+          controlPositionToPreLatch();
+          break;
+      }
     }
   }
 
@@ -360,7 +376,7 @@ public class Shooter extends SubsystemBase {
     SendableHelper.addChild(builder, this, pivotController, "PivotController");
     builder.addDoubleProperty("Pivot desired pos (deg)", () -> pivotDesiredPositionDegrees, null);
     builder.addDoubleProperty("abs enc pos (deg)", pivotMotorAbsoluteEncoder::getPosition, null);
-    builder.addDoubleProperty("pivot pos (deg)", this::getPivotPosition, null);
+    builder.addDoubleProperty("pivot pos (deg)", this::getPivotPositionDegrees, null);
     builder.addDoubleProperty("pivot pos from abs (deg)", this::getPivotPositionFromAbs, null);
     builder.addDoubleProperty(
         "pivot velocity (deg/sec)", pivotMotorAbsoluteEncoder::getVelocity, null);
@@ -394,7 +410,7 @@ public class Shooter extends SubsystemBase {
     builder.addDoubleProperty(
         "Abs to Rel Diff (deg)",
         () -> {
-          return getPivotPosition() - getPivotPositionFromAbs();
+          return getPivotPositionDegrees() - getPivotPositionFromAbs();
         },
         null);
     builder.addBooleanProperty("Clear of conveyor", this::clearOfConveyorZone, null);

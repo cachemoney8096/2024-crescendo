@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -22,20 +23,16 @@ public class IntakeSequence extends SequentialCommandGroup {
     addRequirements(intake, elevator, conveyor, shooter);
 
     addCommands(
-        new InstantCommand(
-            () -> {
-              intake.setDesiredIntakePosition(IntakePosition.DEPLOYED);
-            },
-            intake),
+        new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", false)),
         new InstantCommand(
             () -> {
               shooter.setShooterMode(ShooterMode.IDLE);
             }),
+        new WaitUntilCommand(shooter::clearOfConveyorZone),
+        new SafeDeploy(intake, elevator),
         new ConditionalCommand(
             new InstantCommand(),
-            new SequentialCommandGroup(
-                new WaitUntilCommand(intake::clearOfConveyorZone),
-                new WaitUntilCommand(shooter::clearOfConveyorZone)),
+            new WaitUntilCommand(intake::clearOfConveyorZone),
             elevator::elevatorBelowInterferenceZone),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME, true)),
         new WaitUntilCommand(elevator::atDesiredPosition),

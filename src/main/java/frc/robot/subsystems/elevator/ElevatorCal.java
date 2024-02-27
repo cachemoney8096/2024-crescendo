@@ -29,7 +29,7 @@ public final class ElevatorCal {
 
   /** Elevator trapezoidal motion profile constraints. */
   public static final double MAX_VELOCITY_IN_PER_SECOND = 40.0,
-      MAX_ACCELERATION_IN_PER_SECOND_SQUARED = 80.0;
+      MAX_ACCELERATION_IN_PER_SECOND_SQUARED = 640.0;
   /** Elevator trapezoidal motion profile constraints. */
   public static final double MAX_VELOCITY_IN_PER_SECOND_CLIMB = 40.0,
       MAX_ACCELERATION_IN_PER_SECOND_SQUARED_CLIMB = 40.0;
@@ -38,7 +38,8 @@ public final class ElevatorCal {
   public static final double POSITION_HOME_INCHES = 2.75,
       POSITION_SCORE_TRAP_INCHES = 37.5,
       POSITION_SCORE_AMP_INCHES = 32.5,
-      POSITION_PRE_CLIMB_INCHES = 37.5;
+      POSITION_PRE_CLIMB_INCHES = 37.5,
+      POSITION_SPEAKER_PREP_INCHES = 3.75;
 
   public static final int ELEVATOR_CURRENT_LIMIT_AMPS = 80;
 
