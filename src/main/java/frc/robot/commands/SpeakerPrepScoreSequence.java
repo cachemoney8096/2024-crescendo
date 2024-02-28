@@ -29,7 +29,7 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
 
   Optional<Pair<Rotation2d, Double>> tagDetection = Optional.empty();
   double distanceFromSpeakerMeters = 0.0;
-  double tempSpeedOfNote = 12.16;
+  double tempSpeedOfNote = 12.58;
 
   public SpeakerPrepScoreSequence(
       Intake intake,
