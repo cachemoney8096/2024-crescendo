@@ -69,12 +69,11 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                     Pair<Double, Double> calcDeltaAngles = DeltaAngleSpeedCalcUtil.calcDeltaAngle(
                         currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond,
                         tagDetection.get().getSecond());
-                    new ParallelCommandGroup(
-                      new InstantCommand(() -> shooter.controlPositionWithAngle(calcDeltaAngles.getSecond(), isScheduled())),
-                      new InstantCommand(() -> drive.setTargetHeadingDegrees(calcDeltaAngles.getFirst()))
-                    );
+                    new InstantCommand(
+                        () -> shooter.controlPositionWithAngle(calcDeltaAngles.getSecond(), isScheduled()));
+                    new InstantCommand(() -> drive.setTargetHeadingDegrees(calcDeltaAngles.getFirst()));
                     return true;
-                  } 
+                  }
                   // boolean currentlyStatic = currentSpeedsXY.getNorm() < 0.1;
                   return false;
                 }));
