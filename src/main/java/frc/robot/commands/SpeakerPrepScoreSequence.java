@@ -5,8 +5,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
@@ -19,13 +21,15 @@ import java.util.Optional;
 import frc.robot.utils.DeltaAngleSpeedCalcUtil;
 
 /**
- * gets the robot ready to shoot a ring into the speaker. gets intake and elevator into position,
+ * gets the robot ready to shoot a ring into the speaker. gets intake and
+ * elevator into position,
  * spins up the shooter
  */
 public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
 
   Optional<Pair<Rotation2d, Double>> tagDetection = Optional.empty();
   double distanceFromSpeakerMeters = 0.0;
+  double tempSpeedOfNote = 12.16;
 
   public SpeakerPrepScoreSequence(
       Intake intake,
@@ -44,25 +48,35 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
         new InstantCommand(() -> conveyor.startBackRollers(1.0)),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
         new RunCommand(
-                () -> {
-                  tagDetection = limelight.checkForTag();
-                  if (tagDetection.isEmpty()) {
-                    return;
-                  }
+            () -> {
+              tagDetection = limelight.checkForTag();
+              if (tagDetection.isEmpty()) {
+                return;
+              }
 
-                  drive.setTargetHeadingDegrees(tagDetection.get().getFirst().getDegrees());
-                  shooter.setShooterDistance(tagDetection.get().getSecond());
-                })
+              drive.setTargetHeadingDegrees(tagDetection.get().getFirst().getDegrees());
+              shooter.setShooterDistance(tagDetection.get().getSecond());
+            })
             .until(
                 () -> {
                   ChassisSpeeds currentSpeeds = drive.getCurrentChassisSpeeds();
-                  Translation2d currentSpeedsXY =
-                      new Translation2d(
-                          currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
-                  DeltaAngleSpeedCalcUtil DeltaAngleSpeedCalcUtil = new DeltaAngleSpeedCalcUtil(tagDetection.get().getSecond());      
-                  Pair<Double, Double> calcDeltaAngles = DeltaAngleSpeedCalcUtil.calcDeltaAngle(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond, tagDetection.get().getSecond()); 
-                  boolean currentlyStatic = currentSpeedsXY.getNorm() < 0.1;
-                  return tagDetection.isPresent() && currentlyStatic;
+                  // Translation2d currentSpeedsXY =
+                  // new Translation2d(
+                  // currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
+                  DeltaAngleSpeedCalcUtil DeltaAngleSpeedCalcUtil = new DeltaAngleSpeedCalcUtil(tempSpeedOfNote);
+                  // { delta azimuth DEGREES , delta elevation DEGREES }
+                  if (tagDetection.isPresent()) {
+                    Pair<Double, Double> calcDeltaAngles = DeltaAngleSpeedCalcUtil.calcDeltaAngle(
+                        currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond,
+                        tagDetection.get().getSecond());
+                    new ParallelCommandGroup(
+                      new InstantCommand(() -> shooter.controlPositionWithAngle(calcDeltaAngles.getSecond(), isScheduled())),
+                      new InstantCommand(() -> drive.setTargetHeadingDegrees(calcDeltaAngles.getFirst()))
+                    );
+                    return true;
+                  } 
+                  // boolean currentlyStatic = currentSpeedsXY.getNorm() < 0.1;
+                  return false;
                 }));
     // Conveyor.backUpNote(conveyor));
   }
