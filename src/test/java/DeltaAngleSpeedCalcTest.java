@@ -28,7 +28,7 @@ public class DeltaAngleSpeedCalcTest {
         arbitraryRadialVelocityMPS, distFromSpeakerMeters);
 
     // angles gathered by hand: {18.16383517, 18.06236439}
-    Pair<Double, Double> calcAnglesByHand = new Pair<Double, Double>(18.16383517, 18.06236439);
+    Pair<Double, Double> calcAnglesByHand = new Pair<Double, Double>(18.16383517, -18.06236439);
     assert Math.abs(calcAnglesByHand.getFirst() - calculatedAngles.getFirst()) <= 0.0001;
     assert Math.abs(calcAnglesByHand.getSecond() - calculatedAngles.getSecond()) <= 0.0001;
 
@@ -40,7 +40,7 @@ public class DeltaAngleSpeedCalcTest {
         distFromSpeakerMeters);
 
     // angles gathered by hand { -18.1638517, -12.31285929}
-    calcAnglesByHand = new Pair<Double, Double>(-18.1638517, -12.31285929);
+    calcAnglesByHand = new Pair<Double, Double>(-18.1638517, 12.31285929);
 
     assert Math.abs(calcAnglesByHand.getFirst() - calculatedAngles.getFirst()) <= 0.0001;
     assert Math.abs(calcAnglesByHand.getSecond() - calculatedAngles.getSecond()) <= 0.0001;
@@ -60,7 +60,7 @@ public class DeltaAngleSpeedCalcTest {
         arbitraryRadialVelocityMPS, distFromSpeakerMeters);
 
     // angles gathered by hand: {14.03624347, 13.20854334 }
-    Pair<Double, Double> calcAnglesByHand = new Pair<Double, Double>(14.03624347, 13.20854334);
+    Pair<Double, Double> calcAnglesByHand = new Pair<Double, Double>(14.03624347, -13.20854334);
 
     assert Math.abs(calcAnglesByHand.getFirst() - calculatedAngles.getFirst()) <= 0.00001;
     assert Math.abs(calcAnglesByHand.getSecond() - calculatedAngles.getSecond()) <= 0.00001;
@@ -70,7 +70,7 @@ public class DeltaAngleSpeedCalcTest {
     calculatedAngles = deltaAngleSpeedCalc.calcDeltaAngle(arbitraryTangentialVelocityMPS,
         arbitraryRadialVelocityMPS, distFromSpeakerMeters);
     // angles gathered by hand: {11.30993247, 10.27700868 }
-    calcAnglesByHand = new Pair<Double, Double>(11.30993247, 10.27700868);
+    calcAnglesByHand = new Pair<Double, Double>(11.30993247, -10.27700868);
 
     assert Math.abs(calcAnglesByHand.getFirst() - calculatedAngles.getFirst()) <= 0.00001;
     assert Math.abs(calcAnglesByHand.getSecond() - calculatedAngles.getSecond()) <= 0.00001;
@@ -89,7 +89,7 @@ public class DeltaAngleSpeedCalcTest {
         arbitraryRadialVelocityMPS, distFromSpeakerMeters);
 
     // angles gathered by hand: {18.16383517, 9.86034327 }
-    Pair<Double, Double> calcAnglesByHand = new Pair<Double, Double>(18.16383517, 9.86034327);
+    Pair<Double, Double> calcAnglesByHand = new Pair<Double, Double>(18.16383517, -9.86034327);
 
     assert Math.abs(calcAnglesByHand.getFirst() - calculatedAngles.getFirst()) <= 0.00001;
     assert Math.abs(calcAnglesByHand.getSecond() - calculatedAngles.getSecond()) <= 0.00001;
@@ -100,7 +100,7 @@ public class DeltaAngleSpeedCalcTest {
         arbitraryRadialVelocityMPS, distFromSpeakerMeters);
 
     // angles gathered by hand: {18.16383517, 7.43475071 }
-    calcAnglesByHand = new Pair<Double, Double>(18.16383517, 7.43475071);
+    calcAnglesByHand = new Pair<Double, Double>(18.16383517, -7.43475071);
 
     assert Math.abs(calcAnglesByHand.getFirst() - calculatedAngles.getFirst()) <= 0.00001;
     assert Math.abs(calcAnglesByHand.getSecond() - calculatedAngles.getSecond()) <= 0.00001;
