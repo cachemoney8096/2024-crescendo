@@ -57,35 +57,31 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
         new RunCommand(
             () -> {
-              tagDetection = limelight.checkForTag();
+              tagDetection = shooterLimelight.checkForTag();
               if (tagDetection.isEmpty()) {
                 return;
               }
-
-              drive.setTargetHeadingDegrees(tagDetection.get().getFirst().getDegrees());
-              shooter.setShooterDistance(tagDetection.get().getSecond());
+              ChassisSpeeds currentSpeeds = drive.getCurrentChassisSpeeds();
+              DeltaAngleSpeedCalcUtil DeltaAngleSpeedCalcUtil = new DeltaAngleSpeedCalcUtil(tempSpeedOfNote);
+              // { delta azimuth DEGREES , delta elevation DEGREES }
+              if (tagDetection.isPresent()) {
+                Pair<Double, Double> calcDeltaAngles = DeltaAngleSpeedCalcUtil.calcDeltaAngle(
+                    currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond,
+                    tagDetection.get().getSecond());
+                new InstantCommand(
+                    () -> shooter.controlPositionWithAngle(calcDeltaAngles.getSecond(), isScheduled()));
+                new InstantCommand(() -> drive.setTargetHeadingDegrees(calcDeltaAngles.getFirst()));
+              }
+              ;
             })
-            .until(
-                () -> {
-                  ChassisSpeeds currentSpeeds = drive.getCurrentChassisSpeeds();
-                  // Translation2d currentSpeedsXY =
-                  // new Translation2d(
-                  // currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
-                  DeltaAngleSpeedCalcUtil DeltaAngleSpeedCalcUtil = new DeltaAngleSpeedCalcUtil(tempSpeedOfNote);
-                  // { delta azimuth DEGREES , delta elevation DEGREES }
-                  if (tagDetection.isPresent()) {
-                    Pair<Double, Double> calcDeltaAngles = DeltaAngleSpeedCalcUtil.calcDeltaAngle(
-                        currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond,
-                        tagDetection.get().getSecond());
-                    new ParallelCommandGroup(
-                      new InstantCommand(() -> shooter.controlPositionWithAngle(calcDeltaAngles.getSecond(), isScheduled())),
-                      new InstantCommand(() -> drive.setTargetHeadingDegrees(calcDeltaAngles.getFirst()))
-                    );
-                    return true;
-                  } 
-                  // boolean currentlyStatic = currentSpeedsXY.getNorm() < 0.1;
-                  return false;
-                }));
+    // .until(
+    // () -> {
+    // // Translation2d currentSpeedsXY =
+    // // new Translation2d(
+    // // currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
+    // // boolean currentlyStatic = currentSpeedsXY.getNorm() < 0.1;
+    // })
+    );
     // Conveyor.backUpNote(conveyor));
   }
 }
