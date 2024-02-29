@@ -38,10 +38,10 @@ public class DeltaAngleSpeedCalcUtil {
     double calculatedElevationFraction = (verticalElevationVelocityMPS)/ ((SHOOTER_SPEED_MPS * Math.cos(currentElevationAngleDegrees)) - radialVelocityMPS);
     double calculatedElevationAngleDegrees = Math.toDegrees(Math.atan(calculatedElevationFraction));
 
-    double deltaElevationAngleDegrees = calculatedElevationAngleDegrees- Math.toDegrees(currentElevationAngleDegrees);
+    double deltaElevationAngleDegrees = calculatedElevationAngleDegrees - Math.toDegrees(currentElevationAngleDegrees);
 
     Pair<Double, Double> calculatedDeltaAngleGivenSpeeds = new Pair<Double, Double>(deltaAzimuthAngleDegrees,
-        deltaElevationAngleDegrees);
+        (-1 * deltaElevationAngleDegrees));
 
     return calculatedDeltaAngleGivenSpeeds;
 
