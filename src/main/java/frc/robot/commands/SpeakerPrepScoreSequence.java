@@ -6,10 +6,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
@@ -73,12 +71,12 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                     currentSpeedsXY.getY(), tagDetection.get().getSecond());
                 double currentElevationAngle = Math
                     .atan(Constants.SPEAKER_HEIGHT_METERS / tagDetection.get().getSecond());
-                new InstantCommand(() -> drive.setTargetHeadingDegrees(drive.getHeadingDegrees() + calcDeltaAngles.getFirst()));
+                new InstantCommand(
+                    () -> drive.setTargetHeadingDegrees(drive.getHeadingDegrees() + calcDeltaAngles.getFirst()));
                 new InstantCommand(
                     () -> shooter.controlPositionWithAngle((currentElevationAngle + calcDeltaAngles.getSecond()),
                         isScheduled()));
-              }
-              ;
+              };
             })
     // .until(
     // () -> {
