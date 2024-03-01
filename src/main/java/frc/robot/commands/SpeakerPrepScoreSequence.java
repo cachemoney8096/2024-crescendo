@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc.robot.Constants;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
@@ -57,12 +58,17 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
               DeltaAngleSpeedCalcUtil DeltaAngleSpeedCalcUtil = new DeltaAngleSpeedCalcUtil(tempSpeedOfNote);
               // { delta azimuth DEGREES , delta elevation DEGREES }
               if (tagDetection.isPresent()) {
-                Pair<Double, Double> calcDeltaAngles = DeltaAngleSpeedCalcUtil.calcDeltaAngle(
-                    currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond,
-                    tagDetection.get().getSecond());
+                Translation2d currentSpeedsXY = new Translation2d(currentSpeeds.vxMetersPerSecond,
+                    currentSpeeds.vyMetersPerSecond);
+                currentSpeedsXY.rotateBy(tagDetection.get().getFirst());
+                Pair<Double, Double> calcDeltaAngles = DeltaAngleSpeedCalcUtil.calcDeltaAngle(currentSpeedsXY.getX(),
+                    currentSpeedsXY.getY(), tagDetection.get().getSecond());
+                double currentElevationAngle = Math
+                    .atan(Constants.SPEAKER_HEIGHT_METERS / tagDetection.get().getSecond());
+                new InstantCommand(() -> drive.setTargetHeadingDegrees(drive.getHeadingDegrees() + calcDeltaAngles.getFirst()));
                 new InstantCommand(
-                    () -> shooter.controlPositionWithAngle(calcDeltaAngles.getSecond(), isScheduled()));
-                new InstantCommand(() -> drive.setTargetHeadingDegrees(calcDeltaAngles.getFirst()));
+                    () -> shooter.controlPositionWithAngle((currentElevationAngle + calcDeltaAngles.getSecond()),
+                        isScheduled()));
               }
               ;
             })
