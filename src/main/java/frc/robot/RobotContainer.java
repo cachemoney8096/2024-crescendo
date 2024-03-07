@@ -5,7 +5,6 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.NamedCommands;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
@@ -16,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -123,7 +121,6 @@ public class RobotContainer {
             IntakeLimelightConstants.INTAKE_LIMELIGHT_HEIGHT_METERS,
             0); // we aren't using the target height so 0 is fine
 
-
     NamedCommands.registerCommand(
         "SPEAKER PREP PRELOAD",
         new SpeakerPrepScoreAutoPreload(intake, elevator, shooter, conveyor));
@@ -226,19 +223,20 @@ public class RobotContainer {
         .povLeft()
         .onTrue(
             new GoHomeSequence(intake, elevator, shooter, conveyor, false, true)
-                .beforeStarting(() -> driveFieldRelative = true).beforeStarting(() -> drive.throttle(1.0)));
+                .beforeStarting(() -> driveFieldRelative = true)
+                .beforeStarting(() -> drive.throttle(1.0)));
     driverController.start().onTrue(new InstantCommand(drive::resetYaw));
     // top right button
     driverController
         .povDown()
         .onTrue(
             new SequentialCommandGroup(
-              new InstantCommand(() -> feedPrepped = true),
+                new InstantCommand(() -> feedPrepped = true),
                 new FeedPrepScore(elevator, conveyor, intake, shooter, drive, matchState),
                 new InstantCommand(() -> setSpeakerPrep(true))));
     // bottom left back button
     driverController.povRight().onTrue(new ClimbSequence(intake, elevator, shooter, conveyor));
-    
+
     // top left back button
     driverController
         .povUp()
@@ -253,7 +251,7 @@ public class RobotContainer {
                         .withTimeout(4.0))
                 .andThen(new InstantCommand(() -> driveFieldRelative = false))
                 .andThen(new InstantCommand(() -> drive.throttle(0.3))));
-    
+
     driverController.back().onTrue(new UnclimbSequence(elevator, shooter));
 
     drive.setDefaultCommand(

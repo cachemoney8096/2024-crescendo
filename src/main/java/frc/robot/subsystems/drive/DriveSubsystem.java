@@ -410,7 +410,8 @@ public class DriveSubsystem extends SubsystemBase {
    * @param y Desired speed of the robot in the y direction (sideways), [-1,1].
    * @param rot Desired angular rate of the robot, [-1,1].
    * @param fieldRelative Whether the provided x and y speeds are relative to the field.
-   * @param cardinalAngleDeg Get the angle in degrees of the D-pad (clockwise, -1 means POV not pressed).
+   * @param cardinalAngleDeg Get the angle in degrees of the D-pad (clockwise, -1 means POV not
+   *     pressed).
    */
   public void rotateOrKeepHeading(
       double x, double y, double rot, boolean fieldRelative, int cardinalAngleDeg) {

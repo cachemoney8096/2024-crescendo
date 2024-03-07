@@ -9,7 +9,6 @@ import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.Intake.IntakePosition;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 
@@ -44,6 +43,6 @@ public class IntakeSequence extends SequentialCommandGroup {
               intake.stopRollers();
             },
             intake));
-        // new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)));
+    // new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)));
   }
 }

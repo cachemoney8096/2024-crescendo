@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -36,8 +35,8 @@ public class Conveyor extends SubsystemBase {
 
   /**
    * These aren't actually limit switches; we just use SparkLimitSwitch objects to access them
-   * easily. At the moment, only sensor one actually exists. Sensor one is the closest to the intake. True means blocked (there is a note). TODO: If we
-   * use these, add them to Shuffleboard.
+   * easily. At the moment, only sensor one actually exists. Sensor one is the closest to the
+   * intake. True means blocked (there is a note). TODO: If we use these, add them to Shuffleboard.
    */
   SparkLimitSwitch
       beamBreakSensorOne = frontMotor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen),
@@ -210,7 +209,8 @@ public class Conveyor extends SubsystemBase {
   /** Stop the conveor rollers. */
   public static Command stop(Conveyor conveyor) {
     // return new InstantCommand(conveyor::stopRollers, conveyor);
-    return new InstantCommand(() -> conveyor.frontMotor.set(0.0)).andThen(() -> conveyor.backMotor.set(0.0));
+    return new InstantCommand(() -> conveyor.frontMotor.set(0.0))
+        .andThen(() -> conveyor.backMotor.set(0.0));
   }
 
   /** backs the currently held note a little bit back into the conveyor to crush it */

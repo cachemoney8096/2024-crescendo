@@ -18,7 +18,12 @@ import frc.robot.subsystems.shooter.Shooter.ShooterMode;
  */
 public class GoHomeSequence extends SequentialCommandGroup {
   public GoHomeSequence(
-      Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor, boolean spinUpShooter, boolean stowIntake) {
+      Intake intake,
+      Elevator elevator,
+      Shooter shooter,
+      Conveyor conveyor,
+      boolean spinUpShooter,
+      boolean stowIntake) {
     final ShooterMode desiredShooterMode = spinUpShooter ? ShooterMode.SPIN_UP : ShooterMode.IDLE;
     final SequentialCommandGroup goHomeWhenSafe =
         new SequentialCommandGroup(

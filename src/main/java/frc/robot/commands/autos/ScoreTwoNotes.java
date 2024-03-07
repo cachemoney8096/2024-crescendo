@@ -55,7 +55,7 @@ public class ScoreTwoNotes extends SequentialCommandGroup {
             limelight,
             drive // goes home at the end of ScoreThisNote
             ),
-            new PrintCommand("ScoreTwoNotes - Done scoring"),
+        new PrintCommand("ScoreTwoNotes - Done scoring"),
         new InstantCommand(drive::setForwardTargetHeading),
         drive.turnInPlace(0.5),
         new DriveDistance(drive, 0.2, 0.2, 0.0, true, matchState));
