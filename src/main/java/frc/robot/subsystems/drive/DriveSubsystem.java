@@ -32,9 +32,9 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.RobotContainer.MatchState;
 import frc.robot.RobotMap;
 import frc.robot.utils.GeometryUtils;
+import frc.robot.utils.MatchStateUtil;
 import frc.robot.utils.PoseBuffer;
 import java.util.List;
 import java.util.Optional;
@@ -95,9 +95,9 @@ public class DriveSubsystem extends SubsystemBase {
   private double rotControllerInput = 0.0;
 
   /** Provides info on our alliance color and whether this is a real match. */
-  private MatchState matchState;
+  private MatchStateUtil matchState;
 
-  public DriveSubsystem(MatchState matchState) {
+  public DriveSubsystem(MatchStateUtil matchState) {
     intializeGyro();
     this.matchState = matchState;
 
@@ -236,7 +236,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void resetYaw() {
-    resetYawToAngle(matchState.blue ? 0 : 180);
+    resetYawToAngle(matchState.isBlue() ? 0 : 180);
   }
 
   /**
@@ -572,7 +572,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void setForwardTargetHeading() {
-    targetHeadingDegrees = matchState.blue ? 0 : 180;
+    targetHeadingDegrees = matchState.isBlue() ? 0 : 180;
   }
 
   public void stopDriving() {

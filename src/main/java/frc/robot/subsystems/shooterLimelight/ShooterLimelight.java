@@ -24,9 +24,9 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.RobotContainer.MatchState;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.utils.LimelightHelpers;
+import frc.robot.utils.MatchStateUtil;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
 import java.util.Optional;
 
@@ -69,7 +69,7 @@ public class ShooterLimelight extends SubsystemBase {
   // AprilTag detection
   private Optional<Transform2d> robotToScoringLocation = Optional.empty();
 
-  private MatchState matchState;
+  private MatchStateUtil matchState;
 
   /**
    * Create an ShooterLimelight object
@@ -83,7 +83,7 @@ public class ShooterLimelight extends SubsystemBase {
       double pitchAngleDegrees,
       double heightMeters,
       double targetHeightMeters,
-      MatchState matchState) {
+      MatchStateUtil matchState) {
     kCameraPitchAngleDegrees = pitchAngleDegrees;
     kCameraHeight = heightMeters;
     kTargetHeight = targetHeightMeters;
@@ -212,15 +212,7 @@ public class ShooterLimelight extends SubsystemBase {
     Pose2d speakerCenterTagPoseBlue = new Pose2d(-8.31, 1.44, new Rotation2d(0.0));
     Pose2d speakerCenterTagPoseRed = new Pose2d(8.31, 1.44, new Rotation2d(0.0));
 
-    boolean isBlue;
-
-    if (DriverStation.getAlliance().isEmpty()) {
-      return Optional.empty();
-    } else {
-      isBlue = DriverStation.getAlliance().get() == Alliance.Blue;
-    }
-
-    Pose2d speakerCenterTagPose = isBlue ? speakerCenterTagPoseBlue : speakerCenterTagPoseRed;
+    Pose2d speakerCenterTagPose = matchState.isBlue() ? speakerCenterTagPoseBlue : speakerCenterTagPoseRed;
 
     Pose2d speakerCenterTagPose_wpiBlue =
         speakerCenterTagPose.plus(

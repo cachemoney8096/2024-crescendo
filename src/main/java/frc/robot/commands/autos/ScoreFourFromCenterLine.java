@@ -11,7 +11,6 @@ import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 
 public class ScoreFourFromCenterLine extends SequentialCommandGroup {
   public ScoreFourFromCenterLine(
-      boolean red,
       DriveSubsystem drive,
       Intake intake,
       Elevator elevator,

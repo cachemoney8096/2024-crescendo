@@ -51,6 +51,7 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.JoystickUtil;
+import frc.robot.utils.MatchStateUtil;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -59,27 +60,7 @@ import frc.robot.utils.JoystickUtil;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-
-  /**
-   * This class stores the state of the match (the alliance color, and whether it's a real match)
-   *
-   * @param realMatch a boolean variable defining whether we are in a real match; this can be
-   *     determined by checking if the remaining match time in the init function for the match face
-   *     is greater than one second
-   * @param blue a boolean variable defining whether we are on the blue alliance (true) or the red
-   *     alliance (false). When in a fake match, this variable should be true.
-   */
-  public class MatchState {
-    public boolean realMatch;
-    public boolean blue;
-
-    public MatchState(boolean realMatch, boolean blue) {
-      this.realMatch = realMatch;
-      this.blue = blue;
-    }
-  }
-
-  public MatchState matchState = new MatchState(false, true);
+  private MatchStateUtil matchState;
 
   private final CommandXboxController driverController =
       new CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT);
@@ -103,7 +84,9 @@ public class RobotContainer {
   private SendableChooser<Command> autonChooser = new SendableChooser<>();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
-  public RobotContainer() {
+  public RobotContainer(MatchStateUtil matchState) {
+    this.matchState = matchState;
+
     // Add subsystems
     drive = new DriveSubsystem(matchState);
     elevator = new Elevator();
@@ -167,7 +150,7 @@ public class RobotContainer {
     autonChooser.addOption(
         "Score four from center",
         new ScoreFourFromCenterLine(
-            matchState.blue, drive, intake, elevator, shooter, conveyor, shooterLimelight));
+            drive, intake, elevator, shooter, conveyor, shooterLimelight));
     autonChooser.addOption(
         "Score two with center note",
         new TwoWithCenterNote(drive, intake, elevator, shooter, conveyor, shooterLimelight));
@@ -175,13 +158,13 @@ public class RobotContainer {
 
   private int getCardinalDirectionDegrees() {
     if (driverController.getHID().getAButton()) {
-      return matchState.blue ? 180 : 0;
+      return matchState.isBlue() ? 180 : 0;
     } else if (driverController.getHID().getBButton()) {
-      return matchState.blue ? 90 : 270;
+      return matchState.isBlue() ? 90 : 270;
     } else if (driverController.getHID().getXButton()) {
-      return matchState.blue ? 270 : 90;
+      return matchState.isBlue() ? 270 : 90;
     } else if (driverController.getHID().getYButton()) {
-      return matchState.blue ? 0 : 180;
+      return matchState.isBlue() ? 0 : 180;
     } else {
       return -1;
     }
@@ -275,7 +258,7 @@ public class RobotContainer {
     drive.setDefaultCommand(
         new RunCommand(
                 () -> {
-                  if (matchState.blue) {
+                  if (matchState.isBlue()) {
                     drive.rotateOrKeepHeading(
                         MathUtil.applyDeadband(-driverController.getLeftY(), 0.1),
                         MathUtil.applyDeadband(-driverController.getLeftX(), 0.1),

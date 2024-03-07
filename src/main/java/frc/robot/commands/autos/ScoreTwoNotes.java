@@ -4,7 +4,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.RobotContainer.MatchState;
 import frc.robot.commands.RotateToSpeaker;
 import frc.robot.commands.autos.components.DriveDistance;
 import frc.robot.commands.autos.components.ScoreThisNote;
@@ -14,6 +13,7 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
+import frc.robot.utils.MatchStateUtil;
 
 /**
  * score the preloaded note into the speaker, then get another note and score it in the speaker,
@@ -28,7 +28,7 @@ public class ScoreTwoNotes extends SequentialCommandGroup {
       Shooter shooter,
       Conveyor conveyor,
       DriveSubsystem drive,
-      MatchState matchState,
+      MatchStateUtil matchState,
       ShooterLimelight limelight) {
 
     addRequirements(intake, elevator, shooter, conveyor);
