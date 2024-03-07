@@ -2,6 +2,7 @@ package frc.robot.commands.autos;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer.MatchState;
 import frc.robot.commands.IntakeSequence;
@@ -34,8 +35,12 @@ public class OneFiveLeave extends SequentialCommandGroup {
     addCommands(
         new RotateToSpeaker(drive, limelight),
         drive.turnInPlace(1.0),
+        drive.stopDrivingCommand(),
+        new PrintCommand("OneFiveLeave - Done rotating"),
         new ScoreThisNote(intake, elevator, shooter, conveyor, limelight, drive),
+        new PrintCommand("OneFiveLeave - Done scoring"),
         new ParallelCommandGroup(
+            new PrintCommand("OneFiveLeave - Intaking"),
             new IntakeSequence(intake, elevator, conveyor, shooter)
                 .withTimeout(IntakeConstants.INTAKING_TIMEOUT_SEC),
             new SequentialCommandGroup(

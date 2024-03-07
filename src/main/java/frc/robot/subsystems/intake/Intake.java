@@ -187,11 +187,19 @@ public class Intake extends SubsystemBase {
   }
 
   public void considerZeroingEncoder() {
+    if (Math.abs(pivotAbsoluteEncoder.getPosition()) < 0.01) {
+      return;
+    }
     if (Math.abs(getPivotPosition() - getPivotPositionFromAbs())
         > IntakeCal.PIVOT_ENCODER_ZEROING_THRESHOLD_DEG) {
       pivotRelativeEncoder.setPosition(getPivotPositionFromAbs());
       pivotController.reset(pivotRelativeEncoder.getPosition());
     }
+  }
+
+  public void rezeroIntakeToPosition(double posDegrees) {
+    pivotRelativeEncoder.setPosition(posDegrees);
+    pivotController.reset(posDegrees);
   }
 
   /** Sends the pivot towards the input position. Should be called every cycle. */

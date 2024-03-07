@@ -35,6 +35,6 @@ public class AmpScore extends SequentialCommandGroup {
                 Math.abs(
                         drive.getPose().getTranslation().minus(initialPose.getTranslation()).getY())
                     > 0.1),
-        new GoHomeSequence(intake, elevator, shooter, conveyor, false));
+        new GoHomeSequence(intake, elevator, shooter, conveyor, false, false));
   }
 }

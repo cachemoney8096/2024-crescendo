@@ -43,7 +43,7 @@ public class IntakeSequence extends SequentialCommandGroup {
             () -> {
               intake.stopRollers();
             },
-            intake),
-        new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)));
+            intake));
+        // new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)));
   }
 }

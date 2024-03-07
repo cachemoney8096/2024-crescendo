@@ -37,6 +37,7 @@ public class PIDToPoint extends SequentialCommandGroup {
     addCommands(
         new InstantCommand(
             () -> {
+              System.out.println("target pose: " + drive.targetPose);
               if (drive.targetPose.isEmpty()) {
                 return;
               }
@@ -46,6 +47,7 @@ public class PIDToPoint extends SequentialCommandGroup {
         new WaitUntilCommand(
             () -> {
               if (drive.targetPose.isEmpty()) {
+                System.out.println("drive target pose empty");
                 return true;
               }
               final Pose2d targetPose2d = drive.targetPose.get();

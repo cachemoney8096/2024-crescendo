@@ -2,6 +2,7 @@ package frc.robot.commands.autos;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer.MatchState;
 import frc.robot.commands.RotateToSpeaker;
@@ -34,6 +35,7 @@ public class ScoreTwoNotes extends SequentialCommandGroup {
     addCommands(
         new InstantCommand(() -> initialYaw = drive.getPose().getRotation()),
         new OneFiveLeave(intake, elevator, shooter, conveyor, drive, matchState, limelight),
+        new PrintCommand("ScoreTwoNotes - OneFiveLeave done"),
         new InstantCommand(
             () -> {
               final Rotation2d currentYaw = drive.getPose().getRotation();
@@ -42,8 +44,9 @@ public class ScoreTwoNotes extends SequentialCommandGroup {
               drive.setTargetHeadingDegrees(halfwayYaw.getDegrees());
             }),
         drive.turnInPlace(0.5),
+        drive.stopDrivingCommand(),
         new RotateToSpeaker(drive, limelight),
-        drive.turnInPlace(0.5),
+        drive.turnInPlace(1.0),
         new ScoreThisNote(
             intake,
             elevator,
@@ -52,6 +55,7 @@ public class ScoreTwoNotes extends SequentialCommandGroup {
             limelight,
             drive // goes home at the end of ScoreThisNote
             ),
+            new PrintCommand("ScoreTwoNotes - Done scoring"),
         new InstantCommand(drive::setForwardTargetHeading),
         drive.turnInPlace(0.5),
         new DriveDistance(drive, 0.2, 0.2, 0.0, true, matchState));

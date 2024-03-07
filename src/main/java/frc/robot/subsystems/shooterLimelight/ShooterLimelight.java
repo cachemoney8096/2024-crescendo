@@ -18,6 +18,8 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -210,8 +212,15 @@ public class ShooterLimelight extends SubsystemBase {
     Pose2d speakerCenterTagPoseBlue = new Pose2d(-8.31, 1.44, new Rotation2d(0.0));
     Pose2d speakerCenterTagPoseRed = new Pose2d(8.31, 1.44, new Rotation2d(0.0));
 
-    Pose2d speakerCenterTagPose =
-        matchState.blue ? speakerCenterTagPoseBlue : speakerCenterTagPoseRed;
+    boolean isBlue;
+
+    if (DriverStation.getAlliance().isEmpty()) {
+      return Optional.empty();
+    } else {
+      isBlue = DriverStation.getAlliance().get() == Alliance.Blue;
+    }
+
+    Pose2d speakerCenterTagPose = isBlue ? speakerCenterTagPoseBlue : speakerCenterTagPoseRed;
 
     Pose2d speakerCenterTagPose_wpiBlue =
         speakerCenterTagPose.plus(
@@ -471,42 +480,53 @@ public class ShooterLimelight extends SubsystemBase {
     builder.addDoubleProperty("Tx", () -> getOffSetX(), null);
     builder.addDoubleProperty("Ty", () -> getOffSetY(), null);
     builder.addBooleanProperty("Valid Target", () -> isValidTarget(), null);
-    if (Math.abs(getBotPose3d().getZ()) < ShooterLimelightCal.LARGE_VALUE_CORRECTOR_MARGIN
-        && checkForTag().isPresent()) {
-      builder.addDoubleProperty(
-          "Limelight odometry X",
-          () -> {
-            return getBotPose2d_wpiBlue().getSecond().getX();
-          },
-          null);
-      builder.addDoubleProperty(
-          "Limelight odometry Y",
-          () -> {
-            return getBotPose2d_wpiBlue().getSecond().getY();
-          },
-          null);
-      builder.addDoubleProperty(
-          "Limelight odometry yaw",
-          () -> {
-            return getBotPose2d_wpiBlue().getSecond().getRotation().getDegrees();
-          },
-          null);
-    }
+    // if (Math.abs(getBotPose3d().getZ()) < ShooterLimelightCal.LARGE_VALUE_CORRECTOR_MARGIN
+    //     && checkForTag().isPresent()) {
+    //   builder.addDoubleProperty(
+    //       "Limelight odometry X",
+    //       () -> {
+    //         return getBotPose2d_wpiBlue().getSecond().getX();
+    //       },
+    //       null);
+    //   builder.addDoubleProperty(
+    //       "Limelight odometry Y",
+    //       () -> {
+    //         return getBotPose2d_wpiBlue().getSecond().getY();
+    //       },
+    //       null);
+    //   builder.addDoubleProperty(
+    //       "Limelight odometry yaw",
+    //       () -> {
+    //         return getBotPose2d_wpiBlue().getSecond().getRotation().getDegrees();
+    //       },
+    //       null);
+    // }
+    builder.addBooleanProperty("Connected", () -> CheckConnection(), null);
     builder.addIntegerProperty(
         "Targets seen",
         () -> {
           return targetsCount;
         },
         null);
-    builder.addDoubleProperty(
-        "Distance to tag (m)",
-        () -> {
-          Optional<Pair<Rotation2d, Double>> tagCheck = checkForTag();
-          if (tagCheck.isEmpty()) {
-            return 0.0;
-          }
-          return tagCheck.get().getSecond();
-        },
-        null);
+    // builder.addDoubleProperty(
+    //     "Distance to tag (m)",
+    //     () -> {
+    //       Optional<Pair<Rotation2d, Double>> tagCheck = checkForTag();
+    //       if (tagCheck.isEmpty()) {
+    //         return 0.0;
+    //       }
+    //       return tagCheck.get().getSecond();
+    //     },
+    //     null);
+    // builder.addDoubleProperty(
+    //     "Angle to tag (deg)",
+    //     () -> {
+    //       Optional<Pair<Rotation2d, Double>> tagCheck = checkForTag();
+    //       if (tagCheck.isEmpty()) {
+    //         return 0.0;
+    //       }
+    //       return tagCheck.get().getFirst().getDegrees();
+    //     },
+    //     null);
   }
 }

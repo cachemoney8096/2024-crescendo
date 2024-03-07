@@ -23,7 +23,7 @@ import java.util.Optional;
  */
 public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
 
-  Optional<Pair<Rotation2d, Double>> tagDetection;
+  Optional<Pair<Rotation2d, Double>> tagDetection = Optional.empty();
   double distanceFromSpeakerMeters = 0.0;
 
   public SpeakerPrepScoreSequence(
@@ -38,9 +38,8 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
     addRequirements(intake, elevator, shooter, conveyor);
 
     addCommands(
-        new GoHomeSequence(intake, elevator, shooter, conveyor, true),
-        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SPEAKER_PREP, true)),
-        new InstantCommand(() -> conveyor.startBackRollers(1.0)),
+        new GoHomeSequence(intake, elevator, shooter, conveyor, true, false),
+        // new InstantCommand(() -> conveyor.startBackRollers(1.0)),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
         new RunCommand(
                 () -> {
@@ -49,8 +48,10 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                     return;
                   }
 
+                  System.out.println(tagDetection.get().getFirst().getDegrees());
                   drive.setTargetHeadingDegrees(tagDetection.get().getFirst().getDegrees());
                   shooter.setShooterDistance(tagDetection.get().getSecond());
+                  shooter.readyToShoot = true;
                 })
             .until(
                 () -> {

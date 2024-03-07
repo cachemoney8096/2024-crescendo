@@ -4,10 +4,12 @@ import com.ctre.phoenix6.configs.MountPoseConfigs;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.Pigeon2Configurator;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,6 +23,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -97,6 +100,39 @@ public class DriveSubsystem extends SubsystemBase {
   public DriveSubsystem(MatchState matchState) {
     intializeGyro();
     this.matchState = matchState;
+
+    // Configure AutoBuilder last
+    AutoBuilder.configureHolonomic(
+        this::getPose, // Robot pose supplier
+        this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting
+        // pose)
+        this::getCurrentChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+        this::setOutputRobotRelativeSpeeds, // Method that will drive the robot given ROBOT RELATIVE
+        // ChassisSpeeds
+        new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in
+            // your Constants class
+            DriveCal.PATH_TRANSLATION_CONTROLLER, // Translation PID constants
+            DriveCal.PATH_ROTATION_CONTROLLER, // Rotation PID constants
+            DriveConstants.DRIVE_WHEEL_FREE_SPEED_METERS_PER_SECOND, // Max module speed, in m/s
+            DriveConstants
+                .DRIVE_BASE_RADIUS_METERS, // Drive base radius in meters. Distance from robot
+            // center to furthest module.
+            new ReplanningConfig() // Default path replanning config. See the API for the options
+            // here
+            ),
+        () -> {
+          // Boolean supplier that controls when the path will be mirrored for the red alliance
+          // This will flip the path being followed to the red side of the field.
+          // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+          var alliance = DriverStation.getAlliance();
+          if (alliance.isPresent()) {
+            return alliance.get() == DriverStation.Alliance.Red;
+          }
+          return false;
+        },
+        this // Reference to this subsystem to set requirements
+        );
   }
 
   public void intializeGyro() {
@@ -200,7 +236,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void resetYaw() {
-    resetYawToAngle(0.0);
+    resetYawToAngle(matchState.blue ? 0 : 180);
   }
 
   /**
@@ -374,13 +410,13 @@ public class DriveSubsystem extends SubsystemBase {
    * @param y Desired speed of the robot in the y direction (sideways), [-1,1].
    * @param rot Desired angular rate of the robot, [-1,1].
    * @param fieldRelative Whether the provided x and y speeds are relative to the field.
-   * @param povAngleDeg Get the angle in degrees of the D-pad (clockwise, -1 means POV not pressed).
+   * @param cardinalAngleDeg Get the angle in degrees of the D-pad (clockwise, -1 means POV not pressed).
    */
   public void rotateOrKeepHeading(
-      double x, double y, double rot, boolean fieldRelative, int povAngleDeg) {
+      double x, double y, double rot, boolean fieldRelative, int cardinalAngleDeg) {
     rotControllerInput = rot;
-    if (povAngleDeg != -1) {
-      targetHeadingDegrees = convertCardinalDirections(povAngleDeg);
+    if (cardinalAngleDeg != -1) {
+      targetHeadingDegrees = convertCardinalDirections(cardinalAngleDeg);
       keepHeading(x, y, fieldRelative);
     } else if (rot == 0) {
       keepHeading(x, y, fieldRelative);
@@ -546,6 +582,10 @@ public class DriveSubsystem extends SubsystemBase {
     return new InstantCommand(this::stopDriving, this);
   }
 
+  public double getDiffCurrentTargetYawDeg() {
+    return Math.abs(getHeadingDegrees() - targetHeadingDegrees) % 360;
+  }
+
   /**
    * Provides no input to rotateOrKeepHeading for the input amount of time, allowing turning in
    * place towards the current target heading
@@ -624,5 +664,7 @@ public class DriveSubsystem extends SubsystemBase {
     builder.addDoubleProperty(
         "Yaw error", () -> targetHeadingDegrees - getPose().getRotation().getDegrees(), null);
     builder.addDoubleProperty("Target Heading (tag detection)", () -> tagTargetHeading, null);
+    builder.addDoubleProperty(
+        "getDiffCurrentTargetYawDeg", () -> getDiffCurrentTargetYawDeg(), null);
   }
 }

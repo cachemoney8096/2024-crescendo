@@ -22,13 +22,14 @@ public class FeedPrepScore extends SequentialCommandGroup {
       MatchState matchState) {
     addRequirements(elevator, conveyor, intake, shooter);
     addCommands(
-        new GoHomeSequence(intake, elevator, shooter, conveyor, true),
+        new GoHomeSequence(intake, elevator, shooter, conveyor, true, false),
         new WaitUntilCommand(elevator::elevatorBelowInterferenceZone),
         new ConditionalCommand(
             new InstantCommand(() -> drive.setTargetHeadingDegrees(315.0)),
-            new InstantCommand(() -> drive.setTargetHeadingDegrees(225.0)),
+            new InstantCommand(() -> drive.setTargetHeadingDegrees(205.0)),
             () -> matchState.blue),
-        new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT_CLEAR_STAGE)),
-        new InstantCommand(() -> conveyor.startBackRollers(1.0)));
+        new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT_CLEAR_STAGE))
+        // new InstantCommand(() -> conveyor.startBackRollers(1.0))
+        );
   }
 }

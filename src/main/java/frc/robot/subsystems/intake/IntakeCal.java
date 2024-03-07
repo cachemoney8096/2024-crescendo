@@ -19,7 +19,7 @@ public class IntakeCal {
    * Offset degrees for intake absolute encoder. Real world degrees minus what the encoder read at
    * that position.
    */
-  public static final double INTAKE_ABSOLUTE_ENCODER_ZERO_OFFSET_DEG = 155.4 - 56.89;
+  public static final double INTAKE_ABSOLUTE_ENCODER_ZERO_OFFSET_DEG = 195 - 106.4;
 
   public static final double PIVOT_ENCODER_ZEROING_THRESHOLD_DEG = 5.0;
   public static final double PIVOT_PROFILE_REPLANNING_THRESHOLD_DEG = 20.0;
@@ -31,7 +31,7 @@ public class IntakeCal {
    * each direction. If the reading is above vs. below, this indicates whether 120 deg needs to be
    * added to the reading.
    */
-  public static final double INTAKE_ABSOLUTE_ENCODER_WRAP_POINT_DEG = 55.0;
+  public static final double INTAKE_ABSOLUTE_ENCODER_WRAP_POINT_DEG = 64.0;
 
   /** PID values for the intake pivot motor input degrees, output volts */
   public static final double INTAKE_PIVOT_P = 0.2, INTAKE_PIVOT_I = 0, INTAKE_PIVOT_D = 0;
@@ -45,7 +45,7 @@ public class IntakeCal {
    * is down
    */
   public static final double INTAKE_DEPLOYED_POSITION_DEGREES = 270.4,
-      INTAKE_STOWED_POSITION_DEGREES = 156.0,
+      INTAKE_STOWED_POSITION_DEGREES = 158.0,
       INTAKE_SAFE_POSITION_DEGREES = 200.0; // exact safe position is 186.0
 
   public static final double INTAKE_MARGIN_DEGREES = 8.0;

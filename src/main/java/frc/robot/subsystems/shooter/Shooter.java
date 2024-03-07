@@ -100,6 +100,9 @@ public class Shooter extends SubsystemBase {
   private double armDemandVoltsC;
   private double armDemandVoltsD;
 
+  /** Set to true once speaker prep finished (we are rotated and distanced to a tag) */
+  public boolean readyToShoot = false;
+
   public Shooter() {
     pivotAngleMap = new InterpolatingDoubleTreeMap();
     pivotAngleMap.put(1.16, 144.0);
@@ -351,6 +354,7 @@ public class Shooter extends SubsystemBase {
           controlPositionWithDistance(shooterDistanceMeters);
           break;
         case SHOOT_CLEAR_STAGE:
+          readyToShoot = true;
           spinUpShooter(ShooterCal.SHOOT_CLEAR_STAGE_VOLTAGE);
           controlPosition(ShooterCal.SHOOT_CLEAR_STAGE_ANGLE_DEGREES, false);
           break;
@@ -415,5 +419,6 @@ public class Shooter extends SubsystemBase {
         null);
     builder.addBooleanProperty("Clear of conveyor", this::clearOfConveyorZone, null);
     builder.addBooleanProperty("Close to latch", this::closeToLatch, null);
+    builder.addBooleanProperty("Ready to shoot", () -> readyToShoot, null);
   }
 }

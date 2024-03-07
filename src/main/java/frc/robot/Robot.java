@@ -106,14 +106,14 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    setRobotContainerMatchState();
+
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
-
-    setRobotContainerMatchState();
 
     if (m_robotContainer.matchState.realMatch) {
       m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
@@ -185,7 +185,7 @@ public class Robot extends TimedRobot {
       if (realMatch) {
         blue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
       } else {
-        blue = true;
+        blue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
       }
       m_robotContainer.matchState.blue = blue;
     } else {
