@@ -1,4 +1,4 @@
-// Code from team 3005
+// Code adapted from team 3005
 
 package frc.robot.subsystems.intakeLimelight;
 

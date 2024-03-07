@@ -1,4 +1,4 @@
-// Code from team 3005
+// Code adapted from team 3005
 
 package frc.robot.subsystems.shooterLimelight;
 
@@ -480,27 +480,6 @@ public class ShooterLimelight extends SubsystemBase {
     builder.addDoubleProperty("Tx", () -> getOffSetX(), null);
     builder.addDoubleProperty("Ty", () -> getOffSetY(), null);
     builder.addBooleanProperty("Valid Target", () -> isValidTarget(), null);
-    // if (Math.abs(getBotPose3d().getZ()) < ShooterLimelightCal.LARGE_VALUE_CORRECTOR_MARGIN
-    //     && checkForTag().isPresent()) {
-    //   builder.addDoubleProperty(
-    //       "Limelight odometry X",
-    //       () -> {
-    //         return getBotPose2d_wpiBlue().getSecond().getX();
-    //       },
-    //       null);
-    //   builder.addDoubleProperty(
-    //       "Limelight odometry Y",
-    //       () -> {
-    //         return getBotPose2d_wpiBlue().getSecond().getY();
-    //       },
-    //       null);
-    //   builder.addDoubleProperty(
-    //       "Limelight odometry yaw",
-    //       () -> {
-    //         return getBotPose2d_wpiBlue().getSecond().getRotation().getDegrees();
-    //       },
-    //       null);
-    // }
     builder.addBooleanProperty("Connected", () -> CheckConnection(), null);
     builder.addIntegerProperty(
         "Targets seen",

@@ -29,7 +29,6 @@ public class SpeakerPrepScoreAutoPreload extends SequentialCommandGroup {
 
     addCommands(
         new GoHomeSequence(intake, elevator, shooter, conveyor, true, false),
-        // new InstantCommand(() -> conveyor.startBackRollers(1.0)),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
         new InstantCommand(() -> shooter.setShooterDistance(ShooterCal.AUTO_PRELOAD_DISTANCE_M)));
   }

@@ -28,8 +28,6 @@ public class FeedPrepScore extends SequentialCommandGroup {
             new InstantCommand(() -> drive.setTargetHeadingDegrees(315.0)),
             new InstantCommand(() -> drive.setTargetHeadingDegrees(205.0)),
             () -> matchState.blue),
-        new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT_CLEAR_STAGE))
-        // new InstantCommand(() -> conveyor.startBackRollers(1.0))
-        );
+        new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT_CLEAR_STAGE)));
   }
 }
