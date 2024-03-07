@@ -9,6 +9,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -33,7 +34,9 @@ import frc.robot.commands.SpeakerPrepScoreAutoPreload;
 import frc.robot.commands.SpeakerPrepScoreSequence;
 import frc.robot.commands.SpeakerShootSequence;
 import frc.robot.commands.UnclimbSequence;
+import frc.robot.commands.autos.ScoreFourFromCenterLine;
 import frc.robot.commands.autos.ScoreTwoNotes;
+import frc.robot.commands.autos.TwoWithCenterNote;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
@@ -96,6 +99,9 @@ public class RobotContainer {
   public boolean driveFieldRelative = true;
   public boolean feedPrepped = false;
 
+  // A chooser for autonomous commands
+  private SendableChooser<Command> autonChooser = new SendableChooser<>();
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Add subsystems
@@ -153,6 +159,18 @@ public class RobotContainer {
     burnFlashAllSparks();
 
     driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+
+    autonChooser.setDefaultOption(
+        "Score two",
+        new ScoreTwoNotes(
+            intake, elevator, shooter, conveyor, drive, matchState, shooterLimelight));
+    autonChooser.addOption(
+        "Score four from center",
+        new ScoreFourFromCenterLine(
+            matchState.blue, drive, intake, elevator, shooter, conveyor, shooterLimelight));
+    autonChooser.addOption(
+        "Score two with center note",
+        new TwoWithCenterNote(drive, intake, elevator, shooter, conveyor, shooterLimelight));
   }
 
   private int getCardinalDirectionDegrees() {
@@ -348,13 +366,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // elevator currently goes UP in auto!!
+    // elevator currently goes UP in auto (score two notes)!!
 
-    return new ScoreTwoNotes(
-        intake, elevator, shooter, conveyor, drive, matchState, shooterLimelight);
-    // return new ScoreFourFromCenterLine(
-    //     matchState.blue, drive, intake, elevator, shooter, conveyor, shooterLimelight);
-    // return new PathPlannerAuto("4 NOTE - CENTER LINE - SOURCE - AUTO");
-    // return new TwoWithCenterNote(drive, intake, elevator, shooter, conveyor, shooterLimelight);
+    return autonChooser.getSelected();
   }
 }
