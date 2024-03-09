@@ -196,7 +196,7 @@ public class RobotContainer {
             new ConditionalCommand(
                 new ConditionalCommand(
                     new SpeakerShootSequence(
-                            conveyor, shooter, elevator, drive, !shooterWaitUntilRotated)
+                            conveyor, shooter, elevator, drive, shooterWaitUntilRotated)
                         .beforeStarting(
                             () -> {
                               System.out.println("wait until rotated: " + shooterWaitUntilRotated);
@@ -215,7 +215,7 @@ public class RobotContainer {
         .onTrue(
             new SequentialCommandGroup(
                 new InstantCommand(() -> shootScore = true),
-                new InstantCommand(() -> shooterWaitUntilRotated = false),
+                new InstantCommand(() -> shooterWaitUntilRotated = true),
                 new SpeakerPrepScoreSequence(
                     intake, elevator, shooter, conveyor, shooterLimelight, drive)));
     driverController
@@ -237,7 +237,7 @@ public class RobotContainer {
         .povDown()
         .onTrue(
             new SequentialCommandGroup(
-                new InstantCommand(() -> shooterWaitUntilRotated = true),
+                new InstantCommand(() -> shooterWaitUntilRotated = false),
                 new FeedPrepScore(elevator, conveyor, intake, shooter, drive, matchState),
                 new InstantCommand(() -> shootScore = true)));
     // bottom left back button
