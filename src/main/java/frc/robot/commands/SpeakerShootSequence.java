@@ -23,12 +23,12 @@ public class SpeakerShootSequence extends SequentialCommandGroup {
       Shooter shooter,
       Elevator elevator,
       DriveSubsystem drive,
-      boolean isTeleop) {
+      boolean waitUntilRotated) {
     addRequirements(conveyor, shooter);
     addCommands(
         new InstantCommand(
             () -> {
-              System.out.println("is teleop in shoot" + isTeleop);
+              System.out.println("is teleop in shoot" + waitUntilRotated);
             }),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SPEAKER_PREP, true)),
         new ConditionalCommand(
@@ -41,7 +41,7 @@ public class SpeakerShootSequence extends SequentialCommandGroup {
                 .withTimeout(2.0)
                 .andThen(new PrintCommand("Done waiting for target heading")),
             new InstantCommand(),
-            () -> isTeleop),
+            () -> waitUntilRotated),
         new PrintCommand("Waiting for shooter at desired and spun up"),
         new WaitUntilCommand(
             () -> {
@@ -56,6 +56,7 @@ public class SpeakerShootSequence extends SequentialCommandGroup {
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME, true)));
   }
 
+  /** Defaults to <b> not </b> waiting until rotated */
   public SpeakerShootSequence(
       Conveyor conveyor, Shooter shooter, Elevator elevator, DriveSubsystem drive) {
     this(conveyor, shooter, elevator, drive, false);

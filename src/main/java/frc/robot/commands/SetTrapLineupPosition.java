@@ -31,7 +31,7 @@ public class SetTrapLineupPosition extends Command {
         robotToScoringLocation = Optional.empty();
         return;
       }
-      System.out.println("present");
+      System.out.println("tag present");
       double latencySeconds = tagLimelight.getLatencySeconds();
       targetLocked = true;
       System.out.println("robot to trap: " + robotToScoringLocation.get());

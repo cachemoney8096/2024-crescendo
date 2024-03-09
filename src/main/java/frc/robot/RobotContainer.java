@@ -76,9 +76,13 @@ public class RobotContainer {
   public ShooterLimelight shooterLimelight;
   public IntakeLimelight intakeLimelight;
 
-  public boolean speakerPrepped;
+  /** True for shooting (speaker or feed), false for amp */
+  public boolean shootScore = false;
+
   public boolean driveFieldRelative = true;
-  public boolean feedPrepped = false;
+
+  /** Whether to wait until the robot has rotated to the AprilTags in the shooter logic */
+  public boolean shooterWaitUntilRotated = false;
 
   // A chooser for autonomous commands
   private SendableChooser<Command> autonChooser = new SendableChooser<>();
@@ -125,6 +129,7 @@ public class RobotContainer {
         "INTAKE", new IntakeSequence(intake, elevator, conveyor, shooter));
     NamedCommands.registerCommand(
         "SPEAKER PREP", new SpeakerPrepScoreAuto(intake, elevator, shooter, conveyor));
+
     // Configure the controller bindings
     configureDriver();
     configureOperator();
@@ -191,10 +196,10 @@ public class RobotContainer {
         .onTrue(
             new ConditionalCommand(
                 new ConditionalCommand(
-                    new SpeakerShootSequence(conveyor, shooter, elevator, drive, !feedPrepped)
+                    new SpeakerShootSequence(conveyor, shooter, elevator, drive, !shooterWaitUntilRotated)
                         .beforeStarting(
                             () -> {
-                              System.out.println(feedPrepped);
+                              System.out.println("wait until rotated: " + shooterWaitUntilRotated);
                             })
                         .andThen(new InstantCommand(() -> shooter.readyToShoot = false))
                         .andThen(
@@ -204,13 +209,13 @@ public class RobotContainer {
                     new InstantCommand(),
                     () -> shooter.readyToShoot),
                 new AmpScore(drive, conveyor, intake, shooter, elevator),
-                this::preppedSpeaker)); // score based on prep
+                () -> shootScore)); // score based on prep
     driverController
         .leftBumper()
         .onTrue(
             new SequentialCommandGroup(
-                new InstantCommand(() -> setSpeakerPrep(true)),
-                new InstantCommand(() -> feedPrepped = false),
+                new InstantCommand(() -> shootScore = true),
+                new InstantCommand(() -> shooterWaitUntilRotated = false),
                 new SpeakerPrepScoreSequence(
                     intake, elevator, shooter, conveyor, shooterLimelight, drive)));
     driverController
@@ -218,7 +223,7 @@ public class RobotContainer {
         .onTrue(
             new SequentialCommandGroup(
                 new AmpPrepScore(elevator, conveyor, intake, shooter),
-                new InstantCommand(() -> setSpeakerPrep(false))));
+                new InstantCommand(() -> shootScore = false)));
     // bottom right back button
     driverController
         .povLeft()
@@ -232,9 +237,9 @@ public class RobotContainer {
         .povDown()
         .onTrue(
             new SequentialCommandGroup(
-                new InstantCommand(() -> feedPrepped = true),
+                new InstantCommand(() -> shooterWaitUntilRotated = true),
                 new FeedPrepScore(elevator, conveyor, intake, shooter, drive, matchState),
-                new InstantCommand(() -> setSpeakerPrep(true))));
+                new InstantCommand(() -> shootScore = true)));
     // bottom left back button
     driverController.povRight().onTrue(new ClimbSequence(intake, elevator, shooter, conveyor));
 
@@ -327,20 +332,6 @@ public class RobotContainer {
     elevator.burnFlashSparks();
     shooter.burnFlashSparks();
     Timer.delay(0.25);
-  }
-
-  /**
-   * @param true if speaker was just prepped, false if amp was just prepped
-   */
-  private void setSpeakerPrep(boolean prepSpeaker) {
-    this.speakerPrepped = prepSpeaker;
-  }
-
-  /**
-   * @return true if speaker was prepped, false if amp was prepped
-   */
-  private boolean preppedSpeaker() {
-    return this.speakerPrepped;
   }
 
   /**
