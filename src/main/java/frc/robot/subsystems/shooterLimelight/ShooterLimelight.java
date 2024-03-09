@@ -18,16 +18,14 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.utils.LimelightHelpers;
-import frc.robot.utils.MatchStateUtil;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
+import frc.robot.utils.MatchStateUtil;
 import java.util.Optional;
 
 /** Limelight for the shooter to identify game pieces */
@@ -212,7 +210,8 @@ public class ShooterLimelight extends SubsystemBase {
     Pose2d speakerCenterTagPoseBlue = new Pose2d(-8.31, 1.44, new Rotation2d(0.0));
     Pose2d speakerCenterTagPoseRed = new Pose2d(8.31, 1.44, new Rotation2d(0.0));
 
-    Pose2d speakerCenterTagPose = matchState.isBlue() ? speakerCenterTagPoseBlue : speakerCenterTagPoseRed;
+    Pose2d speakerCenterTagPose =
+        matchState.isBlue() ? speakerCenterTagPoseBlue : speakerCenterTagPoseRed;
 
     Pose2d speakerCenterTagPose_wpiBlue =
         speakerCenterTagPose.plus(

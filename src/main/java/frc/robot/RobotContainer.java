@@ -154,8 +154,7 @@ public class RobotContainer {
             intake, elevator, shooter, conveyor, drive, matchState, shooterLimelight));
     autonChooser.addOption(
         "Score four from center",
-        new ScoreFourFromCenterLine(
-            drive, intake, elevator, shooter, conveyor, shooterLimelight));
+        new ScoreFourFromCenterLine(drive, intake, elevator, shooter, conveyor, shooterLimelight));
     autonChooser.addOption(
         "Score two with center note",
         new TwoWithCenterNote(drive, intake, elevator, shooter, conveyor, shooterLimelight));
@@ -196,7 +195,8 @@ public class RobotContainer {
         .onTrue(
             new ConditionalCommand(
                 new ConditionalCommand(
-                    new SpeakerShootSequence(conveyor, shooter, elevator, drive, !shooterWaitUntilRotated)
+                    new SpeakerShootSequence(
+                            conveyor, shooter, elevator, drive, !shooterWaitUntilRotated)
                         .beforeStarting(
                             () -> {
                               System.out.println("wait until rotated: " + shooterWaitUntilRotated);
