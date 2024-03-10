@@ -14,7 +14,6 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
-import frc.robot.utils.CRTGearRatioUtil;
 import frc.robot.utils.SendableHelper;
 import frc.robot.utils.SparkMaxUtils;
 import java.util.Optional;
@@ -24,7 +23,6 @@ import java.util.TreeMap;
  * Moves the elevator carriage up and down. Does not control anything on the carriage (that's the
  * conveyor).
  */
-
 public class Elevator extends SubsystemBase {
   public enum ElevatorPosition {
     HOME,
@@ -33,9 +31,6 @@ public class Elevator extends SubsystemBase {
     PRE_CLIMB,
     SLIGHTLY_UP
   }
-
-  private Optional<CRTGearRatioUtil> crtgruOptional = CRTGearRatioUtil.init(ElevatorConstants.ELEVATOR_LEFT_ABSOLUTE_ENCODER_RATIO_TERM, ElevatorConstants.ELEVATOR_RIGHT_ABSOLUTE_ENCODER_RATIO_TERM, ElevatorConstants.MAX_LEFT_GEAR_ROTATIONS, ElevatorConstants.ELEVATOR_DRUM_DIAMETER_IN*Math.PI);
-  private CRTGearRatioUtil crtgru;
 
   public CANSparkMax leftMotor =
       new CANSparkMax(RobotMap.LEFT_ELEVATOR_CAN_ID, MotorType.kBrushless);
@@ -95,8 +90,6 @@ public class Elevator extends SubsystemBase {
     elevatorPositions.put(ElevatorPosition.SCORE_TRAP, ElevatorCal.POSITION_SCORE_TRAP_INCHES);
     elevatorPositions.put(ElevatorPosition.PRE_CLIMB, ElevatorCal.POSITION_PRE_CLIMB_INCHES);
     elevatorPositions.put(ElevatorPosition.SLIGHTLY_UP, ElevatorCal.POSITION_SLIGHTLY_UP_INCHES);
-    assert crtgruOptional.isPresent();
-    crtgru = crtgruOptional.get();
     setControlParams(true);
   }
 
@@ -125,24 +118,15 @@ public class Elevator extends SubsystemBase {
                 ElevatorConstants.ELEVATOR_GEAR_RATIO,
                 ElevatorConstants.ELEVATOR_DRUM_DIAMETER_IN));
 
+    errors += SparkMaxUtils.check(setZeroFromAbsolute());
+
     return errors == 0;
   }
 
-  private double elevatorAbsolutePosition(){
-    double absoluteElevatorPositionInches = crtgru.getAbsolutePositionOfMainObject(leftMotorEncoderAbs.getPosition(), rightMotorEncoderAbs.getPosition());
-    if(absoluteElevatorPositionInches < ElevatorCal.ELEVATOR_ABSOLUTE_ENCODER_WRAP_POINT_IN){
-        absoluteElevatorPositionInches+=crtgru.wrapAroundAbsolutePosition();
-    }
-    return (absoluteElevatorPositionInches-ElevatorCal.ELEVATOR_OFFSET)%(crtgru.wrapAroundAbsolutePosition());
-  }
-
   /** Zeroes leftMotorEncoderRel so it returns inches from home. */
-  public void considerZeroingFromAbsolute() {
-      double absoluteElevatorPositionInches = elevatorAbsolutePosition();
-      if(Math.abs(absoluteElevatorPositionInches-leftMotorEncoderRel.getPosition()) < ElevatorCal.ELEVATOR_REL_ENCODER_ERROR_MARGIN_IN){
-        return;
-      }
-      leftMotorEncoderRel.setPosition(absoluteElevatorPositionInches);
+  private REVLibError setZeroFromAbsolute() {
+    // TODO absolute encoder zeroing
+    return leftMotorEncoderRel.setPosition(ElevatorCal.POSITION_HOME_INCHES);
   }
 
   /** If true, use elevator control parameters for note scoring as opposed to climbing */
@@ -271,7 +255,6 @@ public class Elevator extends SubsystemBase {
     builder.addDoubleProperty(
         "Elevator Desired Position (in)", () -> elevatorPositions.get(desiredPosition), null);
     builder.addBooleanProperty("Elevator at desired position", this::atDesiredPosition, null);
-    builder.addDoubleProperty("Elevator absolute position", ()->{return elevatorAbsolutePosition();}, null);
     builder.addBooleanProperty(
         "Elevator above intererence", this::elevatorAboveIntakeInterferenceZone, null);
     builder.addBooleanProperty(

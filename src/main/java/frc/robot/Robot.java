@@ -105,7 +105,6 @@ public class Robot extends TimedRobot {
     m_robotContainer.intake.considerZeroingEncoder();
     m_robotContainer.shooterLimelight.resetOdometryWithTags(
         m_PoseEstimator, m_robotContainer.drive);
-    // m_robotContainer.elevator.considerZeroingFromAbsolute();
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */

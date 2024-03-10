@@ -1,7 +1,6 @@
 package frc.robot.subsystems.elevator;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import frc.robot.Constants;
 
 public final class ElevatorCal {
   /** Feedback parameters for elevator when not climbing. Input in, output Volts */
@@ -54,10 +53,4 @@ public final class ElevatorCal {
    */
   public static final double ELEVATOR_INTERFERENCE_THRESHOLD_MINIMUM_INCHES = 4.0,
       ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES = 18.5;
-
-  public static final double ELEVATOR_ABSOLUTE_ENCODER_WRAP_POINT_IN = Constants.PLACEHOLDER_DOUBLE;
-
-  public static final double ELEVATOR_OFFSET = POSITION_HOME_INCHES - 0.0;
-
-  public static final double ELEVATOR_REL_ENCODER_ERROR_MARGIN_IN = 3.0;
 }
