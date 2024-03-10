@@ -36,7 +36,6 @@ import frc.robot.commands.SpeakerShootSequence;
 import frc.robot.commands.UnclimbSequence;
 import frc.robot.commands.autos.ScoreFourFromCenterLine;
 import frc.robot.commands.autos.ScoreTwoNotes;
-import frc.robot.commands.autos.TwoWithCenterNote;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
@@ -155,9 +154,6 @@ public class RobotContainer {
     autonChooser.addOption(
         "Score four from center",
         new ScoreFourFromCenterLine(drive, intake, elevator, shooter, conveyor, shooterLimelight));
-    autonChooser.addOption(
-        "Score two with center note",
-        new TwoWithCenterNote(drive, intake, elevator, shooter, conveyor, shooterLimelight));
   }
 
   private int getCardinalDirectionDegrees() {
@@ -196,7 +192,7 @@ public class RobotContainer {
             new ConditionalCommand(
                 new ConditionalCommand(
                     new SpeakerShootSequence(
-                            conveyor, shooter, elevator, drive, shooterWaitUntilRotated)
+                            conveyor, shooter, elevator, drive, () -> shooterWaitUntilRotated)
                         .beforeStarting(
                             () -> {
                               System.out.println("wait until rotated: " + shooterWaitUntilRotated);

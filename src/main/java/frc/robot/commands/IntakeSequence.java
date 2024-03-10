@@ -38,11 +38,6 @@ public class IntakeSequence extends SequentialCommandGroup {
         new WaitUntilCommand(intake::nearDeployed),
         new InstantCommand(intake::startRollers),
         Conveyor.receive(conveyor),
-        new InstantCommand(
-            () -> {
-              intake.stopRollers();
-            },
-            intake));
-    // new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)));
+        new InstantCommand(intake::stopRollers, intake));
   }
 }

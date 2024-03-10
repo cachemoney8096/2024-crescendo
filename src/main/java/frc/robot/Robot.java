@@ -109,7 +109,7 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    setRobotContainerMatchState();
+    setMatchState();
 
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
@@ -144,7 +144,7 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
-    setRobotContainerMatchState();
+    setMatchState();
 
     if (matchState.isRealMatch()) {
       m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
@@ -184,7 +184,7 @@ public class Robot extends TimedRobot {
    * Sets whether it is a real match by checking if the match time is more than 1s, and whether we
    * are blue from the driver station data (defaults to true).
    */
-  private void setRobotContainerMatchState() {
+  private void setMatchState() {
     boolean realMatch = DriverStation.getMatchTime() > 1.0;
     matchState.setRealMatch(realMatch);
     if (DriverStation.getAlliance().isPresent()) {

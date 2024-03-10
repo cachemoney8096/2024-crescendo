@@ -30,7 +30,7 @@ public class ClimbSequence extends SequentialCommandGroup {
         new WaitUntilCommand(elevator::atDesiredPosition),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.LATCH)),
         new WaitUntilCommand(shooter::atDesiredPosition),
-        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.PRE_CLIMB, true)),
+        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SCORE_TRAP, true)),
         new WaitUntilCommand(elevator::atDesiredPosition),
         new WaitCommand(0.25),
         Conveyor.scoreTrapOrAmp(conveyor));
