@@ -145,7 +145,7 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
     
-    m_robotContainer.lights.toggleCode(LightCode.PARTY_MODE);
+    m_robotContainer.lights.toggleCode(LightCode.INTAKING);
 
     setMatchState();
 

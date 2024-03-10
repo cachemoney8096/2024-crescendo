@@ -36,7 +36,7 @@ public class ClimbPrepSequence extends SequentialCommandGroup {
                         limelightPipeline.TAG_PIPELINE)),
             new InstantCommand(() -> shooter.setShooterMode(ShooterMode.PRELATCH)),
             new WaitUntilCommand(shooter::clearOfConveyorZone),
-            new SafeDeploy(intake, elevator),
+            new SafeDeploy(intake, elevator, false),
             new WaitUntilCommand(intake::clearOfConveyorZone),
             new InstantCommand(
                 () -> elevator.setDesiredPosition(ElevatorPosition.PRE_CLIMB, true)));

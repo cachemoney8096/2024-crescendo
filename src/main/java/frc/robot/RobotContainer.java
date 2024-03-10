@@ -171,6 +171,7 @@ public class RobotContainer implements Sendable {
         autonChooser.addOption(
                 "Score four from center",
                 new ScoreFourFromCenterLine(drive, intake, elevator, shooter, conveyor, shooterLimelight));
+        SmartDashboard.putData(autonChooser);
     }
 
     private int getCardinalDirectionDegrees() {
@@ -202,7 +203,8 @@ public class RobotContainer implements Sendable {
         .whileTrue(new IntakeSequence(intake, elevator, conveyor, shooter));
     driverController
         .rightTrigger()
-        .onFalse(new GoHomeSequence(intake, elevator, shooter, conveyor, false, false, true)
+        .onFalse(Conveyor.finishReceive(conveyor).andThen(
+            new GoHomeSequence(intake, elevator, shooter, conveyor, false, false, true))
         .beforeStarting(() -> prepState = PrepState.OFF));
     driverController.leftTrigger().onTrue(
         new DeferredCommand(() -> {
@@ -234,7 +236,9 @@ public class RobotContainer implements Sendable {
             new SequentialCommandGroup(
                 new InstantCommand(() -> prepState = PrepState.SPEAKER),
                 new SpeakerPrepScoreSequence(
-                    intake, elevator, shooter, conveyor, shooterLimelight, drive)));
+                    intake, elevator, shooter, conveyor, shooterLimelight, drive,
+                        () -> Math.abs(driverController.getRightX()) > 0.05)
+                    ));
     driverController
         .rightBumper()
         .onTrue(
@@ -290,8 +294,8 @@ public class RobotContainer implements Sendable {
                 () -> {
                   if (matchState.isBlue()) {
                     drive.rotateOrKeepHeading(
-                        MathUtil.applyDeadband(-driverController.getLeftY(), 0.1),
-                        MathUtil.applyDeadband(-driverController.getLeftX(), 0.1),
+                        JoystickUtil.squareAxis(MathUtil.applyDeadband(-driverController.getLeftY(), 0.1)),
+                        JoystickUtil.squareAxis(MathUtil.applyDeadband(-driverController.getLeftX(), 0.1)),
                         JoystickUtil.squareAxis(
                             MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
                         driveFieldRelative, // always field relative
@@ -299,16 +303,16 @@ public class RobotContainer implements Sendable {
                   } else {
                     if (driveFieldRelative) {
                       drive.rotateOrKeepHeading(
-                          MathUtil.applyDeadband(driverController.getLeftY(), 0.1),
-                          MathUtil.applyDeadband(driverController.getLeftX(), 0.1),
+                          JoystickUtil.squareAxis(MathUtil.applyDeadband(driverController.getLeftY(), 0.1)),
+                          JoystickUtil.squareAxis(MathUtil.applyDeadband(driverController.getLeftX(), 0.1)),
                           JoystickUtil.squareAxis(
                               MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
                           driveFieldRelative, // always field relative
                           getCardinalDirectionDegrees());
                     } else {
                       drive.rotateOrKeepHeading(
-                          MathUtil.applyDeadband(-driverController.getLeftY(), 0.1),
-                          MathUtil.applyDeadband(-driverController.getLeftX(), 0.1),
+                          JoystickUtil.squareAxis(MathUtil.applyDeadband(-driverController.getLeftY(), 0.1)),
+                          JoystickUtil.squareAxis(MathUtil.applyDeadband(-driverController.getLeftX(), 0.1)),
                           JoystickUtil.squareAxis(
                               MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
                           driveFieldRelative, // always field relative

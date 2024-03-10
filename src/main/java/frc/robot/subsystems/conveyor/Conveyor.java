@@ -2,6 +2,7 @@ package frc.robot.subsystems.conveyor;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkLimitSwitch;
@@ -80,7 +81,20 @@ public class Conveyor extends SubsystemBase {
     int errors = 0;
     errors += SparkMaxUtils.check(frontMotor.restoreFactoryDefaults());
     errors += SparkMaxUtils.check(backMotor.restoreFactoryDefaults());
-
+    errors += SparkMaxUtils.check(frontMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 20));
+    errors += SparkMaxUtils.check(frontMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 20));
+    errors += SparkMaxUtils.check(frontMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 50));
+    errors += SparkMaxUtils.check(frontMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500));
+    errors += SparkMaxUtils.check(frontMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500));
+    errors += SparkMaxUtils.check(frontMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 200));
+    errors += SparkMaxUtils.check(frontMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 200));
+    errors += SparkMaxUtils.check(backMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 20));
+    errors += SparkMaxUtils.check(backMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 20));
+    errors += SparkMaxUtils.check(backMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 50));
+    errors += SparkMaxUtils.check(backMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500));
+    errors += SparkMaxUtils.check(backMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500));
+    errors += SparkMaxUtils.check(backMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 200));
+    errors += SparkMaxUtils.check(backMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 200));
     errors += SparkMaxUtils.check(frontMotor.setIdleMode(IdleMode.kBrake));
     errors += SparkMaxUtils.check(backMotor.setIdleMode(IdleMode.kCoast));
 
@@ -178,6 +192,43 @@ public class Conveyor extends SubsystemBase {
   }
 
   /** Get a note from the intake. */
+  public static Command startReceive(Conveyor conveyor) {
+    return new SequentialCommandGroup(
+        new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SPEED), conveyor),
+        new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SPEED)),
+        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
+        new WaitUntilCommand(() -> conveyor.beamBreakSensorOne.isPressed()));
+  }
+
+  public static Command rumbleBriefly(Conveyor conveyor) {
+    return 
+        new SequentialCommandGroup(
+                new InstantCommand(
+                    () -> {
+                      conveyor.rumbleSetter.accept(1);
+                    }),
+                new WaitCommand(0.25),
+                new InstantCommand(
+                    () -> {
+                      conveyor.rumbleSetter.accept(0.25);
+                    }))
+            .finallyDo(() -> conveyor.rumbleSetter.accept(0));
+
+  }
+
+  /** Get a note from the intake. */
+  public static Command finishReceive(Conveyor conveyor) {
+    return new SequentialCommandGroup(
+        new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED), conveyor),
+        new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED)),
+        new WaitUntilCommand(() -> !conveyor.beamBreakSensorOne.isPressed()),
+        Conveyor.stop(conveyor),
+        new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", true)),
+        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE)
+    );
+  }
+
+  /** Get a note from the intake. */
   public static Command receive(Conveyor conveyor) {
     Command rumbleBriefly =
         new SequentialCommandGroup(
@@ -193,7 +244,7 @@ public class Conveyor extends SubsystemBase {
             .finallyDo(() -> conveyor.rumbleSetter.accept(0));
 
     return new SequentialCommandGroup(
-        new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SPEED)),
+        new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SPEED), conveyor),
         new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SPEED)),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
         new WaitUntilCommand(() -> conveyor.beamBreakSensorOne.isPressed()),

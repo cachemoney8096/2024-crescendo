@@ -25,7 +25,7 @@ public class AmpPrepScore extends SequentialCommandGroup {
         new SequentialCommandGroup(
             new InstantCommand(() -> drive.setTargetHeadingDegrees(90)),
             new InstantCommand(() -> shooter.setShooterMode(Shooter.ShooterMode.IDLE)),
-            new SafeDeploy(intake, elevator),
+            new SafeDeploy(intake, elevator, true),
             new WaitUntilCommand(intake::clearOfConveyorZone),
             new WaitUntilCommand(shooter::clearOfConveyorZone),
             new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SCORE_AMP, true)),
@@ -36,6 +36,6 @@ public class AmpPrepScore extends SequentialCommandGroup {
             new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SCORE_AMP, true)),
             moveWhenNotSafe,
             () -> elevator.elevatorAboveIntakeInterferenceZone()),
-        new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)));
+        new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.ALMOST_CLEAR_OF_CONVEYOR)));
   }
 }

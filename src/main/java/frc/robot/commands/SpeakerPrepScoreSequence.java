@@ -1,13 +1,18 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.conveyor.Conveyor;
+import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
@@ -15,7 +20,11 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
+import frc.robot.utils.MatchStateUtil;
+
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 
 /**
  * gets the robot ready to shoot a ring into the speaker. gets intake and elevator into position,
@@ -32,7 +41,8 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
       Shooter shooter,
       Conveyor conveyor,
       ShooterLimelight limelight,
-      DriveSubsystem drive) {
+      DriveSubsystem drive, 
+      BooleanSupplier driverControllerInput) {
 
     // Drive is not a requirement!!
     addRequirements(intake, elevator, shooter, conveyor);
@@ -43,24 +53,38 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
         new RunCommand(
                 () -> {
-                  tagDetection = limelight.checkForTag();
-                  if (tagDetection.isEmpty()) {
-                    return;
+                  ChassisSpeeds currentChassisSpeeds = drive.getCurrentChassisSpeeds();
+                  Translation2d driveVelocityMps = new Translation2d(currentChassisSpeeds.vxMetersPerSecond, currentChassisSpeeds.vyMetersPerSecond);
+                  
+                  if (driveVelocityMps.getNorm() > 0.02 || Math.abs(currentChassisSpeeds.omegaRadiansPerSecond) > Units.degreesToRadians(10)) {
+                    Pair<Rotation2d, Double> p = ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(drive.getPose(), drive.matchState.isBlue());
+                    drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
+                    shooter.setShooterDistance(p.getSecond());
+                    System.out.println("Moving");
                   }
-
-                  System.out.println("tag degrees: " + tagDetection.get().getFirst().getDegrees());
-                  drive.setTargetHeadingDegrees(tagDetection.get().getFirst().getDegrees());
-                  shooter.setShooterDistance(tagDetection.get().getSecond());
+                  else{
+                    Optional<Pair<Rotation2d, Double>> interimTagDetection = limelight.checkForTag();
+                    if(interimTagDetection.isEmpty()){
+                      Pair<Rotation2d, Double> p = ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(drive.getPose(), drive.matchState.isBlue());
+                      drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
+                      shooter.setShooterDistance(p.getSecond());
+                      tagDetection = interimTagDetection;
+                      System.out.println("Not moving no tag");
+                    }
+                    else{
+                      tagDetection = interimTagDetection;
+                      // System.out.println("tag degrees: " + tagDetection.get().getFirst().getDegrees());
+                      System.out.println("Not moving with tag, done!");
+                      drive.setTargetHeadingDegrees(tagDetection.get().getFirst().getDegrees());
+                      shooter.setShooterDistance(tagDetection.get().getSecond());
+                    }
+                  }
+      
                   shooter.readyToShoot = true;
                 })
             .until(
                 () -> {
-                  ChassisSpeeds currentSpeeds = drive.getCurrentChassisSpeeds();
-                  Translation2d currentSpeedsXY =
-                      new Translation2d(
-                          currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
-                  boolean currentlyStatic = currentSpeedsXY.getNorm() < 0.1;
-                  return tagDetection.isPresent() && currentlyStatic;
+                  return tagDetection.isPresent() || driverControllerInput.getAsBoolean();
                 }));
   }
 }

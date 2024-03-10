@@ -40,7 +40,7 @@ public class GoHomeSequence extends SequentialCommandGroup {
         new SequentialCommandGroup(
             new InstantCommand(() -> shooter.setShooterMode(desiredShooterMode)),
             new WaitUntilCommand(shooter::clearOfConveyorZone),
-            new SafeDeploy(intake, elevator),
+            new SafeDeploy(intake, elevator, stowIntake),
             new WaitUntilCommand(intake::clearOfConveyorZone),
             new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME, true)),
             new WaitUntilCommand(elevator::elevatorBelowInterferenceZone),

@@ -8,6 +8,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
@@ -53,7 +54,9 @@ public class Intake extends SubsystemBase {
 
   public enum IntakePosition {
     DEPLOYED,
-    STOWED
+    STOWED,
+    CLEAR_OF_CONVEYOR,
+    ALMOST_CLEAR_OF_CONVEYOR
   }
 
   private TreeMap<IntakePosition, Double> intakePositionMap;
@@ -73,6 +76,8 @@ public class Intake extends SubsystemBase {
     intakePositionMap = new TreeMap<IntakePosition, Double>();
     intakePositionMap.put(IntakePosition.DEPLOYED, IntakeCal.INTAKE_DEPLOYED_POSITION_DEGREES);
     intakePositionMap.put(IntakePosition.STOWED, IntakeCal.INTAKE_STOWED_POSITION_DEGREES);
+    intakePositionMap.put(IntakePosition.CLEAR_OF_CONVEYOR, IntakeCal.INTAKE_CLEAR_OF_CONVEYOR_DEGREES);
+    intakePositionMap.put(IntakePosition.ALMOST_CLEAR_OF_CONVEYOR, IntakeCal.INTAKE_ALMOST_CLEAR_OF_CONVEYOR_DEGREES);
 
     pivotRelativeEncoder.setPosition(getPivotPositionFromAbs());
   }
@@ -85,6 +90,13 @@ public class Intake extends SubsystemBase {
   private boolean setUpPivotSpark() {
     int errors = 0;
     errors += SparkMaxUtils.check(pivotMotor.restoreFactoryDefaults());
+    errors += SparkMaxUtils.check(pivotMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 20));
+    errors += SparkMaxUtils.check(pivotMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 20));
+    errors += SparkMaxUtils.check(pivotMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 50));
+    errors += SparkMaxUtils.check(pivotMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500));
+    errors += SparkMaxUtils.check(pivotMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500));
+    errors += SparkMaxUtils.check(pivotMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 200));
+    errors += SparkMaxUtils.check(pivotMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 200));
 
     Timer.delay(0.1);
 

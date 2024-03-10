@@ -39,7 +39,8 @@ public final class ElevatorCal {
       POSITION_SCORE_TRAP_INCHES = 38.5,
       POSITION_SCORE_AMP_INCHES = 32.5,
       POSITION_PRE_CLIMB_INCHES = 38.0,
-      POSITION_SLIGHTLY_UP_INCHES = 2.75;
+      POSITION_SLIGHTLY_UP_INCHES = 3.75, 
+      POSITION_INTAKE_INCHES = 5.75;
 
   public static final int ELEVATOR_CURRENT_LIMIT_AMPS = 80;
 
@@ -51,6 +52,6 @@ public final class ElevatorCal {
    * move without first moving the elevator. This value should be the bottom or top, respectively,
    * of the range of values that cause intake-elevator interference
    */
-  public static final double ELEVATOR_INTERFERENCE_THRESHOLD_MINIMUM_INCHES = 4.0,
+  public static final double ELEVATOR_INTERFERENCE_THRESHOLD_MINIMUM_INCHES = 4.25,
       ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES = 18.5;
 }
