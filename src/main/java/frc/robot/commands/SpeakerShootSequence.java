@@ -12,7 +12,6 @@ import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.subsystems.shooter.ShooterCal;
-import java.util.function.BooleanSupplier;
 
 /**
  * shoots a ring into the speaker once the shooter is in position and spun up, then brings the robot
@@ -24,14 +23,13 @@ public class SpeakerShootSequence extends SequentialCommandGroup {
       Shooter shooter,
       Elevator elevator,
       DriveSubsystem drive,
-      BooleanSupplier waitUntilRotatedFunc) {
+      boolean waitUntilRotated) {
     addRequirements(conveyor, shooter);
     addCommands(
         new InstantCommand(
             () -> {
-              System.out.println("is teleop in shoot" + waitUntilRotatedFunc.getAsBoolean());
+              System.out.println("is teleop in shoot" + waitUntilRotated);
             }),
-        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SPEAKER_PREP, true)),
         new ConditionalCommand(
             new PrintCommand("Waiting for robot heading")
                 .andThen(
@@ -42,7 +40,7 @@ public class SpeakerShootSequence extends SequentialCommandGroup {
                 .withTimeout(2.0)
                 .andThen(new PrintCommand("Done waiting for target heading")),
             new InstantCommand(),
-            waitUntilRotatedFunc),
+            () -> waitUntilRotated),
         new PrintCommand("Waiting for shooter at desired and spun up"),
         new WaitUntilCommand(
             () -> {
@@ -60,6 +58,6 @@ public class SpeakerShootSequence extends SequentialCommandGroup {
   /** Defaults to <b> not </b> waiting until rotated */
   public SpeakerShootSequence(
       Conveyor conveyor, Shooter shooter, Elevator elevator, DriveSubsystem drive) {
-    this(conveyor, shooter, elevator, drive, () -> false);
+    this(conveyor, shooter, elevator, drive, false);
   }
 }

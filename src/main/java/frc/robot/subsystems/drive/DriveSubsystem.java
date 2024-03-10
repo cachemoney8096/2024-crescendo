@@ -95,7 +95,7 @@ public class DriveSubsystem extends SubsystemBase {
   private double rotControllerInput = 0.0;
 
   /** Provides info on our alliance color and whether this is a real match. */
-  private MatchStateUtil matchState;
+  public MatchStateUtil matchState;
 
   public DriveSubsystem(MatchStateUtil matchState) {
     intializeGyro();

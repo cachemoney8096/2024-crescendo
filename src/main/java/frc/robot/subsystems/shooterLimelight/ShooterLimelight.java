@@ -203,6 +203,13 @@ public class ShooterLimelight extends SubsystemBase {
       return Optional.empty();
     }
 
+    return Optional.of(
+        getRotationAndDistanceToSpeakerFromPose(
+            getBotPose2d_wpiBlue().getSecond(), matchState.isBlue()));
+  }
+
+  public static Pair<Rotation2d, Double> getRotationAndDistanceToSpeakerFromPose(
+      Pose2d robotPose, boolean isBlue) {
     /** Offset from center = 0,0 space to wpi blue origin space */
     Translation2d fieldCenterToCornerOffset = new Translation2d(-8.31, -4.10);
 
@@ -210,17 +217,14 @@ public class ShooterLimelight extends SubsystemBase {
     Pose2d speakerCenterTagPoseBlue = new Pose2d(-8.31, 1.44, new Rotation2d(0.0));
     Pose2d speakerCenterTagPoseRed = new Pose2d(8.31, 1.44, new Rotation2d(0.0));
 
-    Pose2d speakerCenterTagPose =
-        matchState.isBlue() ? speakerCenterTagPoseBlue : speakerCenterTagPoseRed;
+    Pose2d speakerCenterTagPose = isBlue ? speakerCenterTagPoseBlue : speakerCenterTagPoseRed;
 
     Pose2d speakerCenterTagPose_wpiBlue =
         speakerCenterTagPose.plus(
             new Transform2d(fieldCenterToCornerOffset, new Rotation2d(0.0)).inverse());
 
     Translation2d robotToTag =
-        speakerCenterTagPose_wpiBlue
-            .getTranslation()
-            .minus(getBotPose2d_wpiBlue().getSecond().getTranslation());
+        speakerCenterTagPose_wpiBlue.getTranslation().minus(robotPose.getTranslation());
     Rotation2d angleToTag =
         robotToTag
             .getAngle()
@@ -231,7 +235,7 @@ public class ShooterLimelight extends SubsystemBase {
                         ShooterLimelightCal.LIMELIGHT_DETECTION_OFFSET_DEGREES)));
     double distanceToTagMeters = robotToTag.getNorm();
 
-    return Optional.of(Pair.of(angleToTag, distanceToTagMeters));
+    return Pair.of(angleToTag, distanceToTagMeters);
   }
 
   public double getLatencySeconds() {

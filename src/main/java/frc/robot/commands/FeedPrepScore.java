@@ -22,7 +22,7 @@ public class FeedPrepScore extends SequentialCommandGroup {
       MatchStateUtil matchState) {
     addRequirements(elevator, conveyor, intake, shooter);
     addCommands(
-        new GoHomeSequence(intake, elevator, shooter, conveyor, true, false),
+        new GoHomeSequence(intake, elevator, shooter, conveyor, true, false, false),
         new WaitUntilCommand(elevator::elevatorBelowInterferenceZone),
         new ConditionalCommand(
             new InstantCommand(() -> drive.setTargetHeadingDegrees(315.0)),

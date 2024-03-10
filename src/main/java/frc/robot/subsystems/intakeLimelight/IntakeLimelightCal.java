@@ -9,7 +9,7 @@ public class IntakeLimelightCal {
   public static final double LIMELIGHT_YAW_DEGREES = 0.0;
   /** offset from trap apriltag */
   public static final Transform2d TRAP_OFFSET =
-      new Transform2d(new Translation2d(-Units.inchesToMeters(11.5), 0), new Rotation2d(0));
+      new Transform2d(new Translation2d(-Units.inchesToMeters(9.0), 0), new Rotation2d(0));
 
   public static final double LIMELIGHT_DETECTION_OFFSET_DEGREES = 0.0;
 }

@@ -3,6 +3,7 @@ package frc.robot.subsystems.elevator;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
@@ -29,7 +30,8 @@ public class Elevator extends SubsystemBase {
     SCORE_TRAP,
     SCORE_AMP,
     PRE_CLIMB,
-    SPEAKER_PREP
+    SLIGHTLY_UP,
+    INTAKING
   }
 
   public CANSparkMax leftMotor =
@@ -89,8 +91,8 @@ public class Elevator extends SubsystemBase {
     elevatorPositions.put(ElevatorPosition.SCORE_AMP, ElevatorCal.POSITION_SCORE_AMP_INCHES);
     elevatorPositions.put(ElevatorPosition.SCORE_TRAP, ElevatorCal.POSITION_SCORE_TRAP_INCHES);
     elevatorPositions.put(ElevatorPosition.PRE_CLIMB, ElevatorCal.POSITION_PRE_CLIMB_INCHES);
-    elevatorPositions.put(ElevatorPosition.SPEAKER_PREP, ElevatorCal.POSITION_SPEAKER_PREP_INCHES);
-
+    elevatorPositions.put(ElevatorPosition.SLIGHTLY_UP, ElevatorCal.POSITION_SLIGHTLY_UP_INCHES);
+    elevatorPositions.put(ElevatorPosition.INTAKING, ElevatorCal.POSITION_INTAKE_INCHES);
     setControlParams(true);
   }
 
@@ -98,6 +100,20 @@ public class Elevator extends SubsystemBase {
     int errors = 0;
     errors += SparkMaxUtils.check(leftMotor.restoreFactoryDefaults());
     errors += SparkMaxUtils.check(rightMotor.restoreFactoryDefaults());
+    errors += SparkMaxUtils.check(leftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 20));
+    errors += SparkMaxUtils.check(leftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 20));
+    errors += SparkMaxUtils.check(leftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 50));
+    errors += SparkMaxUtils.check(leftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500));
+    errors += SparkMaxUtils.check(leftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500));
+    errors += SparkMaxUtils.check(leftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 200));
+    errors += SparkMaxUtils.check(leftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 200));
+    errors += SparkMaxUtils.check(rightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 20));
+    errors += SparkMaxUtils.check(rightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 20));
+    errors += SparkMaxUtils.check(rightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 50));
+    errors += SparkMaxUtils.check(rightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500));
+    errors += SparkMaxUtils.check(rightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500));
+    errors += SparkMaxUtils.check(rightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 200));
+    errors += SparkMaxUtils.check(rightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 200));
 
     errors += SparkMaxUtils.check(rightMotor.follow(leftMotor, true));
 
@@ -111,7 +127,7 @@ public class Elevator extends SubsystemBase {
         SparkMaxUtils.check(
             rightMotor.setSmartCurrentLimit(ElevatorCal.ELEVATOR_CURRENT_LIMIT_AMPS));
 
-    errors += SparkMaxUtils.check(leftMotorEncoderAbs.setInverted(false));
+    errors += SparkMaxUtils.check(leftMotorEncoderAbs.setInverted(true));
     errors +=
         SparkMaxUtils.check(
             SparkMaxUtils.UnitConversions.setLinearFromGearRatio(

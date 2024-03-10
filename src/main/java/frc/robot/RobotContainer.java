@@ -6,16 +6,19 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -28,6 +31,7 @@ import frc.robot.commands.FeedPrepScore;
 import frc.robot.commands.GoHomeSequence;
 import frc.robot.commands.IntakeSequence;
 import frc.robot.commands.PIDToPoint;
+import frc.robot.commands.PartialClimbSequence;
 import frc.robot.commands.SetTrapLineupPosition;
 import frc.robot.commands.SpeakerPrepScoreAuto;
 import frc.robot.commands.SpeakerPrepScoreAutoPreload;
@@ -39,7 +43,6 @@ import frc.robot.commands.autos.ScoreTwoNotes;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakePosition;
 import frc.robot.subsystems.intake.IntakeCal;
@@ -51,6 +54,8 @@ import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.JoystickUtil;
 import frc.robot.utils.MatchStateUtil;
+import java.util.TreeSet;
+import java.util.function.BooleanSupplier;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -58,7 +63,7 @@ import frc.robot.utils.MatchStateUtil;
  * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
-public class RobotContainer {
+public class RobotContainer implements Sendable {
   private MatchStateUtil matchState;
 
   private final CommandXboxController driverController =
@@ -75,13 +80,17 @@ public class RobotContainer {
   public ShooterLimelight shooterLimelight;
   public IntakeLimelight intakeLimelight;
 
-  /** True for shooting (speaker or feed), false for amp */
-  public boolean shootScore = false;
+  public enum PrepState {
+    OFF,
+    CLIMB,
+    SPEAKER,
+    FEED,
+    AMP
+  }
+
+  PrepState prepState = PrepState.OFF;
 
   public boolean driveFieldRelative = true;
-
-  /** Whether to wait until the robot has rotated to the AprilTags in the shooter logic */
-  public boolean shooterWaitUntilRotated = false;
 
   // A chooser for autonomous commands
   private SendableChooser<Command> autonChooser = new SendableChooser<>();
@@ -140,6 +149,7 @@ public class RobotContainer {
     Shuffleboard.getTab("Subsystems").add(elevator.getName(), elevator);
     Shuffleboard.getTab("Subsystems").add("Shooter limelight", shooterLimelight);
     Shuffleboard.getTab("Subsystems").add("Intake limelight", intakeLimelight);
+    Shuffleboard.getTab("Subsystems").add("Container", this);
 
     SmartDashboard.putBoolean("Have Note", false);
 
@@ -154,6 +164,7 @@ public class RobotContainer {
     autonChooser.addOption(
         "Score four from center",
         new ScoreFourFromCenterLine(drive, intake, elevator, shooter, conveyor, shooterLimelight));
+    SmartDashboard.putData(autonChooser);
   }
 
   private int getCardinalDirectionDegrees() {
@@ -185,84 +196,114 @@ public class RobotContainer {
         .whileTrue(new IntakeSequence(intake, elevator, conveyor, shooter));
     driverController
         .rightTrigger()
-        .onFalse(new GoHomeSequence(intake, elevator, shooter, conveyor, false, false));
+        .onFalse(
+            Conveyor.finishReceive(conveyor)
+                .andThen(
+                    new GoHomeSequence(intake, elevator, shooter, conveyor, false, false, true))
+                .beforeStarting(() -> prepState = PrepState.OFF));
     driverController
         .leftTrigger()
         .onTrue(
-            new ConditionalCommand(
-                new ConditionalCommand(
-                    new SpeakerShootSequence(
-                            conveyor, shooter, elevator, drive, () -> shooterWaitUntilRotated)
-                        .beforeStarting(
-                            () -> {
-                              System.out.println("wait until rotated: " + shooterWaitUntilRotated);
-                            })
-                        .andThen(new InstantCommand(() -> shooter.readyToShoot = false))
-                        .andThen(
-                            new InstantCommand(
-                                () -> elevator.setDesiredPosition(ElevatorPosition.HOME, true)))
-                        .finallyDo(conveyor::stopRollers),
-                    new InstantCommand(),
-                    () -> shooter.readyToShoot),
-                new AmpScore(drive, conveyor, intake, shooter, elevator),
-                () -> shootScore)); // score based on prep
+            new DeferredCommand(
+                () -> {
+                  PrepState input = prepState;
+                  prepState = PrepState.OFF;
+                  switch (input) {
+                    case OFF:
+                      return new InstantCommand();
+                    case CLIMB:
+                      return new ClimbSequence(intake, elevator, shooter, conveyor);
+                    case FEED:
+                      return new SpeakerShootSequence(conveyor, shooter, elevator, drive, false);
+                    case SPEAKER:
+                      return new SpeakerShootSequence(conveyor, shooter, elevator, drive, true);
+                    case AMP:
+                      return new AmpScore(drive, conveyor, intake, shooter, elevator);
+                  }
+                  return new InstantCommand();
+                },
+                new TreeSet<Subsystem>()));
+
+    BooleanSupplier driverRotationCommanded =
+        () -> {
+          return Math.abs(driverController.getRightX()) > 0.05;
+        };
     driverController
         .leftBumper()
         .onTrue(
             new SequentialCommandGroup(
-                new InstantCommand(() -> shootScore = true),
-                new InstantCommand(() -> shooterWaitUntilRotated = true),
+                new InstantCommand(() -> prepState = PrepState.SPEAKER),
                 new SpeakerPrepScoreSequence(
-                    intake, elevator, shooter, conveyor, shooterLimelight, drive)));
+                    intake,
+                    elevator,
+                    shooter,
+                    conveyor,
+                    shooterLimelight,
+                    drive,
+                    driverRotationCommanded)));
     driverController
         .rightBumper()
         .onTrue(
             new SequentialCommandGroup(
-                new AmpPrepScore(elevator, conveyor, intake, shooter),
-                new InstantCommand(() -> shootScore = false)));
+                new InstantCommand(() -> prepState = PrepState.AMP),
+                new AmpPrepScore(elevator, conveyor, intake, shooter, drive)));
     // bottom right back button
     driverController
         .povLeft()
         .onTrue(
-            new GoHomeSequence(intake, elevator, shooter, conveyor, false, true)
+            new GoHomeSequence(intake, elevator, shooter, conveyor, false, true, true)
                 .beforeStarting(() -> driveFieldRelative = true)
-                .beforeStarting(() -> drive.throttle(1.0)));
+                .beforeStarting(() -> drive.throttle(1.0))
+                .beforeStarting(() -> prepState = PrepState.OFF));
     driverController.start().onTrue(new InstantCommand(drive::resetYaw));
     // top right button
     driverController
         .povDown()
         .onTrue(
             new SequentialCommandGroup(
-                new InstantCommand(() -> shooterWaitUntilRotated = false),
-                new FeedPrepScore(elevator, conveyor, intake, shooter, drive, matchState),
-                new InstantCommand(() -> shootScore = true)));
+                new InstantCommand(() -> prepState = PrepState.FEED),
+                new FeedPrepScore(elevator, conveyor, intake, shooter, drive, matchState)));
     // bottom left back button
-    driverController.povRight().onTrue(new ClimbSequence(intake, elevator, shooter, conveyor));
+    driverController.povRight().onTrue(new UnclimbSequence(elevator, shooter));
+
+    BooleanSupplier driverJoysticksActive =
+        () -> {
+          return Math.abs(driverController.getLeftY()) > 0.2
+              || Math.abs(driverController.getLeftX()) > 0.2
+              || Math.abs(driverController.getRightY()) > 0.2
+              || Math.abs(driverController.getRightX()) > 0.2;
+        };
 
     // top left back button
     driverController
         .povUp()
         .onTrue(
-            new ClimbPrepSequence(intake, elevator, shooter, conveyor, intakeLimelight)
+            new InstantCommand(() -> prepState = PrepState.CLIMB)
+                .andThen(
+                    new ClimbPrepSequence(intake, elevator, shooter, conveyor, intakeLimelight))
                 .andThen(new WaitUntilCommand(() -> elevator.atDesiredPosition()))
                 // .andThen(new SetTrapLineupPosition(intakeLimelight, drive).withTimeout(4.0)));
                 .andThen(
-                    new SequentialCommandGroup(
-                            new SetTrapLineupPosition(intakeLimelight, drive),
-                            new PIDToPoint(drive))
-                        .withTimeout(4.0))
+                    () ->
+                        new SequentialCommandGroup(
+                                new SetTrapLineupPosition(intakeLimelight, drive),
+                                new PIDToPoint(drive))
+                            .raceWith(new WaitUntilCommand(driverJoysticksActive))
+                            .schedule())
                 .andThen(new InstantCommand(() -> driveFieldRelative = false))
                 .andThen(new InstantCommand(() -> drive.throttle(0.3))));
 
-    driverController.back().onTrue(new UnclimbSequence(elevator, shooter));
+    driverController.back().onTrue(new PartialClimbSequence(intake, elevator, shooter));
 
     drive.setDefaultCommand(
         new RunCommand(
                 () -> {
                   if (matchState.isBlue()) {
                     drive.rotateOrKeepHeading(
-                        MathUtil.applyDeadband(-driverController.getLeftY(), 0.1),
-                        MathUtil.applyDeadband(-driverController.getLeftX(), 0.1),
+                        JoystickUtil.squareAxis(
+                            MathUtil.applyDeadband(-driverController.getLeftY(), 0.1)),
+                        JoystickUtil.squareAxis(
+                            MathUtil.applyDeadband(-driverController.getLeftX(), 0.1)),
                         JoystickUtil.squareAxis(
                             MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
                         driveFieldRelative, // always field relative
@@ -270,16 +311,20 @@ public class RobotContainer {
                   } else {
                     if (driveFieldRelative) {
                       drive.rotateOrKeepHeading(
-                          MathUtil.applyDeadband(driverController.getLeftY(), 0.1),
-                          MathUtil.applyDeadband(driverController.getLeftX(), 0.1),
+                          JoystickUtil.squareAxis(
+                              MathUtil.applyDeadband(driverController.getLeftY(), 0.1)),
+                          JoystickUtil.squareAxis(
+                              MathUtil.applyDeadband(driverController.getLeftX(), 0.1)),
                           JoystickUtil.squareAxis(
                               MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
                           driveFieldRelative, // always field relative
                           getCardinalDirectionDegrees());
                     } else {
                       drive.rotateOrKeepHeading(
-                          MathUtil.applyDeadband(-driverController.getLeftY(), 0.1),
-                          MathUtil.applyDeadband(-driverController.getLeftX(), 0.1),
+                          JoystickUtil.squareAxis(
+                              MathUtil.applyDeadband(-driverController.getLeftY(), 0.1)),
+                          JoystickUtil.squareAxis(
+                              MathUtil.applyDeadband(-driverController.getLeftX(), 0.1)),
                           JoystickUtil.squareAxis(
                               MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
                           driveFieldRelative, // always field relative
@@ -339,5 +384,15 @@ public class RobotContainer {
     // elevator currently goes UP in auto (score two notes)!!
 
     return autonChooser.getSelected();
+  }
+
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    builder.addStringProperty(
+        "prepState",
+        () -> {
+          return prepState.toString();
+        },
+        null);
   }
 }

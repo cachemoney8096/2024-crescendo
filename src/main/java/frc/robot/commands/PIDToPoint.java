@@ -15,9 +15,9 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.drive.DriveSubsystem;
 
 public class PIDToPoint extends SequentialCommandGroup {
-  PIDController xController = new PIDController(0.25, 0.0, 0.0);
-  PIDController yController = new PIDController(0.25, 0.0, 0.0);
-  final double feedforwardOutput = 0.05;
+  PIDController xController = new PIDController(1, 0.0, 0.0); // input meters output -1 to 1
+  PIDController yController = new PIDController(1, 0.0, 0.0); // input meters output -1 to 1
+  final double feedforwardOutput = 0.2;
 
   Transform2d transform = new Transform2d();
 
@@ -63,8 +63,8 @@ public class PIDToPoint extends SequentialCommandGroup {
               xOutput += xFfOutput;
               yOutput += yFfOutput;
 
-              double xOutputClamped = clamp(xOutput, 0.1);
-              double yOutputClamped = clamp(yOutput, 0.1);
+              double xOutputClamped = clamp(xOutput, 0.4);
+              double yOutputClamped = clamp(yOutput, 0.4);
 
               drive.rotateOrKeepHeading(xOutputClamped, yOutputClamped, 0.0, true, -1);
 

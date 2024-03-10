@@ -3,6 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.conveyor.Conveyor;
@@ -28,16 +29,19 @@ public class IntakeSequence extends SequentialCommandGroup {
               shooter.setShooterMode(ShooterMode.IDLE);
             }),
         new WaitUntilCommand(shooter::clearOfConveyorZone),
-        new SafeDeploy(intake, elevator),
+        new SafeDeploy(intake, elevator, false),
         new ConditionalCommand(
             new InstantCommand(),
             new WaitUntilCommand(intake::clearOfConveyorZone),
             elevator::elevatorBelowInterferenceZone),
-        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME, true)),
+        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.INTAKING, true)),
         new WaitUntilCommand(elevator::atDesiredPosition),
         new WaitUntilCommand(intake::nearDeployed),
         new InstantCommand(intake::startRollers),
-        Conveyor.receive(conveyor),
-        new InstantCommand(intake::stopRollers, intake));
+        Conveyor.startReceive(conveyor),
+        new ParallelCommandGroup(
+            Conveyor.rumbleBriefly(conveyor),
+            new InstantCommand(intake::stopRollers, intake),
+            Conveyor.finishReceive(conveyor)));
   }
 }
