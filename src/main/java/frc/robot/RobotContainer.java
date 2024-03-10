@@ -202,7 +202,7 @@ public class RobotContainer implements Sendable {
         .whileTrue(new IntakeSequence(intake, elevator, conveyor, shooter));
     driverController
         .rightTrigger()
-        .onFalse(new GoHomeSequence(intake, elevator, shooter, conveyor, false, false)
+        .onFalse(new GoHomeSequence(intake, elevator, shooter, conveyor, false, false, true)
         .beforeStarting(() -> prepState = PrepState.OFF));
     driverController.leftTrigger().onTrue(
         new DeferredCommand(() -> {
@@ -240,12 +240,12 @@ public class RobotContainer implements Sendable {
         .onTrue(
             new SequentialCommandGroup(
                 new InstantCommand(() -> prepState = PrepState.AMP),
-                new AmpPrepScore(elevator, conveyor, intake, shooter)));
+                new AmpPrepScore(elevator, conveyor, intake, shooter, drive)));
     // bottom right back button
     driverController
         .povLeft()
         .onTrue(
-            new GoHomeSequence(intake, elevator, shooter, conveyor, false, true)
+            new GoHomeSequence(intake, elevator, shooter, conveyor, false, true, true)
                 .beforeStarting(() -> driveFieldRelative = true)
                 .beforeStarting(() -> drive.throttle(1.0))
                 .beforeStarting(() -> prepState = PrepState.OFF));

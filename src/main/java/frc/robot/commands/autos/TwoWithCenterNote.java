@@ -33,7 +33,7 @@ public class TwoWithCenterNote extends SequentialCommandGroup {
       ShooterLimelight limelight) {
     NamedCommands.registerCommand(
         "goHomeWithShooterSpunUp",
-        new GoHomeSequence(intake, elevator, shooter, conveyor, true, false));
+        new GoHomeSequence(intake, elevator, shooter, conveyor, true, false, false));
     NamedCommands.registerCommand(
         "intakeNote", new IntakeSequence(intake, elevator, conveyor, shooter).withTimeout(5.0));
     middleNoteAuto = PathPlannerPath.fromPathFile("Middle Note Auto");

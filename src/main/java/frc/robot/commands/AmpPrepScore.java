@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.conveyor.Conveyor;
+import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
@@ -17,11 +18,12 @@ import frc.robot.subsystems.shooter.Shooter;
  */
 public class AmpPrepScore extends SequentialCommandGroup {
   /** Creates a new AmpPreScore. */
-  public AmpPrepScore(Elevator elevator, Conveyor conveyer, Intake intake, Shooter shooter) {
+  public AmpPrepScore(Elevator elevator, Conveyor conveyer, Intake intake, Shooter shooter, DriveSubsystem drive) {
     addRequirements(conveyer, elevator, intake, shooter);
 
     SequentialCommandGroup moveWhenNotSafe =
         new SequentialCommandGroup(
+            new InstantCommand(() -> drive.setTargetHeadingDegrees(90)),
             new InstantCommand(() -> shooter.setShooterMode(Shooter.ShooterMode.IDLE)),
             new SafeDeploy(intake, elevator),
             new WaitUntilCommand(intake::clearOfConveyorZone),

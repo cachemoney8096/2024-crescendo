@@ -31,7 +31,7 @@ public class Elevator extends SubsystemBase {
     SCORE_TRAP,
     SCORE_AMP,
     PRE_CLIMB,
-    SPEAKER_PREP
+    SLIGHTLY_UP
   }
 
   private Optional<CRTGearRatioUtil> crtgruOptional = CRTGearRatioUtil.init(ElevatorConstants.ELEVATOR_LEFT_ABSOLUTE_ENCODER_RATIO_TERM, ElevatorConstants.ELEVATOR_RIGHT_ABSOLUTE_ENCODER_RATIO_TERM, ElevatorConstants.MAX_LEFT_GEAR_ROTATIONS, ElevatorConstants.ELEVATOR_DRUM_DIAMETER_IN*Math.PI);
@@ -94,7 +94,7 @@ public class Elevator extends SubsystemBase {
     elevatorPositions.put(ElevatorPosition.SCORE_AMP, ElevatorCal.POSITION_SCORE_AMP_INCHES);
     elevatorPositions.put(ElevatorPosition.SCORE_TRAP, ElevatorCal.POSITION_SCORE_TRAP_INCHES);
     elevatorPositions.put(ElevatorPosition.PRE_CLIMB, ElevatorCal.POSITION_PRE_CLIMB_INCHES);
-    elevatorPositions.put(ElevatorPosition.SPEAKER_PREP, ElevatorCal.POSITION_SPEAKER_PREP_INCHES);
+    elevatorPositions.put(ElevatorPosition.SLIGHTLY_UP, ElevatorCal.POSITION_SLIGHTLY_UP_INCHES);
     assert crtgruOptional.isPresent();
     crtgru = crtgruOptional.get();
     setControlParams(true);

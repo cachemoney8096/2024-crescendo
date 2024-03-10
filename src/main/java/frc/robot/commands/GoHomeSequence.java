@@ -23,8 +23,10 @@ public class GoHomeSequence extends SequentialCommandGroup {
       Shooter shooter,
       Conveyor conveyor,
       boolean spinUpShooter,
-      boolean stowIntake) {
+      boolean stowIntake, 
+      boolean homeElevator) {
     final ShooterMode desiredShooterMode = spinUpShooter ? ShooterMode.SPIN_UP : ShooterMode.IDLE;
+    final ElevatorPosition desiredElevatorPosition = homeElevator ? ElevatorPosition.HOME : ElevatorPosition.SLIGHTLY_UP;
     final SequentialCommandGroup goHomeWhenSafe =
         new SequentialCommandGroup(
             new ConditionalCommand(
@@ -32,7 +34,7 @@ public class GoHomeSequence extends SequentialCommandGroup {
                 new InstantCommand(),
                 () -> stowIntake),
             new InstantCommand(() -> shooter.setShooterMode(desiredShooterMode)),
-            new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME, true)));
+            new InstantCommand(() -> elevator.setDesiredPosition(desiredElevatorPosition, true)));
 
     final SequentialCommandGroup goHomeWhenNotSafe =
         new SequentialCommandGroup(

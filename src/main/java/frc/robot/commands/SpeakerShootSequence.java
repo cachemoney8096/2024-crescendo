@@ -31,7 +31,6 @@ public class SpeakerShootSequence extends SequentialCommandGroup {
             () -> {
               System.out.println("is teleop in shoot" + waitUntilRotated);
             }),
-        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SPEAKER_PREP, true)),
         new ConditionalCommand(
             new PrintCommand("Waiting for robot heading")
                 .andThen(

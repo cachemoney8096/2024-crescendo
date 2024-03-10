@@ -31,12 +31,12 @@ public class ScoreThisNote extends SequentialCommandGroup {
         new SpeakerPrepScoreSequence(intake, elevator, shooter, conveyor, limelight, drive)
             .withTimeout(5.0),
         new PrintCommand("ScoreThisNote - done prep"),
-        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SPEAKER_PREP, true)),
+        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SLIGHTLY_UP, true)),
         new WaitUntilCommand(() -> elevator.atDesiredPosition()),
         new SpeakerShootSequence(conveyor, shooter, elevator, drive),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME, true)),
         new PrintCommand("ScoreThisNote - done score"),
-        new GoHomeSequence(intake, elevator, shooter, conveyor, false, false),
+        new GoHomeSequence(intake, elevator, shooter, conveyor, false, false, false),
         new PrintCommand("ScoreThisNote - done home"));
   }
 }
