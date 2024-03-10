@@ -206,7 +206,6 @@ public class RobotContainer implements Sendable {
         .onTrue(
             new DeferredCommand(
                 () -> {
-                  System.out.println(prepState.toString());
                   PrepState input = prepState;
                   prepState = PrepState.OFF;
                   switch (input) {
@@ -225,6 +224,10 @@ public class RobotContainer implements Sendable {
                 },
                 new TreeSet<Subsystem>()));
 
+    BooleanSupplier driverRotationCommanded =
+        () -> {
+          return Math.abs(driverController.getRightX()) > 0.05;
+        };
     driverController
         .leftBumper()
         .onTrue(
@@ -237,7 +240,7 @@ public class RobotContainer implements Sendable {
                     conveyor,
                     shooterLimelight,
                     drive,
-                    () -> Math.abs(driverController.getRightX()) > 0.05)));
+                    driverRotationCommanded)));
     driverController
         .rightBumper()
         .onTrue(

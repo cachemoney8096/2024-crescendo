@@ -60,7 +60,6 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                             drive.getPose(), drive.matchState.isBlue());
                     drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
                     shooter.setShooterDistance(p.getSecond());
-                    System.out.println("Moving");
                   } else {
                     Optional<Pair<Rotation2d, Double>> interimTagDetection =
                         limelight.checkForTag();
@@ -71,12 +70,9 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                       drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
                       shooter.setShooterDistance(p.getSecond());
                       tagDetection = interimTagDetection;
-                      System.out.println("Not moving no tag");
                     } else {
                       tagDetection = interimTagDetection;
-                      // System.out.println("tag degrees: " +
-                      // tagDetection.get().getFirst().getDegrees());
-                      System.out.println("Not moving with tag, done!");
+                      System.out.println("tag degrees: " + tagDetection.get().getFirst().getDegrees());
                       drive.setTargetHeadingDegrees(tagDetection.get().getFirst().getDegrees());
                       shooter.setShooterDistance(tagDetection.get().getSecond());
                     }

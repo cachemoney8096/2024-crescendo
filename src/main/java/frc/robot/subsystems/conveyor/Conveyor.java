@@ -191,7 +191,7 @@ public class Conveyor extends SubsystemBase {
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.NO_NOTE));
   }
 
-  /** Get a note from the intake. */
+  /** Get a note from the intake, ends when conveyor sees the note. */
   public static Command startReceive(Conveyor conveyor) {
     return new SequentialCommandGroup(
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SPEED), conveyor),
@@ -200,6 +200,7 @@ public class Conveyor extends SubsystemBase {
         new WaitUntilCommand(() -> conveyor.beamBreakSensorOne.isPressed()));
   }
 
+  /** Rumbles the controllers. */
   public static Command rumbleBriefly(Conveyor conveyor) {
     return new SequentialCommandGroup(
             new InstantCommand(
@@ -214,42 +215,13 @@ public class Conveyor extends SubsystemBase {
         .finallyDo(() -> conveyor.rumbleSetter.accept(0));
   }
 
-  /** Get a note from the intake. */
+  /** Assuming a note is here, then runs until it's positioned correctly. Notably, it won't do anything if there's not a note. */
   public static Command finishReceive(Conveyor conveyor) {
     return new SequentialCommandGroup(
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED), conveyor),
         new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED)),
         new WaitUntilCommand(() -> !conveyor.beamBreakSensorOne.isPressed()),
         Conveyor.stop(conveyor),
-        new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", true)),
-        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE));
-  }
-
-  /** Get a note from the intake. */
-  public static Command receive(Conveyor conveyor) {
-    Command rumbleBriefly =
-        new SequentialCommandGroup(
-                new InstantCommand(
-                    () -> {
-                      conveyor.rumbleSetter.accept(1);
-                    }),
-                new WaitCommand(0.25),
-                new InstantCommand(
-                    () -> {
-                      conveyor.rumbleSetter.accept(0.25);
-                    }))
-            .finallyDo(() -> conveyor.rumbleSetter.accept(0));
-
-    return new SequentialCommandGroup(
-        new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SPEED), conveyor),
-        new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SPEED)),
-        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
-        new WaitUntilCommand(() -> conveyor.beamBreakSensorOne.isPressed()),
-        new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED)),
-        new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED)),
-        new WaitUntilCommand(() -> !conveyor.beamBreakSensorOne.isPressed()),
-        Conveyor.stop(conveyor),
-        rumbleBriefly,
         new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", true)),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE));
   }
