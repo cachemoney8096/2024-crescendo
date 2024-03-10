@@ -10,7 +10,8 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 
 /**
- * Switches the elevator to use the climbing controller, then has the robot climb and latch (and that's it).
+ * Switches the elevator to use the climbing controller, then has the robot climb and latch (and
+ * that's it).
  */
 public class PartialClimbSequence extends SequentialCommandGroup {
   public PartialClimbSequence(Intake intake, Elevator elevator, Shooter shooter) {

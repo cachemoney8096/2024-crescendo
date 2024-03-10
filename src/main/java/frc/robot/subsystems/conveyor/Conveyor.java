@@ -215,7 +215,10 @@ public class Conveyor extends SubsystemBase {
         .finallyDo(() -> conveyor.rumbleSetter.accept(0));
   }
 
-  /** Assuming a note is here, then runs until it's positioned correctly. Notably, it won't do anything if there's not a note. */
+  /**
+   * Assuming a note is here, then runs until it's positioned correctly. Notably, it won't do
+   * anything if there's not a note.
+   */
   public static Command finishReceive(Conveyor conveyor) {
     return new SequentialCommandGroup(
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED), conveyor),
