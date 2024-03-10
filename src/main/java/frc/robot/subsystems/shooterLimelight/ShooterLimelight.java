@@ -1,4 +1,4 @@
-// Code from team 3005
+// Code adapted from team 3005
 
 package frc.robot.subsystems.shooterLimelight;
 
@@ -22,10 +22,10 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.RobotContainer.MatchState;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
+import frc.robot.utils.MatchStateUtil;
 import java.util.Optional;
 
 /** Limelight for the shooter to identify game pieces */
@@ -67,7 +67,7 @@ public class ShooterLimelight extends SubsystemBase {
   // AprilTag detection
   private Optional<Transform2d> robotToScoringLocation = Optional.empty();
 
-  private MatchState matchState;
+  private MatchStateUtil matchState;
 
   /**
    * Create an ShooterLimelight object
@@ -81,7 +81,7 @@ public class ShooterLimelight extends SubsystemBase {
       double pitchAngleDegrees,
       double heightMeters,
       double targetHeightMeters,
-      MatchState matchState) {
+      MatchStateUtil matchState) {
     kCameraPitchAngleDegrees = pitchAngleDegrees;
     kCameraHeight = heightMeters;
     kTargetHeight = targetHeightMeters;
@@ -211,7 +211,7 @@ public class ShooterLimelight extends SubsystemBase {
     Pose2d speakerCenterTagPoseRed = new Pose2d(8.31, 1.44, new Rotation2d(0.0));
 
     Pose2d speakerCenterTagPose =
-        matchState.blue ? speakerCenterTagPoseBlue : speakerCenterTagPoseRed;
+        matchState.isBlue() ? speakerCenterTagPoseBlue : speakerCenterTagPoseRed;
 
     Pose2d speakerCenterTagPose_wpiBlue =
         speakerCenterTagPose.plus(
@@ -471,42 +471,32 @@ public class ShooterLimelight extends SubsystemBase {
     builder.addDoubleProperty("Tx", () -> getOffSetX(), null);
     builder.addDoubleProperty("Ty", () -> getOffSetY(), null);
     builder.addBooleanProperty("Valid Target", () -> isValidTarget(), null);
-    if (Math.abs(getBotPose3d().getZ()) < ShooterLimelightCal.LARGE_VALUE_CORRECTOR_MARGIN
-        && checkForTag().isPresent()) {
-      builder.addDoubleProperty(
-          "Limelight odometry X",
-          () -> {
-            return getBotPose2d_wpiBlue().getSecond().getX();
-          },
-          null);
-      builder.addDoubleProperty(
-          "Limelight odometry Y",
-          () -> {
-            return getBotPose2d_wpiBlue().getSecond().getY();
-          },
-          null);
-      builder.addDoubleProperty(
-          "Limelight odometry yaw",
-          () -> {
-            return getBotPose2d_wpiBlue().getSecond().getRotation().getDegrees();
-          },
-          null);
-    }
+    builder.addBooleanProperty("Connected", () -> CheckConnection(), null);
     builder.addIntegerProperty(
         "Targets seen",
         () -> {
           return targetsCount;
         },
         null);
-    builder.addDoubleProperty(
-        "Distance to tag (m)",
-        () -> {
-          Optional<Pair<Rotation2d, Double>> tagCheck = checkForTag();
-          if (tagCheck.isEmpty()) {
-            return 0.0;
-          }
-          return tagCheck.get().getSecond();
-        },
-        null);
+    // builder.addDoubleProperty(
+    //     "Distance to tag (m)",
+    //     () -> {
+    //       Optional<Pair<Rotation2d, Double>> tagCheck = checkForTag();
+    //       if (tagCheck.isEmpty()) {
+    //         return 0.0;
+    //       }
+    //       return tagCheck.get().getSecond();
+    //     },
+    //     null);
+    // builder.addDoubleProperty(
+    //     "Angle to tag (deg)",
+    //     () -> {
+    //       Optional<Pair<Rotation2d, Double>> tagCheck = checkForTag();
+    //       if (tagCheck.isEmpty()) {
+    //         return 0.0;
+    //       }
+    //       return tagCheck.get().getFirst().getDegrees();
+    //     },
+    //     null);
   }
 }

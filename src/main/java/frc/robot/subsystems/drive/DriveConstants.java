@@ -14,7 +14,7 @@ public class DriveConstants {
   public static final boolean TURNING_ENCODER_INVERTED = true;
 
   /** Multiplier for wheel diameter based on empirical on-field measurement */
-  public static final double WHEEL_DIAMETER_FUDGE_FACTOR = 1.035;
+  public static final double WHEEL_DIAMETER_FUDGE_FACTOR = 1.035 * 1.02;
 
   public static final double inchesToMeters = 0.0254;
 
@@ -39,6 +39,7 @@ public class DriveConstants {
   public static final IdleMode TURNING_MOTOR_IDLE_MODE = IdleMode.kBrake;
 
   public static final int DRIVING_MOTOR_CURRENT_LIMIT_AMPS = 50; // amps
+  public static final int DRIVING_MOTOR_STATOR_CURRENT_LIMIT_AMPS = 120; // amps
   public static final int TURNING_MOTOR_CURRENT_LIMIT_AMPS = 20; // amps
 
   public static final double TURN_MODULE_ENCODER_GEAR_RATIO = 1.0;

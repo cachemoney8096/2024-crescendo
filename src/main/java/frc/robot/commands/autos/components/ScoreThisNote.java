@@ -1,12 +1,16 @@
 package frc.robot.commands.autos.components;
 
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.commands.GoHomeSequence;
 import frc.robot.commands.SpeakerPrepScoreSequence;
 import frc.robot.commands.SpeakerShootSequence;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
@@ -26,7 +30,13 @@ public class ScoreThisNote extends SequentialCommandGroup {
     addCommands(
         new SpeakerPrepScoreSequence(intake, elevator, shooter, conveyor, limelight, drive)
             .withTimeout(5.0),
-        new SpeakerShootSequence(conveyor, shooter),
-        new GoHomeSequence(intake, elevator, shooter, conveyor, false));
+        new PrintCommand("ScoreThisNote - done prep"),
+        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SPEAKER_PREP, true)),
+        new WaitUntilCommand(() -> elevator.atDesiredPosition()),
+        new SpeakerShootSequence(conveyor, shooter, elevator, drive),
+        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME, true)),
+        new PrintCommand("ScoreThisNote - done score"),
+        new GoHomeSequence(intake, elevator, shooter, conveyor, false, false),
+        new PrintCommand("ScoreThisNote - done home"));
   }
 }

@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
@@ -23,7 +22,7 @@ import java.util.Optional;
  */
 public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
 
-  Optional<Pair<Rotation2d, Double>> tagDetection;
+  Optional<Pair<Rotation2d, Double>> tagDetection = Optional.empty();
   double distanceFromSpeakerMeters = 0.0;
 
   public SpeakerPrepScoreSequence(
@@ -38,9 +37,7 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
     addRequirements(intake, elevator, shooter, conveyor);
 
     addCommands(
-        new GoHomeSequence(intake, elevator, shooter, conveyor, true),
-        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SPEAKER_PREP, true)),
-        new InstantCommand(() -> conveyor.startBackRollers(1.0)),
+        new GoHomeSequence(intake, elevator, shooter, conveyor, true, false),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
         new RunCommand(
                 () -> {
@@ -49,8 +46,10 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                     return;
                   }
 
+                  System.out.println("tag degrees: " + tagDetection.get().getFirst().getDegrees());
                   drive.setTargetHeadingDegrees(tagDetection.get().getFirst().getDegrees());
                   shooter.setShooterDistance(tagDetection.get().getSecond());
+                  shooter.readyToShoot = true;
                 })
             .until(
                 () -> {

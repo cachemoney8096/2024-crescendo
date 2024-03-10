@@ -18,11 +18,19 @@ import frc.robot.subsystems.shooter.Shooter.ShooterMode;
  */
 public class GoHomeSequence extends SequentialCommandGroup {
   public GoHomeSequence(
-      Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor, boolean spinUpShooter) {
+      Intake intake,
+      Elevator elevator,
+      Shooter shooter,
+      Conveyor conveyor,
+      boolean spinUpShooter,
+      boolean stowIntake) {
     final ShooterMode desiredShooterMode = spinUpShooter ? ShooterMode.SPIN_UP : ShooterMode.IDLE;
     final SequentialCommandGroup goHomeWhenSafe =
         new SequentialCommandGroup(
-            new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)),
+            new ConditionalCommand(
+                new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)),
+                new InstantCommand(),
+                () -> stowIntake),
             new InstantCommand(() -> shooter.setShooterMode(desiredShooterMode)),
             new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME, true)));
 
@@ -34,12 +42,16 @@ public class GoHomeSequence extends SequentialCommandGroup {
             new WaitUntilCommand(intake::clearOfConveyorZone),
             new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME, true)),
             new WaitUntilCommand(elevator::elevatorBelowInterferenceZone),
-            new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)));
+            new ConditionalCommand(
+                new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.STOWED)),
+                new InstantCommand(),
+                () -> stowIntake));
 
     addRequirements(intake, elevator, shooter, conveyor);
     addCommands(
         new InstantCommand(conveyor::stopRollers),
         new InstantCommand(intake::stopRollers),
+        new InstantCommand(() -> shooter.readyToShoot = false),
         new ConditionalCommand(
             goHomeWhenSafe, goHomeWhenNotSafe, () -> elevator.elevatorBelowInterferenceZone()));
   }

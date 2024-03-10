@@ -2,8 +2,8 @@ package frc.robot.commands.autos;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.RobotContainer.MatchState;
 import frc.robot.commands.IntakeSequence;
 import frc.robot.commands.RotateToSpeaker;
 import frc.robot.commands.autos.components.DriveDistance;
@@ -15,6 +15,7 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
+import frc.robot.utils.MatchStateUtil;
 
 /** score the preloaded note into the speaker, then get another note, return to home state */
 public class OneFiveLeave extends SequentialCommandGroup {
@@ -24,7 +25,7 @@ public class OneFiveLeave extends SequentialCommandGroup {
       Shooter shooter,
       Conveyor conveyor,
       DriveSubsystem drive,
-      MatchState matchState,
+      MatchStateUtil matchState,
       ShooterLimelight limelight) {
     final double X_DISTANCE_TO_NOTE_METERS = 1.0; // guesstimate
     final double NO_Y_DISTANCE = 0.0;
@@ -34,8 +35,12 @@ public class OneFiveLeave extends SequentialCommandGroup {
     addCommands(
         new RotateToSpeaker(drive, limelight),
         drive.turnInPlace(1.0),
+        drive.stopDrivingCommand(),
+        new PrintCommand("OneFiveLeave - Done rotating"),
         new ScoreThisNote(intake, elevator, shooter, conveyor, limelight, drive),
+        new PrintCommand("OneFiveLeave - Done scoring"),
         new ParallelCommandGroup(
+            new PrintCommand("OneFiveLeave - Intaking"),
             new IntakeSequence(intake, elevator, conveyor, shooter)
                 .withTimeout(IntakeConstants.INTAKING_TIMEOUT_SEC),
             new SequentialCommandGroup(

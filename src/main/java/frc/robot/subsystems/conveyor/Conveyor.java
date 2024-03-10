@@ -11,13 +11,13 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.RobotMap;
 import frc.robot.utils.SparkMaxUtils;
+import java.util.function.DoubleConsumer;
 
 public class Conveyor extends SubsystemBase {
   public CANSparkMax frontMotor =
@@ -35,8 +35,8 @@ public class Conveyor extends SubsystemBase {
 
   /**
    * These aren't actually limit switches; we just use SparkLimitSwitch objects to access them
-   * easily. At the moment, these are unused. Sensor one is the closest to the intake. TODO: If we
-   * use these, add them to Shuffleboard.
+   * easily. At the moment, only sensor one actually exists. Sensor one is the closest to the
+   * intake. True means blocked (there is a note). TODO: If we use these, add them to Shuffleboard.
    */
   SparkLimitSwitch
       beamBreakSensorOne = frontMotor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen),
@@ -68,11 +68,11 @@ public class Conveyor extends SubsystemBase {
 
   private ConveyorPosition currentNotePosition = ConveyorPosition.NO_NOTE;
 
-  Command rumbleCommand;
+  public DoubleConsumer rumbleSetter;
 
-  public Conveyor(Command rumbleCommand) {
+  public Conveyor(DoubleConsumer rumbleSetter) {
     SparkMaxUtils.initWithRetry(this::setUpConveyorSparks, ConveyorCal.SPARK_INIT_RETRY_ATTEMPTS);
-    this.rumbleCommand = rumbleCommand;
+    this.rumbleSetter = rumbleSetter;
   }
 
   /** Does all the initialization for the sparks, return true on success */
@@ -179,50 +179,52 @@ public class Conveyor extends SubsystemBase {
 
   /** Get a note from the intake. */
   public static Command receive(Conveyor conveyor) {
+    Command rumbleBriefly =
+        new SequentialCommandGroup(
+                new InstantCommand(
+                    () -> {
+                      conveyor.rumbleSetter.accept(1);
+                    }),
+                new WaitCommand(0.25),
+                new InstantCommand(
+                    () -> {
+                      conveyor.rumbleSetter.accept(0.25);
+                    }))
+            .finallyDo(() -> conveyor.rumbleSetter.accept(0));
+
     return new SequentialCommandGroup(
-        new InstantCommand(() -> conveyor.backMotorEncoder.setPosition(0.0), conveyor),
-        new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.FRONT_RECEIVE_SPEED)),
-        new InstantCommand(() -> conveyor.backMotor.set(0.0)),
+        new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SPEED)),
+        new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SPEED)),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
-        new ParallelRaceGroup(
-            new WaitUntilCommand(
-                    () ->
-                        Math.abs(conveyor.backMotorEncoder.getPosition())
-                            > ConveyorCal.NOTE_POSITION_THRESHOLD_INCHES)
-                .andThen(
-                    new InstantCommand(
-                        () -> System.out.println("Ended because of back conveyor position"))),
-            new WaitUntilCommand(() -> conveyor.beamBreakSensorOne.isPressed())
-                .andThen(
-                    new InstantCommand(
-                        () -> System.out.println("Ended because of conveyor beam break")))),
-        conveyor.rumbleCommand,
-        new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", true)),
-        new InstantCommand(() -> conveyor.frontMotorEncoder.setPosition(0.0), conveyor),
-        new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.BACK_OFF_POWER)),
-        new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.BACK_OFF_POWER)),
+        new WaitUntilCommand(() -> conveyor.beamBreakSensorOne.isPressed()),
+        new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED)),
+        new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED)),
         new WaitUntilCommand(() -> !conveyor.beamBreakSensorOne.isPressed()),
         Conveyor.stop(conveyor),
+        rumbleBriefly,
+        new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", true)),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE));
   }
 
   /** Stop the conveor rollers. */
   public static Command stop(Conveyor conveyor) {
-    return new InstantCommand(conveyor::stopRollers, conveyor);
+    // return new InstantCommand(conveyor::stopRollers, conveyor);
+    return new InstantCommand(() -> conveyor.frontMotor.set(0.0))
+        .andThen(() -> conveyor.backMotor.set(0.0));
   }
 
   /** backs the currently held note a little bit back into the conveyor to crush it */
   public static Command crushNote(Conveyor conveyor) {
     return new SequentialCommandGroup(
-        new InstantCommand(() -> conveyor.backMotorEncoder.setPosition(0.0), conveyor),
-        new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.FRONT_RECEIVE_SPEED)),
-        new InstantCommand(() -> conveyor.backMotor.set(0.0)),
+        new InstantCommand(() -> conveyor.frontMotorEncoder.setPosition(0.0), conveyor),
+        new InstantCommand(() -> conveyor.frontMotor.set(0.0)),
+        new InstantCommand(() -> conveyor.backMotor.set(-ConveyorCal.RECEIVE_SPEED)),
         new WaitUntilCommand(
                 () ->
-                    Math.abs(conveyor.backMotorEncoder.getPosition())
+                    Math.abs(conveyor.frontMotorEncoder.getPosition())
                         > ConveyorCal.NOTE_POSITION_THRESHOLD_INCHES)
             .withTimeout(1.0),
-        new WaitCommand(0.25),
+        new WaitCommand(0.5),
         Conveyor.stop(conveyor));
   }
 

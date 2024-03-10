@@ -113,6 +113,9 @@ public class SwerveModule implements Sendable {
         DriveConstants.DRIVING_MOTOR_REDUCTION / DriveConstants.WHEEL_CIRCUMFERENCE_METERS;
     toApply.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS;
     toApply.CurrentLimits.SupplyCurrentLimitEnable = true;
+    toApply.CurrentLimits.StatorCurrentLimit =
+        DriveConstants.DRIVING_MOTOR_STATOR_CURRENT_LIMIT_AMPS;
+    toApply.CurrentLimits.StatorCurrentLimitEnable = true;
     toApply.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     toApply.Slot0.kP = DriveCal.DRIVING_P;
     toApply.Slot0.kI = DriveCal.DRIVING_I;

@@ -17,6 +17,7 @@ import frc.robot.subsystems.intakeLimelight.IntakeLimelightConstants;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.LimelightHelpers;
+import frc.robot.utils.MatchStateUtil;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -31,6 +32,8 @@ public class Robot extends TimedRobot {
 
   private SwerveDrivePoseEstimator m_PoseEstimator;
 
+  private MatchStateUtil matchState = new MatchStateUtil(false, true);
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -41,7 +44,7 @@ public class Robot extends TimedRobot {
      * Instantiate our RobotContainer. This will perform all our button bindings, and put our
      * autonomous chooser on the dashboard.
      */
-    m_robotContainer = new RobotContainer();
+    m_robotContainer = new RobotContainer(matchState);
     RobotController.setBrownoutVoltage(Constants.BROWNOUT_VOLTAGE);
     m_PoseEstimator =
         new SwerveDrivePoseEstimator(
@@ -77,7 +80,7 @@ public class Robot extends TimedRobot {
         IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME); // It takes 2.5-3s on first run
     LimelightHelpers.getLatestResults(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
 
-    if (!m_robotContainer.matchState.realMatch) {
+    if (!matchState.isRealMatch()) {
       m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kCoast);
       m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kCoast);
       m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kCoast);
@@ -106,6 +109,8 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    setMatchState();
+
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -113,9 +118,7 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.schedule();
     }
 
-    setRobotContainerMatchState();
-
-    if (m_robotContainer.matchState.realMatch) {
+    if (matchState.isRealMatch()) {
       m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
       m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kBrake);
       m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
@@ -141,9 +144,9 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
-    setRobotContainerMatchState();
+    setMatchState();
 
-    if (m_robotContainer.matchState.realMatch) {
+    if (matchState.isRealMatch()) {
       m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
       m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kBrake);
       m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
@@ -177,19 +180,18 @@ public class Robot extends TimedRobot {
   @Override
   public void simulationPeriodic() {}
 
-  private void setRobotContainerMatchState() {
+  /**
+   * Sets whether it is a real match by checking if the match time is more than 1s, and whether we
+   * are blue from the driver station data (defaults to true).
+   */
+  private void setMatchState() {
     boolean realMatch = DriverStation.getMatchTime() > 1.0;
-    m_robotContainer.matchState.realMatch = realMatch;
+    matchState.setRealMatch(realMatch);
     if (DriverStation.getAlliance().isPresent()) {
-      boolean blue;
-      if (realMatch) {
-        blue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
-      } else {
-        blue = true;
-      }
-      m_robotContainer.matchState.blue = blue;
+      boolean isBlue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
+      matchState.setBlue(isBlue);
     } else {
-      m_robotContainer.matchState.blue = true;
+      matchState.setBlue(true);
     }
   }
 }

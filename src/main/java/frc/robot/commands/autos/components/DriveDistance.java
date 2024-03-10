@@ -5,8 +5,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.robot.RobotContainer.MatchState;
 import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.utils.MatchStateUtil;
 
 /** drives in a direction at a given speed for a certain distance */
 public class DriveDistance extends SequentialCommandGroup {
@@ -16,7 +16,7 @@ public class DriveDistance extends SequentialCommandGroup {
   Translation2d direction;
   Translation2d speeds;
   double distanceToTravel;
-  MatchState matchState;
+  MatchStateUtil matchState;
 
   /**
    * @param normSpeed should be in [0,1]
@@ -30,14 +30,14 @@ public class DriveDistance extends SequentialCommandGroup {
       double xMeters,
       double yMeters,
       boolean fieldRelative,
-      MatchState stateOfMatch) {
+      MatchStateUtil matchState) {
 
     Translation2d desiredTranslation = new Translation2d(xMeters, yMeters);
 
     this.distanceToTravel = desiredTranslation.getNorm();
     this.direction = desiredTranslation.div(distanceToTravel);
     this.speeds = direction.times(normSpeed);
-    this.matchState = stateOfMatch;
+    this.matchState = matchState;
 
     addCommands(
         new InstantCommand(
@@ -47,8 +47,8 @@ public class DriveDistance extends SequentialCommandGroup {
         new InstantCommand(
             () -> {
               final double NOT_ROTATING = 0.0;
-              double xDriveSpeed = matchState.blue ? speeds.getX() : -speeds.getX();
-              double yDriveSpeed = matchState.blue ? speeds.getY() : -speeds.getY();
+              double xDriveSpeed = matchState.isBlue() ? speeds.getX() : -speeds.getX();
+              double yDriveSpeed = matchState.isBlue() ? speeds.getY() : -speeds.getY();
               drive.drive(xDriveSpeed, yDriveSpeed, NOT_ROTATING, fieldRelative);
             },
             drive),
