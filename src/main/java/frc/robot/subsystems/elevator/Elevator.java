@@ -111,7 +111,7 @@ public class Elevator extends SubsystemBase {
         SparkMaxUtils.check(
             rightMotor.setSmartCurrentLimit(ElevatorCal.ELEVATOR_CURRENT_LIMIT_AMPS));
 
-    errors += SparkMaxUtils.check(leftMotorEncoderAbs.setInverted(false));
+    errors += SparkMaxUtils.check(leftMotorEncoderAbs.setInverted(true));
     errors +=
         SparkMaxUtils.check(
             SparkMaxUtils.UnitConversions.setLinearFromGearRatio(
