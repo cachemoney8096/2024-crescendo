@@ -12,7 +12,8 @@ import frc.robot.subsystems.intake.Intake.IntakePosition;
 /* moves elevator out of the way before deploying the intake if the elevator is at the top of the interference zone */
 public class SafeDeploy extends SequentialCommandGroup {
   public SafeDeploy(Intake intake, Elevator elevator, boolean clearOnly) {
-    IntakePosition desiredIntakePosition = clearOnly?IntakePosition.CLEAR_OF_CONVEYOR:IntakePosition.DEPLOYED;
+    IntakePosition desiredIntakePosition =
+        clearOnly ? IntakePosition.CLEAR_OF_CONVEYOR : IntakePosition.DEPLOYED;
     addRequirements(intake, elevator);
     addCommands(
         new ConditionalCommand(

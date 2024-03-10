@@ -15,8 +15,8 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.drive.DriveSubsystem;
 
 public class PIDToPoint extends SequentialCommandGroup {
-  PIDController xController = new PIDController(1, 0.0, 0.0); //input meters output -1 to 1
-  PIDController yController = new PIDController(1, 0.0, 0.0); //input meters output -1 to 1
+  PIDController xController = new PIDController(1, 0.0, 0.0); // input meters output -1 to 1
+  PIDController yController = new PIDController(1, 0.0, 0.0); // input meters output -1 to 1
   final double feedforwardOutput = 0.2;
 
   Transform2d transform = new Transform2d();

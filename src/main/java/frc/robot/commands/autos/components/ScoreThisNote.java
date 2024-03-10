@@ -28,7 +28,16 @@ public class ScoreThisNote extends SequentialCommandGroup {
       DriveSubsystem drive) {
     addRequirements(intake, elevator, shooter, conveyor);
     addCommands(
-        new SpeakerPrepScoreSequence(intake, elevator, shooter, conveyor, limelight, drive, ()->{return false;})
+        new SpeakerPrepScoreSequence(
+                intake,
+                elevator,
+                shooter,
+                conveyor,
+                limelight,
+                drive,
+                () -> {
+                  return false;
+                })
             .withTimeout(5.0),
         new PrintCommand("ScoreThisNote - done prep"),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SLIGHTLY_UP, true)),

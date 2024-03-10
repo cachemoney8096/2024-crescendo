@@ -201,19 +201,17 @@ public class Conveyor extends SubsystemBase {
   }
 
   public static Command rumbleBriefly(Conveyor conveyor) {
-    return 
-        new SequentialCommandGroup(
-                new InstantCommand(
-                    () -> {
-                      conveyor.rumbleSetter.accept(1);
-                    }),
-                new WaitCommand(0.25),
-                new InstantCommand(
-                    () -> {
-                      conveyor.rumbleSetter.accept(0.25);
-                    }))
-            .finallyDo(() -> conveyor.rumbleSetter.accept(0));
-
+    return new SequentialCommandGroup(
+            new InstantCommand(
+                () -> {
+                  conveyor.rumbleSetter.accept(1);
+                }),
+            new WaitCommand(0.25),
+            new InstantCommand(
+                () -> {
+                  conveyor.rumbleSetter.accept(0.25);
+                }))
+        .finallyDo(() -> conveyor.rumbleSetter.accept(0));
   }
 
   /** Get a note from the intake. */
@@ -224,8 +222,7 @@ public class Conveyor extends SubsystemBase {
         new WaitUntilCommand(() -> !conveyor.beamBreakSensorOne.isPressed()),
         Conveyor.stop(conveyor),
         new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", true)),
-        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE)
-    );
+        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE));
   }
 
   /** Get a note from the intake. */

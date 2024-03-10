@@ -16,111 +16,119 @@ public class BetterCRTGearRatioUtil {
   private double expectedAbsoluteEncoderValuePairsPrecisionDenominator = 30;
 
   public static Optional<BetterCRTGearRatioUtil> init(
-    int mainGearRotationRatioTerm,
-    int secondaryGearRotationRatioTerm,
-    int maxRotations,
-    double mainGearCircumference) {
-    BetterCRTGearRatioUtil u = new BetterCRTGearRatioUtil(
-        mainGearRotationRatioTerm,
-        secondaryGearRotationRatioTerm,
-        maxRotations,
-        mainGearCircumference);
-    if (u.validateGearRatioWithMaxRotations()) { 
-      //need to fill in expected values
+      int mainGearRotationRatioTerm,
+      int secondaryGearRotationRatioTerm,
+      int maxRotations,
+      double mainGearCircumference) {
+    BetterCRTGearRatioUtil u =
+        new BetterCRTGearRatioUtil(
+            mainGearRotationRatioTerm,
+            secondaryGearRotationRatioTerm,
+            maxRotations,
+            mainGearCircumference);
+    if (u.validateGearRatioWithMaxRotations()) {
+      // need to fill in expected values
       u.initExpectedAEVP();
       return Optional.of(u);
     }
     return Optional.empty();
   }
 
-  private void initExpectedAEVP(){
-    for(int i = 0; i < maxRotations*expectedAbsoluteEncoderValuePairsPrecisionDenominator; i++){
-      double elevatorPos = i * mainGearCircumference / expectedAbsoluteEncoderValuePairsPrecisionDenominator;
-      double mainGearRotationValue = 
+  private void initExpectedAEVP() {
+    for (int i = 0; i < maxRotations * expectedAbsoluteEncoderValuePairsPrecisionDenominator; i++) {
+      double elevatorPos =
+          i * mainGearCircumference / expectedAbsoluteEncoderValuePairsPrecisionDenominator;
+      double mainGearRotationValue =
           BetterCRTGearRatioUtil.mod(elevatorPos / mainGearCircumference, 1) > 0.98
               ? 0.0
               : BetterCRTGearRatioUtil.mod(elevatorPos / mainGearCircumference, 1) < 0.02
                   ? 0.0
                   : BetterCRTGearRatioUtil.mod(elevatorPos / mainGearCircumference, 1);
-      double secondaryGearRotationValue = BetterCRTGearRatioUtil.mod(
-        elevatorPos
-            / mainGearCircumference
-            * secondaryGearRotationRatioTerm
-            / mainGearRotationRatioTerm,
-        1);
+      double secondaryGearRotationValue =
+          BetterCRTGearRatioUtil.mod(
+              elevatorPos
+                  / mainGearCircumference
+                  * secondaryGearRotationRatioTerm
+                  / mainGearRotationRatioTerm,
+              1);
       boolean has = false;
-      for(int j = 0; j < expectedAbsoluteEncoderValueMain.size(); j++){
-        if(Math.abs(mainGearRotationValue-expectedAbsoluteEncoderValueMain.get(j)) < 0.005){
+      for (int j = 0; j < expectedAbsoluteEncoderValueMain.size(); j++) {
+        if (Math.abs(mainGearRotationValue - expectedAbsoluteEncoderValueMain.get(j)) < 0.005) {
           has = true;
         }
       }
-      if(!has){
+      if (!has) {
         expectedAbsoluteEncoderValueMain.add(mainGearRotationValue);
       }
       has = false;
-      for(int j = 0; j < expectedAbsoluteEncoderValueSecondary.size(); j++){
-        if(Math.abs(secondaryGearRotationValue-expectedAbsoluteEncoderValueSecondary.get(j)) < 0.005){
+      for (int j = 0; j < expectedAbsoluteEncoderValueSecondary.size(); j++) {
+        if (Math.abs(secondaryGearRotationValue - expectedAbsoluteEncoderValueSecondary.get(j))
+            < 0.005) {
           has = true;
         }
       }
-      if(!has){
+      if (!has) {
         expectedAbsoluteEncoderValueSecondary.add(secondaryGearRotationValue);
       }
     }
   }
 
-  public double getAbsolutePositionOfMainObject(double mainGearRotationValue, double secondaryGearRotationValue){
+  public double getAbsolutePositionOfMainObject(
+      double mainGearRotationValue, double secondaryGearRotationValue) {
     double leastErrorMain = 1;
     double leastErrorSecondary = 1;
     double main = 0;
     double secondary = 0;
-    for(int i = 0; i < expectedAbsoluteEncoderValueMain.size(); i++){
-      if(Math.abs(expectedAbsoluteEncoderValueMain.get(i)-mainGearRotationValue) < leastErrorMain){
+    for (int i = 0; i < expectedAbsoluteEncoderValueMain.size(); i++) {
+      if (Math.abs(expectedAbsoluteEncoderValueMain.get(i) - mainGearRotationValue)
+          < leastErrorMain) {
         main = expectedAbsoluteEncoderValueMain.get(i);
-        leastErrorMain = Math.abs(expectedAbsoluteEncoderValueMain.get(i)-mainGearRotationValue);
+        leastErrorMain = Math.abs(expectedAbsoluteEncoderValueMain.get(i) - mainGearRotationValue);
       }
     }
-    for(int i = 0; i < expectedAbsoluteEncoderValueSecondary.size(); i++){
-      if(Math.abs(expectedAbsoluteEncoderValueSecondary.get(i)-secondaryGearRotationValue) < leastErrorSecondary){
+    for (int i = 0; i < expectedAbsoluteEncoderValueSecondary.size(); i++) {
+      if (Math.abs(expectedAbsoluteEncoderValueSecondary.get(i) - secondaryGearRotationValue)
+          < leastErrorSecondary) {
         secondary = expectedAbsoluteEncoderValueSecondary.get(i);
-        leastErrorSecondary = Math.abs(expectedAbsoluteEncoderValueSecondary.get(i)-secondaryGearRotationValue);
+        leastErrorSecondary =
+            Math.abs(expectedAbsoluteEncoderValueSecondary.get(i) - secondaryGearRotationValue);
       }
     }
-    System.out.println(main+"-"+secondary);
+    System.out.println(main + "-" + secondary);
     return getAbsolutePositionOfMainObjectHelper(main, secondary);
   }
 
   public int getMainGearFullRotations(
-    double mainGearRotationValue, double secondaryGearRotationValue) {
-  return (int)
-      Math.round(
-          mod(
-              mainGearRotationRatioTerm, // mod the main gear rotation ratio term by the whole
-              // thing plus the simplified term to make 0 full
-              // rotations work properly
-              mod(
-                      k
-                          * // this is the multiplier, see the comment in the returns statement of
-                          // kFactor() for more details
-                          (mainGearRotationValue * secondaryGearRotationRatioTermSimplfied
-                              - secondaryGearRotationValue
-                                  * mainGearRotationRatioTermSimplified) // this returns a decimal
-                      // where the multiplier
-                      // is different for every
-                      // gear ratio
-                      ,
-                      mainGearRotationRatioTermSimplified) // mod it with the main gear rotation
-                  // ratio term so it is within the
-                  // correct range
-                  + mainGearRotationRatioTermSimplified)); // for more information, see the
-  // comment in the kFactor() function
-}
+      double mainGearRotationValue, double secondaryGearRotationValue) {
+    return (int)
+        Math.round(
+            mod(
+                mainGearRotationRatioTerm, // mod the main gear rotation ratio term by the whole
+                // thing plus the simplified term to make 0 full
+                // rotations work properly
+                mod(
+                        k
+                            * // this is the multiplier, see the comment in the returns statement of
+                            // kFactor() for more details
+                            (mainGearRotationValue * secondaryGearRotationRatioTermSimplfied
+                                - secondaryGearRotationValue
+                                    * mainGearRotationRatioTermSimplified) // this returns a decimal
+                        // where the multiplier
+                        // is different for every
+                        // gear ratio
+                        ,
+                        mainGearRotationRatioTermSimplified) // mod it with the main gear rotation
+                    // ratio term so it is within the
+                    // correct range
+                    + mainGearRotationRatioTermSimplified)); // for more information, see the
+    // comment in the kFactor() function
+  }
 
   private double getAbsolutePositionOfMainObjectHelper(
       double mainGearRotationValue, double secondaryGearRotationValue) {
     return mainGearRotationValue * mainGearCircumference
         + getMainGearFullRotations(mainGearRotationValue, secondaryGearRotationValue)
-            * mainGearCircumference; 
+            * mainGearCircumference;
   }
 
   private BetterCRTGearRatioUtil(
@@ -142,7 +150,7 @@ public class BetterCRTGearRatioUtil {
     this.mainGearCircumference = mainGearCircumference;
     this.k = kFactor();
   }
-  
+
   private static double gcd(double a, double b) {
     if (b == 0.0) return a;
     return gcd(b, a % b);
@@ -164,9 +172,7 @@ public class BetterCRTGearRatioUtil {
       double x = ((a * (b - i) - 1.0) / b);
       sum += x * (1 + Math.floor(x) - Math.ceil(x));
     }
-    return (int)
-        ((int) ((sum * b) + 1.0)
-            / a); 
+    return (int) ((int) ((sum * b) + 1.0) / a);
   }
 
   public boolean validateGearRatioWithMaxRotations() {
@@ -176,5 +182,4 @@ public class BetterCRTGearRatioUtil {
   public double wrapAroundAbsolutePosition() {
     return mainGearCircumference * mainGearRotationRatioTerm;
   }
-
 }

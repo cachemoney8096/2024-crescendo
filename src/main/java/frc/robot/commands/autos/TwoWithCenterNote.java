@@ -18,7 +18,6 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
-import frc.robot.utils.MatchStateUtil;
 
 public class TwoWithCenterNote extends SequentialCommandGroup {
 
@@ -40,7 +39,16 @@ public class TwoWithCenterNote extends SequentialCommandGroup {
     middleNoteAuto = PathPlannerPath.fromPathFile("Middle Note Auto");
     addCommands(
         drive.followTrajectoryCommand(middleNoteAuto, true),
-        new SpeakerPrepScoreSequence(intake, elevator, shooter, conveyor, limelight, drive, ()->{return false;})
+        new SpeakerPrepScoreSequence(
+                intake,
+                elevator,
+                shooter,
+                conveyor,
+                limelight,
+                drive,
+                () -> {
+                  return false;
+                })
             .withTimeout(5.0),
         new WaitUntilCommand(() -> shooter.isShooterSpunUp()),
         new SpeakerShootSequence(conveyor, shooter, elevator, drive));

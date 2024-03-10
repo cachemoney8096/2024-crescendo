@@ -1,6 +1,6 @@
 import frc.robot.utils.BetterCRTGearRatioUtil;
 import java.util.Optional;
-import org.junit.jupiter.api.Test; 
+import org.junit.jupiter.api.Test;
 
 public class BetterCRTTest {
   @Test
@@ -26,7 +26,7 @@ public class BetterCRTTest {
     int mainGearRotationRatioTerm = mgr;
     int secondaryGearRotationRatioTerm = sgr;
     int maxRotations = mr;
-    double mainGearCircumference = 1.1*Math.PI;
+    double mainGearCircumference = 1.1 * Math.PI;
     Optional<BetterCRTGearRatioUtil> crtUtilOptional =
         BetterCRTGearRatioUtil.init(
             mainGearRotationRatioTerm,
@@ -40,7 +40,7 @@ public class BetterCRTTest {
     boolean works = true;
     for (int i = 0; i < maxRotations * 6; i++) {
       double elevatorPos = i * mainGearCircumference / 6;
-      double epoc = //elevator pos / cir
+      double epoc = // elevator pos / cir
           BetterCRTGearRatioUtil.mod(elevatorPos / mainGearCircumference, 1) > 0.98
               ? 0.0
               : BetterCRTGearRatioUtil.mod(elevatorPos / mainGearCircumference, 1) < 0.02
@@ -59,18 +59,19 @@ public class BetterCRTTest {
           > 1) {
         works = false;
       }
-      System.out.println(crtutil.getAbsolutePositionOfMainObject(
-                      epoc,
-                      BetterCRTGearRatioUtil.mod(
-                          elevatorPos
-                              / mainGearCircumference
-                              * secondaryGearRotationRatioTerm
-                              / mainGearRotationRatioTerm,
-                          1)));
-     }
+      System.out.println(
+          crtutil.getAbsolutePositionOfMainObject(
+              epoc,
+              BetterCRTGearRatioUtil.mod(
+                  elevatorPos
+                      / mainGearCircumference
+                      * secondaryGearRotationRatioTerm
+                      / mainGearRotationRatioTerm,
+                  1)));
+    }
     System.out.println("");
-    System.out.println(crtutil.getAbsolutePositionOfMainObject(0.7, 0.7*26/44));
-    System.out.println(crtutil.getAbsolutePositionOfMainObject(0.7, (0.7*26/44)+0.004));
+    System.out.println(crtutil.getAbsolutePositionOfMainObject(0.7, 0.7 * 26 / 44));
+    System.out.println(crtutil.getAbsolutePositionOfMainObject(0.7, (0.7 * 26 / 44) + 0.004));
     return works;
   }
 }

@@ -76,8 +76,10 @@ public class Intake extends SubsystemBase {
     intakePositionMap = new TreeMap<IntakePosition, Double>();
     intakePositionMap.put(IntakePosition.DEPLOYED, IntakeCal.INTAKE_DEPLOYED_POSITION_DEGREES);
     intakePositionMap.put(IntakePosition.STOWED, IntakeCal.INTAKE_STOWED_POSITION_DEGREES);
-    intakePositionMap.put(IntakePosition.CLEAR_OF_CONVEYOR, IntakeCal.INTAKE_CLEAR_OF_CONVEYOR_DEGREES);
-    intakePositionMap.put(IntakePosition.ALMOST_CLEAR_OF_CONVEYOR, IntakeCal.INTAKE_ALMOST_CLEAR_OF_CONVEYOR_DEGREES);
+    intakePositionMap.put(
+        IntakePosition.CLEAR_OF_CONVEYOR, IntakeCal.INTAKE_CLEAR_OF_CONVEYOR_DEGREES);
+    intakePositionMap.put(
+        IntakePosition.ALMOST_CLEAR_OF_CONVEYOR, IntakeCal.INTAKE_ALMOST_CLEAR_OF_CONVEYOR_DEGREES);
 
     pivotRelativeEncoder.setPosition(getPivotPositionFromAbs());
   }

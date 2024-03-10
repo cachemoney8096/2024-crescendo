@@ -40,10 +40,8 @@ public class IntakeSequence extends SequentialCommandGroup {
         new InstantCommand(intake::startRollers),
         Conveyor.startReceive(conveyor),
         new ParallelCommandGroup(
-          Conveyor.rumbleBriefly(conveyor),
-          new InstantCommand(intake::stopRollers, intake),
-          Conveyor.finishReceive(conveyor)
-        )
-        );
+            Conveyor.rumbleBriefly(conveyor),
+            new InstantCommand(intake::stopRollers, intake),
+            Conveyor.finishReceive(conveyor)));
   }
 }

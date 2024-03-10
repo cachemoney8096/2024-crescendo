@@ -12,7 +12,6 @@ import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.subsystems.shooter.ShooterCal;
-import java.util.function.BooleanSupplier;
 
 /**
  * shoots a ring into the speaker once the shooter is in position and spun up, then brings the robot
