@@ -38,6 +38,7 @@ import frc.robot.commands.SpeakerPrepScoreAutoPreload;
 import frc.robot.commands.SpeakerPrepScoreSequence;
 import frc.robot.commands.SpeakerShootSequence;
 import frc.robot.commands.UnclimbSequence;
+import frc.robot.commands.autos.CenterOneToFive;
 import frc.robot.commands.autos.ScoreFourFromCenterLine;
 import frc.robot.commands.autos.ScoreTwoNotes;
 import frc.robot.subsystems.conveyor.Conveyor;
@@ -121,20 +122,20 @@ public class RobotContainer implements Sendable {
             IntakeLimelightConstants.INTAKE_LIMELIGHT_PITCH_DEGREES,
             IntakeLimelightConstants.INTAKE_LIMELIGHT_HEIGHT_METERS,
             0); // we aren't using the target height so 0 is fine
-
+    
     NamedCommands.registerCommand(
         "SPEAKER PREP PRELOAD",
-        new SpeakerPrepScoreAutoPreload(intake, elevator, shooter, conveyor));
+        new SpeakerPrepScoreAutoPreload(intake, elevator, shooter, conveyor).andThen(new InstantCommand(() -> System.out.println("speaker prep preload - done"))));
     NamedCommands.registerCommand(
         "SPEAKER SCORE",
-        new InstantCommand(() -> System.out.println("Speaker score starting"))
-            .andThen(Conveyor.shoot(conveyor))
-            .andThen(new InstantCommand(() -> System.out.println("Speaker Score Done"))));
+        new SequentialCommandGroup(new InstantCommand(() -> System.out.println("Speaker score starting")), 
+        Conveyor.shoot(conveyor), 
+        new InstantCommand(() -> System.out.println("Speaker Score Done"))));
     NamedCommands.registerCommand(
         "INTAKE DEPLOY",
         new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.DEPLOYED)));
     NamedCommands.registerCommand(
-        "INTAKE", new IntakeSequence(intake, elevator, conveyor, shooter));
+        "INTAKE", new IntakeSequence(intake, elevator, conveyor, shooter, lights));
     NamedCommands.registerCommand(
         "SPEAKER PREP", new SpeakerPrepScoreAuto(intake, elevator, shooter, conveyor));
 
@@ -160,11 +161,15 @@ public class RobotContainer implements Sendable {
     autonChooser.setDefaultOption(
         "Score two",
         new ScoreTwoNotes(
-            intake, elevator, shooter, conveyor, drive, matchState, shooterLimelight));
-    autonChooser.addOption(
+            intake, elevator, shooter, conveyor, drive, matchState, shooterLimelight, lights));
+    /*autonChooser.addOption(
         "Score four from center",
-        new ScoreFourFromCenterLine(drive, intake, elevator, shooter, conveyor, shooterLimelight));
-    SmartDashboard.putData(autonChooser);
+        new ScoreFourFromCenterLine(drive, intake, elevator, shooter, conveyor, shooterLimelight));*/
+    // autonChooser.addOption("CENTER 1-2-3-4-5", 
+    // new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight));
+    autonChooser.addOption("CENTER #1-2-3-4-5", 
+    new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight));
+    SmartDashboard.putData(autonChooser); 
   }
 
   private int getCardinalDirectionDegrees() {
@@ -193,7 +198,7 @@ public class RobotContainer implements Sendable {
   private void configureDriver() {
     driverController
         .rightTrigger()
-        .whileTrue(new IntakeSequence(intake, elevator, conveyor, shooter));
+        .whileTrue(new IntakeSequence(intake, elevator, conveyor, shooter, lights));
     driverController
         .rightTrigger()
         .onFalse(

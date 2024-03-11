@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.1,
-      "y": 4.8
+      "x": 0.7289985049768751,
+      "y": 4.331918999408469
     },
-    "rotation": -24.0
+    "rotation": -60.0
   },
   "command": {
     "type": "sequential",
@@ -22,7 +22,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "SPEAKER_PREP_PRELOAD"
+                        "name": "SPEAKER PREP PRELOAD"
                       }
                     },
                     {
@@ -34,7 +34,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "SPEAKER_SCORE"
+                        "name": "SPEAKER SCORE"
                       }
                     }
                   ]
@@ -43,7 +43,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "INTAKE_DEPLOYED"
+                  "name": "INTAKE DEPLOY"
                 }
               }
             ]
@@ -52,7 +52,43 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Copy of 4 NOTE - CENTER LINE - SOURCE"
+            "pathName": "RIGHT TO 6 TO SHOOT AT STAGE RIGHT"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SPEAKER SCORE"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SHOOT AT STAGE RIGHT TO 7 TO SHOOT AT STAGE RIGHT"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SPEAKER SCORE"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SHOOT AT STAGE RIGHT TO 8"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "8 TO SHOOT AT STAGE RIGHT"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SPEAKER SCORE"
           }
         }
       ]

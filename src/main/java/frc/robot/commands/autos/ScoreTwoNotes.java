@@ -11,6 +11,7 @@ import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 import frc.robot.utils.MatchStateUtil;
@@ -29,12 +30,13 @@ public class ScoreTwoNotes extends SequentialCommandGroup {
       Conveyor conveyor,
       DriveSubsystem drive,
       MatchStateUtil matchState,
-      ShooterLimelight limelight) {
+      ShooterLimelight limelight,
+      Lights lights) {
 
     addRequirements(intake, elevator, shooter, conveyor);
     addCommands(
         new InstantCommand(() -> initialYaw = drive.getPose().getRotation()),
-        new OneFiveLeave(intake, elevator, shooter, conveyor, drive, matchState, limelight),
+        new OneFiveLeave(intake, elevator, shooter, conveyor, drive, matchState, limelight, lights),
         new PrintCommand("ScoreTwoNotes - OneFiveLeave done"),
         new InstantCommand(
             () -> {

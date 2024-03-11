@@ -1,0 +1,114 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.9727725093034074,
+        "y": 2.9545202714566505
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.599488930521485,
+        "y": 1.0330490459638635
+      },
+      "isLocked": false,
+      "linkedName": "SHOOT AT STAGE RIGHT"
+    },
+    {
+      "anchor": {
+        "x": 7.9672288203636805,
+        "y": 2.34846483115785
+      },
+      "prevControl": {
+        "x": 7.939680845804644,
+        "y": 1.1983368933180818
+      },
+      "nextControl": {
+        "x": 8.007633271738463,
+        "y": 4.035350676055028
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.9727725093034074,
+        "y": 2.9545202714566505
+      },
+      "prevControl": {
+        "x": 5.102239466223898,
+        "y": 5.027505357024136
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "SHOOT AT STAGE RIGHT"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.6,
+      "rotationDegrees": 45.0,
+      "rotateFast": false
+    },
+    {
+      "waypointRelativePos": 1.15,
+      "rotationDegrees": 45.0,
+      "rotateFast": false
+    }
+  ],
+  "constraintZones": [],
+  "eventMarkers": [
+    {
+      "name": "INTAKE",
+      "waypointRelativePos": 0.5,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "INTAKE"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "SPEAKER PREP",
+      "waypointRelativePos": 1.45,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "SPEAKER PREP"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 5.0,
+    "maxAcceleration": 6.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -30.685173089595207,
+    "rotateFast": true
+  },
+  "reversed": false,
+  "folder": "RIGHT",
+  "previewStartingState": {
+    "rotation": -30.0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": false
+}

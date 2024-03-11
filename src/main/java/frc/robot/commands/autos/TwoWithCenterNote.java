@@ -16,6 +16,7 @@ import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 
@@ -30,12 +31,13 @@ public class TwoWithCenterNote extends SequentialCommandGroup {
       Elevator elevator,
       Shooter shooter,
       Conveyor conveyor,
-      ShooterLimelight limelight) {
+      ShooterLimelight limelight, 
+      Lights lights) {
     NamedCommands.registerCommand(
         "goHomeWithShooterSpunUp",
         new GoHomeSequence(intake, elevator, shooter, conveyor, true, false, false));
     NamedCommands.registerCommand(
-        "intakeNote", new IntakeSequence(intake, elevator, conveyor, shooter).withTimeout(5.0));
+        "intakeNote", new IntakeSequence(intake, elevator, conveyor, shooter, lights).withTimeout(5.0));
     middleNoteAuto = PathPlannerPath.fromPathFile("Middle Note Auto");
     addCommands(
         drive.followTrajectoryCommand(middleNoteAuto, true),

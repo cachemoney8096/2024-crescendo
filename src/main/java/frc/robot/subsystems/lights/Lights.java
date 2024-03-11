@@ -2,13 +2,16 @@ package frc.robot.subsystems.lights;
 
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
+
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import com.ctre.phoenix.led.CANdleConfiguration;
 import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
 import frc.robot.RobotMap;
 import java.util.TreeMap;
 
-public class Lights {
+public class Lights extends SubsystemBase{
   /**
    * Tree map of light code enums and integers that represent the R, G, B values of each light code
    * enum

@@ -36,7 +36,7 @@ public final class ElevatorCal {
 
   /** Elevator positions relative to home position. Home position fixed at 3 inches. */
   public static final double POSITION_HOME_INCHES = 2.75,
-      POSITION_SCORE_TRAP_INCHES = 38.5,
+      POSITION_SCORE_TRAP_INCHES = 39,
       POSITION_SCORE_AMP_INCHES = 32.5,
       POSITION_PRE_CLIMB_INCHES = 38.0,
       POSITION_SLIGHTLY_UP_INCHES = 3.75,

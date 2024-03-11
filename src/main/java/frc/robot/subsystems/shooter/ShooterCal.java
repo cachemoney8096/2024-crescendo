@@ -77,7 +77,7 @@ public class ShooterCal {
   public static final double PIVOT_PROFILE_REPLANNING_THRESHOLD_DEG = 5.0;
   public static final double PIVOT_ENCODER_ZEROING_THRESHOLD_DEG = 5.0;
 
-  public static final double AUTO_PRELOAD_DISTANCE_M = Units.feetToMeters(7.0);
+  public static final double AUTO_PRELOAD_DISTANCE_M = Units.feetToMeters(4);
   public static final double AUTO_SHOOTING_DISTANCE_M = Units.feetToMeters(16.0);
 
   /**

@@ -62,7 +62,7 @@ public class SwerveModule implements Sendable {
 
     errors += SparkMaxUtils.check(turningSparkMax.restoreFactoryDefaults());
 
-    errors +=
+    /*errors +=
         SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 50));
     errors +=
         SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 50));
@@ -75,7 +75,7 @@ public class SwerveModule implements Sendable {
     errors +=
         SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 20));
     errors +=
-        SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 20));
+        SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 20));*/
     Timer.delay(0.1);
 
     turningSparkMax.setInverted(false);

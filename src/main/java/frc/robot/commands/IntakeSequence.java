@@ -10,6 +10,8 @@ import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.lights.Lights;
+import frc.robot.subsystems.lights.Lights.LightCode;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 
@@ -19,10 +21,11 @@ import frc.robot.subsystems.shooter.Shooter.ShooterMode;
  * game piece Stops and stowes intake
  */
 public class IntakeSequence extends SequentialCommandGroup {
-  public IntakeSequence(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter) {
-    addRequirements(intake, elevator, conveyor, shooter);
+  public IntakeSequence(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter, Lights lights) {
+    addRequirements(intake, elevator, conveyor, shooter, lights);
 
     addCommands(
+        new InstantCommand(()-> lights.toggleCode(LightCode.INTAKING)),
         new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", false)),
         new InstantCommand(
             () -> {
@@ -42,6 +45,8 @@ public class IntakeSequence extends SequentialCommandGroup {
         new ParallelCommandGroup(
             Conveyor.rumbleBriefly(conveyor),
             new InstantCommand(intake::stopRollers, intake),
-            Conveyor.finishReceive(conveyor)));
+            Conveyor.finishReceive(conveyor)),
+            new InstantCommand(()->lights.toggleCode(LightCode.INTAKING))
+            );
   }
 }
