@@ -280,6 +280,6 @@ public class Conveyor extends SubsystemBase {
         },
         null);
     builder.addBooleanProperty("beamBreakSensorOne", () -> beamBreakSensorOne.isPressed(), null);
-    builder.addBooleanProperty("Intake Sensor", () -> intakeBeamBreakSensor.get(), null);
+    //builder.addBooleanProperty("Intake Sensor", () -> intakeBeamBreakSensor.get(), null);
   }
 }

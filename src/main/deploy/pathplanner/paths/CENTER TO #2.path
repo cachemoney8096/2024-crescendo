@@ -35,19 +35,19 @@
       "name": "INTAKE AND SPEAKER PREP",
       "waypointRelativePos": 0,
       "command": {
-        "type": "parallel",
+        "type": "sequential",
         "data": {
           "commands": [
             {
               "type": "named",
               "data": {
-                "name": "INTAKE"
+                "name": "SPEAKER PREP"
               }
             },
             {
               "type": "named",
               "data": {
-                "name": "SPEAKER PREP"
+                "name": "INTAKE"
               }
             }
           ]

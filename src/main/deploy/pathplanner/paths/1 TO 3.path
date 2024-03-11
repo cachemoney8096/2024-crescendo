@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 2.5058428640347206,
-        "y": 4.24927507573136
+        "x": 2.492068876755203,
+        "y": 3.9323511980357293
       },
       "prevControl": {
-        "x": 1.920448404655198,
-        "y": 5.516481905447032
+        "x": 1.929726526119719,
+        "y": 5.483024299381932
       },
       "nextControl": null,
       "isLocked": false,
@@ -35,19 +35,19 @@
       "name": "INTAKE AND SPEAKER PREP",
       "waypointRelativePos": 0,
       "command": {
-        "type": "parallel",
+        "type": "sequential",
         "data": {
           "commands": [
             {
               "type": "named",
               "data": {
-                "name": "INTAKE"
+                "name": "SPEAKER PREP"
               }
             },
             {
               "type": "named",
               "data": {
-                "name": "SPEAKER PREP"
+                "name": "INTAKE"
               }
             }
           ]
@@ -56,15 +56,15 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 5.0,
+    "maxVelocity": 2.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
     "velocity": 0,
     "rotation": -25.0,
-    "rotateFast": true
+    "rotateFast": false
   },
   "reversed": false,
   "folder": "CENTER",

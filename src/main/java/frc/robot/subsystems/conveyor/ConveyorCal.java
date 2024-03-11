@@ -27,7 +27,7 @@ public class ConveyorCal {
   public static final double NOTE_POSITION_THRESHOLD_INCHES = 0.1;
 
   /** The time required for a note to exit the conveyor */
-  public static final double NOTE_EXIT_TIME_SHOOTER_SECONDS = 1.0,
+  public static final double NOTE_EXIT_TIME_SHOOTER_SECONDS = 0.3,
       NOTE_EXIT_TIME_TRAP_AMP_SECONDS = 1.0;
 
   /** The position to back off when receiving a note */

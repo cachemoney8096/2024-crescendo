@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AmpPrepScore;
 import frc.robot.commands.AmpScore;
+import frc.robot.commands.AutoIntakeSequence;
 import frc.robot.commands.ClimbPrepSequence;
 import frc.robot.commands.ClimbSequence;
 import frc.robot.commands.FeedPrepScore;
@@ -51,6 +52,7 @@ import frc.robot.subsystems.intakeLimelight.IntakeLimelight;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelightConstants;
 import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.JoystickUtil;
@@ -135,9 +137,9 @@ public class RobotContainer implements Sendable {
         "INTAKE DEPLOY",
         new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.DEPLOYED)));
     NamedCommands.registerCommand(
-        "INTAKE", new IntakeSequence(intake, elevator, conveyor, shooter, lights));
+        "INTAKE", new AutoIntakeSequence(intake, elevator, conveyor, lights));
     NamedCommands.registerCommand(
-        "SPEAKER PREP", new SpeakerPrepScoreAuto(intake, elevator, shooter, conveyor));
+        "SPEAKER PREP", new SpeakerPrepScoreAuto(intake, elevator, shooter, conveyor).andThen(new InstantCommand(() -> System.out.println("LSDGJDLFKGJDLFKGJLDLKGJDLFGJDLTGKJDLKGJDFLKGJ"))));
 
     // Configure the controller bindings
     configureDriver();
@@ -151,6 +153,7 @@ public class RobotContainer implements Sendable {
     Shuffleboard.getTab("Subsystems").add("Shooter limelight", shooterLimelight);
     Shuffleboard.getTab("Subsystems").add("Intake limelight", intakeLimelight);
     Shuffleboard.getTab("Subsystems").add("Container", this);
+    Shuffleboard.getTab("Subsystems").add("This is a duplicate elevator subsystem", elevator);
 
     SmartDashboard.putBoolean("Have Note", false);
 
@@ -162,13 +165,13 @@ public class RobotContainer implements Sendable {
         "Score two",
         new ScoreTwoNotes(
             intake, elevator, shooter, conveyor, drive, matchState, shooterLimelight, lights));
-    /*autonChooser.addOption(
+    autonChooser.addOption(
         "Score four from center",
-        new ScoreFourFromCenterLine(drive, intake, elevator, shooter, conveyor, shooterLimelight));*/
+        new ScoreFourFromCenterLine(drive, intake, elevator, shooter, conveyor, shooterLimelight));
     // autonChooser.addOption("CENTER 1-2-3-4-5", 
     // new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight));
-    autonChooser.addOption("CENTER #1-2-3-4-5", 
-    new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight));
+    //autonChooser.addOption("CENTER #1-2-3-4-5", 
+    //new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight));
     SmartDashboard.putData(autonChooser); 
   }
 
