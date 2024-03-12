@@ -176,6 +176,14 @@ public class ShooterLimelight extends SubsystemBase {
     }
   }
 
+  public void resetOdometryDuringPrep(DriveSubsystem drive){
+    if (Math.abs(getBotPose3d().getZ()) < ShooterLimelightCal.LARGE_VALUE_CORRECTOR_MARGIN){
+      Pose2d currentPose = getBotPose2d_wpiBlue().getSecond();
+      drive.resetOdometry(currentPose);
+      drive.resetYawToAngle(currentPose.getRotation().getDegrees());
+    }
+  }
+
   private Transform2d getRobotToScoringLocation(Pose3d targetPoseRobotSpace) {
     Transform2d targetFromBot = getBotFromTarget(targetPoseRobotSpace);
     return targetFromBot;
