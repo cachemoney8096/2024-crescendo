@@ -39,10 +39,10 @@ import frc.robot.commands.SpeakerPrepScoreAutoPreload;
 import frc.robot.commands.SpeakerPrepScoreSequence;
 import frc.robot.commands.SpeakerShootSequence;
 import frc.robot.commands.UnclimbSequence;
-import frc.robot.commands.autos.CenterOneToFive;
 import frc.robot.commands.autos.ScoreFourFromCenterLine;
 import frc.robot.commands.autos.ScoreTwoNotes;
 import frc.robot.subsystems.conveyor.Conveyor;
+import frc.robot.subsystems.conveyor.ConveyorCal;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
@@ -52,7 +52,6 @@ import frc.robot.subsystems.intakeLimelight.IntakeLimelight;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelightConstants;
 import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.JoystickUtil;
@@ -124,22 +123,28 @@ public class RobotContainer implements Sendable {
             IntakeLimelightConstants.INTAKE_LIMELIGHT_PITCH_DEGREES,
             IntakeLimelightConstants.INTAKE_LIMELIGHT_HEIGHT_METERS,
             0); // we aren't using the target height so 0 is fine
-    
+
     NamedCommands.registerCommand(
         "SPEAKER PREP PRELOAD",
-        new SpeakerPrepScoreAutoPreload(intake, elevator, shooter, conveyor).andThen(new InstantCommand(() -> System.out.println("speaker prep preload - done"))));
+        new SpeakerPrepScoreAutoPreload(intake, elevator, shooter, conveyor)
+            .andThen(new InstantCommand(() -> System.out.println("speaker prep preload - done"))));
     NamedCommands.registerCommand(
         "SPEAKER SCORE",
-        new SequentialCommandGroup(new InstantCommand(() -> System.out.println("Speaker score starting")), 
-        Conveyor.shoot(conveyor), 
-        new InstantCommand(() -> System.out.println("Speaker Score Done"))));
+        new SequentialCommandGroup(
+            new InstantCommand(() -> System.out.println("Speaker score starting")),
+            Conveyor.shoot(conveyor),
+            new InstantCommand(() -> System.out.println("Speaker Score Done"))));
     NamedCommands.registerCommand(
         "INTAKE DEPLOY",
         new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.DEPLOYED)));
     NamedCommands.registerCommand(
         "INTAKE", new AutoIntakeSequence(intake, elevator, conveyor, lights));
     NamedCommands.registerCommand(
-        "SPEAKER PREP", new SpeakerPrepScoreAuto(intake, elevator, shooter, conveyor).andThen(new InstantCommand(() -> System.out.println("LSDGJDLFKGJDLFKGJLDLKGJDLFGJDLTGKJDLKGJDFLKGJ"))));
+        "SPEAKER PREP",
+        new SpeakerPrepScoreAuto(intake, elevator, shooter, conveyor)
+            .andThen(
+                new InstantCommand(
+                    () -> System.out.println("LSDGJDLFKGJDLFKGJLDLKGJDLFGJDLTGKJDLKGJDFLKGJ"))));
 
     // Configure the controller bindings
     configureDriver();
@@ -168,11 +173,11 @@ public class RobotContainer implements Sendable {
     autonChooser.addOption(
         "Score four from center",
         new ScoreFourFromCenterLine(drive, intake, elevator, shooter, conveyor, shooterLimelight));
-    // autonChooser.addOption("CENTER 1-2-3-4-5", 
+    // autonChooser.addOption("CENTER 1-2-3-4-5",
     // new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight));
-    //autonChooser.addOption("CENTER #1-2-3-4-5", 
-    //new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight));
-    SmartDashboard.putData(autonChooser); 
+    // autonChooser.addOption("CENTER #1-2-3-4-5",
+    // new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight));
+    SmartDashboard.putData(autonChooser);
   }
 
   private int getCardinalDirectionDegrees() {
@@ -218,7 +223,14 @@ public class RobotContainer implements Sendable {
                   prepState = PrepState.OFF;
                   switch (input) {
                     case OFF:
-                      return new InstantCommand();
+                      // return new InstantCommand();
+                      return new SequentialCommandGroup(
+                          new InstantCommand(intake::reverseRollers),
+                          new InstantCommand(() -> conveyor.startRollers(-1.0)),
+                          WaitUntilCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
+                          new InstantCommand(intake::stopRollers),
+                          new InstantCommand(
+                              conveyor::stopRollers)); // outtake when not prepped in anything
                     case CLIMB:
                       return new ClimbSequence(intake, elevator, shooter, conveyor);
                     case FEED:
@@ -342,6 +354,17 @@ public class RobotContainer implements Sendable {
                 },
                 drive)
             .withName("Manual Drive"));
+  }
+
+  private Command ParallelCommandGroup(
+      InstantCommand instantCommand, InstantCommand instantCommand2) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'ParallelCommandGroup'");
+  }
+
+  private Command WaitUntilCommand(double noteExitTimeTrapAmpSeconds) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'WaitUntilCommand'");
   }
 
   private void configureOperator() {

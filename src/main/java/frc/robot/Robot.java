@@ -94,6 +94,7 @@ public class Robot extends TimedRobot {
     }
 
     m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);
+    Conveyor.stop(m_robotContainer.conveyor);
 
     m_robotContainer.intake.dontAllowIntakeMovement();
     m_robotContainer.elevator.dontAllowElevatorMovement();
@@ -146,7 +147,7 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
-    m_robotContainer.lights.toggleCode(LightCode.INTAKING);
+    m_robotContainer.lights.toggleCode(LightCode.NOTELESS);
 
     setMatchState();
 
@@ -160,7 +161,6 @@ public class Robot extends TimedRobot {
       m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
       m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
     }
-    Conveyor.stop(m_robotContainer.conveyor);
   }
 
   /** This function is called periodically during operator control. */
