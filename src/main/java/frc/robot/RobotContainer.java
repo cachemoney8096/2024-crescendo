@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -90,7 +91,8 @@ public class RobotContainer implements Sendable {
     CLIMB,
     SPEAKER,
     FEED,
-    AMP
+    AMP,
+    OPERATOR_PREPPED
   }
 
   PrepState prepState = PrepState.OFF;
@@ -178,8 +180,10 @@ public class RobotContainer implements Sendable {
     autonChooser.addOption(
         "Score four from center",
         new Pair<Command, String>(new ScoreFourFromCenterLine(drive, intake, elevator, shooter, conveyor, shooterLimelight), "4 NOTE - CENTER LINE - SOURCE - AUTO"));
-    autonChooser.addOption("score notes 1-2-3-4-5",
-    new Pair<Command, String>(new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight), "CENTER 1-2-3-4-5"));
+     autonChooser.addOption("BLUE score notes 1-2-3-4-5",
+     new Pair<Command, String>(new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight, false), "CENTER 1-2-3-4-5"));
+     autonChooser.addOption("RED score notes 1-2-3-4-5",
+     new Pair<Command, String>(new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight, true), "CENTER 1-2-3-4-5 RED"));
     SmartDashboard.putData(autonChooser);
   }
 
@@ -224,16 +228,16 @@ public class RobotContainer implements Sendable {
                 () -> {
                   PrepState input = prepState;
                   prepState = PrepState.OFF;
+                  System.out.println("we are @score button");
                   switch (input) {
                     case OFF:
-                      // return new InstantCommand();
                       return new SequentialCommandGroup(
                           new InstantCommand(intake::reverseRollers),
                           new InstantCommand(() -> conveyor.startRollers(-1.0)),
-                          WaitUntilCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
-                          new InstantCommand(intake::stopRollers),
-                          new InstantCommand(
-                              conveyor::stopRollers)); // outtake when not prepped in anything
+                          new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),                          new InstantCommand(
+                              conveyor::stopRollers),
+                          new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
+                          new InstantCommand(intake::stopRollers));
                     case CLIMB:
                       return new ClimbSequence(intake, elevator, shooter, conveyor);
                     case FEED:
@@ -242,8 +246,11 @@ public class RobotContainer implements Sendable {
                       return new SpeakerShootSequence(conveyor, shooter, elevator, drive, true);
                     case AMP:
                       return new AmpScore(drive, conveyor, intake, shooter, elevator);
+                    case OPERATOR_PREPPED:
+                      return Conveyor.shoot(conveyor);
+                    default:
+                      return new InstantCommand(()->System.out.println("you suck at coding"));
                   }
-                  return new InstantCommand();
                 },
                 new TreeSet<Subsystem>()));
 
@@ -288,7 +295,7 @@ public class RobotContainer implements Sendable {
                 new InstantCommand(() -> prepState = PrepState.FEED),
                 new FeedPrepScore(elevator, conveyor, intake, shooter, drive, matchState)));
     // bottom left back button
-    driverController.povRight().onTrue(new UnclimbSequence(elevator, shooter));
+    driverController.povRight().onTrue(new UnclimbSequence(elevator, shooter, conveyor));
 
     BooleanSupplier driverJoysticksActive =
         () -> {
@@ -383,8 +390,8 @@ public class RobotContainer implements Sendable {
         .b()
         .onFalse(
             new InstantCommand(() -> conveyor.stopRollers()).andThen(() -> intake.stopRollers()));
-    operatorController.a().onTrue(new InstantCommand(() -> shooter.setShooterDistance(1.16)).andThen(new InstantCommand(()->shooter.setShooterMode(ShooterMode.SHOOT))));
-    operatorController.y().onTrue(new InstantCommand(() -> shooter.setShooterDistance(2.77)).andThen(new InstantCommand(()->shooter.setShooterMode(ShooterMode.SHOOT))));
+    operatorController.a().onTrue(new InstantCommand(() -> shooter.setShooterDistance(1.16)).andThen(new InstantCommand(()->shooter.setShooterMode(ShooterMode.SHOOT))).andThen(new InstantCommand(()->prepState = PrepState.OPERATOR_PREPPED)));
+    operatorController.y().onTrue(new InstantCommand(() -> shooter.setShooterDistance(2.77)).andThen(new InstantCommand(()->shooter.setShooterMode(ShooterMode.SHOOT))).andThen(new InstantCommand(()->prepState = PrepState.OPERATOR_PREPPED)));
 
     operatorController
         .leftBumper()

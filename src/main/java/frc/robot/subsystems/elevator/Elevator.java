@@ -208,7 +208,11 @@ public class Elevator extends SubsystemBase {
   public boolean atDesiredPosition() {
     double desiredPositionIn = elevatorPositions.get(desiredPosition);
     double currentPositionIn = leftMotorEncoderRel.getPosition();
-    return Math.abs(desiredPositionIn - currentPositionIn) < ElevatorCal.ELEVATOR_MARGIN_INCHES;
+    double elevatorMarginInches = ElevatorCal.ELEVATOR_MARGIN_INCHES;
+    if(desiredPosition == ElevatorPosition.PRE_CLIMB){
+      elevatorMarginInches = 1;
+    }
+    return Math.abs(desiredPositionIn - currentPositionIn) < elevatorMarginInches;
   }
 
   /**
