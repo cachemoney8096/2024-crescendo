@@ -23,9 +23,12 @@ import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.MatchStateUtil;
 
 /**
- * The VM is configured to automatically run this class, and to call the functions corresponding to
- * each mode, as described in the TimedRobot documentation. If you change the name of this class or
- * the package after creating this project, you must also update the build.gradle file in the
+ * The VM is configured to automatically run this class, and to call the
+ * functions corresponding to
+ * each mode, as described in the TimedRobot documentation. If you change the
+ * name of this class or
+ * the package after creating this project, you must also update the
+ * build.gradle file in the
  * project.
  */
 public class Robot extends TimedRobot {
@@ -38,30 +41,34 @@ public class Robot extends TimedRobot {
   private MatchStateUtil matchState = new MatchStateUtil(false, true);
 
   /**
-   * This function is run when the robot is first started up and should be used for any
+   * This function is run when the robot is first started up and should be used
+   * for any
    * initialization code.
    */
   @Override
   public void robotInit() {
     /**
-     * Instantiate our RobotContainer. This will perform all our button bindings, and put our
+     * Instantiate our RobotContainer. This will perform all our button bindings,
+     * and put our
      * autonomous chooser on the dashboard.
      */
     m_robotContainer = new RobotContainer(matchState);
     RobotController.setBrownoutVoltage(Constants.BROWNOUT_VOLTAGE);
-    m_PoseEstimator =
-        new SwerveDrivePoseEstimator(
-            DriveConstants.DRIVE_KINEMATICS,
-            m_robotContainer.drive.getGyro().getRotation2d(),
-            m_robotContainer.drive.getModulePositions(),
-            new Pose2d());
+    m_PoseEstimator = new SwerveDrivePoseEstimator(
+        DriveConstants.DRIVE_KINEMATICS,
+        m_robotContainer.drive.getGyro().getRotation2d(),
+        m_robotContainer.drive.getModulePositions(),
+        new Pose2d());
   }
 
   /**
-   * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
+   * This function is called every 20 ms, no matter the mode. Use this for items
+   * like diagnostics
    * that you want ran during disabled, autonomous, teleoperated and test.
    *
-   * <p>This runs after the mode specific periodic functions, but before LiveWindow and
+   * <p>
+   * This runs after the mode specific periodic functions, but before LiveWindow
+   * and
    * SmartDashboard integrated updating.
    */
   @Override
@@ -110,12 +117,22 @@ public class Robot extends TimedRobot {
         m_PoseEstimator, m_robotContainer.drive);
   }
 
-  /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
+  /**
+   * This autonomous runs the autonomous command selected by your
+   * {@link RobotContainer} class.
+   */
   @Override
   public void autonomousInit() {
     setMatchState();
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
+    if (m_robotContainer.shooterLimelight.checkForTag().isEmpty()) {
+      Pose2d pathStartingPose = PathPlannerAuto.getStaringPoseFromAutoFile(m_robotContainer.getAutonomusName());
+      if (Math.abs(m_robotContainer.drive.getPose().getX()-pathStartingPose.getX()) < Constants.ODOMETRY_ERROR
+          && Math.abs(m_robotContainer.drive.getPose().getY()-pathStartingPose.getY()) < Constants.ODOMETRY_ERROR) {
+            m_robotContainer.drive.resetOdometry(pathStartingPose);
+      }
+    }
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
@@ -135,7 +152,8 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+  }
 
   @Override
   public void teleopInit() {
@@ -165,7 +183,8 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+  }
 
   @Override
   public void testInit() {
@@ -175,18 +194,22 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+  }
 
   /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() {}
+  public void simulationInit() {
+  }
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+  }
 
   /**
-   * Sets whether it is a real match by checking if the match time is more than 1s, and whether we
+   * Sets whether it is a real match by checking if the match time is more than
+   * 1s, and whether we
    * are blue from the driver station data (defaults to true).
    */
   private void setMatchState() {
