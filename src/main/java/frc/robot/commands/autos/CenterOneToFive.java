@@ -21,6 +21,6 @@ public class CenterOneToFive extends SequentialCommandGroup {
     addRequirements(drive, intake, elevator, shooter, conveyor, limelight);
 
     /** Initialize sequential commands that run for the "15 second autonomous phase" */
-    addCommands(new PathPlannerAuto("CENTER"));
+    addCommands(new PathPlannerAuto("CENTER 1-2-3-4-5"));
   }
 }

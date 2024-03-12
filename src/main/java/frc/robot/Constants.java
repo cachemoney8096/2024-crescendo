@@ -73,4 +73,6 @@ public final class Constants {
   public static final double BROWNOUT_VOLTAGE = 5.0;
 
   public static final double NOTE_HEIGHT_INCHES = 2.0;
+
+  public static final double ODOMETRY_ERROR = 0.2; //arbitrary value for now
 }

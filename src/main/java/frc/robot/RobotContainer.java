@@ -6,6 +6,7 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -39,6 +40,7 @@ import frc.robot.commands.SpeakerPrepScoreAutoPreload;
 import frc.robot.commands.SpeakerPrepScoreSequence;
 import frc.robot.commands.SpeakerShootSequence;
 import frc.robot.commands.UnclimbSequence;
+import frc.robot.commands.autos.CenterOneToFive;
 import frc.robot.commands.autos.ScoreFourFromCenterLine;
 import frc.robot.commands.autos.ScoreTwoNotes;
 import frc.robot.subsystems.conveyor.Conveyor;
@@ -95,7 +97,7 @@ public class RobotContainer implements Sendable {
   public boolean driveFieldRelative = true;
 
   // A chooser for autonomous commands
-  private SendableChooser<Command> autonChooser = new SendableChooser<>();
+  private SendableChooser<Pair<Command, String>> autonChooser = new SendableChooser<>();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer(MatchStateUtil matchState) {
@@ -168,15 +170,13 @@ public class RobotContainer implements Sendable {
 
     autonChooser.setDefaultOption(
         "Score two",
-        new ScoreTwoNotes(
-            intake, elevator, shooter, conveyor, drive, matchState, shooterLimelight, lights));
+        new Pair<Command, String>(new ScoreTwoNotes(
+            intake, elevator, shooter, conveyor, drive, matchState, shooterLimelight, lights), null));
     autonChooser.addOption(
         "Score four from center",
-        new ScoreFourFromCenterLine(drive, intake, elevator, shooter, conveyor, shooterLimelight));
-    // autonChooser.addOption("CENTER 1-2-3-4-5",
-    // new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight));
-    // autonChooser.addOption("CENTER #1-2-3-4-5",
-    // new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight));
+        new Pair<Command, String>(new ScoreFourFromCenterLine(drive, intake, elevator, shooter, conveyor, shooterLimelight), "4 NOTE - CENTER LINE - SOURCE - AUTO"));
+    autonChooser.addOption("score notes 1-2-3-4-5",
+    new Pair<Command, String>(new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight), "CENTER 1-2-3-4-5"));
     SmartDashboard.putData(autonChooser);
   }
 
@@ -415,7 +415,11 @@ public class RobotContainer implements Sendable {
   public Command getAutonomousCommand() {
     // elevator currently goes UP in auto (score two notes)!!
 
-    return autonChooser.getSelected();
+    return autonChooser.getSelected().getFirst();
+  }
+
+  public String getAutonomusName(){
+    return autonChooser.getSelected().getSecond();
   }
 
   @Override

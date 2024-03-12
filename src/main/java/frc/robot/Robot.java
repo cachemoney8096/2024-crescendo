@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.revrobotics.CANSparkBase.IdleMode;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -113,7 +114,6 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     setMatchState();
-    System.out.println("LGKJSDLGKJDFLSGKJLSKDGFJLSFKGJ");
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
