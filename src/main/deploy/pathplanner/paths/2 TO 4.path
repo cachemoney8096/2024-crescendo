@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.89151450786123,
-        "y": 5.544029880006069
+        "x": 2.6556841685111943,
+        "y": 5.3800210457563775
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.39838019273354,
-        "y": 6.4531130404542685
+        "x": 5.191770383540767,
+        "y": 5.981058819260496
       },
       "isLocked": false,
       "linkedName": "SHOOT AT 2"
     },
     {
       "anchor": {
-        "x": 7.994776794922717,
-        "y": 7.424179143660301
+        "x": 8.534126782539278,
+        "y": 6.875285750571502
       },
       "prevControl": {
-        "x": 5.405267186373299,
-        "y": 6.44622604681451
+        "x": 6.085997314851773,
+        "y": 6.2302696033963505
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,7 +33,7 @@
   "eventMarkers": [
     {
       "name": "INTAKE",
-      "waypointRelativePos": 0.5,
+      "waypointRelativePos": 0.7,
       "command": {
         "type": "sequential",
         "data": {
@@ -50,8 +50,8 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 5.0,
-    "maxAcceleration": 6.0,
+    "maxVelocity": 5.5,
+    "maxAcceleration": 6.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },

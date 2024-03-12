@@ -32,18 +32,12 @@
   "constraintZones": [],
   "eventMarkers": [
     {
-      "name": "INTAKE AND SPEAKER PREP",
-      "waypointRelativePos": 0,
+      "name": "INTAKE",
+      "waypointRelativePos": 0.35,
       "command": {
         "type": "sequential",
         "data": {
           "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "SPEAKER PREP"
-              }
-            },
             {
               "type": "named",
               "data": {
@@ -56,8 +50,8 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 2.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 2.5,
+    "maxAcceleration": 3.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },

@@ -54,6 +54,7 @@ import frc.robot.subsystems.intakeLimelight.IntakeLimelight;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelightConstants;
 import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.JoystickUtil;
@@ -147,6 +148,8 @@ public class RobotContainer implements Sendable {
             .andThen(
                 new InstantCommand(
                     () -> System.out.println("LSDGJDLFKGJDLFKGJLDLKGJDLFGJDLTGKJDLKGJDFLKGJ"))));
+    NamedCommands.registerCommand("CONVEYOR OVERRIDE",
+    Conveyor.stop(conveyor).andThen(new InstantCommand(()->shooter.setShooterMode(ShooterMode.IDLE))));
 
     // Configure the controller bindings
     configureDriver();
@@ -380,8 +383,8 @@ public class RobotContainer implements Sendable {
         .b()
         .onFalse(
             new InstantCommand(() -> conveyor.stopRollers()).andThen(() -> intake.stopRollers()));
-    operatorController.a().onTrue(new InstantCommand(() -> shooter.setShooterDistance(1.16)));
-    operatorController.y().onTrue(new InstantCommand(() -> shooter.setShooterDistance(2.77)));
+    operatorController.a().onTrue(new InstantCommand(() -> shooter.setShooterDistance(1.16)).andThen(new InstantCommand(()->shooter.setShooterMode(ShooterMode.SHOOT))));
+    operatorController.y().onTrue(new InstantCommand(() -> shooter.setShooterDistance(2.77)).andThen(new InstantCommand(()->shooter.setShooterMode(ShooterMode.SHOOT))));
 
     operatorController
         .leftBumper()

@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.revrobotics.CANSparkBase.IdleMode;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -95,6 +97,12 @@ public class Robot extends TimedRobot {
       m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kCoast);
       m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kCoast);
       m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kCoast);
+
+      m_robotContainer.drive.frontRight.drivingTalon.setNeutralMode(NeutralModeValue.Coast);
+      m_robotContainer.drive.frontLeft.drivingTalon.setNeutralMode(NeutralModeValue.Coast);
+      m_robotContainer.drive.rearRight.drivingTalon.setNeutralMode(NeutralModeValue.Coast);
+      m_robotContainer.drive.rearLeft.drivingTalon.setNeutralMode(NeutralModeValue.Coast);
+
       m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kCoast);
       m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kCoast);
       m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kCoast);
@@ -103,6 +111,7 @@ public class Robot extends TimedRobot {
 
     m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);
     Conveyor.stop(m_robotContainer.conveyor);
+    m_robotContainer.intake.stopRollers();
 
     m_robotContainer.intake.dontAllowIntakeMovement();
     m_robotContainer.elevator.dontAllowElevatorMovement();
@@ -128,8 +137,8 @@ public class Robot extends TimedRobot {
 
     if (m_robotContainer.shooterLimelight.checkForTag().isEmpty()) {
       Pose2d pathStartingPose = PathPlannerAuto.getStaringPoseFromAutoFile(m_robotContainer.getAutonomusName());
-      if (Math.abs(m_robotContainer.drive.getPose().getX()-pathStartingPose.getX()) < Constants.ODOMETRY_ERROR
-          && Math.abs(m_robotContainer.drive.getPose().getY()-pathStartingPose.getY()) < Constants.ODOMETRY_ERROR) {
+      if (Math.abs(m_robotContainer.drive.getPose().getX()) < Constants.ODOMETRY_ERROR
+          && Math.abs(m_robotContainer.drive.getPose().getY()) < Constants.ODOMETRY_ERROR) {
             m_robotContainer.drive.resetOdometry(pathStartingPose);
       }
     }
@@ -143,11 +152,33 @@ public class Robot extends TimedRobot {
       m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kBrake);
       m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
       m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kBrake);
+
+      m_robotContainer.drive.frontRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+      m_robotContainer.drive.frontLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+      m_robotContainer.drive.rearRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+      m_robotContainer.drive.rearLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+
       m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
       m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
       m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
       m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
     }
+  }
+
+  @Override
+  public void autonomousExit() {
+    m_robotContainer.intake.stopRollers();
+    Conveyor.stop(m_robotContainer.conveyor);
+    m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);
+    m_robotContainer.drive.frontRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+    m_robotContainer.drive.frontLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+    m_robotContainer.drive.rearRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+    m_robotContainer.drive.rearLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+
+    m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
   }
 
   /** This function is called periodically during autonomous. */
@@ -166,6 +197,10 @@ public class Robot extends TimedRobot {
     }
 
     m_robotContainer.lights.toggleCode(LightCode.NOTELESS);
+    m_robotContainer.intake.stopRollers();
+    Conveyor.stop(m_robotContainer.conveyor);
+    m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);
+
 
     setMatchState();
 
@@ -174,6 +209,12 @@ public class Robot extends TimedRobot {
       m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kBrake);
       m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
       m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kBrake);
+
+      m_robotContainer.drive.frontRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+      m_robotContainer.drive.frontLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+      m_robotContainer.drive.rearRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+      m_robotContainer.drive.rearLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+
       m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
       m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
       m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);

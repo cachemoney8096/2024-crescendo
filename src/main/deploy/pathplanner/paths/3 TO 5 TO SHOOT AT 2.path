@@ -3,41 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.492068876755203,
-        "y": 3.9323511980357293
+        "x": 2.010668021336043,
+        "y": 4.2219238724191746
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.0439138656055094,
-        "y": 7.5620749019275815
+        "x": 2.5625130101863496,
+        "y": 7.851647576311027
       },
       "isLocked": false,
       "linkedName": "3 INTAKE"
     },
     {
       "anchor": {
-        "x": 8.28174300793046,
-        "y": 5.544029880006069
+        "x": 8.270256540513081,
+        "y": 6.142312856054285
       },
       "prevControl": {
-        "x": 8.265798925629236,
-        "y": 6.735552236412192
+        "x": 8.254312458211857,
+        "y": 7.333835212460408
       },
       "nextControl": {
-        "x": 8.291397379091054,
-        "y": 4.822545955277096
+        "x": 8.279910911673674,
+        "y": 5.420828931325312
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.89151450786123,
-        "y": 5.544029880006069
+        "x": 2.6556841685111943,
+        "y": 5.3800210457563775
       },
       "prevControl": {
-        "x": 6.397962351480259,
-        "y": 2.9560014675584907
+        "x": 6.774991835697957,
+        "y": 3.547588809463334
       },
       "nextControl": null,
       "isLocked": false,
@@ -59,24 +59,7 @@
   "constraintZones": [],
   "eventMarkers": [
     {
-      "name": "INTAKE",
-      "waypointRelativePos": 0.55,
-      "command": {
-        "type": "sequential",
-        "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "INTAKE"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "name": "SPEAKER PREP",
+      "name": "SPEAKER PREP AND SCORE",
       "waypointRelativePos": 1.6,
       "command": {
         "type": "sequential",
@@ -91,11 +74,28 @@
           ]
         }
       }
+    },
+    {
+      "name": "INTAKE",
+      "waypointRelativePos": 0.65,
+      "command": {
+        "type": "sequential",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "INTAKE"
+              }
+            }
+          ]
+        }
+      }
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 4.0,
+    "maxVelocity": 4.0,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },

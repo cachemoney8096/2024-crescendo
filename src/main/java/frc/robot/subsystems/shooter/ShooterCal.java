@@ -77,8 +77,8 @@ public class ShooterCal {
   public static final double PIVOT_PROFILE_REPLANNING_THRESHOLD_DEG = 5.0;
   public static final double PIVOT_ENCODER_ZEROING_THRESHOLD_DEG = 5.0;
 
-  public static final double AUTO_PRELOAD_DISTANCE_M = Units.feetToMeters(4);
-  public static final double AUTO_SHOOTING_DISTANCE_M = Units.feetToMeters(16.0);
+  public static final double AUTO_PRELOAD_DISTANCE_M = Units.feetToMeters(3.8);
+  public static final double AUTO_SHOOTING_DISTANCE_M = Units.feetToMeters(8.5);
 
   /**
    * What the abs encoder reads (in degrees) when the shooter is pointed down. Acquired by pointing
@@ -90,7 +90,7 @@ public class ShooterCal {
   public static final double CONVEYOR_ZONE_THRESHOLD_DEGREES = 110.0;
 
   public static final double SHOOT_CLEAR_STAGE_ANGLE_DEGREES = 128.0;
-  public static final double SHOOT_CLEAR_STAGE_VOLTAGE = 7;
+  public static final double SHOOT_CLEAR_STAGE_VOLTAGE = 5.5;
 
   public static final double ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES = 4.0;
 }

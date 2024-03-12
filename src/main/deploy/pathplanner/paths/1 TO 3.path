@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.920448404655198,
-        "y": 5.509594911807273
+        "x": 1.6002032004064015,
+        "y": 6.054356108712217
       },
       "isLocked": false,
       "linkedName": "1 INTAKE"
     },
     {
       "anchor": {
-        "x": 2.492068876755203,
-        "y": 3.9323511980357293
+        "x": 2.010668021336043,
+        "y": 4.2219238724191746
       },
       "prevControl": {
-        "x": 1.929726526119719,
-        "y": 5.483024299381932
+        "x": 1.0455050555355199,
+        "y": 5.288447814990869
       },
       "nextControl": null,
       "isLocked": false,
@@ -32,18 +32,12 @@
   "constraintZones": [],
   "eventMarkers": [
     {
-      "name": "INTAKE AND SPEAKER PREP",
-      "waypointRelativePos": 0,
+      "name": "INTAKE",
+      "waypointRelativePos": 0.7,
       "command": {
         "type": "sequential",
         "data": {
           "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "SPEAKER PREP"
-              }
-            },
             {
               "type": "named",
               "data": {
@@ -56,8 +50,8 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 2.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 2.5,
+    "maxAcceleration": 3.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },

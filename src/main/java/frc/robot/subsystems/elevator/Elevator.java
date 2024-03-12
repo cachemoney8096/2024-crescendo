@@ -254,6 +254,14 @@ public class Elevator extends SubsystemBase {
     rightMotor.burnFlash();
   }
 
+  public double getCurPosInches() {
+    return leftMotorEncoderRel.getPosition();
+  }
+
+  public double getDesiredPosInches() {
+    return elevatorPositions.get(desiredPosition);
+    }
+
   @Override
   public void initSendable(SendableBuilder builder) {
     super.initSendable(builder);

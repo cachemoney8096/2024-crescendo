@@ -4,8 +4,10 @@ import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
@@ -19,7 +21,6 @@ import java.util.Optional;
 public class SpeakerPrepScoreAuto extends SequentialCommandGroup {
 
   Optional<Pair<Rotation2d, Double>> tagDetection = Optional.empty();
-  double distanceFromSpeakerMeters = 0.0;
 
   public SpeakerPrepScoreAuto(
       Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor) {
@@ -30,6 +31,10 @@ public class SpeakerPrepScoreAuto extends SequentialCommandGroup {
     addCommands(
         // new GoHomeSequence(intake, elevator, shooter, conveyor, true, false, false),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
-        new InstantCommand(() -> shooter.setShooterDistance(ShooterCal.AUTO_SHOOTING_DISTANCE_M)));
+        new InstantCommand(() -> shooter.setShooterDistance(ShooterCal.AUTO_SHOOTING_DISTANCE_M)),
+        new InstantCommand(()-> elevator.setDesiredPosition(ElevatorPosition.SLIGHTLY_UP, true)),
+        new InstantCommand(() -> System.out.println("elevator pos: " + elevator.getCurPosInches())),
+        new InstantCommand(() -> System.out.println("elevator desired pos: " + elevator.getDesiredPosInches())),
+        new WaitUntilCommand(()->elevator.atDesiredPosition()));
   }
 }
