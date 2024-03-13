@@ -1,0 +1,70 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 8.059461482689013,
+        "y": 0.8080477216589235
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 5.772979594288994,
+        "y": 1.3590072128396513
+      },
+      "isLocked": false,
+      "linkedName": "#8 INTAKE RED"
+    },
+    {
+      "anchor": {
+        "x": 4.0192228743943925,
+        "y": 2.939419972991158
+      },
+      "prevControl": {
+        "x": 5.734084290694401,
+        "y": 1.3003154867284938
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "SHOOT AT STAGE LEFT RED"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "eventMarkers": [
+    {
+      "name": "SPEAKER PREP STAGE",
+      "waypointRelativePos": 0.5,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "SPEAKER PREP STAGE"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 5.0,
+    "maxAcceleration": 6.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -30.0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "LEFT RED",
+  "previewStartingState": {
+    "rotation": 0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": false
+}

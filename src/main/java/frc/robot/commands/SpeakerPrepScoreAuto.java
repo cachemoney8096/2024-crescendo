@@ -23,7 +23,7 @@ public class SpeakerPrepScoreAuto extends SequentialCommandGroup {
   Optional<Pair<Rotation2d, Double>> tagDetection = Optional.empty();
 
   public SpeakerPrepScoreAuto(
-      Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor) {
+      Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor, double shooterDistanceMeters) {
 
     // Drive is not a requirement!!
     addRequirements(intake, elevator, shooter, conveyor);
@@ -31,7 +31,7 @@ public class SpeakerPrepScoreAuto extends SequentialCommandGroup {
     addCommands(
         // new GoHomeSequence(intake, elevator, shooter, conveyor, true, false, false),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
-        new InstantCommand(() -> shooter.setShooterDistance(ShooterCal.AUTO_SHOOTING_DISTANCE_M)),
+        new InstantCommand(() -> shooter.setShooterDistance(shooterDistanceMeters)),
         new InstantCommand(()-> elevator.setDesiredPosition(ElevatorPosition.SLIGHTLY_UP, true)),
         new InstantCommand(() -> System.out.println("elevator pos: " + elevator.getCurPosInches())),
         new InstantCommand(() -> System.out.println("elevator desired pos: " + elevator.getDesiredPosInches())),

@@ -44,6 +44,7 @@ import frc.robot.commands.UnclimbSequence;
 import frc.robot.commands.autos.CenterOneToFive;
 import frc.robot.commands.autos.ScoreFourFromCenterLine;
 import frc.robot.commands.autos.ScoreTwoNotes;
+import frc.robot.commands.autos.SideSixToEight;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.conveyor.ConveyorCal;
 import frc.robot.subsystems.drive.DriveSubsystem;
@@ -56,6 +57,7 @@ import frc.robot.subsystems.intakeLimelight.IntakeLimelightConstants;
 import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
+import frc.robot.subsystems.shooter.ShooterCal;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.JoystickUtil;
@@ -148,7 +150,13 @@ public class RobotContainer implements Sendable {
         "INTAKE", new AutoIntakeSequence(intake, elevator, conveyor, lights));
     NamedCommands.registerCommand(
         "SPEAKER PREP",
-        new SpeakerPrepScoreAuto(intake, elevator, shooter, conveyor)
+        new SpeakerPrepScoreAuto(intake, elevator, shooter, conveyor, ShooterCal.AUTO_SHOOTING_DISTANCE_M)
+            .andThen(
+                new InstantCommand(
+                    () -> System.out.println("LSDGJDLFKGJDLFKGJLDLKGJDLFGJDLTGKJDLKGJDFLKGJ"))));
+    NamedCommands.registerCommand(
+        "SPEAKER PREP STAGE",
+        new SpeakerPrepScoreAuto(intake, elevator, shooter, conveyor, ShooterCal.AUTO_STAGE_SHOOTING_DISTANCE_M)
             .andThen(
                 new InstantCommand(
                     () -> System.out.println("LSDGJDLFKGJDLFKGJLDLKGJDLFGJDLTGKJDLKGJDFLKGJ"))));
@@ -186,6 +194,10 @@ public class RobotContainer implements Sendable {
      new Pair<Command, String>(new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight, false), "CENTER 1-2-3-4-5"));
      autonChooser.addOption("RED score notes 1-2-3-4-5",
      new Pair<Command, String>(new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight, true), "CENTER 1-2-3-4-5 RED"));
+     autonChooser.addOption("BLUE score notes 8-6-7 right",
+     new Pair<Command, String>(new SideSixToEight(drive, intake, elevator, shooter, conveyor, shooterLimelight, false), "RIGHT 8-6-7"));
+     autonChooser.addOption("RED score notes 8-6-7 left",
+     new Pair<Command, String>(new SideSixToEight(drive, intake, elevator, shooter, conveyor, shooterLimelight, true), "LEFT 8-6-7 RED"));
     SmartDashboard.putData(autonChooser);
   }
 
