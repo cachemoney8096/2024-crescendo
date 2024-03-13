@@ -4,12 +4,15 @@
 
 package frc.robot;
 
+import org.littletonrobotics.urcl.URCL;
+
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.revrobotics.CANSparkBase.IdleMode;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -54,6 +57,10 @@ public class Robot extends TimedRobot {
      * and put our
      * autonomous chooser on the dashboard.
      */
+
+    DataLogManager.start();
+    URCL.start();
+    
     m_robotContainer = new RobotContainer(matchState);
     RobotController.setBrownoutVoltage(Constants.BROWNOUT_VOLTAGE);
     m_PoseEstimator = new SwerveDrivePoseEstimator(
