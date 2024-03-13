@@ -16,19 +16,25 @@
     },
     {
       "anchor": {
-        "x": 4.0192228743943925,
-        "y": 2.939419972991158
+        "x": 4.413229941816507,
+        "y": 3.618840233495605
       },
       "prevControl": {
-        "x": 4.69845139404972,
-        "y": 1.522408750951594
+        "x": 5.092458461471835,
+        "y": 2.2018290114560415
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "SHOOT AT STAGE LEFT RED"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": -30.0,
+      "rotateFast": false
+    }
+  ],
   "constraintZones": [],
   "eventMarkers": [
     {
@@ -50,8 +56,8 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 5.0,
-    "maxAcceleration": 6.0,
+    "maxVelocity": 4.0,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },
@@ -66,5 +72,5 @@
     "rotation": 45.0,
     "velocity": 0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

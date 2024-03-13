@@ -68,6 +68,8 @@ public class Robot extends TimedRobot {
         m_robotContainer.drive.getGyro().getRotation2d(),
         m_robotContainer.drive.getModulePositions(),
         new Pose2d());
+    
+    m_robotContainer.isTeleop = false;
   }
 
   /**
@@ -95,6 +97,7 @@ public class Robot extends TimedRobot {
   /** This function is called once each time the robot enters disabled mode. */
   @Override
   public void disabledInit() {
+    m_robotContainer.isTeleop = false;
     LimelightHelpers.getLatestResults(
         IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME); // It takes 2.5-3s on first run
     LimelightHelpers.getLatestResults(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
@@ -139,6 +142,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
+    m_robotContainer.isTeleop = false;
+
     setMatchState();
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
@@ -203,13 +208,16 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
+    
     m_robotContainer.lights.toggleCode(LightCode.NOTELESS);
     m_robotContainer.intake.stopRollers();
     Conveyor.stop(m_robotContainer.conveyor);
     m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);
-
-
+    
+    
     setMatchState();
+    
+    m_robotContainer.isTeleop = true;
 
     if (matchState.isRealMatch()) {
       m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);

@@ -81,7 +81,7 @@ public class ShooterCal {
   public static final double AUTO_SHOOTING_DISTANCE_M = Units.feetToMeters(8.5);
   
   /** Stage left on blue, stage right on red */
-  public static final double AUTO_STAGE_SHOOTING_DISTANCE_M = Units.feetToMeters(16);
+  public static final double AUTO_STAGE_SHOOTING_DISTANCE_M = Units.feetToMeters(15);
 
   /**
    * What the abs encoder reads (in degrees) when the shooter is pointed down. Acquired by pointing

@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -62,8 +63,6 @@ import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.JoystickUtil;
 import frc.robot.utils.MatchStateUtil;
-
-import java.time.Instant;
 import java.util.TreeSet;
 import java.util.function.BooleanSupplier;
 
@@ -98,6 +97,8 @@ public class RobotContainer implements Sendable {
     AMP,
     OPERATOR_PREPPED
   }
+
+  public boolean isTeleop = false;
 
   PrepState prepState = PrepState.OFF;
 
@@ -141,6 +142,7 @@ public class RobotContainer implements Sendable {
         "SPEAKER SCORE",
         new SequentialCommandGroup(
             new InstantCommand(() -> System.out.println("Speaker score starting")),
+            new WaitCommand(0.5),
             Conveyor.shoot(conveyor),
             new InstantCommand(() -> System.out.println("Speaker Score Done"))));
     NamedCommands.registerCommand(
@@ -150,18 +152,25 @@ public class RobotContainer implements Sendable {
         "INTAKE", new AutoIntakeSequence(intake, elevator, conveyor, lights));
     NamedCommands.registerCommand(
         "SPEAKER PREP",
-        new SpeakerPrepScoreAuto(intake, elevator, shooter, conveyor, ShooterCal.AUTO_SHOOTING_DISTANCE_M)
+        new SpeakerPrepScoreAuto(
+                intake, elevator, shooter, conveyor, ShooterCal.AUTO_SHOOTING_DISTANCE_M)
             .andThen(
                 new InstantCommand(
                     () -> System.out.println("LSDGJDLFKGJDLFKGJLDLKGJDLFGJDLTGKJDLKGJDFLKGJ"))));
     NamedCommands.registerCommand(
         "SPEAKER PREP STAGE",
-        new SpeakerPrepScoreAuto(intake, elevator, shooter, conveyor, ShooterCal.AUTO_STAGE_SHOOTING_DISTANCE_M)
+        new InstantCommand(() -> conveyor.stopRollers())
+            .andThen(
+                new SpeakerPrepScoreAuto(
+                    intake, elevator, shooter, conveyor, ShooterCal.AUTO_STAGE_SHOOTING_DISTANCE_M))
             .andThen(
                 new InstantCommand(
                     () -> System.out.println("LSDGJDLFKGJDLFKGJLDLKGJDLFGJDLTGKJDLKGJDFLKGJ"))));
-    NamedCommands.registerCommand("CONVEYOR OVERRIDE",
-    Conveyor.stop(conveyor).andThen(new InstantCommand(()->shooter.setShooterMode(ShooterMode.IDLE))));
+    NamedCommands.registerCommand(
+        "CONVEYOR OVERRIDE",
+        Conveyor.stop(conveyor)
+            .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.IDLE)))
+            .andThen(new InstantCommand(() -> intake.stopRollers())));
 
     // Configure the controller bindings
     configureDriver();
@@ -185,19 +194,37 @@ public class RobotContainer implements Sendable {
 
     autonChooser.setDefaultOption(
         "Score two",
-        new Pair<Command, String>(new ScoreTwoNotes(
-            intake, elevator, shooter, conveyor, drive, matchState, shooterLimelight, lights), null));
+        new Pair<Command, String>(
+            new ScoreTwoNotes(
+                intake, elevator, shooter, conveyor, drive, matchState, shooterLimelight, lights),
+            null));
     autonChooser.addOption(
         "Score four from center",
-        new Pair<Command, String>(new ScoreFourFromCenterLine(drive, intake, elevator, shooter, conveyor, shooterLimelight), "4 NOTE - CENTER LINE - SOURCE - AUTO"));
-     autonChooser.addOption("BLUE score notes 1-2-3-4-5",
-     new Pair<Command, String>(new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight, false), "CENTER 1-2-3-4-5"));
-     autonChooser.addOption("RED score notes 1-2-3-4-5",
-     new Pair<Command, String>(new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight, true), "CENTER 1-2-3-4-5 RED"));
-     autonChooser.addOption("BLUE score notes 8-6-7 right",
-     new Pair<Command, String>(new SideSixToEight(drive, intake, elevator, shooter, conveyor, shooterLimelight, false), "RIGHT 8-6-7"));
-     autonChooser.addOption("RED score notes 8-6-7 left",
-     new Pair<Command, String>(new SideSixToEight(drive, intake, elevator, shooter, conveyor, shooterLimelight, true), "LEFT 8-6-7 RED"));
+        new Pair<Command, String>(
+            new ScoreFourFromCenterLine(
+                drive, intake, elevator, shooter, conveyor, shooterLimelight),
+            "4 NOTE - CENTER LINE - SOURCE - AUTO"));
+    autonChooser.addOption(
+        "BLUE score notes 1-2-3-4-5",
+        new Pair<Command, String>(
+            new CenterOneToFive(
+                drive, intake, elevator, shooter, conveyor, shooterLimelight, false),
+            "CENTER 1-2-3-4-5"));
+    autonChooser.addOption(
+        "RED score notes 1-2-3-4-5",
+        new Pair<Command, String>(
+            new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight, true),
+            "CENTER 1-2-3-4-5 RED"));
+    autonChooser.addOption(
+        "BLUE score notes 8-6-7 right",
+        new Pair<Command, String>(
+            new SideSixToEight(drive, intake, elevator, shooter, conveyor, shooterLimelight, false),
+            "RIGHT 8-6-7"));
+    autonChooser.addOption(
+        "RED score notes 8-6-7 left",
+        new Pair<Command, String>(
+            new SideSixToEight(drive, intake, elevator, shooter, conveyor, shooterLimelight, true),
+            "LEFT 8-6-7 RED"));
     SmartDashboard.putData(autonChooser);
   }
 
@@ -248,8 +275,8 @@ public class RobotContainer implements Sendable {
                       return new SequentialCommandGroup(
                           new InstantCommand(intake::reverseRollers),
                           new InstantCommand(() -> conveyor.startRollers(-1.0)),
-                          new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),                          new InstantCommand(
-                              conveyor::stopRollers),
+                          new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
+                          new InstantCommand(conveyor::stopRollers),
                           new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
                           new InstantCommand(intake::stopRollers));
                     case CLIMB:
@@ -263,7 +290,7 @@ public class RobotContainer implements Sendable {
                     case OPERATOR_PREPPED:
                       return Conveyor.shoot(conveyor);
                     default:
-                      return new InstantCommand(()->System.out.println("you suck at coding"));
+                      return new InstantCommand(() -> System.out.println("you suck at coding"));
                   }
                 },
                 new TreeSet<Subsystem>()));
@@ -272,7 +299,7 @@ public class RobotContainer implements Sendable {
         () -> {
           return Math.abs(driverController.getRightX()) > 0.05;
         };
-        
+
     driverController
         .leftBumper()
         .onTrue(
@@ -341,43 +368,46 @@ public class RobotContainer implements Sendable {
     driverController.back().onTrue(new PartialClimbSequence(intake, elevator, shooter));
 
     drive.setDefaultCommand(
-        new RunCommand(
-                () -> {
-                  if (matchState.isBlue()) {
-                    drive.rotateOrKeepHeading(
-                        JoystickUtil.squareAxis(
-                            MathUtil.applyDeadband(-driverController.getLeftY(), 0.1)),
-                        JoystickUtil.squareAxis(
-                            MathUtil.applyDeadband(-driverController.getLeftX(), 0.1)),
-                        JoystickUtil.squareAxis(
-                            MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
-                        driveFieldRelative, // always field relative
-                        getCardinalDirectionDegrees());
-                  } else {
-                    if (driveFieldRelative) {
-                      drive.rotateOrKeepHeading(
-                          JoystickUtil.squareAxis(
-                              MathUtil.applyDeadband(driverController.getLeftY(), 0.1)),
-                          JoystickUtil.squareAxis(
-                              MathUtil.applyDeadband(driverController.getLeftX(), 0.1)),
-                          JoystickUtil.squareAxis(
-                              MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
-                          driveFieldRelative, // always field relative
-                          getCardinalDirectionDegrees());
-                    } else {
-                      drive.rotateOrKeepHeading(
-                          JoystickUtil.squareAxis(
-                              MathUtil.applyDeadband(-driverController.getLeftY(), 0.1)),
-                          JoystickUtil.squareAxis(
-                              MathUtil.applyDeadband(-driverController.getLeftX(), 0.1)),
-                          JoystickUtil.squareAxis(
-                              MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
-                          driveFieldRelative, // always field relative
-                          getCardinalDirectionDegrees());
-                    }
-                  }
-                },
-                drive)
+        new ConditionalCommand(
+                new RunCommand(
+                    () -> {
+                      if (matchState.isBlue()) {
+                        drive.rotateOrKeepHeading(
+                            JoystickUtil.squareAxis(
+                                MathUtil.applyDeadband(-driverController.getLeftY(), 0.1)),
+                            JoystickUtil.squareAxis(
+                                MathUtil.applyDeadband(-driverController.getLeftX(), 0.1)),
+                            JoystickUtil.squareAxis(
+                                MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
+                            driveFieldRelative, // always field relative
+                            getCardinalDirectionDegrees());
+                      } else {
+                        if (driveFieldRelative) {
+                          drive.rotateOrKeepHeading(
+                              JoystickUtil.squareAxis(
+                                  MathUtil.applyDeadband(driverController.getLeftY(), 0.1)),
+                              JoystickUtil.squareAxis(
+                                  MathUtil.applyDeadband(driverController.getLeftX(), 0.1)),
+                              JoystickUtil.squareAxis(
+                                  MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
+                              driveFieldRelative, // always field relative
+                              getCardinalDirectionDegrees());
+                        } else {
+                          drive.rotateOrKeepHeading(
+                              JoystickUtil.squareAxis(
+                                  MathUtil.applyDeadband(-driverController.getLeftY(), 0.1)),
+                              JoystickUtil.squareAxis(
+                                  MathUtil.applyDeadband(-driverController.getLeftX(), 0.1)),
+                              JoystickUtil.squareAxis(
+                                  MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
+                              driveFieldRelative, // always field relative
+                              getCardinalDirectionDegrees());
+                        }
+                      }
+                    },
+                    drive),
+                new InstantCommand(),
+                () -> true)
             .withName("Manual Drive"));
   }
 
@@ -404,8 +434,18 @@ public class RobotContainer implements Sendable {
         .b()
         .onFalse(
             new InstantCommand(() -> conveyor.stopRollers()).andThen(() -> intake.stopRollers()));
-    operatorController.a().onTrue(new InstantCommand(() -> shooter.setShooterDistance(1.16)).andThen(new InstantCommand(()->shooter.setShooterMode(ShooterMode.SHOOT))).andThen(new InstantCommand(()->prepState = PrepState.OPERATOR_PREPPED)));
-    operatorController.y().onTrue(new InstantCommand(() -> shooter.setShooterDistance(2.77)).andThen(new InstantCommand(()->shooter.setShooterMode(ShooterMode.SHOOT))).andThen(new InstantCommand(()->prepState = PrepState.OPERATOR_PREPPED)));
+    operatorController
+        .a()
+        .onTrue(
+            new InstantCommand(() -> shooter.setShooterDistance(1.16))
+                .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
+                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
+    operatorController
+        .y()
+        .onTrue(
+            new InstantCommand(() -> shooter.setShooterDistance(2.77))
+                .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
+                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
 
     operatorController
         .leftBumper()
@@ -442,7 +482,7 @@ public class RobotContainer implements Sendable {
     return autonChooser.getSelected().getFirst();
   }
 
-  public String getAutonomusName(){
+  public String getAutonomusName() {
     return autonChooser.getSelected().getSecond();
   }
 

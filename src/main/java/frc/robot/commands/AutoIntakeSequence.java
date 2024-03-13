@@ -29,10 +29,11 @@ public class AutoIntakeSequence extends SequentialCommandGroup {
         new InstantCommand(() -> lights.toggleCode(LightCode.INTAKING)),
         new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", false)),
         new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.DEPLOYED)),
-        new WaitUntilCommand(intake::nearDeployed),
-        new InstantCommand(intake::startRollers),
+        new WaitUntilCommand(intake::almostClearOfConveyorZone),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.INTAKING, true)),
         new WaitUntilCommand(elevator::atDesiredPosition),
+        new WaitUntilCommand(intake::nearDeployed),
+        new InstantCommand(intake::startRollers),
         Conveyor.startReceive(conveyor),
         new ParallelCommandGroup(
             Conveyor.rumbleBriefly(conveyor),

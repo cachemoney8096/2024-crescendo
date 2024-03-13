@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.7289985049768751,
-      "y": 4.331918999408469
+      "x": 0.74,
+      "y": 4.34
     },
     "rotation": -60.0
   },
@@ -25,12 +25,6 @@
                 "type": "named",
                 "data": {
                   "name": "SPEAKER PREP PRELOAD"
-                }
-              },
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 0.5
                 }
               },
               {

@@ -167,6 +167,8 @@ public class DriveSubsystem extends SubsystemBase {
     odometry.update(Rotation2d.fromDegrees(gyro.getYaw().getValue()), getModulePositions());
     poseBuffer.pushToBuffer(getPose(), Timer.getFPGATimestamp());
     // TODO: put this in a thread that loops faster
+
+    
   }
 
   public SwerveModulePosition[] getModulePositions() {
