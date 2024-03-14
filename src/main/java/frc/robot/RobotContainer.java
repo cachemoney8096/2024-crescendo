@@ -139,12 +139,17 @@ public class RobotContainer implements Sendable {
     NamedCommands.registerCommand(
         "SPEAKER PREP PRELOAD",
         new InstantCommand(() -> pathCmd = "SPEAKER PREP PRELOAD")
-            .andThen(new SpeakerPrepScoreAutoPreload(intake, elevator, shooter, conveyor, ShooterCal.AUTO_PRELOAD_DISTANCE_M)));
-    // for when we start a little bit off of the subwoofer but actually we aren't doing that anymore but im not gonna remove the code rn, cope 🤷
+            .andThen(
+                new SpeakerPrepScoreAutoPreload(
+                    intake, elevator, shooter, conveyor, ShooterCal.AUTO_PRELOAD_DISTANCE_M)));
+    // for when we start a little bit off of the subwoofer but actually we aren't doing that anymore
+    // but im not gonna remove the code rn, cope 🤷
     NamedCommands.registerCommand(
         "SPEAKER PREP PRELOAD 2",
         new InstantCommand(() -> pathCmd = "SPEAKER PREP PRELOAD 2")
-            .andThen(new SpeakerPrepScoreAutoPreload(intake, elevator, shooter, conveyor, ShooterCal.AUTO_PRELOAD_DISTANCE_2_M)));
+            .andThen(
+                new SpeakerPrepScoreAutoPreload(
+                    intake, elevator, shooter, conveyor, ShooterCal.AUTO_PRELOAD_DISTANCE_2_M)));
     NamedCommands.registerCommand(
         "SPEAKER SCORE",
         new SequentialCommandGroup(
@@ -160,7 +165,8 @@ public class RobotContainer implements Sendable {
     NamedCommands.registerCommand(
         "INTAKE",
         new InstantCommand(() -> pathCmd = "INTAKE")
-            .andThen(new AutoIntakeSequence(intake, elevator, conveyor, lights)).finallyDo(conveyor::stopRollers));
+            .andThen(new AutoIntakeSequence(intake, elevator, conveyor, lights))
+            .finallyDo(conveyor::stopRollers));
     NamedCommands.registerCommand(
         "SPEAKER PREP",
         new InstantCommand(() -> pathCmd = "SPEAKER PREP")
@@ -173,7 +179,11 @@ public class RobotContainer implements Sendable {
             .andThen(new InstantCommand(() -> conveyor.stopRollers()))
             .andThen(
                 new SpeakerPrepScoreAuto(
-                    intake, elevator, shooter, conveyor, ShooterCal.AUTO_STAGE_SHOOTING_DISTANCE_M)));
+                    intake,
+                    elevator,
+                    shooter,
+                    conveyor,
+                    ShooterCal.AUTO_STAGE_SHOOTING_DISTANCE_M)));
     NamedCommands.registerCommand(
         "CONVEYOR OVERRIDE",
         new InstantCommand(() -> pathCmd = "CONVEYOR OVERRIDE")

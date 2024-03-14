@@ -80,7 +80,7 @@ public class ShooterCal {
   public static final double AUTO_PRELOAD_DISTANCE_M = Units.feetToMeters(3.4);
   public static final double AUTO_PRELOAD_DISTANCE_2_M = Units.feetToMeters(3.4);
   public static final double AUTO_SHOOTING_DISTANCE_M = Units.feetToMeters(8.5);
-  
+
   /** Stage left on blue, stage right on red */
   public static final double AUTO_STAGE_SHOOTING_DISTANCE_M = Units.feetToMeters(14.75);
 

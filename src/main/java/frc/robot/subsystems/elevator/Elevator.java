@@ -209,7 +209,7 @@ public class Elevator extends SubsystemBase {
     double desiredPositionIn = elevatorPositions.get(desiredPosition);
     double currentPositionIn = leftMotorEncoderRel.getPosition();
     double elevatorMarginInches = ElevatorCal.ELEVATOR_MARGIN_INCHES;
-    if(desiredPosition == ElevatorPosition.PRE_CLIMB){
+    if (desiredPosition == ElevatorPosition.PRE_CLIMB) {
       elevatorMarginInches = 1;
     }
     return Math.abs(desiredPositionIn - currentPositionIn) < elevatorMarginInches;
@@ -264,7 +264,7 @@ public class Elevator extends SubsystemBase {
 
   public double getDesiredPosInches() {
     return elevatorPositions.get(desiredPosition);
-    }
+  }
 
   @Override
   public void initSendable(SendableBuilder builder) {

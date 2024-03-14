@@ -197,10 +197,11 @@ public class Conveyor extends SubsystemBase {
   /** Get a note from the intake, ends when conveyor sees the note. */
   public static Command startReceive(Conveyor conveyor) {
     return new SequentialCommandGroup(
-        new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SPEED), conveyor),
-        new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SPEED)),
-        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
-        new WaitUntilCommand(() -> conveyor.beamBreakSensorOne.isPressed())).withName("Start Receive");
+            new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SPEED), conveyor),
+            new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SPEED)),
+            new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
+            new WaitUntilCommand(() -> conveyor.beamBreakSensorOne.isPressed()))
+        .withName("Start Receive");
   }
 
   /** Rumbles the controllers. */
@@ -224,17 +225,19 @@ public class Conveyor extends SubsystemBase {
    */
   public static Command finishReceive(Conveyor conveyor) {
     return new SequentialCommandGroup(
-        new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED), conveyor),
-        new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED)),
-        new WaitUntilCommand(() -> !conveyor.beamBreakSensorOne.isPressed()),
-        new PrintCommand("Conveyor about to stop"),
-        new InstantCommand(() -> conveyor.conveyorStopped = "Conveyor about to stop"),
-        Conveyor.stop(conveyor),
-        new InstantCommand(() -> conveyor.stopRollers()),
-        new PrintCommand("Conveyor stopped"),
-        new InstantCommand(() -> conveyor.conveyorStopped = "Conveyor stopped"),
-        new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", true)),
-        new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE)).withName("Finish Receive");
+            new InstantCommand(
+                () -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED), conveyor),
+            new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED)),
+            new WaitUntilCommand(() -> !conveyor.beamBreakSensorOne.isPressed()),
+            new PrintCommand("Conveyor about to stop"),
+            new InstantCommand(() -> conveyor.conveyorStopped = "Conveyor about to stop"),
+            Conveyor.stop(conveyor),
+            new InstantCommand(() -> conveyor.stopRollers()),
+            new PrintCommand("Conveyor stopped"),
+            new InstantCommand(() -> conveyor.conveyorStopped = "Conveyor stopped"),
+            new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", true)),
+            new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE))
+        .withName("Finish Receive");
   }
 
   /** Stop the conveor rollers. */
@@ -242,7 +245,7 @@ public class Conveyor extends SubsystemBase {
     return new InstantCommand(conveyor::stopRollers, conveyor);
     // return new InstantCommand(() -> conveyor.frontMotor.set(0.0))
     //     .andThen(new InstantCommand(() -> conveyor.backMotor.set(0.0))).withName("Stop");
-    
+
   }
 
   /** backs the currently held note a little bit back into the conveyor to crush it */
@@ -289,7 +292,7 @@ public class Conveyor extends SubsystemBase {
         },
         null);
     builder.addBooleanProperty("beamBreakSensorOne", () -> beamBreakSensorOne.isPressed(), null);
-    //builder.addBooleanProperty("Intake Sensor", () -> intakeBeamBreakSensor.get(), null);
+    // builder.addBooleanProperty("Intake Sensor", () -> intakeBeamBreakSensor.get(), null);
     builder.addStringProperty("conveyorStopped", () -> conveyorStopped, null);
   }
 }

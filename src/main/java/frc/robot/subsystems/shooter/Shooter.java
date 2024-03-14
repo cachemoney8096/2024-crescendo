@@ -300,8 +300,7 @@ public class Shooter extends SubsystemBase {
   /**
    * Set pivot to a specific angle using voltage. Needs to be called every cycle.
    *
-   * @param 
-   *  Desired pivot position. *
+   * @param Desired pivot position. *
    */
   private void controlPosition(double angleDeg, boolean holdLatchVoltage) {
     pivotDesiredPositionDegrees = angleDeg;

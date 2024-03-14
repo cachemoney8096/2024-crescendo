@@ -11,7 +11,6 @@ import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
-import frc.robot.subsystems.shooter.ShooterCal;
 import java.util.Optional;
 
 /**
@@ -23,7 +22,11 @@ public class SpeakerPrepScoreAuto extends SequentialCommandGroup {
   Optional<Pair<Rotation2d, Double>> tagDetection = Optional.empty();
 
   public SpeakerPrepScoreAuto(
-      Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor, double shooterDistanceMeters) {
+      Intake intake,
+      Elevator elevator,
+      Shooter shooter,
+      Conveyor conveyor,
+      double shooterDistanceMeters) {
 
     // Drive is not a requirement!!
     addRequirements(intake, elevator, shooter, conveyor);
@@ -32,9 +35,10 @@ public class SpeakerPrepScoreAuto extends SequentialCommandGroup {
         // new GoHomeSequence(intake, elevator, shooter, conveyor, true, false, false),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
         new InstantCommand(() -> shooter.setShooterDistance(shooterDistanceMeters)),
-        new InstantCommand(()-> elevator.setDesiredPosition(ElevatorPosition.SLIGHTLY_UP, true)),
+        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SLIGHTLY_UP, true)),
         new InstantCommand(() -> System.out.println("elevator pos: " + elevator.getCurPosInches())),
-        new InstantCommand(() -> System.out.println("elevator desired pos: " + elevator.getDesiredPosInches())),
-        new WaitUntilCommand(()->elevator.atDesiredPosition()));
+        new InstantCommand(
+            () -> System.out.println("elevator desired pos: " + elevator.getDesiredPosInches())),
+        new WaitUntilCommand(() -> elevator.atDesiredPosition()));
   }
 }

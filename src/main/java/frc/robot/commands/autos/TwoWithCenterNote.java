@@ -31,13 +31,14 @@ public class TwoWithCenterNote extends SequentialCommandGroup {
       Elevator elevator,
       Shooter shooter,
       Conveyor conveyor,
-      ShooterLimelight limelight, 
+      ShooterLimelight limelight,
       Lights lights) {
     NamedCommands.registerCommand(
         "goHomeWithShooterSpunUp",
         new GoHomeSequence(intake, elevator, shooter, conveyor, true, false, false));
     NamedCommands.registerCommand(
-        "intakeNote", new IntakeSequence(intake, elevator, conveyor, shooter, lights).withTimeout(5.0));
+        "intakeNote",
+        new IntakeSequence(intake, elevator, conveyor, shooter, lights).withTimeout(5.0));
     middleNoteAuto = PathPlannerPath.fromPathFile("Middle Note Auto");
     addCommands(
         drive.followTrajectoryCommand(middleNoteAuto, true),

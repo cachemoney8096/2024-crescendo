@@ -21,11 +21,12 @@ import frc.robot.subsystems.shooter.Shooter.ShooterMode;
  * game piece Stops and stowes intake
  */
 public class IntakeSequence extends SequentialCommandGroup {
-  public IntakeSequence(Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter, Lights lights) {
+  public IntakeSequence(
+      Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter, Lights lights) {
     addRequirements(intake, elevator, conveyor, shooter, lights);
 
     addCommands(
-        new InstantCommand(()-> lights.toggleCode(LightCode.INTAKING)),
+        new InstantCommand(() -> lights.toggleCode(LightCode.INTAKING)),
         new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", false)),
         new InstantCommand(
             () -> {
@@ -46,7 +47,6 @@ public class IntakeSequence extends SequentialCommandGroup {
             Conveyor.rumbleBriefly(conveyor),
             new InstantCommand(intake::stopRollers, intake),
             Conveyor.finishReceive(conveyor)),
-            new InstantCommand(()->lights.toggleCode(LightCode.INTAKING))
-            );
+        new InstantCommand(() -> lights.toggleCode(LightCode.INTAKING)));
   }
 }

@@ -35,9 +35,8 @@ public class AutoIntakeSequence extends SequentialCommandGroup {
         new ParallelCommandGroup(
                 Conveyor.rumbleBriefly(conveyor),
                 new InstantCommand(intake::stopRollers, intake),
-                Conveyor.finishReceive(conveyor)
-                .finallyDo(conveyor::stopRollers))
-                .finallyDo(conveyor::stopRollers),
+                Conveyor.finishReceive(conveyor).finallyDo(conveyor::stopRollers))
+            .finallyDo(conveyor::stopRollers),
         new InstantCommand(() -> lights.toggleCode(LightCode.INTAKING)));
   }
 }
