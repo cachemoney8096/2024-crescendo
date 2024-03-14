@@ -12,6 +12,7 @@ import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intakeLimelight.IntakeLimelight;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 
@@ -24,7 +25,8 @@ public class ScoreThisNote extends SequentialCommandGroup {
       Elevator elevator,
       Shooter shooter,
       Conveyor conveyor,
-      ShooterLimelight limelight,
+      ShooterLimelight shooterLimelight,
+      IntakeLimelight intakeLimelight,
       DriveSubsystem drive) {
     addRequirements(intake, elevator, shooter, conveyor);
     addCommands(
@@ -33,7 +35,8 @@ public class ScoreThisNote extends SequentialCommandGroup {
                 elevator,
                 shooter,
                 conveyor,
-                limelight,
+                shooterLimelight,
+                intakeLimelight,
                 drive,
                 () -> {
                   return false;
@@ -45,7 +48,7 @@ public class ScoreThisNote extends SequentialCommandGroup {
         new SpeakerShootSequence(conveyor, shooter, elevator, drive),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME, true)),
         new PrintCommand("ScoreThisNote - done score"),
-        new GoHomeSequence(intake, elevator, shooter, conveyor, false, false, false),
+        new GoHomeSequence(intake, elevator, shooter, conveyor, intakeLimelight, false, false, false),
         new PrintCommand("ScoreThisNote - done home"));
   }
 }

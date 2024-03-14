@@ -215,7 +215,15 @@ public class RobotContainer implements Sendable {
         "Score two",
         new Pair<Command, String>(
             new ScoreTwoNotes(
-                intake, elevator, shooter, conveyor, drive, matchState, shooterLimelight, lights),
+                intake,
+                elevator,
+                shooter,
+                conveyor,
+                drive,
+                matchState,
+                shooterLimelight,
+                intakeLimelight,
+                lights),
             null));
     autonChooser.addOption(
         "Score four from center",
@@ -279,7 +287,8 @@ public class RobotContainer implements Sendable {
         .onFalse(
             Conveyor.finishReceive(conveyor)
                 .andThen(
-                    new GoHomeSequence(intake, elevator, shooter, conveyor, false, false, true))
+                    new GoHomeSequence(
+                        intake, elevator, shooter, conveyor, intakeLimelight, false, false, true))
                 .beforeStarting(() -> prepState = PrepState.OFF));
     driverController
         .leftTrigger()
@@ -305,7 +314,8 @@ public class RobotContainer implements Sendable {
                     case SPEAKER:
                       return new SpeakerShootSequence(conveyor, shooter, elevator, drive, true);
                     case AMP:
-                      return new AmpScore(drive, conveyor, intake, shooter, elevator);
+                      return new AmpScore(
+                          drive, conveyor, intake, shooter, elevator, intakeLimelight);
                     case OPERATOR_PREPPED:
                       return Conveyor.shoot(conveyor);
                     default:
@@ -330,6 +340,7 @@ public class RobotContainer implements Sendable {
                     shooter,
                     conveyor,
                     shooterLimelight,
+                    intakeLimelight,
                     drive,
                     driverRotationCommanded)));
     driverController
@@ -342,7 +353,8 @@ public class RobotContainer implements Sendable {
     driverController
         .povLeft()
         .onTrue(
-            new GoHomeSequence(intake, elevator, shooter, conveyor, false, true, true)
+            new GoHomeSequence(
+                    intake, elevator, shooter, conveyor, intakeLimelight, false, true, true)
                 .beforeStarting(() -> driveFieldRelative = true)
                 .beforeStarting(() -> drive.throttle(1.0))
                 .beforeStarting(() -> prepState = PrepState.OFF));
@@ -353,7 +365,8 @@ public class RobotContainer implements Sendable {
         .onTrue(
             new SequentialCommandGroup(
                 new InstantCommand(() -> prepState = PrepState.FEED),
-                new FeedPrepScore(elevator, conveyor, intake, shooter, drive, matchState)));
+                new FeedPrepScore(
+                    elevator, conveyor, intake, shooter, drive, matchState, intakeLimelight)));
     // bottom left back button
     driverController.povRight().onTrue(new UnclimbSequence(elevator, shooter, conveyor));
 
