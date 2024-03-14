@@ -164,7 +164,7 @@ public class RobotContainer implements Sendable {
     NamedCommands.registerCommand(
         "INTAKE",
         new InstantCommand(() -> pathCmd = "INTAKE")
-            .andThen(new AutoIntakeSequence(intake, elevator, conveyor, lights)).finallyDo(() -> new InstantCommand(() -> conveyor.stopRollers())));
+            .andThen(new AutoIntakeSequence(intake, elevator, conveyor, lights)).finallyDo(conveyor::stopRollers));
     NamedCommands.registerCommand(
         "SPEAKER PREP",
         new InstantCommand(() -> pathCmd = "SPEAKER PREP")
