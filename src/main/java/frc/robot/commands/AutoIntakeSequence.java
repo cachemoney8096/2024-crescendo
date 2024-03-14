@@ -1,7 +1,6 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -15,10 +14,8 @@ import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.lights.Lights.LightCode;
 
 /**
- * Puts the intake into the deployed position then gets elevator to home
- * position Checks that
- * everything is in position to intake then starts rollers Intakes until the
- * conveyor recieves the
+ * Puts the intake into the deployed position then gets elevator to home position Checks that
+ * everything is in position to intake then starts rollers Intakes until the conveyor recieves the
  * game piece Stops and stowes intake
  */
 public class AutoIntakeSequence extends SequentialCommandGroup {
@@ -36,9 +33,11 @@ public class AutoIntakeSequence extends SequentialCommandGroup {
         new InstantCommand(intake::startRollers),
         Conveyor.startReceive(conveyor),
         new ParallelCommandGroup(
-            Conveyor.rumbleBriefly(conveyor),
-            new InstantCommand(intake::stopRollers, intake),
-            Conveyor.finishReceive(conveyor)),
+                Conveyor.rumbleBriefly(conveyor),
+                new InstantCommand(intake::stopRollers, intake),
+                Conveyor.finishReceive(conveyor)
+                    .finallyDo(() -> new InstantCommand(() -> conveyor.stopRollers())))
+            .finallyDo(() -> new InstantCommand(() -> conveyor.stopRollers())),
         new InstantCommand(() -> lights.toggleCode(LightCode.INTAKING)));
   }
 }

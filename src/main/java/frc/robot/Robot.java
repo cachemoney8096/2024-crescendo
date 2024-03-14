@@ -151,7 +151,12 @@ public class Robot extends TimedRobot {
       Pose2d pathStartingPose = PathPlannerAuto.getStaringPoseFromAutoFile(m_robotContainer.getAutonomusName());
       if (Math.abs(m_robotContainer.drive.getPose().getX()) < Constants.ODOMETRY_ERROR
           && Math.abs(m_robotContainer.drive.getPose().getY()) < Constants.ODOMETRY_ERROR) {
-            m_robotContainer.drive.resetOdometry(pathStartingPose);
+            if (matchState.isRed()) {
+              Pose2d flippedPathStartingPose = new Pose2d(16.54 - pathStartingPose.getX(), pathStartingPose.getY(), pathStartingPose.getRotation());
+              m_robotContainer.drive.resetOdometry(flippedPathStartingPose);
+            } else {
+              m_robotContainer.drive.resetOdometry(pathStartingPose);
+            }
       }
     }
     // schedule the autonomous command (example)

@@ -24,7 +24,7 @@ public class SpeakerPrepScoreAutoPreload extends SequentialCommandGroup {
   double distanceFromSpeakerMeters = 0.0;
 
   public SpeakerPrepScoreAutoPreload(
-      Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor) {
+      Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor, double preloadDistance) {
 
     // Drive is not a requirement!!
     addRequirements(intake, elevator, shooter, conveyor);
@@ -32,7 +32,7 @@ public class SpeakerPrepScoreAutoPreload extends SequentialCommandGroup {
     addCommands(
         // new GoHomeSequence(intake, elevator, shooter, conveyor, true, false, false),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
-        new InstantCommand(() -> shooter.setShooterDistance(ShooterCal.AUTO_PRELOAD_DISTANCE_M)),
+        new InstantCommand(() -> shooter.setShooterDistance(preloadDistance)),
         new InstantCommand(()-> elevator.setDesiredPosition(ElevatorPosition.SLIGHTLY_UP, true)),
         new InstantCommand(() -> System.out.println("elevator pos: " + elevator.getCurPosInches())),
         new InstantCommand(() -> System.out.println("elevator desired pos: " + elevator.getDesiredPosInches())),

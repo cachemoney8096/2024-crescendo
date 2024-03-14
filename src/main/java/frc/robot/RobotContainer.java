@@ -104,6 +104,8 @@ public class RobotContainer implements Sendable {
 
   public boolean driveFieldRelative = true;
 
+  public String pathCmd = "";
+
   // A chooser for autonomous commands
   private SendableChooser<Pair<Command, String>> autonChooser = new SendableChooser<>();
 
@@ -136,30 +138,46 @@ public class RobotContainer implements Sendable {
 
     NamedCommands.registerCommand(
         "SPEAKER PREP PRELOAD",
-        new SpeakerPrepScoreAutoPreload(intake, elevator, shooter, conveyor)
+        new InstantCommand(() -> pathCmd = "SPEAKER PREP PRELOAD")
+            .andThen(new SpeakerPrepScoreAutoPreload(intake, elevator, shooter, conveyor, ShooterCal.AUTO_PRELOAD_DISTANCE_M))
+            .andThen(new InstantCommand(() -> System.out.println("speaker prep preload - done"))));
+    // for when we start a little bit off of the subwoofer but actually we aren't doing that anymore but im not gonna remove the code rn, cope 🤷
+    NamedCommands.registerCommand(
+        "SPEAKER PREP PRELOAD 2",
+        new InstantCommand(() -> pathCmd = "SPEAKER PREP PRELOAD 2")
+            .andThen(new SpeakerPrepScoreAutoPreload(intake, elevator, shooter, conveyor, ShooterCal.AUTO_PRELOAD_DISTANCE_2_M))
             .andThen(new InstantCommand(() -> System.out.println("speaker prep preload - done"))));
     NamedCommands.registerCommand(
         "SPEAKER SCORE",
         new SequentialCommandGroup(
+            new InstantCommand(() -> pathCmd = "SPEAKER SCORE"),
             new InstantCommand(() -> System.out.println("Speaker score starting")),
-            new WaitCommand(0.5),
+            new WaitCommand(0.4),
             Conveyor.shoot(conveyor),
             new InstantCommand(() -> System.out.println("Speaker Score Done"))));
     NamedCommands.registerCommand(
         "INTAKE DEPLOY",
-        new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.DEPLOYED)));
+        new InstantCommand(() -> pathCmd = "INTAKE DEPLOY")
+            .andThen(
+                new InstantCommand(
+                    () -> intake.setDesiredIntakePosition(IntakePosition.DEPLOYED))));
     NamedCommands.registerCommand(
-        "INTAKE", new AutoIntakeSequence(intake, elevator, conveyor, lights));
+        "INTAKE",
+        new InstantCommand(() -> pathCmd = "INTAKE")
+            .andThen(new AutoIntakeSequence(intake, elevator, conveyor, lights)).finallyDo(() -> new InstantCommand(() -> conveyor.stopRollers())));
     NamedCommands.registerCommand(
         "SPEAKER PREP",
-        new SpeakerPrepScoreAuto(
-                intake, elevator, shooter, conveyor, ShooterCal.AUTO_SHOOTING_DISTANCE_M)
+        new InstantCommand(() -> pathCmd = "SPEAKER PREP")
+            .andThen(
+                new SpeakerPrepScoreAuto(
+                    intake, elevator, shooter, conveyor, ShooterCal.AUTO_SHOOTING_DISTANCE_M))
             .andThen(
                 new InstantCommand(
                     () -> System.out.println("LSDGJDLFKGJDLFKGJLDLKGJDLFGJDLTGKJDLKGJDFLKGJ"))));
     NamedCommands.registerCommand(
         "SPEAKER PREP STAGE",
-        new InstantCommand(() -> conveyor.stopRollers())
+        new InstantCommand(() -> pathCmd = "SPEAKER PREP STAGE")
+            .andThen(new InstantCommand(() -> conveyor.stopRollers()))
             .andThen(
                 new SpeakerPrepScoreAuto(
                     intake, elevator, shooter, conveyor, ShooterCal.AUTO_STAGE_SHOOTING_DISTANCE_M))
@@ -168,7 +186,8 @@ public class RobotContainer implements Sendable {
                     () -> System.out.println("LSDGJDLFKGJDLFKGJLDLKGJDLFGJDLTGKJDLKGJDFLKGJ"))));
     NamedCommands.registerCommand(
         "CONVEYOR OVERRIDE",
-        Conveyor.stop(conveyor)
+        new InstantCommand(() -> pathCmd = "CONVEYOR OVERRIDE")
+            .andThen(Conveyor.stop(conveyor))
             .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.IDLE)))
             .andThen(new InstantCommand(() -> intake.stopRollers())));
 
@@ -407,7 +426,7 @@ public class RobotContainer implements Sendable {
                     },
                     drive),
                 new InstantCommand(),
-                () -> true)
+                () -> isTeleop)
             .withName("Manual Drive"));
   }
 
@@ -494,5 +513,6 @@ public class RobotContainer implements Sendable {
           return prepState.toString();
         },
         null);
+    builder.addStringProperty("pathCmd", () -> pathCmd, null);
   }
 }

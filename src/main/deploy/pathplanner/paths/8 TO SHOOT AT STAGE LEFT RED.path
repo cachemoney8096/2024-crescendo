@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 9.426254746796248,
-        "y": 0.6171855329518504
+        "x": 9.200491113864324,
+        "y": 0.49200686374443986
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.0918277462464685,
-        "y": 0.8351901574618276
+        "x": 6.866064113314544,
+        "y": 0.7100114882544168
       },
       "isLocked": false,
       "linkedName": "#8 INTAKE RED"
     },
     {
       "anchor": {
-        "x": 4.413229941816507,
-        "y": 3.618840233495605
+        "x": 3.9789605916548085,
+        "y": 3.0578404124421055
       },
       "prevControl": {
-        "x": 5.51717225523243,
-        "y": 1.9543683419608453
+        "x": 5.082902905070732,
+        "y": 1.3933685209073456
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "SHOOT AT STAGE LEFT RED"
+      "linkedName": "SHOOT AT STAGE LEFT RED 1"
     }
   ],
   "rotationTargets": [
@@ -39,7 +39,7 @@
   "eventMarkers": [
     {
       "name": "SPEAKER PREP STAGE",
-      "waypointRelativePos": 0.5,
+      "waypointRelativePos": 0.7,
       "command": {
         "type": "parallel",
         "data": {
@@ -56,14 +56,14 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 5.0,
+    "maxVelocity": 3.75,
+    "maxAcceleration": 4.75,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -30.0,
+    "rotation": -32.0,
     "rotateFast": false
   },
   "reversed": false,
