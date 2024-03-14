@@ -9,6 +9,7 @@ import org.littletonrobotics.urcl.URCL;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.util.GeometryUtil;
 import com.revrobotics.CANSparkBase.IdleMode;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -152,8 +153,7 @@ public class Robot extends TimedRobot {
       if (Math.abs(m_robotContainer.drive.getPose().getX()) < Constants.ODOMETRY_ERROR
           && Math.abs(m_robotContainer.drive.getPose().getY()) < Constants.ODOMETRY_ERROR) {
             if (matchState.isRed()) {
-              Pose2d flippedPathStartingPose = new Pose2d(16.54 - pathStartingPose.getX(), pathStartingPose.getY(), pathStartingPose.getRotation());
-              m_robotContainer.drive.resetOdometry(flippedPathStartingPose);
+              m_robotContainer.drive.resetOdometry(GeometryUtil.flipFieldPose(pathStartingPose));
             } else {
               m_robotContainer.drive.resetOdometry(pathStartingPose);
             }
