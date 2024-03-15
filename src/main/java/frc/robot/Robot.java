@@ -137,16 +137,20 @@ public class Robot extends TimedRobot {
 
     if (m_robotContainer.shooterLimelight.checkForTag().isEmpty()) {
       Pose2d pathStartingPose =
-          PathPlannerAuto.getStaringPoseFromAutoFile(m_robotContainer.getAutonomusName());
+          PathPlannerAuto.getStaringPoseFromAutoFile(m_robotContainer.getAutonomousName());
       if (Math.abs(m_robotContainer.drive.getPose().getX()) < Constants.ODOMETRY_ERROR
           && Math.abs(m_robotContainer.drive.getPose().getY()) < Constants.ODOMETRY_ERROR) {
         if (matchState.isRed()) {
-          m_robotContainer.drive.resetOdometry(GeometryUtil.flipFieldPose(pathStartingPose));
+          Pose2d flippedPose = GeometryUtil.flipFieldPose(pathStartingPose);
+          m_robotContainer.drive.resetOdometry(flippedPose);
+          m_robotContainer.drive.resetYawToAngle(flippedPose.getRotation().getDegrees());
         } else {
           m_robotContainer.drive.resetOdometry(pathStartingPose);
+          m_robotContainer.drive.resetYawToAngle(pathStartingPose.getRotation().getDegrees());
         }
       }
     }
+
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
@@ -208,6 +212,8 @@ public class Robot extends TimedRobot {
     setMatchState();
 
     m_robotContainer.isTeleop = true;
+    m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kCoast);
+    m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kCoast);
 
     if (matchState.isRealMatch()) {
       m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
@@ -224,6 +230,24 @@ public class Robot extends TimedRobot {
       m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
       m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
       m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
+    }
+
+    if (!matchState.isRealMatch()) {
+      if (m_robotContainer.shooterLimelight.checkForTag().isEmpty()) {
+        Pose2d pathStartingPose =
+            PathPlannerAuto.getStaringPoseFromAutoFile(m_robotContainer.getAutonomousName());
+        if (Math.abs(m_robotContainer.drive.getPose().getX()) < Constants.ODOMETRY_ERROR
+            && Math.abs(m_robotContainer.drive.getPose().getY()) < Constants.ODOMETRY_ERROR) {
+          if (matchState.isRed()) {
+            Pose2d flippedPose = GeometryUtil.flipFieldPose(pathStartingPose);
+            m_robotContainer.drive.resetOdometry(flippedPose);
+            m_robotContainer.drive.resetYawToAngle(flippedPose.getRotation().getDegrees());
+          } else {
+            m_robotContainer.drive.resetOdometry(pathStartingPose);
+            m_robotContainer.drive.resetYawToAngle(pathStartingPose.getRotation().getDegrees());
+          }
+        }
+      }
     }
   }
 

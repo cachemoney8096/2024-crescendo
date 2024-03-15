@@ -514,7 +514,7 @@ public class RobotContainer implements Sendable {
     return autonChooser.getSelected().getFirst();
   }
 
-  public String getAutonomusName() {
+  public String getAutonomousName() {
     return autonChooser.getSelected().getSecond();
   }
 
