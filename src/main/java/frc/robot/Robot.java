@@ -135,18 +135,20 @@ public class Robot extends TimedRobot {
     setMatchState();
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
-    if (m_robotContainer.shooterLimelight.checkForTag().isEmpty()) {
-      Pose2d pathStartingPose =
-          PathPlannerAuto.getStaringPoseFromAutoFile(m_robotContainer.getAutonomousName());
-      if (Math.abs(m_robotContainer.drive.getPose().getX()) < Constants.ODOMETRY_ERROR
-          && Math.abs(m_robotContainer.drive.getPose().getY()) < Constants.ODOMETRY_ERROR) {
-        if (matchState.isRed()) {
-          Pose2d flippedPose = GeometryUtil.flipFieldPose(pathStartingPose);
-          m_robotContainer.drive.resetOdometry(flippedPose);
-          m_robotContainer.drive.resetYawToAngle(flippedPose.getRotation().getDegrees());
-        } else {
-          m_robotContainer.drive.resetOdometry(pathStartingPose);
-          m_robotContainer.drive.resetYawToAngle(pathStartingPose.getRotation().getDegrees());
+    if (m_autonomousCommand != null && m_robotContainer.getAutonomousName() != null) {
+      if (m_robotContainer.shooterLimelight.checkForTag().isEmpty()) {
+        Pose2d pathStartingPose =
+            PathPlannerAuto.getStaringPoseFromAutoFile(m_robotContainer.getAutonomousName());
+        if (Math.abs(m_robotContainer.drive.getPose().getX()) < Constants.ODOMETRY_ERROR
+            && Math.abs(m_robotContainer.drive.getPose().getY()) < Constants.ODOMETRY_ERROR) {
+          if (matchState.isRed()) {
+            Pose2d flippedPose = GeometryUtil.flipFieldPose(pathStartingPose);
+            m_robotContainer.drive.resetOdometry(flippedPose);
+            m_robotContainer.drive.resetYawToAngle(flippedPose.getRotation().getDegrees());
+          } else {
+            m_robotContainer.drive.resetOdometry(pathStartingPose);
+            m_robotContainer.drive.resetYawToAngle(pathStartingPose.getRotation().getDegrees());
+          }
         }
       }
     }
@@ -232,23 +234,23 @@ public class Robot extends TimedRobot {
       m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
     }
 
-    if (!matchState.isRealMatch()) {
-      if (m_robotContainer.shooterLimelight.checkForTag().isEmpty()) {
-        Pose2d pathStartingPose =
-            PathPlannerAuto.getStaringPoseFromAutoFile(m_robotContainer.getAutonomousName());
-        if (Math.abs(m_robotContainer.drive.getPose().getX()) < Constants.ODOMETRY_ERROR
-            && Math.abs(m_robotContainer.drive.getPose().getY()) < Constants.ODOMETRY_ERROR) {
-          if (matchState.isRed()) {
-            Pose2d flippedPose = GeometryUtil.flipFieldPose(pathStartingPose);
-            m_robotContainer.drive.resetOdometry(flippedPose);
-            m_robotContainer.drive.resetYawToAngle(flippedPose.getRotation().getDegrees());
-          } else {
-            m_robotContainer.drive.resetOdometry(pathStartingPose);
-            m_robotContainer.drive.resetYawToAngle(pathStartingPose.getRotation().getDegrees());
-          }
-        }
-      }
-    }
+    // if (!matchState.isRealMatch()) {
+    //   if (m_robotContainer.shooterLimelight.checkForTag().isEmpty()) {
+    //     Pose2d pathStartingPose =
+    //         PathPlannerAuto.getStaringPoseFromAutoFile(m_robotContainer.getAutonomousName());
+    //     if (Math.abs(m_robotContainer.drive.getPose().getX()) < Constants.ODOMETRY_ERROR
+    //         && Math.abs(m_robotContainer.drive.getPose().getY()) < Constants.ODOMETRY_ERROR) {
+    //       if (matchState.isRed()) {
+    //         Pose2d flippedPose = GeometryUtil.flipFieldPose(pathStartingPose);
+    //         m_robotContainer.drive.resetOdometry(flippedPose);
+    //         m_robotContainer.drive.resetYawToAngle(flippedPose.getRotation().getDegrees());
+    //       } else {
+    //         m_robotContainer.drive.resetOdometry(pathStartingPose);
+    //         m_robotContainer.drive.resetYawToAngle(pathStartingPose.getRotation().getDegrees());
+    //       }
+    //     }
+    //   }
+    // }
   }
 
   /** This function is called periodically during operator control. */
