@@ -204,7 +204,7 @@ public class Elevator extends SubsystemBase {
       voltageToSet = ElevatorCal.CLIMBING_KS;
     }
 
-    // leftMotor.setVoltage(voltageToSet);
+    leftMotor.setVoltage(voltageToSet);
     rightMotor.setVoltage(voltageToSet);
 
     prevVelocityInPerSec = nextVelocityInPerSec;
@@ -303,7 +303,8 @@ public class Elevator extends SubsystemBase {
         rightMotorEncoderRel::setPosition);
     builder.addDoubleProperty(
         "Right Motor Position (rots)", () -> rightMotor.getEncoder().getPosition(), null);
-    builder.addDoubleProperty("Elevator Vel (in per s)", leftMotorEncoderRel::getVelocity, null);
+    builder.addDoubleProperty("Left Elevator Vel (in per s)", leftMotorEncoderRel::getVelocity, null);
+    builder.addDoubleProperty("Right Elevator Vel (in per s)", rightMotorEncoderRel::getVelocity, null);
     builder.addDoubleProperty(
         "Elevator Left Abs Pos (deg)", leftMotorEncoderAbs::getPosition, null);
     builder.addDoubleProperty(

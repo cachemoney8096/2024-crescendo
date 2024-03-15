@@ -214,8 +214,6 @@ public class Robot extends TimedRobot {
     setMatchState();
 
     m_robotContainer.isTeleop = true;
-    m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kCoast);
-    m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kCoast);
 
     if (matchState.isRealMatch()) {
       m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);

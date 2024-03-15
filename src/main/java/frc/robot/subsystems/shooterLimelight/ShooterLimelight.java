@@ -11,6 +11,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -114,6 +115,11 @@ public class ShooterLimelight extends SubsystemBase {
             limelightPoseFieldSpace.getSecond().getRotation().plus(Rotation2d.fromDegrees(187))));
   }
 
+  public Pair<Double, Pose3d> getBotPose3d_wpiBlue(){
+    Pair<Double, Pose3d> limelightPoseFieldSpace = LimelightHelpers.getTimedBotPose3d_wpiBlue(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
+    return new Pair<Double, Pose3d>(limelightPoseFieldSpace.getFirst(), new Pose3d(limelightPoseFieldSpace.getSecond().getTranslation(), limelightPoseFieldSpace.getSecond().getRotation().plus(new Rotation3d(0, 0, Units.degreesToRadians(187)))));
+  }
+
   private static Transform2d getBotFromTarget(Pose3d botPoseTargetSpace) {
     /**
      * Target space: 3d Cartesian Coordinate System with (0,0,0) at the center of the target.
@@ -165,7 +171,7 @@ public class ShooterLimelight extends SubsystemBase {
   }
 
   public void resetOdometryWithTags(SwerveDrivePoseEstimator poseEstimator, DriveSubsystem drive) {
-    if (Math.abs(getBotPose3d().getZ()) < ShooterLimelightCal.LARGE_VALUE_CORRECTOR_MARGIN
+    if (Math.abs(getBotPose3d_wpiBlue().getSecond().getZ()) < ShooterLimelightCal.LARGE_VALUE_CORRECTOR_MARGIN
         && checkForTag().isPresent()) {
       poseEstimator.update(
           getBotPose2d_wpiBlue().getSecond().getRotation(), drive.getModulePositions());
@@ -177,7 +183,7 @@ public class ShooterLimelight extends SubsystemBase {
   }
 
   public void resetOdometryDuringPrep(DriveSubsystem drive) {
-    if (Math.abs(getBotPose3d().getZ()) < ShooterLimelightCal.LARGE_VALUE_CORRECTOR_MARGIN) {
+    if (Math.abs(getBotPose3d_wpiBlue().getSecond().getZ()) < ShooterLimelightCal.LARGE_VALUE_CORRECTOR_MARGIN) {
       Pose2d currentPose = getBotPose2d_wpiBlue().getSecond();
       drive.resetOdometry(currentPose);
       drive.resetYawToAngle(currentPose.getRotation().getDegrees());

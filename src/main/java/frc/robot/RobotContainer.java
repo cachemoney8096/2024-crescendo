@@ -7,6 +7,10 @@ package frc.robot;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -18,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -63,6 +68,7 @@ import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.JoystickUtil;
 import frc.robot.utils.MatchStateUtil;
+import java.util.Optional;
 import java.util.TreeSet;
 import java.util.function.BooleanSupplier;
 
@@ -89,7 +95,7 @@ public class RobotContainer implements Sendable {
   public ShooterLimelight shooterLimelight;
   public IntakeLimelight intakeLimelight;
 
-  public enum PrepState {
+  private enum PrepState {
     OFF,
     CLIMB,
     SPEAKER,
@@ -106,7 +112,10 @@ public class RobotContainer implements Sendable {
 
   public String pathCmd = "";
 
-  /** A chooser for autonomous commands. String in pair should be the path's name, and null if no path */
+  /**
+   * A chooser for autonomous commands. String in pair should be the path's name, and null if no
+   * path
+   */
   private SendableChooser<Pair<Command, String>> autonChooser = new SendableChooser<>();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -154,7 +163,7 @@ public class RobotContainer implements Sendable {
         "SPEAKER SCORE",
         new SequentialCommandGroup(
             new InstantCommand(() -> pathCmd = "SPEAKER SCORE"),
-            new WaitCommand(0.4),
+            new WaitCommand(0.25),
             Conveyor.shoot(conveyor)));
     NamedCommands.registerCommand(
         "INTAKE DEPLOY",
@@ -203,7 +212,6 @@ public class RobotContainer implements Sendable {
     Shuffleboard.getTab("Subsystems").add("Shooter limelight", shooterLimelight);
     Shuffleboard.getTab("Subsystems").add("Intake limelight", intakeLimelight);
     Shuffleboard.getTab("Subsystems").add("Container", this);
-    Shuffleboard.getTab("Subsystems").add("This is a duplicate elevator subsystem", elevator);
 
     SmartDashboard.putBoolean("Have Note", false);
 
@@ -290,44 +298,69 @@ public class RobotContainer implements Sendable {
                     new GoHomeSequence(
                         intake, elevator, shooter, conveyor, intakeLimelight, false, false, true))
                 .beforeStarting(() -> prepState = PrepState.OFF));
-    driverController
-        .leftTrigger()
-        .onTrue(
-            new DeferredCommand(
-                () -> {
-                  PrepState input = prepState;
-                  prepState = PrepState.OFF;
-                  System.out.println("we are @score button");
-                  switch (input) {
-                    case OFF:
-                      return new SequentialCommandGroup(
-                          new InstantCommand(intake::reverseRollers),
-                          new InstantCommand(() -> conveyor.startRollers(-1.0)),
-                          new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
-                          new InstantCommand(conveyor::stopRollers),
-                          new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
-                          new InstantCommand(intake::stopRollers));
-                    case CLIMB:
-                      return new ClimbSequence(intake, elevator, shooter, conveyor);
-                    case FEED:
-                      return new SpeakerShootSequence(conveyor, shooter, elevator, drive, false);
-                    case SPEAKER:
-                      return new SpeakerShootSequence(conveyor, shooter, elevator, drive, true);
-                    case AMP:
-                      return new AmpScore(
-                          drive, conveyor, intake, shooter, elevator, intakeLimelight);
-                    case OPERATOR_PREPPED:
-                      return Conveyor.shoot(conveyor);
-                    default:
-                      return new InstantCommand(() -> System.out.println("you suck at coding"));
-                  }
-                },
-                new TreeSet<Subsystem>()));
 
     BooleanSupplier driverRotationCommanded =
         () -> {
           return Math.abs(driverController.getRightX()) > 0.05;
         };
+
+    driverController
+        .leftTrigger()
+        .onTrue(
+            new SequentialCommandGroup(
+                new InstantCommand(() -> System.out.println("we @ score button")),
+                new DeferredCommand(
+                    () -> {
+                      PrepState input = prepState;
+                      prepState = PrepState.OFF;
+                      System.out.println("running deferred command");
+                      switch (input) {
+                        case OFF:
+                          return new SequentialCommandGroup(
+                              new InstantCommand(() -> System.out.println("case off: outtaking")),
+                              new InstantCommand(intake::reverseRollers),
+                              new InstantCommand(() -> conveyor.startRollers(-1.0)),
+                              new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
+                              new InstantCommand(conveyor::stopRollers),
+                              new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
+                              new InstantCommand(intake::stopRollers));
+                        case CLIMB:
+                          return new ClimbSequence(intake, elevator, shooter, conveyor);
+                        case FEED:
+                          return new SpeakerShootSequence(
+                              conveyor, shooter, elevator, drive, false);
+                        case SPEAKER:
+                          return new SpeakerShootSequence(conveyor, shooter, elevator, drive, true);
+                        case AMP:
+                          return new AmpScore(
+                              drive, conveyor, intake, shooter, elevator, intakeLimelight);
+                        case OPERATOR_PREPPED:
+                          return new SequentialCommandGroup(
+                            new ParallelCommandGroup(
+                              new InstantCommand(
+                                  () -> {
+                                    ChassisSpeeds currentChassisSpeeds =
+                                        drive.getCurrentChassisSpeeds();
+                                    Translation2d driveVelocityMps =
+                                        new Translation2d(
+                                            currentChassisSpeeds.vxMetersPerSecond,
+                                            currentChassisSpeeds.vyMetersPerSecond);
+                                    if (driveVelocityMps.getNorm() < 0.02
+                                        && Math.abs(currentChassisSpeeds.omegaRadiansPerSecond)
+                                            < Units.degreesToRadians(10)) {
+                                      Optional<Pair<Rotation2d, Double>> tagDetection =
+                                          shooterLimelight.checkForTag();
+                                          if(tagDetection.isPresent()){
+                                            shooterLimelight.resetOdometryDuringPrep(drive);
+                                          }
+                                    }
+                                  }),
+                              Conveyor.shoot(conveyor)));
+                        default:
+                          return new InstantCommand(() -> System.out.println("you suck at coding"));
+                      }
+                    },
+                    new TreeSet<Subsystem>())));
 
     driverController
         .leftBumper()
@@ -491,6 +524,16 @@ public class RobotContainer implements Sendable {
             new InstantCommand(
                     () -> intake.rezeroIntakeToPosition(IntakeCal.INTAKE_DEPLOYED_POSITION_DEGREES))
                 .ignoringDisable(true));
+    // operatorController
+    //     .povUp()
+    //     .onTrue(
+    //         new InstantCommand(() -> elevator.leftMotor.setVoltage(12.0))
+    //             .andThen(new InstantCommand(() -> elevator.rightMotor.setVoltage(12.0))));
+    // operatorController
+    //     .povUp()
+    //     .onFalse(
+    //         new InstantCommand(() -> elevator.leftMotor.setVoltage(0.0))
+    //             .andThen(new InstantCommand(() -> elevator.rightMotor.setVoltage(0.0))));
   }
 
   private void burnFlashAllSparks() {

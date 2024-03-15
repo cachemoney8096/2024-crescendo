@@ -42,7 +42,7 @@ public final class ElevatorCal {
       POSITION_SLIGHTLY_UP_INCHES = 3.25,
       POSITION_INTAKE_INCHES = 5.75;
 
-  public static final int ELEVATOR_CURRENT_LIMIT_AMPS = 80;
+  public static final int ELEVATOR_CURRENT_LIMIT_AMPS = 60;
 
   /** Consider the elevator at the desired position if within this margin of the target. */
   public static final double ELEVATOR_MARGIN_INCHES = 0.5;

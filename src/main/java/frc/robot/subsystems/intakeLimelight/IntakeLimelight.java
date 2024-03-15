@@ -313,6 +313,7 @@ public class IntakeLimelight extends SubsystemBase {
     return getValidTarget() != -1.0;
   }
 
+
   /**
    * Get a 2d translation from the camera to the target, including normalization to handle the
    * effects of angle to target. See the below discussion.
