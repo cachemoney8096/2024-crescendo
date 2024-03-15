@@ -206,7 +206,7 @@ public class Robot extends TimedRobot {
 
     m_robotContainer.lights.toggleCode(LightCode.NOTELESS);
     m_robotContainer.intake.stopRollers();
-    Conveyor.stop(m_robotContainer.conveyor);
+    m_robotContainer.conveyor.stopRollers();
     m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);
 
     setMatchState();

@@ -242,7 +242,7 @@ public class Conveyor extends SubsystemBase {
 
   /** Stop the conveor rollers. */
   public static Command stop(Conveyor conveyor) {
-    return new InstantCommand(conveyor::stopRollers, conveyor);
+    return new InstantCommand(conveyor::stopRollers, conveyor).ignoringDisable(true);
     // return new InstantCommand(() -> conveyor.frontMotor.set(0.0))
     //     .andThen(new InstantCommand(() -> conveyor.backMotor.set(0.0))).withName("Stop");
 
