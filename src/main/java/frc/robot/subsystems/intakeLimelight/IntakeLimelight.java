@@ -77,7 +77,7 @@ public class IntakeLimelight extends SubsystemBase {
     setLimelightValues(
         Constants.limelightLedMode.OFF,
         Constants.limelightCamMode.DRIVER_CAMERA,
-        Constants.limelightPipeline.PIPELINE2);
+        Constants.limelightPipeline.TAG_PIPELINE);
 
     m_simDevice = SimDevice.create("limelight-intake");
     if (m_simDevice != null) {

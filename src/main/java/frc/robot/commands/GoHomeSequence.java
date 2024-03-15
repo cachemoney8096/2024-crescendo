@@ -65,7 +65,7 @@ public class GoHomeSequence extends SequentialCommandGroup {
                 intakeLimelight.setLimelightValues(
                     limelightLedMode.OFF,
                     limelightCamMode.DRIVER_CAMERA,
-                    limelightPipeline.PIPELINE2)),
+                    limelightPipeline.TAG_PIPELINE)),
         new ConditionalCommand(
             goHomeWhenSafe, goHomeWhenNotSafe, () -> elevator.elevatorBelowInterferenceZone()));
   }

@@ -106,7 +106,7 @@ public class RobotContainer implements Sendable {
 
   public String pathCmd = "";
 
-  // A chooser for autonomous commands
+  /** A chooser for autonomous commands. String in pair should be the path's name, and null if no path */
   private SendableChooser<Pair<Command, String>> autonChooser = new SendableChooser<>();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
