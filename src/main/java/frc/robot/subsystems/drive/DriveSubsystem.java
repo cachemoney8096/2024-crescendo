@@ -649,12 +649,12 @@ public class DriveSubsystem extends SubsystemBase {
         "Rear Left Distance (m)", () -> rearLeft.getPosition().distanceMeters, null);
     builder.addDoubleProperty(
         "Rear Right Distance (m)", () -> rearRight.getPosition().distanceMeters, null);
-    builder.addDoubleProperty(
-        "Rear Right Velocity (mps)", () -> rearRight.getState().speedMetersPerSecond, null);
-    builder.addDoubleProperty(
-        "Rear Right Desired Velocity (mps)",
-        () -> rearRight.desiredState.speedMetersPerSecond,
-        null);
+    // builder.addDoubleProperty(
+    //     "Rear Right Velocity (mps)", () -> rearRight.getState().speedMetersPerSecond, null);
+    // builder.addDoubleProperty(
+    //     "Rear Right Desired Velocity (mps)",
+    //     () -> rearRight.desiredState.speedMetersPerSecond,
+    //     null);
     builder.addDoubleProperty(
         "Rear Right Velocity Error (mps)",
         () ->
@@ -676,5 +676,14 @@ public class DriveSubsystem extends SubsystemBase {
         "Rear left desired speed mps", () -> rearLeft.desiredState.speedMetersPerSecond, null);
     builder.addDoubleProperty(
         "Rear right desired speed mps", () -> rearRight.desiredState.speedMetersPerSecond, null);
+
+    builder.addDoubleProperty(
+        "Front left current speed mps", () -> frontLeft.getState().speedMetersPerSecond, null);
+    builder.addDoubleProperty(
+        "Front right current speed mps", () -> frontRight.getState().speedMetersPerSecond, null);
+    builder.addDoubleProperty(
+        "Rear left current speed mps", () -> rearLeft.getState().speedMetersPerSecond, null);
+    builder.addDoubleProperty(
+        "Rear right current speed mps", () -> rearRight.getState().speedMetersPerSecond, null);
   }
 }

@@ -338,8 +338,8 @@ public class RobotContainer implements Sendable {
                           return new AmpScore(
                               drive, conveyor, intake, shooter, elevator, intakeLimelight);
                         case OPERATOR_PREPPED:
-                          return new SequentialCommandGroup(
-                            new ParallelCommandGroup(
+                          //return new SequentialCommandGroup(
+                            /*new ParallelCommandGroup(
                               new InstantCommand(
                                   () -> {
                                     ChassisSpeeds currentChassisSpeeds =
@@ -357,8 +357,8 @@ public class RobotContainer implements Sendable {
                                             shooterLimelight.resetOdometryDuringPrep(drive);
                                           }
                                     }
-                                  }),
-                              Conveyor.shoot(conveyor)));
+                                  }),*/
+                              Conveyor.shoot(conveyor);
                         default:
                           return new InstantCommand(() -> System.out.println("you suck at coding"));
                       }
