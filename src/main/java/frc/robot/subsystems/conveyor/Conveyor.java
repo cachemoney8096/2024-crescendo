@@ -228,6 +228,7 @@ public class Conveyor extends SubsystemBase {
             new InstantCommand(
                 () -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED), conveyor),
             new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED)),
+            new WaitCommand(0.1),
             new WaitUntilCommand(() -> !conveyor.beamBreakSensorOne.isPressed()),
             new PrintCommand("Conveyor about to stop"),
             new InstantCommand(() -> conveyor.conveyorStopped = "Conveyor about to stop"),

@@ -121,8 +121,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
-    m_robotContainer.shooter.considerZeroingEncoder();
-    m_robotContainer.intake.considerZeroingEncoder();
+    if (!matchState.isRealMatch()) {
+      m_robotContainer.shooter.considerZeroingEncoder();
+      m_robotContainer.intake.considerZeroingEncoder();
+    }
     m_robotContainer.shooterLimelight.resetOdometryWithTags(
         m_PoseEstimator, m_robotContainer.drive);
   }
@@ -215,20 +217,20 @@ public class Robot extends TimedRobot {
 
     m_robotContainer.isTeleop = true;
 
-      m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kBrake);
 
-      m_robotContainer.drive.frontRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
-      m_robotContainer.drive.frontLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
-      m_robotContainer.drive.rearRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
-      m_robotContainer.drive.rearLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+    m_robotContainer.drive.frontRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+    m_robotContainer.drive.frontLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+    m_robotContainer.drive.rearRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+    m_robotContainer.drive.rearLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
 
-      m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
 
     // if (!matchState.isRealMatch()) {
     //   if (m_robotContainer.shooterLimelight.checkForTag().isEmpty()) {

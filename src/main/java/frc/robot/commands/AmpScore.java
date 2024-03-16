@@ -26,10 +26,6 @@ public class AmpScore extends SequentialCommandGroup {
 
     addCommands(
         new InstantCommand(() -> initialPose = drive.getPose()),
-        new WaitUntilCommand(
-            () -> {
-              return elevator.atDesiredPosition();
-            }),
         Conveyor.scoreTrapOrAmp(conveyor),
         new WaitUntilCommand(
             () ->

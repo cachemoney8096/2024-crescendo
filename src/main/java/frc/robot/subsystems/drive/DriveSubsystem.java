@@ -603,11 +603,11 @@ public class DriveSubsystem extends SubsystemBase {
   @Override
   public void initSendable(SendableBuilder builder) {
     super.initSendable(builder);
-    addChild("Rotate to target controller", DriveCal.ROTATE_TO_TARGET_PID_CONTROLLER);
-    addChild("Front Right", frontRight);
-    addChild("Front Left", frontLeft);
-    addChild("Rear Right", rearRight);
-    addChild("Rear Left", rearLeft);
+    // addChild("Rotate to target controller", DriveCal.ROTATE_TO_TARGET_PID_CONTROLLER);
+    // addChild("Front Right", frontRight);
+    // addChild("Front Left", frontLeft);
+    // addChild("Rear Right", rearRight);
+    // addChild("Rear Left", rearLeft);
     builder.addDoubleProperty(
         "Throttle multiplier",
         () -> {
@@ -685,5 +685,13 @@ public class DriveSubsystem extends SubsystemBase {
         "Rear left current speed mps", () -> rearLeft.getState().speedMetersPerSecond, null);
     builder.addDoubleProperty(
         "Rear right current speed mps", () -> rearRight.getState().speedMetersPerSecond, null);
+    builder.addDoubleProperty(
+        "Front left desired position", () -> frontLeft.desiredState.angle.getRadians(), null);
+    builder.addDoubleProperty(
+        "Front right desired position", () -> frontRight.desiredState.angle.getRadians(), null);
+    builder.addDoubleProperty(
+        "Rear left desired position", () -> rearLeft.desiredState.angle.getRadians(), null);
+    builder.addDoubleProperty(
+        "Rear right desired position", () -> rearRight.desiredState.angle.getRadians(), null);
   }
 }
