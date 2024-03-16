@@ -668,5 +668,13 @@ public class DriveSubsystem extends SubsystemBase {
     builder.addDoubleProperty("Target Heading (tag detection)", () -> tagTargetHeading, null);
     builder.addDoubleProperty(
         "getDiffCurrentTargetYawDeg", () -> getDiffCurrentTargetYawDeg(), null);
+    builder.addDoubleProperty(
+        "Front left desired speed mps", () -> frontLeft.desiredState.speedMetersPerSecond, null);
+    builder.addDoubleProperty(
+        "Front right desired speed mps", () -> frontRight.desiredState.speedMetersPerSecond, null);
+    builder.addDoubleProperty(
+        "Rear left desired speed mps", () -> rearLeft.desiredState.speedMetersPerSecond, null);
+    builder.addDoubleProperty(
+        "Rear right desired speed mps", () -> rearRight.desiredState.speedMetersPerSecond, null);
   }
 }

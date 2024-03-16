@@ -57,21 +57,21 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                   if (driveVelocityMps.getNorm() > 0.02
                       || Math.abs(currentChassisSpeeds.omegaRadiansPerSecond)
                           > Units.degreesToRadians(10)) {
-                    Pair<Rotation2d, Double> p =
+                    /*Pair<Rotation2d, Double> p =
                         ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
                             drive.getPose(), drive.matchState.isBlue());
                     drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
-                    shooter.setShooterDistance(p.getSecond());
+                    shooter.setShooterDistance(p.getSecond());*/
                   } else {
                     Optional<Pair<Rotation2d, Double>> interimTagDetection =
                         shooterLimelight.checkForTag();
                     if (interimTagDetection.isEmpty()) {
-                      Pair<Rotation2d, Double> p =
+                      /*Pair<Rotation2d, Double> p =
                           ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
                               drive.getPose(), drive.matchState.isBlue());
-                      drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
+                       drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
                       shooter.setShooterDistance(p.getSecond());
-                      tagDetection = interimTagDetection;
+                      tagDetection = interimTagDetection;*/
                     } else {
                       tagDetection = interimTagDetection;
                       shooterLimelight.resetOdometryDuringPrep(drive);
