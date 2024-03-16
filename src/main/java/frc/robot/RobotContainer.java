@@ -487,28 +487,22 @@ public class RobotContainer implements Sendable {
     throw new UnsupportedOperationException("Unimplemented method 'WaitUntilCommand'");
   }
 
-  // TODO
-  // for blue, 0 is towards center line
-  // for red, 0 is towards their speaker ?
   private void configureOperator() {
     /**
-     * conveyor towards shooter -> right trigger
-     * conveyor outtake -> left trigger
+     * conveyor towards shooter -> right trigger -> DONE
+     * conveyor outtake -> left trigger -> DONE
      * 
-     * subwoofer center: speaker prep with set distance -> dpad down
+     * subwoofer center: speaker prep with set distance -> dpad down -> DONE
      * 
-     * blue subwoofer amp side (same distance as normal subwoofer shot) -> left dpad
-     * blue subwoofer source side (same distance as normal subwoofer shot) -> right dpad
+     * blue subwoofer amp side (same distance as normal subwoofer shot) -> left dpad -> DONE
+     * blue subwoofer source side (same distance as normal subwoofer shot) -> right dpad -> DONE
      * 
-     * red subwoofer amp side (same distance as normal subwoofer shot) -> right dpad
-     * red subwoofer source side (same distance as normal subwoofer shot) -> left dpad
+     * red subwoofer amp side (same distance as normal subwoofer shot) -> right dpad -> DONE
+     * red subwoofer source side (same distance as normal subwoofer shot) -> left dpad -> DONE
      * 
-     * under chain shot (diff headings for blue and red) -> y
-     * amp shot (diff headings for blue and red) -> b
-     * podium shot (diff headings for blue and red) -> x
-     * 
-     * 
-     * ensure that back buttons aren't bound
+     * under chain shot (diff headings for blue and red) -> y -> DONE
+     * amp shot (diff headings for blue and red) -> b -> DONE
+     * podium shot (diff headings for blue and red) -> x -> DONE
      */
     operatorController.rightTrigger().onTrue(new InstantCommand(() -> conveyor.startRollers(1.0)));
     operatorController.rightTrigger().onFalse(new InstantCommand(() -> conveyor.stopRollers()));
@@ -521,18 +515,50 @@ public class RobotContainer implements Sendable {
         .leftTrigger()
         .onFalse(
             new InstantCommand(() -> conveyor.stopRollers()).andThen(() -> intake.stopRollers()));
+            
     operatorController
-        .a()
+        .povDown()
         .onTrue(
-            new InstantCommand(() -> shooter.setShooterDistance(1.16))
+            new InstantCommand(() -> shooter.setShooterDistance(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS)).andThen(() -> drive.setTargetHeadingDegrees(matchState.isBlue() ? 180.0 : 0.0))
                 .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
                 .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
+
+    operatorController
+        .povLeft()
+        .onTrue(
+            new InstantCommand(() -> shooter.setShooterDistance(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS)).andThen(() -> drive.setTargetHeadingDegrees(matchState.isBlue() ? 60.0 : 120.0))
+                .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
+                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
+
+    operatorController
+        .povRight()
+        .onTrue(
+            new InstantCommand(() -> shooter.setShooterDistance(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS)).andThen(() -> drive.setTargetHeadingDegrees(matchState.isBlue() ? 300.0 : 240.0))
+                .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
+                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
+
+    
+    operatorController
+        .b()
+        .onTrue(
+            new InstantCommand(() -> shooter.setShooterDistance(Units.inchesToMeters(142.0))).andThen(() -> drive.setTargetHeadingDegrees(matchState.isBlue() ? 200.0 : 160.0))
+                .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
+                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
+
+    operatorController
+        .x()
+        .onTrue(
+            new InstantCommand(() -> shooter.setShooterDistance(Units.inchesToMeters(100.0))).andThen(() -> drive.setTargetHeadingDegrees(matchState.isBlue() ? 158.0 : 202.0))
+                .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
+                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
+
     operatorController
         .y()
         .onTrue(
-            new InstantCommand(() -> shooter.setShooterDistance(2.77))
+            new InstantCommand(() -> shooter.setShooterDistance(Units.inchesToMeters(174.0))).andThen(() -> drive.setTargetHeadingDegrees(matchState.isBlue() ? 170.0 : 190.0))
                 .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
                 .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
+    
 
     operatorController
         .leftBumper()
@@ -541,7 +567,7 @@ public class RobotContainer implements Sendable {
                     () -> intake.rezeroIntakeToPosition(IntakeCal.INTAKE_STOWED_POSITION_DEGREES))
                 .ignoringDisable(true));
     operatorController
-        .leftTrigger() // change to right bumper
+        .rightBumper()
         .onTrue(
             new InstantCommand(
                     () -> intake.rezeroIntakeToPosition(IntakeCal.INTAKE_DEPLOYED_POSITION_DEGREES))
