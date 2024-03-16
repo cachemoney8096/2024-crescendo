@@ -487,16 +487,38 @@ public class RobotContainer implements Sendable {
     throw new UnsupportedOperationException("Unimplemented method 'WaitUntilCommand'");
   }
 
+  // TODO
+  // for blue, 0 is towards center line
+  // for red, 0 is towards their speaker ?
   private void configureOperator() {
-    operatorController.x().onTrue(new InstantCommand(() -> conveyor.startRollers(1.0)));
-    operatorController.x().onFalse(new InstantCommand(() -> conveyor.stopRollers()));
+    /**
+     * conveyor towards shooter -> right trigger
+     * conveyor outtake -> left trigger
+     * 
+     * subwoofer center: speaker prep with set distance -> dpad down
+     * 
+     * blue subwoofer amp side (same distance as normal subwoofer shot) -> left dpad
+     * blue subwoofer source side (same distance as normal subwoofer shot) -> right dpad
+     * 
+     * red subwoofer amp side (same distance as normal subwoofer shot) -> right dpad
+     * red subwoofer source side (same distance as normal subwoofer shot) -> left dpad
+     * 
+     * under chain shot (diff headings for blue and red) -> y
+     * amp shot (diff headings for blue and red) -> b
+     * podium shot (diff headings for blue and red) -> x
+     * 
+     * 
+     * ensure that back buttons aren't bound
+     */
+    operatorController.rightTrigger().onTrue(new InstantCommand(() -> conveyor.startRollers(1.0)));
+    operatorController.rightTrigger().onFalse(new InstantCommand(() -> conveyor.stopRollers()));
     operatorController
-        .b()
+        .leftTrigger()
         .onTrue(
             new InstantCommand(() -> conveyor.startRollers(-1.0))
                 .andThen(() -> intake.reverseRollers()));
     operatorController
-        .b()
+        .leftTrigger()
         .onFalse(
             new InstantCommand(() -> conveyor.stopRollers()).andThen(() -> intake.stopRollers()));
     operatorController
@@ -519,7 +541,7 @@ public class RobotContainer implements Sendable {
                     () -> intake.rezeroIntakeToPosition(IntakeCal.INTAKE_STOWED_POSITION_DEGREES))
                 .ignoringDisable(true));
     operatorController
-        .leftTrigger()
+        .leftTrigger() // change to right bumper
         .onTrue(
             new InstantCommand(
                     () -> intake.rezeroIntakeToPosition(IntakeCal.INTAKE_DEPLOYED_POSITION_DEGREES))
