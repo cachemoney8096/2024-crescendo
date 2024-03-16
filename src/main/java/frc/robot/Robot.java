@@ -215,7 +215,6 @@ public class Robot extends TimedRobot {
 
     m_robotContainer.isTeleop = true;
 
-    if (matchState.isRealMatch()) {
       m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
       m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kBrake);
       m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
@@ -230,7 +229,6 @@ public class Robot extends TimedRobot {
       m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
       m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
       m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
-    }
 
     // if (!matchState.isRealMatch()) {
     //   if (m_robotContainer.shooterLimelight.checkForTag().isEmpty()) {
