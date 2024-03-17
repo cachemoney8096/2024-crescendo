@@ -6,13 +6,9 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.util.GeometryUtil;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -25,7 +21,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -71,7 +66,6 @@ import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.JoystickUtil;
 import frc.robot.utils.MatchStateUtil;
-import java.util.Optional;
 import java.util.TreeSet;
 import java.util.function.BooleanSupplier;
 
@@ -310,60 +304,87 @@ public class RobotContainer implements Sendable {
     driverController
         .leftTrigger()
         .onTrue(
-            new SequentialCommandGroup(
-                new InstantCommand(() -> System.out.println("we @ score button")),
-                new DeferredCommand(
-                    () -> {
-                      PrepState input = prepState;
-                      prepState = PrepState.OFF;
-                      System.out.println("running deferred command");
-                      switch (input) {
-                        case OFF:
-                          return new SequentialCommandGroup(
-                              new InstantCommand(() -> System.out.println("case off: outtaking")),
-                              new InstantCommand(intake::reverseRollers),
-                              new InstantCommand(() -> conveyor.startRollers(-1.0)),
-                              new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
-                              new InstantCommand(conveyor::stopRollers),
-                              new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
-                              new InstantCommand(intake::stopRollers));
-                        case CLIMB:
-                          return new ClimbSequence(intake, elevator, shooter, conveyor);
-                        case FEED:
-                          return new SpeakerShootSequence(
-                              conveyor, shooter, elevator, drive, false);
-                        case SPEAKER:
-                          return new SpeakerShootSequence(conveyor, shooter, elevator, drive, true);
-                        case AMP:
-                          return new AmpScore(
-                              drive, conveyor, intake, shooter, elevator, intakeLimelight);
-                        case OPERATOR_PREPPED:
-                          //return new SequentialCommandGroup(
-                            /*new ParallelCommandGroup(
-                              new InstantCommand(
-                                  () -> {
-                                    ChassisSpeeds currentChassisSpeeds =
-                                        drive.getCurrentChassisSpeeds();
-                                    Translation2d driveVelocityMps =
-                                        new Translation2d(
-                                            currentChassisSpeeds.vxMetersPerSecond,
-                                            currentChassisSpeeds.vyMetersPerSecond);
-                                    if (driveVelocityMps.getNorm() < 0.02
-                                        && Math.abs(currentChassisSpeeds.omegaRadiansPerSecond)
-                                            < Units.degreesToRadians(10)) {
-                                      Optional<Pair<Rotation2d, Double>> tagDetection =
-                                          shooterLimelight.checkForTag();
-                                          if(tagDetection.isPresent()){
-                                            shooterLimelight.resetOdometryDuringPrep(drive);
-                                          }
-                                    }
-                                  }),*/
-                              Conveyor.shoot(conveyor);
-                        default:
-                          return new InstantCommand(() -> System.out.println("you suck at coding"));
-                      }
-                    },
-                    new TreeSet<Subsystem>())));
+            new InstantCommand(() -> System.out.println("driver controller left trigger pressed"))
+                .andThen(
+                    new SequentialCommandGroup(
+                        new InstantCommand(() -> System.out.println("we @ score button")),
+                        new DeferredCommand(
+                            () -> {
+                              PrepState input = prepState;
+                              prepState = PrepState.OFF;
+                              System.out.println("running deferred command");
+                              switch (input) {
+                                case OFF:
+                                  return new SequentialCommandGroup(
+                                      new InstantCommand(
+                                          () -> System.out.println("deferred case: off")),
+                                      new InstantCommand(intake::reverseRollers),
+                                      new InstantCommand(() -> conveyor.startRollers(-1.0)),
+                                      new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
+                                      new InstantCommand(conveyor::stopRollers),
+                                      new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
+                                      new InstantCommand(intake::stopRollers));
+                                case CLIMB:
+                                  return new SequentialCommandGroup(
+                                      new InstantCommand(
+                                          () -> System.out.println("deferred case: climb")),
+                                      new ClimbSequence(intake, elevator, shooter, conveyor));
+                                case FEED:
+                                  return new SequentialCommandGroup(
+                                      new InstantCommand(
+                                          () -> System.out.println("deferred case: feed")),
+                                      new SpeakerShootSequence(
+                                          conveyor, shooter, elevator, drive, false));
+                                case SPEAKER:
+                                  return new SequentialCommandGroup(
+                                      new InstantCommand(
+                                          () -> System.out.println("deferred case: speaker")),
+                                      new SpeakerShootSequence(
+                                          conveyor, shooter, elevator, drive, true));
+                                case AMP:
+                                  return new SequentialCommandGroup(
+                                      new InstantCommand(
+                                          () -> System.out.println("deferred case: amp")),
+                                      new AmpScore(
+                                          drive,
+                                          conveyor,
+                                          intake,
+                                          shooter,
+                                          elevator,
+                                          intakeLimelight));
+                                case OPERATOR_PREPPED:
+                                  // return new SequentialCommandGroup(
+                                  /*new ParallelCommandGroup(
+                                  new InstantCommand(
+                                      () -> {
+                                        ChassisSpeeds currentChassisSpeeds =
+                                            drive.getCurrentChassisSpeeds();
+                                        Translation2d driveVelocityMps =
+                                            new Translation2d(
+                                                currentChassisSpeeds.vxMetersPerSecond,
+                                                currentChassisSpeeds.vyMetersPerSecond);
+                                        if (driveVelocityMps.getNorm() < 0.02
+                                            && Math.abs(currentChassisSpeeds.omegaRadiansPerSecond)
+                                                < Units.degreesToRadians(10)) {
+                                          Optional<Pair<Rotation2d, Double>> tagDetection =
+                                              shooterLimelight.checkForTag();
+                                              if(tagDetection.isPresent()){
+                                                shooterLimelight.resetOdometryDuringPrep(drive);
+                                              }
+                                        }
+                                      }),*/
+                                  new SequentialCommandGroup(
+                                      new InstantCommand(
+                                          () ->
+                                              System.out.println(
+                                                  "deferred case: operator prepped")),
+                                      Conveyor.shoot(conveyor));
+                                default:
+                                  return new InstantCommand(
+                                      () -> System.out.println("deferred case: default"));
+                              }
+                            },
+                            new TreeSet<Subsystem>()))));
 
     driverController
         .leftBumper()
@@ -492,20 +513,18 @@ public class RobotContainer implements Sendable {
 
   private void configureOperator() {
     /**
-     * conveyor towards shooter -> right trigger -> DONE
-     * conveyor outtake -> left trigger -> DONE
-     * 
-     * subwoofer center: speaker prep with set distance -> dpad down -> DONE
-     * 
-     * blue subwoofer amp side (same distance as normal subwoofer shot) -> left dpad -> DONE
-     * blue subwoofer source side (same distance as normal subwoofer shot) -> right dpad -> DONE
-     * 
-     * red subwoofer amp side (same distance as normal subwoofer shot) -> right dpad -> DONE
-     * red subwoofer source side (same distance as normal subwoofer shot) -> left dpad -> DONE
-     * 
-     * under chain shot (diff headings for blue and red) -> y -> DONE
-     * amp shot (diff headings for blue and red) -> b -> DONE
-     * podium shot (diff headings for blue and red) -> x -> DONE
+     * conveyor towards shooter -> right trigger -> DONE conveyor outtake -> left trigger -> DONE
+     *
+     * <p>subwoofer center: speaker prep with set distance -> dpad down -> DONE
+     *
+     * <p>blue subwoofer amp side (same distance as normal subwoofer shot) -> left dpad -> DONE blue
+     * subwoofer source side (same distance as normal subwoofer shot) -> right dpad -> DONE
+     *
+     * <p>red subwoofer amp side (same distance as normal subwoofer shot) -> right dpad -> DONE red
+     * subwoofer source side (same distance as normal subwoofer shot) -> left dpad -> DONE
+     *
+     * <p>under chain shot (diff headings for blue and red) -> y -> DONE amp shot (diff headings for
+     * blue and red) -> b -> DONE podium shot (diff headings for blue and red) -> x -> DONE
      */
     operatorController.rightTrigger().onTrue(new InstantCommand(() -> conveyor.startRollers(1.0)));
     operatorController.rightTrigger().onFalse(new InstantCommand(() -> conveyor.stopRollers()));
@@ -518,60 +537,97 @@ public class RobotContainer implements Sendable {
         .leftTrigger()
         .onFalse(
             new InstantCommand(() -> conveyor.stopRollers()).andThen(() -> intake.stopRollers()));
-            
+
     operatorController
         .povDown()
         .onTrue(
-            new InstantCommand(() -> shooter.setShooterDistance(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS)).andThen(() -> drive.setTargetHeadingDegrees(matchState.isBlue() ? 0.0 : 180.0))
+            new InstantCommand(
+                    () -> shooter.setShooterDistance(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS))
+                .andThen(() -> drive.setTargetHeadingDegrees(matchState.isBlue() ? 0.0 : 180.0))
                 .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
                 .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
 
     operatorController
         .povLeft()
         .onTrue(
-            new InstantCommand(() -> shooter.setShooterDistance(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS)).andThen(() -> {
-                double redDeg = 120.0;
-                drive.setTargetHeadingDegrees(matchState.isBlue() ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg)).getDegrees() : redDeg);})
+            new InstantCommand(
+                    () -> shooter.setShooterDistance(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS))
+                .andThen(
+                    () -> {
+                      double redDeg = 120.0;
+                      drive.setTargetHeadingDegrees(
+                          matchState.isBlue()
+                              ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg))
+                                  .getDegrees()
+                              : redDeg);
+                    })
                 .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
                 .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
 
     operatorController
         .povRight()
         .onTrue(
-            new InstantCommand(() -> shooter.setShooterDistance(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS)).andThen(() -> {
-                double redDeg = 240.0;
-                drive.setTargetHeadingDegrees(matchState.isBlue() ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg)).getDegrees() : redDeg);})
+            new InstantCommand(
+                    () -> shooter.setShooterDistance(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS))
+                .andThen(
+                    () -> {
+                      double redDeg = 240.0;
+                      drive.setTargetHeadingDegrees(
+                          matchState.isBlue()
+                              ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg))
+                                  .getDegrees()
+                              : redDeg);
+                    })
                 .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
                 .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
 
     operatorController
         .b()
         .onTrue(
-            new InstantCommand(() -> shooter.setShooterDistance(Units.inchesToMeters(142.0))).andThen(() -> {
-                double redDeg = 160.0;
-                drive.setTargetHeadingDegrees(matchState.isBlue() ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg)).getDegrees() : redDeg);
-            })
+            new InstantCommand(() -> shooter.setShooterDistance(Units.inchesToMeters(142.0)))
+                .andThen(
+                    () -> {
+                      double redDeg = 160.0;
+                      drive.setTargetHeadingDegrees(
+                          matchState.isBlue()
+                              ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg))
+                                  .getDegrees()
+                              : redDeg);
+                    })
                 .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
                 .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
 
     operatorController
         .x()
         .onTrue(
-            new InstantCommand(() -> shooter.setShooterDistance(Units.inchesToMeters(100.0))).andThen(() -> {
-                double redDeg = 202.0;
-                drive.setTargetHeadingDegrees(matchState.isBlue() ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg)).getDegrees() : redDeg);})
+            new InstantCommand(() -> shooter.setShooterDistance(Units.inchesToMeters(100.0)))
+                .andThen(
+                    () -> {
+                      double redDeg = 202.0;
+                      drive.setTargetHeadingDegrees(
+                          matchState.isBlue()
+                              ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg))
+                                  .getDegrees()
+                              : redDeg);
+                    })
                 .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
                 .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
 
     operatorController
         .y()
         .onTrue(
-            new InstantCommand(() -> shooter.setShooterDistance(Units.inchesToMeters(174.0))).andThen(() -> {
-                double redDeg = 190.0;
-                drive.setTargetHeadingDegrees(matchState.isBlue() ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg)).getDegrees() : redDeg);})
+            new InstantCommand(() -> shooter.setShooterDistance(Units.inchesToMeters(174.0)))
+                .andThen(
+                    () -> {
+                      double redDeg = 190.0;
+                      drive.setTargetHeadingDegrees(
+                          matchState.isBlue()
+                              ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg))
+                                  .getDegrees()
+                              : redDeg);
+                    })
                 .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
                 .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
-    
 
     operatorController
         .leftBumper()
