@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.GeometryUtil;
@@ -17,6 +20,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.conveyor.Conveyor;
+import frc.robot.subsystems.drive.DriveCal;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelightConstants;
 import frc.robot.subsystems.lights.Lights.LightCode;
@@ -207,6 +211,31 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    TalonFXConfigurator frontLeftDriveTalonCfg = m_robotContainer.drive.frontLeft.drivingTalon.getConfigurator();
+    TalonFXConfigurator frontRightDriveTalonCfg = m_robotContainer.drive.frontRight.drivingTalon.getConfigurator();
+    TalonFXConfigurator rearLeftDriveTalonCfg = m_robotContainer.drive.rearLeft.drivingTalon.getConfigurator();
+    TalonFXConfigurator rearRightDriveTalonCfg = m_robotContainer.drive.rearRight.drivingTalon.getConfigurator();
+
+    TalonFXConfiguration toApply = new TalonFXConfiguration();
+    toApply.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // TODO: check this
+    toApply.Feedback.SensorToMechanismRatio =
+        DriveConstants.DRIVING_MOTOR_REDUCTION / DriveConstants.WHEEL_CIRCUMFERENCE_METERS;
+    toApply.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS_TELEOP;
+    toApply.CurrentLimits.SupplyCurrentLimitEnable = true;
+    toApply.CurrentLimits.StatorCurrentLimit =
+        DriveConstants.DRIVING_MOTOR_STATOR_CURRENT_LIMIT_AMPS;
+    toApply.CurrentLimits.StatorCurrentLimitEnable = true;
+    toApply.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    toApply.Slot0.kP = DriveCal.DRIVING_P;
+    toApply.Slot0.kI = DriveCal.DRIVING_I;
+    toApply.Slot0.kD = DriveCal.DRIVING_D;
+    toApply.Slot0.kV = DriveCal.DRIVING_FF;
+
+    frontLeftDriveTalonCfg.apply(toApply);
+    frontRightDriveTalonCfg.apply(toApply);
+    rearLeftDriveTalonCfg.apply(toApply);
+    rearRightDriveTalonCfg.apply(toApply);
 
     m_robotContainer.lights.toggleCode(LightCode.NOTELESS);
     m_robotContainer.intake.stopRollers();

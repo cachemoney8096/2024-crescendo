@@ -252,14 +252,8 @@ public class Conveyor extends SubsystemBase {
   /** backs the currently held note a little bit back into the conveyor to crush it */
   public static Command crushNote(Conveyor conveyor) {
     return new SequentialCommandGroup(
-        new InstantCommand(() -> conveyor.frontMotorEncoder.setPosition(0.0), conveyor),
-        new InstantCommand(() -> conveyor.frontMotor.set(0.0)),
+        new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SPEED)),
         new InstantCommand(() -> conveyor.backMotor.set(-ConveyorCal.RECEIVE_SPEED)),
-        new WaitUntilCommand(
-                () ->
-                    Math.abs(conveyor.frontMotorEncoder.getPosition())
-                        > ConveyorCal.NOTE_POSITION_THRESHOLD_INCHES)
-            .withTimeout(1.0),
         new WaitCommand(0.5),
         Conveyor.stop(conveyor));
   }

@@ -142,7 +142,7 @@ public class SwerveModule implements Sendable {
     toApply.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // TODO: check this
     toApply.Feedback.SensorToMechanismRatio =
         DriveConstants.DRIVING_MOTOR_REDUCTION / DriveConstants.WHEEL_CIRCUMFERENCE_METERS;
-    toApply.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS;
+    toApply.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS_AUTO;
     toApply.CurrentLimits.SupplyCurrentLimitEnable = true;
     toApply.CurrentLimits.StatorCurrentLimit =
         DriveConstants.DRIVING_MOTOR_STATOR_CURRENT_LIMIT_AMPS;
