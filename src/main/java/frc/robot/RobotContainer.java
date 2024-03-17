@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SelectCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -66,6 +67,7 @@ import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.JoystickUtil;
 import frc.robot.utils.MatchStateUtil;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.BooleanSupplier;
 
@@ -260,6 +262,12 @@ public class RobotContainer implements Sendable {
     SmartDashboard.putData(autonChooser);
   }
 
+  private PrepState getAndClearPrepState() {
+    PrepState input = this.prepState;
+    this.prepState = PrepState.OFF;
+    return input;
+  }
+
   private int getCardinalDirectionDegrees() {
     if (driverController.getHID().getAButton()) {
       return matchState.isBlue() ? 180 : 0;
@@ -301,90 +309,132 @@ public class RobotContainer implements Sendable {
           return Math.abs(driverController.getRightX()) > 0.05;
         };
 
+    TreeMap<PrepState, Command> selectCommandMap = new TreeMap<PrepState, Command>();
+    selectCommandMap.put(
+        PrepState.OFF,
+        new SequentialCommandGroup(
+            new InstantCommand(() -> System.out.println("selectcommand case: off")),
+            new InstantCommand(intake::reverseRollers),
+            new InstantCommand(() -> conveyor.startRollers(-1.0)),
+            new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
+            new InstantCommand(conveyor::stopRollers),
+            new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
+            new InstantCommand(intake::stopRollers)));
+    selectCommandMap.put(
+        PrepState.CLIMB,
+        new SequentialCommandGroup(
+            new InstantCommand(() -> System.out.println("selectcommand case: climb")),
+            new ClimbSequence(intake, elevator, shooter, conveyor)));
+    selectCommandMap.put(
+        PrepState.FEED,
+        new SequentialCommandGroup(
+            new InstantCommand(() -> System.out.println("selectcommand case: feed")),
+            new SpeakerShootSequence(conveyor, shooter, elevator, drive, false)));
+    selectCommandMap.put(
+        PrepState.SPEAKER,
+        new SequentialCommandGroup(
+            new InstantCommand(() -> System.out.println("selectcommand case: speaker")),
+            new SpeakerShootSequence(conveyor, shooter, elevator, drive, true)));
+    selectCommandMap.put(
+        PrepState.AMP,
+        new SequentialCommandGroup(
+            new InstantCommand(() -> System.out.println("selectcommand case: amp")),
+            new AmpScore(drive, conveyor, intake, shooter, elevator, intakeLimelight)));
+    selectCommandMap.put(
+        PrepState.OPERATOR_PREPPED,
+        new SequentialCommandGroup(
+            new InstantCommand(() -> System.out.println("selectcommand case: operator prepped")),
+            Conveyor.shoot(conveyor)));
+
+    SelectCommand<PrepState> driverLeftTriggerCommand = new SelectCommand<PrepState>(selectCommandMap, this::getAndClearPrepState);
+
     driverController
         .leftTrigger()
         .onTrue(
             new InstantCommand(() -> System.out.println("driver controller left trigger pressed"))
                 .andThen(
                     new SequentialCommandGroup(
-                        new InstantCommand(() -> System.out.println("we @ score button")),
-                        new DeferredCommand(
-                            () -> {
-                              PrepState input = prepState;
-                              prepState = PrepState.OFF;
-                              System.out.println("running deferred command");
-                              switch (input) {
-                                case OFF:
-                                  return new SequentialCommandGroup(
-                                      new InstantCommand(
-                                          () -> System.out.println("deferred case: off")),
-                                      new InstantCommand(intake::reverseRollers),
-                                      new InstantCommand(() -> conveyor.startRollers(-1.0)),
-                                      new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
-                                      new InstantCommand(conveyor::stopRollers),
-                                      new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
-                                      new InstantCommand(intake::stopRollers));
-                                case CLIMB:
-                                  return new SequentialCommandGroup(
-                                      new InstantCommand(
-                                          () -> System.out.println("deferred case: climb")),
-                                      new ClimbSequence(intake, elevator, shooter, conveyor));
-                                case FEED:
-                                  return new SequentialCommandGroup(
-                                      new InstantCommand(
-                                          () -> System.out.println("deferred case: feed")),
-                                      new SpeakerShootSequence(
-                                          conveyor, shooter, elevator, drive, false));
-                                case SPEAKER:
-                                  return new SequentialCommandGroup(
-                                      new InstantCommand(
-                                          () -> System.out.println("deferred case: speaker")),
-                                      new SpeakerShootSequence(
-                                          conveyor, shooter, elevator, drive, true));
-                                case AMP:
-                                  return new SequentialCommandGroup(
-                                      new InstantCommand(
-                                          () -> System.out.println("deferred case: amp")),
-                                      new AmpScore(
-                                          drive,
-                                          conveyor,
-                                          intake,
-                                          shooter,
-                                          elevator,
-                                          intakeLimelight));
-                                case OPERATOR_PREPPED:
-                                  // return new SequentialCommandGroup(
-                                  /*new ParallelCommandGroup(
-                                  new InstantCommand(
-                                      () -> {
-                                        ChassisSpeeds currentChassisSpeeds =
-                                            drive.getCurrentChassisSpeeds();
-                                        Translation2d driveVelocityMps =
-                                            new Translation2d(
-                                                currentChassisSpeeds.vxMetersPerSecond,
-                                                currentChassisSpeeds.vyMetersPerSecond);
-                                        if (driveVelocityMps.getNorm() < 0.02
-                                            && Math.abs(currentChassisSpeeds.omegaRadiansPerSecond)
-                                                < Units.degreesToRadians(10)) {
-                                          Optional<Pair<Rotation2d, Double>> tagDetection =
-                                              shooterLimelight.checkForTag();
-                                              if(tagDetection.isPresent()){
-                                                shooterLimelight.resetOdometryDuringPrep(drive);
-                                              }
-                                        }
-                                      }),*/
-                                  new SequentialCommandGroup(
-                                      new InstantCommand(
-                                          () ->
-                                              System.out.println(
-                                                  "deferred case: operator prepped")),
-                                      Conveyor.shoot(conveyor));
-                                default:
-                                  return new InstantCommand(
-                                      () -> System.out.println("deferred case: default"));
-                              }
-                            },
-                            new TreeSet<Subsystem>()))));
+                        new InstantCommand(() -> 
+                            System.out.println("we @ score button")),
+                        driverLeftTriggerCommand
+                        // new DeferredCommand(
+                        //     () -> {
+                        //       PrepState input = prepState;
+                        //       prepState = PrepState.OFF;
+                        //       System.out.println("running deferred command");
+                        //       switch (input) {
+                        //         case OFF:
+                        //           return new SequentialCommandGroup(
+                        //               new InstantCommand(
+                        //                   () -> System.out.println("deferred case: off")),
+                        //               new InstantCommand(intake::reverseRollers),
+                        //               new InstantCommand(() -> conveyor.startRollers(-1.0)),
+                        //               new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
+                        //               new InstantCommand(conveyor::stopRollers),
+                        //               new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
+                        //               new InstantCommand(intake::stopRollers));
+                        //         case CLIMB:
+                        //           return new SequentialCommandGroup(
+                        //               new InstantCommand(
+                        //                   () -> System.out.println("deferred case: climb")),
+                        //               new ClimbSequence(intake, elevator, shooter, conveyor));
+                        //         case FEED:
+                        //           return new SequentialCommandGroup(
+                        //               new InstantCommand(
+                        //                   () -> System.out.println("deferred case: feed")),
+                        //               new SpeakerShootSequence(
+                        //                   conveyor, shooter, elevator, drive, false));
+                        //         case SPEAKER:
+                        //           return new SequentialCommandGroup(
+                        //               new InstantCommand(
+                        //                   () -> System.out.println("deferred case: speaker")),
+                        //               new SpeakerShootSequence(
+                        //                   conveyor, shooter, elevator, drive, true));
+                        //         case AMP:
+                        //           return new SequentialCommandGroup(
+                        //               new InstantCommand(
+                        //                   () -> System.out.println("deferred case: amp")),
+                        //               new AmpScore(
+                        //                   drive,
+                        //                   conveyor,
+                        //                   intake,
+                        //                   shooter,
+                        //                   elevator,
+                        //                   intakeLimelight));
+                        //         case OPERATOR_PREPPED:
+                        //           // return new SequentialCommandGroup(
+                        //           /*new ParallelCommandGroup(
+                        //           new InstantCommand(
+                        //               () -> {
+                        //                 ChassisSpeeds currentChassisSpeeds =
+                        //                     drive.getCurrentChassisSpeeds();
+                        //                 Translation2d driveVelocityMps =
+                        //                     new Translation2d(
+                        //                         currentChassisSpeeds.vxMetersPerSecond,
+                        //                         currentChassisSpeeds.vyMetersPerSecond);
+                        //                 if (driveVelocityMps.getNorm() < 0.02
+                        //                     && Math.abs(currentChassisSpeeds.omegaRadiansPerSecond)
+                        //                         < Units.degreesToRadians(10)) {
+                        //                   Optional<Pair<Rotation2d, Double>> tagDetection =
+                        //                       shooterLimelight.checkForTag();
+                        //                       if(tagDetection.isPresent()){
+                        //                         shooterLimelight.resetOdometryDuringPrep(drive);
+                        //                       }
+                        //                 }
+                        //               }),*/
+                        //           new SequentialCommandGroup(
+                        //               new InstantCommand(
+                        //                   () ->
+                        //                       System.out.println(
+                        //                           "deferred case: operator prepped")),
+                        //               Conveyor.shoot(conveyor));
+                        //         default:
+                        //           return new InstantCommand(
+                        //               () -> System.out.println("deferred case: default"));
+                        //       }
+                        //     },
+                        //     new TreeSet<Subsystem>())
+                        )));
 
     driverController
         .leftBumper()
