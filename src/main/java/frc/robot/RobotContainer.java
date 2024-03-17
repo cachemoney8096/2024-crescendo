@@ -130,6 +130,7 @@ public class RobotContainer implements Sendable {
         new Conveyor(
             (double val) -> {
               driverController.getHID().setRumble(RumbleType.kBothRumble, val);
+              operatorController.getHID().setRumble(RumbleType.kBothRumble, val);
             });
     lights = new Lights();
     shooterLimelight =
@@ -217,6 +218,7 @@ public class RobotContainer implements Sendable {
     burnFlashAllSparks();
 
     driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+    operatorController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
 
     autonChooser.setDefaultOption(
         "Score two",
