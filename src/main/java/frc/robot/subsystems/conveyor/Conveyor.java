@@ -254,7 +254,7 @@ public class Conveyor extends SubsystemBase {
     return new SequentialCommandGroup(
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SPEED)),
         new InstantCommand(() -> conveyor.backMotor.set(-ConveyorCal.RECEIVE_SPEED)),
-        new WaitCommand(0.5),
+        new WaitCommand(1.0),
         Conveyor.stop(conveyor));
   }
 
