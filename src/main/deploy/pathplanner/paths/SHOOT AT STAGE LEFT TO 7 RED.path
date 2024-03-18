@@ -1,0 +1,70 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.9241772897665155,
+        "y": 3.4618261176114777
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.522138205484559,
+        "y": 1.6188029837850055
+      },
+      "isLocked": false,
+      "linkedName": "SHOOT AT STAGE LEFT RED 2"
+    },
+    {
+      "anchor": {
+        "x": 8.531805660772894,
+        "y": 3.086196061402312
+      },
+      "prevControl": {
+        "x": 7.236850667296679,
+        "y": 1.6424091791051103
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "#7 INTAKE RED"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "eventMarkers": [
+    {
+      "name": "INTAKE",
+      "waypointRelativePos": 0.5,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "INTAKE"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.75,
+    "maxAcceleration": 4.75,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 22.5,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "LEFT RED",
+  "previewStartingState": {
+    "rotation": -32.0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": false
+}

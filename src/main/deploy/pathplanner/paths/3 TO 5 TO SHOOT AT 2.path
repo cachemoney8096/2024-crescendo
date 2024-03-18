@@ -1,0 +1,120 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 2.010668021336043,
+        "y": 4.2219238724191746
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.5625130101863496,
+        "y": 7.851647576311027
+      },
+      "isLocked": false,
+      "linkedName": "3 INTAKE"
+    },
+    {
+      "anchor": {
+        "x": 8.293644849397962,
+        "y": 6.0692661556263285
+      },
+      "prevControl": {
+        "x": 8.277700767096738,
+        "y": 7.260788512032452
+      },
+      "nextControl": {
+        "x": 8.303299220558555,
+        "y": 5.347782230897356
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.7856981070087494,
+        "y": 5.484558433504332
+      },
+      "prevControl": {
+        "x": 7.078831027014923,
+        "y": 2.8760519906062205
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "SHOOT AT 2"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.7,
+      "rotationDegrees": -45.0,
+      "rotateFast": false
+    },
+    {
+      "waypointRelativePos": 1.2,
+      "rotationDegrees": -45.0,
+      "rotateFast": false
+    }
+  ],
+  "constraintZones": [],
+  "eventMarkers": [
+    {
+      "name": "SPEAKER PREP AND SCORE",
+      "waypointRelativePos": 1.6,
+      "command": {
+        "type": "sequential",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "SPEAKER PREP"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "SPEAKER SCORE"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "INTAKE",
+      "waypointRelativePos": 0.65,
+      "command": {
+        "type": "sequential",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "INTAKE"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 5.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "CENTER",
+  "previewStartingState": {
+    "rotation": -25.0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": false
+}

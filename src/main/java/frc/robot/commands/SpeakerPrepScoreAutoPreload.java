@@ -4,12 +4,13 @@ import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
-import frc.robot.subsystems.shooter.ShooterCal;
 import java.util.Optional;
 
 /**
@@ -22,14 +23,20 @@ public class SpeakerPrepScoreAutoPreload extends SequentialCommandGroup {
   double distanceFromSpeakerMeters = 0.0;
 
   public SpeakerPrepScoreAutoPreload(
-      Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor) {
+      Intake intake,
+      Elevator elevator,
+      Shooter shooter,
+      Conveyor conveyor,
+      double preloadDistance) {
 
     // Drive is not a requirement!!
     addRequirements(intake, elevator, shooter, conveyor);
 
     addCommands(
-        new GoHomeSequence(intake, elevator, shooter, conveyor, true, false, false),
+        // new GoHomeSequence(intake, elevator, shooter, conveyor, true, false, false),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
-        new InstantCommand(() -> shooter.setShooterDistance(ShooterCal.AUTO_PRELOAD_DISTANCE_M)));
+        new InstantCommand(() -> shooter.setShooterDistance(preloadDistance)),
+        new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SLIGHTLY_UP, true)),
+        new WaitUntilCommand(() -> elevator.atDesiredPosition()));
   }
 }

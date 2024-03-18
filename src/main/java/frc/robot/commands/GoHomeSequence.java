@@ -4,11 +4,15 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc.robot.Constants.limelightCamMode;
+import frc.robot.Constants.limelightLedMode;
+import frc.robot.Constants.limelightPipeline;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakePosition;
+import frc.robot.subsystems.intakeLimelight.IntakeLimelight;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 
@@ -22,6 +26,7 @@ public class GoHomeSequence extends SequentialCommandGroup {
       Elevator elevator,
       Shooter shooter,
       Conveyor conveyor,
+      IntakeLimelight intakeLimelight,
       boolean spinUpShooter,
       boolean stowIntake,
       boolean homeElevator) {
@@ -55,6 +60,12 @@ public class GoHomeSequence extends SequentialCommandGroup {
         new InstantCommand(conveyor::stopRollers),
         new InstantCommand(intake::stopRollers),
         new InstantCommand(() -> shooter.readyToShoot = false),
+        new InstantCommand(
+            () ->
+                intakeLimelight.setLimelightValues(
+                    limelightLedMode.OFF,
+                    limelightCamMode.DRIVER_CAMERA,
+                    limelightPipeline.TAG_PIPELINE)),
         new ConditionalCommand(
             goHomeWhenSafe, goHomeWhenNotSafe, () -> elevator.elevatorBelowInterferenceZone()));
   }

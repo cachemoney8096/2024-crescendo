@@ -4,9 +4,13 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.util.GeometryUtil;
 import com.revrobotics.CANSparkBase.IdleMode;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -19,6 +23,7 @@ import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.MatchStateUtil;
+import org.littletonrobotics.urcl.URCL;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -45,6 +50,9 @@ public class Robot extends TimedRobot {
      * Instantiate our RobotContainer. This will perform all our button bindings, and put our
      * autonomous chooser on the dashboard.
      */
+    DataLogManager.start();
+    URCL.start();
+
     m_robotContainer = new RobotContainer(matchState);
     RobotController.setBrownoutVoltage(Constants.BROWNOUT_VOLTAGE);
     m_PoseEstimator =
@@ -53,6 +61,8 @@ public class Robot extends TimedRobot {
             m_robotContainer.drive.getGyro().getRotation2d(),
             m_robotContainer.drive.getModulePositions(),
             new Pose2d());
+
+    m_robotContainer.isTeleop = false;
   }
 
   /**
@@ -77,6 +87,7 @@ public class Robot extends TimedRobot {
   /** This function is called once each time the robot enters disabled mode. */
   @Override
   public void disabledInit() {
+    m_robotContainer.isTeleop = false;
     LimelightHelpers.getLatestResults(
         IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME); // It takes 2.5-3s on first run
     LimelightHelpers.getLatestResults(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
@@ -86,6 +97,12 @@ public class Robot extends TimedRobot {
       m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kCoast);
       m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kCoast);
       m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kCoast);
+
+      m_robotContainer.drive.frontRight.drivingTalon.setNeutralMode(NeutralModeValue.Coast);
+      m_robotContainer.drive.frontLeft.drivingTalon.setNeutralMode(NeutralModeValue.Coast);
+      m_robotContainer.drive.rearRight.drivingTalon.setNeutralMode(NeutralModeValue.Coast);
+      m_robotContainer.drive.rearLeft.drivingTalon.setNeutralMode(NeutralModeValue.Coast);
+
       m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kCoast);
       m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kCoast);
       m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kCoast);
@@ -93,6 +110,8 @@ public class Robot extends TimedRobot {
     }
 
     m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);
+    m_robotContainer.conveyor.stopRollers();
+    m_robotContainer.intake.stopRollers();
 
     m_robotContainer.intake.dontAllowIntakeMovement();
     m_robotContainer.elevator.dontAllowElevatorMovement();
@@ -101,8 +120,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
-    m_robotContainer.shooter.considerZeroingEncoder();
-    m_robotContainer.intake.considerZeroingEncoder();
+    if (!matchState.isRealMatch()) {
+      m_robotContainer.shooter.considerZeroingEncoder();
+      m_robotContainer.intake.considerZeroingEncoder();
+    }
     m_robotContainer.shooterLimelight.resetOdometryWithTags(
         m_PoseEstimator, m_robotContainer.drive);
   }
@@ -110,25 +131,56 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    setMatchState();
+    m_robotContainer.isTeleop = false;
 
+    setMatchState();
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
-    // schedule the autonomous command (example)
+    // If there's a path planner auto and the robot didn't initialize its pose from tags, then initialize from the path's starting pose
+    if (m_autonomousCommand != null && m_robotContainer.getAutonomousName() != null) {
+      if (m_robotContainer.shooterLimelight.checkForTag().isEmpty()) {
+        Pose2d pathStartingPose =
+            PathPlannerAuto.getStaringPoseFromAutoFile(m_robotContainer.getAutonomousName());
+        if (Math.abs(m_robotContainer.drive.getPose().getX()) < Constants.ODOMETRY_MARGIN_FOR_ZEROING_M
+            && Math.abs(m_robotContainer.drive.getPose().getY()) < Constants.ODOMETRY_MARGIN_FOR_ZEROING_M) {
+          if (matchState.isRed()) {
+            Pose2d flippedPose = GeometryUtil.flipFieldPose(pathStartingPose);
+            m_robotContainer.drive.resetOdometry(flippedPose);
+            m_robotContainer.drive.resetYawToAngle(flippedPose.getRotation().getDegrees());
+          } else {
+            m_robotContainer.drive.resetOdometry(pathStartingPose);
+            m_robotContainer.drive.resetYawToAngle(pathStartingPose.getRotation().getDegrees());
+          }
+        }
+      }
+    }
+
+    m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kBrake);
+
+    m_robotContainer.drive.frontRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+    m_robotContainer.drive.frontLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+    m_robotContainer.drive.rearRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+    m_robotContainer.drive.rearLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+
+    m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
+
+    // schedule the autonomous command
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+  }
 
-    if (matchState.isRealMatch()) {
-      m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
-    }
+  @Override
+  public void autonomousExit() {
+    m_robotContainer.intake.stopRollers();
+    m_robotContainer.conveyor.stopRollers();
+    m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);
   }
 
   /** This function is called periodically during autonomous. */
@@ -145,20 +197,29 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
-    m_robotContainer.lights.toggleCode(LightCode.INTAKING);
+    m_robotContainer.lights.toggleCode(LightCode.NOTELESS);
+    m_robotContainer.intake.stopRollers();
+    m_robotContainer.conveyor.stopRollers();
+    m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);
 
     setMatchState();
 
-    if (matchState.isRealMatch()) {
-      m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
-    }
+    m_robotContainer.isTeleop = true;
+
+    m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kBrake);
+
+    m_robotContainer.drive.frontRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+    m_robotContainer.drive.frontLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+    m_robotContainer.drive.rearRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+    m_robotContainer.drive.rearLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+
+    m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
   }
 
   /** This function is called periodically during operator control. */

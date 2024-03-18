@@ -76,7 +76,7 @@ public class IntakeLimelight extends SubsystemBase {
     kTargetHeight = targetHeightMeters;
     setLimelightValues(
         Constants.limelightLedMode.OFF,
-        Constants.limelightCamMode.VISION_PROCESSING,
+        Constants.limelightCamMode.DRIVER_CAMERA,
         Constants.limelightPipeline.TAG_PIPELINE);
 
     m_simDevice = SimDevice.create("limelight-intake");
@@ -457,8 +457,6 @@ public class IntakeLimelight extends SubsystemBase {
 
   @Override
   public void initSendable(SendableBuilder builder) {
-    builder.addDoubleProperty("Target Area", () -> getTargetArea(), null);
-    builder.addDoubleProperty("Skew", () -> getSkew(), null);
     builder.addDoubleProperty("Latency", () -> getLatency(), null);
     builder.addDoubleProperty("Tx", () -> getOffSetX(), null);
     builder.addDoubleProperty("Ty", () -> getOffSetY(), null);

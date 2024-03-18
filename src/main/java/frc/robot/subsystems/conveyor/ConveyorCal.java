@@ -15,7 +15,7 @@ public class ConveyorCal {
   public static final double SCORE_AMP_FRONT_SPEED = -0.5, SCORE_AMP_BACK_SPEED = -0.5;
 
   /** The power used for each conveyor motor to receive the note */
-  public static final double RECEIVE_SPEED = 1.0, RECEIVE_SLOW_SPEED = 0.2;
+  public static final double RECEIVE_SPEED = 1.0, RECEIVE_SLOW_SPEED = 0.15;
 
   /** The power used for the front conveyer to backup the note */
   public static final double FRONT_BACKUP_SPEED = -1.0;
@@ -27,8 +27,9 @@ public class ConveyorCal {
   public static final double NOTE_POSITION_THRESHOLD_INCHES = 0.1;
 
   /** The time required for a note to exit the conveyor */
-  public static final double NOTE_EXIT_TIME_SHOOTER_SECONDS = 1.0,
-      NOTE_EXIT_TIME_TRAP_AMP_SECONDS = 1.0;
+  public static final double NOTE_EXIT_TIME_SHOOTER_SECONDS = 0.25,
+      NOTE_EXIT_TIME_TRAP_AMP_SECONDS = 1.0,
+      NOTE_EXIT_TIME_OUTTAKE_SECONDS = 0.5;
 
   /** The position to back off when receiving a note */
   public static final double BACK_OFF_INCHES = -2.5;
