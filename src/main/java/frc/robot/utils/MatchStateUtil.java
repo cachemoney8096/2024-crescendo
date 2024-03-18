@@ -21,7 +21,7 @@ public class MatchStateUtil {
 
   /**
    * Returns true if the match is a "real" (timed, via FMS or practice mode) match. Returns false if
-   * it is an untimed match (i.e. the autonomous- or teleop-specific modes)
+   * it is an untimed match (i.e. the autonomous- or teleop-specific modes) OR if disabled before a real match has begun.
    */
   public boolean isRealMatch() {
     return realMatch;

@@ -62,20 +62,6 @@ public class SwerveModule implements Sendable {
 
     errors += SparkMaxUtils.check(turningSparkMax.restoreFactoryDefaults());
 
-    /*errors +=
-        SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 50));
-    errors +=
-        SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 50));
-    errors +=
-        SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 50));
-    errors +=
-        SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500));
-    errors +=
-        SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500));
-    errors +=
-        SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 20));
-    errors +=
-        SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 20));*/
     errors +=
         SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 500));
     errors +=
@@ -142,7 +128,7 @@ public class SwerveModule implements Sendable {
     toApply.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // TODO: check this
     toApply.Feedback.SensorToMechanismRatio =
         DriveConstants.DRIVING_MOTOR_REDUCTION / DriveConstants.WHEEL_CIRCUMFERENCE_METERS;
-    toApply.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS_AUTO;
+    toApply.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS;
     toApply.CurrentLimits.SupplyCurrentLimitEnable = true;
     toApply.CurrentLimits.StatorCurrentLimit =
         DriveConstants.DRIVING_MOTOR_STATOR_CURRENT_LIMIT_AMPS;

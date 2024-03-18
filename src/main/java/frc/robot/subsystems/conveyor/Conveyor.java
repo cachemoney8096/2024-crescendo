@@ -32,8 +32,6 @@ public class Conveyor extends SubsystemBase {
   /** Configured to read inches, positive towards the shooter. */
   private RelativeEncoder backMotorEncoder = backMotor.getEncoder();
 
-  private String conveyorStopped = "";
-
   /** False is blocked (i.e. there is a note) */
   public DigitalInput intakeBeamBreakSensor = new DigitalInput(RobotMap.INTAKE_BEAM_BREAK_DIO);
 
@@ -230,12 +228,8 @@ public class Conveyor extends SubsystemBase {
             new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED)),
             new WaitCommand(0.1),
             new WaitUntilCommand(() -> !conveyor.beamBreakSensorOne.isPressed()),
-            new PrintCommand("Conveyor about to stop"),
-            new InstantCommand(() -> conveyor.conveyorStopped = "Conveyor about to stop"),
             Conveyor.stop(conveyor),
             new InstantCommand(() -> conveyor.stopRollers()),
-            new PrintCommand("Conveyor stopped"),
-            new InstantCommand(() -> conveyor.conveyorStopped = "Conveyor stopped"),
             new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", true)),
             new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE))
         .withName("Finish Receive");
@@ -244,8 +238,6 @@ public class Conveyor extends SubsystemBase {
   /** Stop the conveor rollers. */
   public static Command stop(Conveyor conveyor) {
     return new InstantCommand(conveyor::stopRollers, conveyor).ignoringDisable(true);
-    // return new InstantCommand(() -> conveyor.frontMotor.set(0.0))
-    //     .andThen(new InstantCommand(() -> conveyor.backMotor.set(0.0))).withName("Stop");
 
   }
 
@@ -287,7 +279,6 @@ public class Conveyor extends SubsystemBase {
         },
         null);
     builder.addBooleanProperty("beamBreakSensorOne", () -> beamBreakSensorOne.isPressed(), null);
-    // builder.addBooleanProperty("Intake Sensor", () -> intakeBeamBreakSensor.get(), null);
-    builder.addStringProperty("conveyorStopped", () -> conveyorStopped, null);
+    builder.addBooleanProperty("Intake Sensor", () -> intakeBeamBreakSensor.get(), null);
   }
 }

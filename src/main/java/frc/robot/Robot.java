@@ -4,9 +4,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.configs.TalonFXConfigurator;
-import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.GeometryUtil;
@@ -19,8 +16,6 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.conveyor.Conveyor;
-import frc.robot.subsystems.drive.DriveCal;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelightConstants;
 import frc.robot.subsystems.lights.Lights.LightCode;
@@ -115,7 +110,7 @@ public class Robot extends TimedRobot {
     }
 
     m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);
-    Conveyor.stop(m_robotContainer.conveyor);
+    m_robotContainer.conveyor.stopRollers();
     m_robotContainer.intake.stopRollers();
 
     m_robotContainer.intake.dontAllowIntakeMovement();
@@ -141,12 +136,13 @@ public class Robot extends TimedRobot {
     setMatchState();
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
+    // If there's a path planner auto and the robot didn't initialize its pose from tags, then initialize from the path's starting pose
     if (m_autonomousCommand != null && m_robotContainer.getAutonomousName() != null) {
       if (m_robotContainer.shooterLimelight.checkForTag().isEmpty()) {
         Pose2d pathStartingPose =
             PathPlannerAuto.getStaringPoseFromAutoFile(m_robotContainer.getAutonomousName());
-        if (Math.abs(m_robotContainer.drive.getPose().getX()) < Constants.ODOMETRY_ERROR
-            && Math.abs(m_robotContainer.drive.getPose().getY()) < Constants.ODOMETRY_ERROR) {
+        if (Math.abs(m_robotContainer.drive.getPose().getX()) < Constants.ODOMETRY_MARGIN_FOR_ZEROING_M
+            && Math.abs(m_robotContainer.drive.getPose().getY()) < Constants.ODOMETRY_MARGIN_FOR_ZEROING_M) {
           if (matchState.isRed()) {
             Pose2d flippedPose = GeometryUtil.flipFieldPose(pathStartingPose);
             m_robotContainer.drive.resetOdometry(flippedPose);
@@ -159,34 +155,11 @@ public class Robot extends TimedRobot {
       }
     }
 
-    // schedule the autonomous command (example)
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
-    }
+    m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kBrake);
 
-    if (matchState.isRealMatch()) {
-      m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kBrake);
-
-      m_robotContainer.drive.frontRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
-      m_robotContainer.drive.frontLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
-      m_robotContainer.drive.rearRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
-      m_robotContainer.drive.rearLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
-
-      m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
-      m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
-    }
-  }
-
-  @Override
-  public void autonomousExit() {
-    m_robotContainer.intake.stopRollers();
-    Conveyor.stop(m_robotContainer.conveyor);
-    m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);
     m_robotContainer.drive.frontRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
     m_robotContainer.drive.frontLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
     m_robotContainer.drive.rearRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
@@ -196,6 +169,18 @@ public class Robot extends TimedRobot {
     m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
     m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
     m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
+
+    // schedule the autonomous command
+    if (m_autonomousCommand != null) {
+      m_autonomousCommand.schedule();
+    }
+  }
+
+  @Override
+  public void autonomousExit() {
+    m_robotContainer.intake.stopRollers();
+    m_robotContainer.conveyor.stopRollers();
+    m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);
   }
 
   /** This function is called periodically during autonomous. */
@@ -211,31 +196,6 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-
-    TalonFXConfigurator frontLeftDriveTalonCfg = m_robotContainer.drive.frontLeft.drivingTalon.getConfigurator();
-    TalonFXConfigurator frontRightDriveTalonCfg = m_robotContainer.drive.frontRight.drivingTalon.getConfigurator();
-    TalonFXConfigurator rearLeftDriveTalonCfg = m_robotContainer.drive.rearLeft.drivingTalon.getConfigurator();
-    TalonFXConfigurator rearRightDriveTalonCfg = m_robotContainer.drive.rearRight.drivingTalon.getConfigurator();
-
-    TalonFXConfiguration toApply = new TalonFXConfiguration();
-    toApply.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // TODO: check this
-    toApply.Feedback.SensorToMechanismRatio =
-        DriveConstants.DRIVING_MOTOR_REDUCTION / DriveConstants.WHEEL_CIRCUMFERENCE_METERS;
-    toApply.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS_TELEOP;
-    toApply.CurrentLimits.SupplyCurrentLimitEnable = true;
-    toApply.CurrentLimits.StatorCurrentLimit =
-        DriveConstants.DRIVING_MOTOR_STATOR_CURRENT_LIMIT_AMPS;
-    toApply.CurrentLimits.StatorCurrentLimitEnable = true;
-    toApply.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-    toApply.Slot0.kP = DriveCal.DRIVING_P;
-    toApply.Slot0.kI = DriveCal.DRIVING_I;
-    toApply.Slot0.kD = DriveCal.DRIVING_D;
-    toApply.Slot0.kV = DriveCal.DRIVING_FF;
-
-    frontLeftDriveTalonCfg.apply(toApply);
-    frontRightDriveTalonCfg.apply(toApply);
-    rearLeftDriveTalonCfg.apply(toApply);
-    rearRightDriveTalonCfg.apply(toApply);
 
     m_robotContainer.lights.toggleCode(LightCode.NOTELESS);
     m_robotContainer.intake.stopRollers();
@@ -260,24 +220,6 @@ public class Robot extends TimedRobot {
     m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
     m_robotContainer.drive.rearRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
     m_robotContainer.drive.rearLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
-
-    // if (!matchState.isRealMatch()) {
-    //   if (m_robotContainer.shooterLimelight.checkForTag().isEmpty()) {
-    //     Pose2d pathStartingPose =
-    //         PathPlannerAuto.getStaringPoseFromAutoFile(m_robotContainer.getAutonomousName());
-    //     if (Math.abs(m_robotContainer.drive.getPose().getX()) < Constants.ODOMETRY_ERROR
-    //         && Math.abs(m_robotContainer.drive.getPose().getY()) < Constants.ODOMETRY_ERROR) {
-    //       if (matchState.isRed()) {
-    //         Pose2d flippedPose = GeometryUtil.flipFieldPose(pathStartingPose);
-    //         m_robotContainer.drive.resetOdometry(flippedPose);
-    //         m_robotContainer.drive.resetYawToAngle(flippedPose.getRotation().getDegrees());
-    //       } else {
-    //         m_robotContainer.drive.resetOdometry(pathStartingPose);
-    //         m_robotContainer.drive.resetYawToAngle(pathStartingPose.getRotation().getDegrees());
-    //       }
-    //     }
-    //   }
-    // }
   }
 
   /** This function is called periodically during operator control. */

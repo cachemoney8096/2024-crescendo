@@ -23,7 +23,7 @@ import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 public class IntakeSequence extends SequentialCommandGroup {
   public IntakeSequence(
       Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter, Lights lights) {
-    addRequirements(intake, elevator, conveyor, shooter, lights);
+    addRequirements(intake, elevator, conveyor, shooter);
 
     addCommands(
         new InstantCommand(() -> lights.toggleCode(LightCode.INTAKING)),

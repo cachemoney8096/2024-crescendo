@@ -10,6 +10,7 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 
+/** Auto mode for notes 8-6-7 */
 public class SideSixToEight extends SequentialCommandGroup {
   /** Right on blue, left on red */
   public SideSixToEight(

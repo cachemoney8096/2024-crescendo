@@ -78,7 +78,6 @@ public class ShooterCal {
   public static final double PIVOT_ENCODER_ZEROING_THRESHOLD_DEG = 5.0;
 
   public static final double AUTO_PRELOAD_DISTANCE_M = Units.feetToMeters(3.4);
-  public static final double AUTO_PRELOAD_DISTANCE_2_M = Units.feetToMeters(3.4);
   public static final double AUTO_SHOOTING_DISTANCE_M = Units.feetToMeters(8.5);
 
   /** Stage left on blue, stage right on red */

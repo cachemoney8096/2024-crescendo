@@ -10,6 +10,7 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 
+/** Auto mode for notes 2-1-3-5-4 */
 public class CenterOneToFive extends SequentialCommandGroup {
   public CenterOneToFive(
       DriveSubsystem drive,

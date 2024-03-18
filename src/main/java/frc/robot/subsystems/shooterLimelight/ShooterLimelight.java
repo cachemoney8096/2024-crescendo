@@ -49,11 +49,6 @@ public class ShooterLimelight extends SubsystemBase {
   private SimDouble m_ty;
   private SimBoolean m_valid;
 
-  // NT published variables when using translation api
-  private double m_lastDistance = 0.0;
-  private double m_lastX = 0.0;
-  private double m_lastY = 0.0;
-
   NetworkTable table =
       NetworkTableInstance.getDefault().getTable(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
   NetworkTableEntry tx = table.getEntry("tx");
@@ -460,11 +455,6 @@ public class ShooterLimelight extends SubsystemBase {
 
     // Convert camera coordinates to our conventions
     Translation2d result = new Translation2d(distance, new Rotation2d(z_target, -x_target));
-
-    // For NT so this function doesn't need to be called multiple times
-    m_lastDistance = distance;
-    m_lastX = result.getX();
-    m_lastY = result.getY();
 
     return result;
   }

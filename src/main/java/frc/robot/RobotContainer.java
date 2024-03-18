@@ -19,12 +19,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SelectCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -68,7 +66,6 @@ import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.JoystickUtil;
 import frc.robot.utils.MatchStateUtil;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -100,15 +97,16 @@ public class RobotContainer implements Sendable {
     SPEAKER,
     FEED,
     AMP,
-    OPERATOR_PREPPED
+    OPERATOR
   }
-
-  public boolean isTeleop = false;
 
   PrepState prepState = PrepState.OFF;
 
+  public boolean isTeleop = false;
+
   public boolean driveFieldRelative = true;
 
+  /** What was the last command the auto initiated */
   public String pathCmd = "";
 
   /**
@@ -151,14 +149,6 @@ public class RobotContainer implements Sendable {
             .andThen(
                 new SpeakerPrepScoreAutoPreload(
                     intake, elevator, shooter, conveyor, ShooterCal.AUTO_PRELOAD_DISTANCE_M)));
-    // for when we start a little bit off of the subwoofer but actually we aren't doing that anymore
-    // but im not gonna remove the code rn, cope 🤷
-    NamedCommands.registerCommand(
-        "SPEAKER PREP PRELOAD 2",
-        new InstantCommand(() -> pathCmd = "SPEAKER PREP PRELOAD 2")
-            .andThen(
-                new SpeakerPrepScoreAutoPreload(
-                    intake, elevator, shooter, conveyor, ShooterCal.AUTO_PRELOAD_DISTANCE_2_M)));
     NamedCommands.registerCommand(
         "SPEAKER SCORE",
         new SequentialCommandGroup(
@@ -315,7 +305,6 @@ public class RobotContainer implements Sendable {
     selectCommandMap.put(
         PrepState.OFF,
         new SequentialCommandGroup(
-            new InstantCommand(() -> System.out.println("selectcommand case: off")),
             new InstantCommand(intake::reverseRollers),
             new InstantCommand(() -> conveyor.startRollers(-1.0)),
             new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
@@ -325,27 +314,22 @@ public class RobotContainer implements Sendable {
     selectCommandMap.put(
         PrepState.CLIMB,
         new SequentialCommandGroup(
-            new InstantCommand(() -> System.out.println("selectcommand case: climb")),
             new ClimbSequence(intake, elevator, shooter, conveyor)));
     selectCommandMap.put(
         PrepState.FEED,
         new SequentialCommandGroup(
-            new InstantCommand(() -> System.out.println("selectcommand case: feed")),
             new SpeakerShootSequence(conveyor, shooter, elevator, drive, false)));
     selectCommandMap.put(
         PrepState.SPEAKER,
         new SequentialCommandGroup(
-            new InstantCommand(() -> System.out.println("selectcommand case: speaker")),
             new SpeakerShootSequence(conveyor, shooter, elevator, drive, true)));
     selectCommandMap.put(
         PrepState.AMP,
         new SequentialCommandGroup(
-            new InstantCommand(() -> System.out.println("selectcommand case: amp")),
             new AmpScore(drive, conveyor, intake, shooter, elevator, intakeLimelight)));
     selectCommandMap.put(
-        PrepState.OPERATOR_PREPPED,
+        PrepState.OPERATOR,
         new SequentialCommandGroup(
-            new InstantCommand(() -> System.out.println("selectcommand case: operator prepped")),
             Conveyor.shoot(conveyor)));
 
     SelectCommand<PrepState> driverLeftTriggerCommand = new SelectCommand<PrepState>(selectCommandMap, this::getAndClearPrepState);
@@ -359,83 +343,6 @@ public class RobotContainer implements Sendable {
                         new InstantCommand(() -> 
                             System.out.println("we @ score button")),
                         driverLeftTriggerCommand
-                        // new DeferredCommand(
-                        //     () -> {
-                        //       PrepState input = prepState;
-                        //       prepState = PrepState.OFF;
-                        //       System.out.println("running deferred command");
-                        //       switch (input) {
-                        //         case OFF:
-                        //           return new SequentialCommandGroup(
-                        //               new InstantCommand(
-                        //                   () -> System.out.println("deferred case: off")),
-                        //               new InstantCommand(intake::reverseRollers),
-                        //               new InstantCommand(() -> conveyor.startRollers(-1.0)),
-                        //               new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
-                        //               new InstantCommand(conveyor::stopRollers),
-                        //               new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_OUTTAKE_SECONDS),
-                        //               new InstantCommand(intake::stopRollers));
-                        //         case CLIMB:
-                        //           return new SequentialCommandGroup(
-                        //               new InstantCommand(
-                        //                   () -> System.out.println("deferred case: climb")),
-                        //               new ClimbSequence(intake, elevator, shooter, conveyor));
-                        //         case FEED:
-                        //           return new SequentialCommandGroup(
-                        //               new InstantCommand(
-                        //                   () -> System.out.println("deferred case: feed")),
-                        //               new SpeakerShootSequence(
-                        //                   conveyor, shooter, elevator, drive, false));
-                        //         case SPEAKER:
-                        //           return new SequentialCommandGroup(
-                        //               new InstantCommand(
-                        //                   () -> System.out.println("deferred case: speaker")),
-                        //               new SpeakerShootSequence(
-                        //                   conveyor, shooter, elevator, drive, true));
-                        //         case AMP:
-                        //           return new SequentialCommandGroup(
-                        //               new InstantCommand(
-                        //                   () -> System.out.println("deferred case: amp")),
-                        //               new AmpScore(
-                        //                   drive,
-                        //                   conveyor,
-                        //                   intake,
-                        //                   shooter,
-                        //                   elevator,
-                        //                   intakeLimelight));
-                        //         case OPERATOR_PREPPED:
-                        //           // return new SequentialCommandGroup(
-                        //           /*new ParallelCommandGroup(
-                        //           new InstantCommand(
-                        //               () -> {
-                        //                 ChassisSpeeds currentChassisSpeeds =
-                        //                     drive.getCurrentChassisSpeeds();
-                        //                 Translation2d driveVelocityMps =
-                        //                     new Translation2d(
-                        //                         currentChassisSpeeds.vxMetersPerSecond,
-                        //                         currentChassisSpeeds.vyMetersPerSecond);
-                        //                 if (driveVelocityMps.getNorm() < 0.02
-                        //                     && Math.abs(currentChassisSpeeds.omegaRadiansPerSecond)
-                        //                         < Units.degreesToRadians(10)) {
-                        //                   Optional<Pair<Rotation2d, Double>> tagDetection =
-                        //                       shooterLimelight.checkForTag();
-                        //                       if(tagDetection.isPresent()){
-                        //                         shooterLimelight.resetOdometryDuringPrep(drive);
-                        //                       }
-                        //                 }
-                        //               }),*/
-                        //           new SequentialCommandGroup(
-                        //               new InstantCommand(
-                        //                   () ->
-                        //                       System.out.println(
-                        //                           "deferred case: operator prepped")),
-                        //               Conveyor.shoot(conveyor));
-                        //         default:
-                        //           return new InstantCommand(
-                        //               () -> System.out.println("deferred case: default"));
-                        //       }
-                        //     },
-                        //     new TreeSet<Subsystem>())
                         )));
 
     driverController
@@ -552,17 +459,6 @@ public class RobotContainer implements Sendable {
             .withName("Manual Drive"));
   }
 
-  private Command ParallelCommandGroup(
-      InstantCommand instantCommand, InstantCommand instantCommand2) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'ParallelCommandGroup'");
-  }
-
-  private Command WaitUntilCommand(double noteExitTimeTrapAmpSeconds) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'WaitUntilCommand'");
-  }
-
   private void configureOperator() {
     /**
      * conveyor towards shooter -> right trigger -> DONE conveyor outtake -> left trigger -> DONE
@@ -597,7 +493,7 @@ public class RobotContainer implements Sendable {
                     () -> shooter.setShooterDistance(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS))
                 .andThen(() -> drive.setTargetHeadingDegrees(matchState.isBlue() ? 0.0 : 180.0))
                 .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
-                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
+                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR)));
 
     operatorController
         .povLeft()
@@ -614,7 +510,7 @@ public class RobotContainer implements Sendable {
                               : redDeg);
                     })
                 .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
-                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
+                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR)));
 
     operatorController
         .povRight()
@@ -631,7 +527,7 @@ public class RobotContainer implements Sendable {
                               : redDeg);
                     })
                 .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
-                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
+                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR)));
 
     operatorController
         .b()
@@ -647,7 +543,7 @@ public class RobotContainer implements Sendable {
                               : redDeg);
                     })
                 .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
-                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
+                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR)));
 
     operatorController
         .x()
@@ -663,7 +559,7 @@ public class RobotContainer implements Sendable {
                               : redDeg);
                     })
                 .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
-                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
+                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR)));
 
     operatorController
         .y()
@@ -679,7 +575,7 @@ public class RobotContainer implements Sendable {
                               : redDeg);
                     })
                 .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
-                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR_PREPPED)));
+                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR)));
 
     operatorController
         .leftBumper()
@@ -693,16 +589,6 @@ public class RobotContainer implements Sendable {
             new InstantCommand(
                     () -> intake.rezeroIntakeToPosition(IntakeCal.INTAKE_DEPLOYED_POSITION_DEGREES))
                 .ignoringDisable(true));
-    // operatorController
-    //     .povUp()
-    //     .onTrue(
-    //         new InstantCommand(() -> elevator.leftMotor.setVoltage(12.0))
-    //             .andThen(new InstantCommand(() -> elevator.rightMotor.setVoltage(12.0))));
-    // operatorController
-    //     .povUp()
-    //     .onFalse(
-    //         new InstantCommand(() -> elevator.leftMotor.setVoltage(0.0))
-    //             .andThen(new InstantCommand(() -> elevator.rightMotor.setVoltage(0.0))));
   }
 
   private void burnFlashAllSparks() {

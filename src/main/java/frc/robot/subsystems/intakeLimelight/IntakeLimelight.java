@@ -313,7 +313,6 @@ public class IntakeLimelight extends SubsystemBase {
     return getValidTarget() != -1.0;
   }
 
-
   /**
    * Get a 2d translation from the camera to the target, including normalization to handle the
    * effects of angle to target. See the below discussion.
@@ -458,8 +457,6 @@ public class IntakeLimelight extends SubsystemBase {
 
   @Override
   public void initSendable(SendableBuilder builder) {
-    builder.addDoubleProperty("Target Area", () -> getTargetArea(), null);
-    builder.addDoubleProperty("Skew", () -> getSkew(), null);
     builder.addDoubleProperty("Latency", () -> getLatency(), null);
     builder.addDoubleProperty("Tx", () -> getOffSetX(), null);
     builder.addDoubleProperty("Ty", () -> getOffSetY(), null);

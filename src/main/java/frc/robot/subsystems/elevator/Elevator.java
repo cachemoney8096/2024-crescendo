@@ -116,8 +116,6 @@ public class Elevator extends SubsystemBase {
     errors += SparkMaxUtils.check(rightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 200));
     errors += SparkMaxUtils.check(rightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 200));
 
-    // errors += SparkMaxUtils.check(rightMotor.follow(leftMotor, true));
-
     errors += SparkMaxUtils.check(leftMotor.setIdleMode(IdleMode.kBrake));
     errors += SparkMaxUtils.check(rightMotor.setIdleMode(IdleMode.kBrake));
 
@@ -130,7 +128,6 @@ public class Elevator extends SubsystemBase {
 
     errors += SparkMaxUtils.check(leftMotorEncoderAbs.setInverted(true));
     rightMotor.setInverted(true);
-    // errors += SparkMaxUtils.check(rightMotorEncoderRel.setInverted(true));
 
     errors +=
         SparkMaxUtils.check(
@@ -176,8 +173,9 @@ public class Elevator extends SubsystemBase {
     currentPIDController.reset(leftMotorEncoderRel.getPosition());
   }
 
+  /** True if the elevator is near OR below home. */
   private boolean nearHome() {
-    return leftMotorEncoderRel.getPosition() < (elevatorPositions.get(ElevatorPosition.HOME) + 1.0) && rightMotorEncoderRel.getPosition() < (elevatorPositions.get(ElevatorPosition.HOME) + 1.0);
+    return leftMotorEncoderRel.getPosition() < (elevatorPositions.get(ElevatorPosition.HOME) + 1.0);
   }
 
   /** Sets elevator motor voltage based on input position. Should be called every cycle. */
@@ -239,7 +237,6 @@ public class Elevator extends SubsystemBase {
    */
   public boolean elevatorBelowInterferenceZone() {
     return leftMotorEncoderRel.getPosition()
-        < ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_MINIMUM_INCHES && rightMotorEncoderRel.getPosition()
         < ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_MINIMUM_INCHES;
   }
 
@@ -249,7 +246,6 @@ public class Elevator extends SubsystemBase {
    */
   public boolean elevatorAboveIntakeInterferenceZone() {
     return leftMotorEncoderRel.getPosition()
-        > ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES && rightMotorEncoderRel.getPosition()
         > ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES;
   }
 
@@ -261,9 +257,6 @@ public class Elevator extends SubsystemBase {
     return (leftMotorEncoderRel.getPosition()
             < ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES
         && leftMotorEncoderRel.getPosition()
-            > (ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES - 3)) && (rightMotorEncoderRel.getPosition()
-            < ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES
-        && rightMotorEncoderRel.getPosition()
             > (ElevatorCal.ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES - 3));
   }
 
@@ -281,28 +274,16 @@ public class Elevator extends SubsystemBase {
     rightMotor.burnFlash();
   }
 
-  public double getCurPosInches() {
-    return leftMotorEncoderRel.getPosition();
-  }
-
-  public double getDesiredPosInches() {
-    return elevatorPositions.get(desiredPosition);
-  }
-
   @Override
   public void initSendable(SendableBuilder builder) {
     super.initSendable(builder);
     SendableHelper.addChild(builder, this, currentPIDController, "CurrentElevatorController");
     builder.addDoubleProperty(
         "Left Elevator Position (in)",
-        leftMotorEncoderRel::getPosition,
-        leftMotorEncoderRel::setPosition);
+        leftMotorEncoderRel::getPosition, null);
     builder.addDoubleProperty(
         "Right Elevator Position (in)",
-        rightMotorEncoderRel::getPosition,
-        rightMotorEncoderRel::setPosition);
-    builder.addDoubleProperty(
-        "Right Motor Position (rots)", () -> rightMotor.getEncoder().getPosition(), null);
+        rightMotorEncoderRel::getPosition, null);
     builder.addDoubleProperty("Left Elevator Vel (in per s)", leftMotorEncoderRel::getVelocity, null);
     builder.addDoubleProperty("Right Elevator Vel (in per s)", rightMotorEncoderRel::getVelocity, null);
     builder.addDoubleProperty(
@@ -330,7 +311,5 @@ public class Elevator extends SubsystemBase {
         "Holding climb home position",
         () -> desiredPosition == ElevatorPosition.HOME && nearHome() && !currentlyUsingNoteControl,
         null);
-    builder.addDoubleProperty("Left bus voltage", leftMotor::getBusVoltage, null);
-    builder.addDoubleProperty("Right bus voltage", rightMotor::getBusVoltage, null);
   }
 }

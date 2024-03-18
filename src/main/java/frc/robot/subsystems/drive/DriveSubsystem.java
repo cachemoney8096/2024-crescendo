@@ -167,7 +167,6 @@ public class DriveSubsystem extends SubsystemBase {
     odometry.update(Rotation2d.fromDegrees(gyro.getYaw().getValue()), getModulePositions());
     poseBuffer.pushToBuffer(getPose(), Timer.getFPGATimestamp());
     // TODO: put this in a thread that loops faster
-
   }
 
   public SwerveModulePosition[] getModulePositions() {
@@ -603,11 +602,6 @@ public class DriveSubsystem extends SubsystemBase {
   @Override
   public void initSendable(SendableBuilder builder) {
     super.initSendable(builder);
-    // addChild("Rotate to target controller", DriveCal.ROTATE_TO_TARGET_PID_CONTROLLER);
-    // addChild("Front Right", frontRight);
-    // addChild("Front Left", frontLeft);
-    // addChild("Rear Right", rearRight);
-    // addChild("Rear Left", rearLeft);
     builder.addDoubleProperty(
         "Throttle multiplier",
         () -> {
@@ -649,12 +643,6 @@ public class DriveSubsystem extends SubsystemBase {
         "Rear Left Distance (m)", () -> rearLeft.getPosition().distanceMeters, null);
     builder.addDoubleProperty(
         "Rear Right Distance (m)", () -> rearRight.getPosition().distanceMeters, null);
-    // builder.addDoubleProperty(
-    //     "Rear Right Velocity (mps)", () -> rearRight.getState().speedMetersPerSecond, null);
-    // builder.addDoubleProperty(
-    //     "Rear Right Desired Velocity (mps)",
-    //     () -> rearRight.desiredState.speedMetersPerSecond,
-    //     null);
     builder.addDoubleProperty(
         "Rear Right Velocity Error (mps)",
         () ->
@@ -676,7 +664,6 @@ public class DriveSubsystem extends SubsystemBase {
         "Rear left desired speed mps", () -> rearLeft.desiredState.speedMetersPerSecond, null);
     builder.addDoubleProperty(
         "Rear right desired speed mps", () -> rearRight.desiredState.speedMetersPerSecond, null);
-
     builder.addDoubleProperty(
         "Front left current speed mps", () -> frontLeft.getState().speedMetersPerSecond, null);
     builder.addDoubleProperty(

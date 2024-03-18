@@ -5,11 +5,10 @@ import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdleConfiguration;
 import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
 import java.util.TreeMap;
 
-public class Lights extends SubsystemBase {
+public class Lights {
   /**
    * Tree map of light code enums and integers that represent the R, G, B values of each light code
    * enum

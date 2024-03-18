@@ -20,7 +20,7 @@ import frc.robot.subsystems.lights.Lights.LightCode;
  */
 public class AutoIntakeSequence extends SequentialCommandGroup {
   public AutoIntakeSequence(Intake intake, Elevator elevator, Conveyor conveyor, Lights lights) {
-    addRequirements(intake, elevator, conveyor, lights);
+    addRequirements(intake, elevator, conveyor);
 
     addCommands(
         new InstantCommand(() -> lights.toggleCode(LightCode.INTAKING)),
