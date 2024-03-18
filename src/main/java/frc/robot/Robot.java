@@ -38,7 +38,7 @@ public class Robot extends TimedRobot {
 
   private SwerveDrivePoseEstimator m_PoseEstimator;
 
-  private MatchStateUtil matchState = new MatchStateUtil(false, true);
+  private MatchStateUtil matchState = new MatchStateUtil(false, true, false);
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -61,8 +61,6 @@ public class Robot extends TimedRobot {
             m_robotContainer.drive.getGyro().getRotation2d(),
             m_robotContainer.drive.getModulePositions(),
             new Pose2d());
-
-    m_robotContainer.isTeleop = false;
   }
 
   /**
@@ -87,7 +85,7 @@ public class Robot extends TimedRobot {
   /** This function is called once each time the robot enters disabled mode. */
   @Override
   public void disabledInit() {
-    m_robotContainer.isTeleop = false;
+    matchState.setTeleop(false);
     LimelightHelpers.getLatestResults(
         IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME); // It takes 2.5-3s on first run
     LimelightHelpers.getLatestResults(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
@@ -131,9 +129,7 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    m_robotContainer.isTeleop = false;
-
-    setMatchState();
+    matchState.updateMatchState(false);
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // If there's a path planner auto and the robot didn't initialize its pose from tags, then initialize from the path's starting pose
@@ -202,9 +198,7 @@ public class Robot extends TimedRobot {
     m_robotContainer.conveyor.stopRollers();
     m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);
 
-    setMatchState();
-
-    m_robotContainer.isTeleop = true;
+    matchState.updateMatchState(true);
 
     m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kBrake);
     m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kBrake);
@@ -243,19 +237,4 @@ public class Robot extends TimedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {}
-
-  /**
-   * Sets whether it is a real match by checking if the match time is more than 1s, and whether we
-   * are blue from the driver station data (defaults to true).
-   */
-  private void setMatchState() {
-    boolean realMatch = DriverStation.getMatchTime() > 1.0;
-    matchState.setRealMatch(realMatch);
-    if (DriverStation.getAlliance().isPresent()) {
-      boolean isBlue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
-      matchState.setBlue(isBlue);
-    } else {
-      matchState.setBlue(true);
-    }
-  }
 }
