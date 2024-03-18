@@ -102,8 +102,6 @@ public class RobotContainer implements Sendable {
 
   PrepState prepState = PrepState.OFF;
 
-  public boolean isTeleop = false;
-
   public boolean driveFieldRelative = true;
 
   /** What was the last command the auto initiated */
@@ -455,7 +453,7 @@ public class RobotContainer implements Sendable {
                     },
                     drive),
                 new InstantCommand(),
-                () -> isTeleop)
+                matchState::isTeleop)
             .withName("Manual Drive"));
   }
 
