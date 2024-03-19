@@ -81,8 +81,6 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                       shooter.setShooterDistance(tagDetection.get().getSecond());
                     }
                   }
-
-                  shooter.readyToShoot = true;
                 })
             .until(
                 () -> {

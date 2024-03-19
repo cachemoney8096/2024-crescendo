@@ -59,7 +59,6 @@ public class GoHomeSequence extends SequentialCommandGroup {
     addCommands(
         new InstantCommand(conveyor::stopRollers),
         new InstantCommand(intake::stopRollers),
-        new InstantCommand(() -> shooter.readyToShoot = false),
         new InstantCommand(
             () ->
                 intakeLimelight.setLimelightValues(
