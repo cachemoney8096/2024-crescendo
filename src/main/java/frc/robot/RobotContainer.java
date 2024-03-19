@@ -9,7 +9,6 @@ import com.pathplanner.lib.util.GeometryUtil;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -518,7 +517,8 @@ public class RobotContainer implements Sendable {
     operatorController
         .b()
         .onTrue(
-            new InstantCommand(() -> shooter.setShooterDistance(ShooterCal.AMP_SHOT_DISTANCE_METERS))
+            new InstantCommand(
+                    () -> shooter.setShooterDistance(ShooterCal.AMP_SHOT_DISTANCE_METERS))
                 .andThen(
                     () -> {
                       double redDeg = ShooterCal.AMP_SHOT_RED_DEGREES;
@@ -534,7 +534,8 @@ public class RobotContainer implements Sendable {
     operatorController
         .x()
         .onTrue(
-            new InstantCommand(() -> shooter.setShooterDistance(ShooterCal.PODIUM_SHOT_DISTANCE_METERS))
+            new InstantCommand(
+                    () -> shooter.setShooterDistance(ShooterCal.PODIUM_SHOT_DISTANCE_METERS))
                 .andThen(
                     () -> {
                       double redDeg = ShooterCal.PODIUM_SHOT_RED_DEGREES;
@@ -550,7 +551,8 @@ public class RobotContainer implements Sendable {
     operatorController
         .y()
         .onTrue(
-            new InstantCommand(() -> shooter.setShooterDistance(ShooterCal.STAGE_SHOT_DISTANCE_METERS))
+            new InstantCommand(
+                    () -> shooter.setShooterDistance(ShooterCal.STAGE_SHOT_DISTANCE_METERS))
                 .andThen(
                     () -> {
                       double redDeg = ShooterCal.STAGE_SHOT_RED_DEGREES;

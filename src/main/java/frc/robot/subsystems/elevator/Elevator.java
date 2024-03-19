@@ -314,6 +314,11 @@ public class Elevator extends SubsystemBase {
         "Holding climb home position",
         () -> desiredPosition == ElevatorPosition.HOME && nearHome() && !currentlyUsingNoteControl,
         null);
-    builder.addDoubleProperty("CRT calculated position", ()->crtUtil.getAbsolutePosition(leftMotorEncoderAbs.getPosition(), rightMotorEncoderAbs.getPosition()), null);
+    builder.addDoubleProperty(
+        "CRT calculated position",
+        () ->
+            crtUtil.getAbsolutePosition(
+                leftMotorEncoderAbs.getPosition(), rightMotorEncoderAbs.getPosition()),
+        null);
   }
 }
