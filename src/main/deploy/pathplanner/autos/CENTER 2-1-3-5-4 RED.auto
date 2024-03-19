@@ -111,7 +111,7 @@
         {
           "type": "named",
           "data": {
-            "name": "CONVEYOR OVERRIDE"
+            "name": "STOP SUBSYSTEMS"
           }
         }
       ]

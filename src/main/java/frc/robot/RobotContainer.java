@@ -102,8 +102,6 @@ public class RobotContainer implements Sendable {
 
   PrepState prepState = PrepState.OFF;
 
-  public boolean isTeleop = false;
-
   public boolean driveFieldRelative = true;
 
   /** What was the last command the auto initiated */
@@ -184,8 +182,8 @@ public class RobotContainer implements Sendable {
                     conveyor,
                     ShooterCal.AUTO_STAGE_SHOOTING_DISTANCE_M)));
     NamedCommands.registerCommand(
-        "CONVEYOR OVERRIDE",
-        new InstantCommand(() -> pathCmd = "CONVEYOR OVERRIDE")
+        "STOP SUBSYSTEMS",
+        new InstantCommand(() -> pathCmd = "STOP SUBSYSTEMS")
             .andThen(Conveyor.stop(conveyor))
             .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.IDLE)))
             .andThen(new InstantCommand(() -> intake.stopRollers())));
@@ -231,16 +229,16 @@ public class RobotContainer implements Sendable {
                 drive, intake, elevator, shooter, conveyor, shooterLimelight),
             "4 NOTE - CENTER LINE - SOURCE - AUTO"));
     autonChooser.addOption(
-        "BLUE score notes 1-2-3-4-5",
+        "BLUE score notes 2-1-3-5-4",
         new Pair<Command, String>(
             new CenterOneToFive(
                 drive, intake, elevator, shooter, conveyor, shooterLimelight, false),
-            "CENTER 1-2-3-4-5"));
+            "CENTER 2-1-3-5-4"));
     autonChooser.addOption(
-        "RED score notes 1-2-3-4-5",
+        "RED score notes 2-1-3-5-4",
         new Pair<Command, String>(
             new CenterOneToFive(drive, intake, elevator, shooter, conveyor, shooterLimelight, true),
-            "CENTER 1-2-3-4-5 RED"));
+            "CENTER 2-1-3-5-4 RED"));
     autonChooser.addOption(
         "BLUE score notes 8-6-7 right",
         new Pair<Command, String>(
@@ -443,7 +441,7 @@ public class RobotContainer implements Sendable {
                     },
                     drive),
                 new InstantCommand(),
-                () -> isTeleop)
+                () -> matchState.isTeleop())
             .withName("Manual Drive"));
   }
 
@@ -490,7 +488,7 @@ public class RobotContainer implements Sendable {
                     () -> shooter.setShooterDistance(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS))
                 .andThen(
                     () -> {
-                      double redDeg = 120.0;
+                      double redDeg = ShooterCal.SUBWOOFER_SHOT_LEFT_RED_DEGREES;
                       drive.setTargetHeadingDegrees(
                           matchState.isBlue()
                               ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg))
@@ -507,7 +505,7 @@ public class RobotContainer implements Sendable {
                     () -> shooter.setShooterDistance(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS))
                 .andThen(
                     () -> {
-                      double redDeg = 240.0;
+                      double redDeg = ShooterCal.SUBWOOFER_SHOT_RIGHT_RED_DEGREES;
                       drive.setTargetHeadingDegrees(
                           matchState.isBlue()
                               ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg))
@@ -520,10 +518,10 @@ public class RobotContainer implements Sendable {
     operatorController
         .b()
         .onTrue(
-            new InstantCommand(() -> shooter.setShooterDistance(Units.inchesToMeters(142.0)))
+            new InstantCommand(() -> shooter.setShooterDistance(ShooterCal.AMP_SHOT_DISTANCE_METERS))
                 .andThen(
                     () -> {
-                      double redDeg = 160.0;
+                      double redDeg = ShooterCal.AMP_SHOT_RED_DEGREES;
                       drive.setTargetHeadingDegrees(
                           matchState.isBlue()
                               ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg))
@@ -536,10 +534,10 @@ public class RobotContainer implements Sendable {
     operatorController
         .x()
         .onTrue(
-            new InstantCommand(() -> shooter.setShooterDistance(Units.inchesToMeters(100.0)))
+            new InstantCommand(() -> shooter.setShooterDistance(ShooterCal.PODIUM_SHOT_DISTANCE_METERS))
                 .andThen(
                     () -> {
-                      double redDeg = 202.0;
+                      double redDeg = ShooterCal.PODIUM_SHOT_RED_DEGREES;
                       drive.setTargetHeadingDegrees(
                           matchState.isBlue()
                               ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg))
@@ -552,10 +550,10 @@ public class RobotContainer implements Sendable {
     operatorController
         .y()
         .onTrue(
-            new InstantCommand(() -> shooter.setShooterDistance(Units.inchesToMeters(174.0)))
+            new InstantCommand(() -> shooter.setShooterDistance(ShooterCal.STAGE_SHOT_DISTANCE_METERS))
                 .andThen(
                     () -> {
-                      double redDeg = 190.0;
+                      double redDeg = ShooterCal.STAGE_SHOT_RED_DEGREES;
                       drive.setTargetHeadingDegrees(
                           matchState.isBlue()
                               ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg))

@@ -26,8 +26,8 @@ public class CenterOneToFive extends SequentialCommandGroup {
     /** Initialize sequential commands that run for the "15 second autonomous phase" */
     addCommands(
         new ConditionalCommand(
-            new PathPlannerAuto("CENTER 1-2-3-4-5 RED"),
-            new PathPlannerAuto("CENTER 1-2-3-4-5"),
+            new PathPlannerAuto("CENTER 2-1-3-5-4 RED"),
+            new PathPlannerAuto("CENTER 2-1-3-5-4"),
             () -> isRed));
   }
 }
