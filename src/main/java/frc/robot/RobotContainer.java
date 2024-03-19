@@ -394,7 +394,8 @@ public class RobotContainer implements Sendable {
                     () ->
                         new SequentialCommandGroup(
                                 new SetTrapLineupPosition(intakeLimelight, drive),
-                                new PIDToPoint(drive))
+                                new PIDToPoint(drive),
+                                Conveyor.rumbleBriefly(conveyor)) //rumble after auto drive finishes
                             .raceWith(new WaitUntilCommand(driverJoysticksActive))
                             .schedule())
                 .andThen(new InstantCommand(() -> driveFieldRelative = false))
