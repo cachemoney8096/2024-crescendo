@@ -284,6 +284,7 @@ public class RobotContainer implements Sendable {
    * joysticks}.
    */
   private void configureDriver() {
+    new Trigger(() -> !conveyor.intakeBeamBreakSensor.get()).onTrue(Conveyor.rumbleBriefly(conveyor));
     driverController
         .rightTrigger()
         .whileTrue(new IntakeSequence(intake, elevator, conveyor, shooter, lights));
