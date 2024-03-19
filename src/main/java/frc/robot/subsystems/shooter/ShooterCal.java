@@ -77,8 +77,11 @@ public class ShooterCal {
   public static final double PIVOT_PROFILE_REPLANNING_THRESHOLD_DEG = 5.0;
   public static final double PIVOT_ENCODER_ZEROING_THRESHOLD_DEG = 5.0;
 
-  public static final double AUTO_PRELOAD_DISTANCE_M = Units.feetToMeters(7.0);
-  public static final double AUTO_SHOOTING_DISTANCE_M = Units.feetToMeters(16.0);
+  public static final double AUTO_PRELOAD_DISTANCE_M = Units.feetToMeters(3.4);
+  public static final double AUTO_SHOOTING_DISTANCE_M = Units.feetToMeters(8.5);
+
+  /** Stage left on blue, stage right on red */
+  public static final double AUTO_STAGE_SHOOTING_DISTANCE_M = Units.feetToMeters(14.75);
 
   /**
    * What the abs encoder reads (in degrees) when the shooter is pointed down. Acquired by pointing
@@ -90,7 +93,19 @@ public class ShooterCal {
   public static final double CONVEYOR_ZONE_THRESHOLD_DEGREES = 110.0;
 
   public static final double SHOOT_CLEAR_STAGE_ANGLE_DEGREES = 128.0;
-  public static final double SHOOT_CLEAR_STAGE_VOLTAGE = 5.25;
+  public static final double SHOOT_CLEAR_STAGE_VOLTAGE = 5.5;
 
   public static final double ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES = 4.0;
+
+  public static final double SUBWOOFER_SHOT_DISTANCE_METERS = 1.16,
+      AMP_SHOT_DISTANCE_METERS = Units.inchesToMeters(142.0),
+      PODIUM_SHOT_DISTANCE_METERS = Units.inchesToMeters(100.0),
+      STAGE_SHOT_DISTANCE_METERS = Units.inchesToMeters(174.0);
+
+  /** Operator manual shoot angles */
+  public static final double SUBWOOFER_SHOT_LEFT_RED_DEGREES = 120.0,
+      SUBWOOFER_SHOT_RIGHT_RED_DEGREES = 240.0,
+      AMP_SHOT_RED_DEGREES = 160,
+      PODIUM_SHOT_RED_DEGREES = 202.0,
+      STAGE_SHOT_RED_DEGREES = 190.0;
 }

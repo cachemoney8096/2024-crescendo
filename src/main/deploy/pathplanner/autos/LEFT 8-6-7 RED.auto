@@ -1,0 +1,104 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.74,
+      "y": 4.34
+    },
+    "rotation": -60.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "INTAKE DEPLOY"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "SPEAKER PREP PRELOAD"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "SPEAKER SCORE"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LEFT TO 8 RED"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "8 TO SHOOT AT STAGE LEFT RED"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SPEAKER SCORE"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SHOOT AT STAGE LEFT TO 6 RED"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "6 TO SHOOT AT STAGE LEFT RED"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SPEAKER SCORE"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SHOOT AT STAGE LEFT TO 7 RED"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "7 TO SHOOT AT STAGE LEFT RED"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SPEAKER SCORE"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "STOP SUBSYSTEMS"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}

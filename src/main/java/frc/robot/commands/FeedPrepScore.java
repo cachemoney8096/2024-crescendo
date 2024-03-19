@@ -8,6 +8,7 @@ import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intakeLimelight.IntakeLimelight;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.utils.MatchStateUtil;
@@ -19,10 +20,12 @@ public class FeedPrepScore extends SequentialCommandGroup {
       Intake intake,
       Shooter shooter,
       DriveSubsystem drive,
-      MatchStateUtil matchState) {
+      MatchStateUtil matchState,
+      IntakeLimelight intakeLimelight) {
     addRequirements(elevator, conveyor, intake, shooter);
     addCommands(
-        new GoHomeSequence(intake, elevator, shooter, conveyor, true, false, false),
+        new GoHomeSequence(
+            intake, elevator, shooter, conveyor, intakeLimelight, true, false, false),
         new WaitUntilCommand(elevator::elevatorBelowInterferenceZone),
         new ConditionalCommand(
             new InstantCommand(() -> drive.setTargetHeadingDegrees(315.0)),

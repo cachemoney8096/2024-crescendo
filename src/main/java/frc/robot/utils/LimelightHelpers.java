@@ -609,6 +609,12 @@ public class LimelightHelpers {
     return new Pair<Double, Pose2d>(timestamp, toPose2D(result));
   }
 
+  public static Pair<Double, Pose3d> getTimedBotPose3d_wpiBlue(String limelightName) {
+    double[] result = getBotPose_wpiBlue(limelightName);
+    final double timestamp = Timer.getFPGATimestamp() - (result[6] / 1000.0);
+    return new Pair<Double, Pose3d>(timestamp, toPose3D(result));
+  }
+
   /**
    * Gets the Pose2d for easy use with Odometry vision pose estimator (addVisionMeasurement)
    *

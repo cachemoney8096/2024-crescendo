@@ -8,6 +8,7 @@ import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intakeLimelight.IntakeLimelight;
 import frc.robot.subsystems.shooter.Shooter;
 
 /**
@@ -19,22 +20,24 @@ public class AmpScore extends SequentialCommandGroup {
   Pose2d initialPose;
 
   public AmpScore(
-      DriveSubsystem drive, Conveyor conveyor, Intake intake, Shooter shooter, Elevator elevator) {
+      DriveSubsystem drive,
+      Conveyor conveyor,
+      Intake intake,
+      Shooter shooter,
+      Elevator elevator,
+      IntakeLimelight intakeLimelight) {
     // Drive not a requirement
     addRequirements(conveyor, intake, elevator, shooter);
 
     addCommands(
         new InstantCommand(() -> initialPose = drive.getPose()),
-        new WaitUntilCommand(
-            () -> {
-              return elevator.atDesiredPosition();
-            }),
         Conveyor.scoreTrapOrAmp(conveyor),
         new WaitUntilCommand(
             () ->
                 Math.abs(
                         drive.getPose().getTranslation().minus(initialPose.getTranslation()).getY())
                     > 0.1),
-        new GoHomeSequence(intake, elevator, shooter, conveyor, false, true, true));
+        new GoHomeSequence(
+            intake, elevator, shooter, conveyor, intakeLimelight, false, true, true));
   }
 }

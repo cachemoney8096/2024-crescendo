@@ -17,15 +17,15 @@
     {
       "anchor": {
         "x": 8.204892772594862,
-        "y": 4.14052774521124
+        "y": 4.1
       },
       "prevControl": {
         "x": 7.912025472886463,
-        "y": 4.546441446412733
+        "y": 4.505913701201493
       },
       "nextControl": {
         "x": 8.597899863502372,
-        "y": 3.595820422039495
+        "y": 3.555292676828255
       },
       "isLocked": false,
       "linkedName": null
@@ -246,58 +246,7 @@
   ],
   "eventMarkers": [
     {
-      "name": "SPEAKER PREP PRELOAD",
-      "waypointRelativePos": 0.0,
-      "command": {
-        "type": "parallel",
-        "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "SPEAKER PREP PRELOAD"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "name": "SPEAKER SCORE PRELOAD",
-      "waypointRelativePos": 0.15000000000000002,
-      "command": {
-        "type": "parallel",
-        "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "SPEAKER SCORE PRELOAD"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "name": "INTAKE DEPLOYED",
-      "waypointRelativePos": 0.25,
-      "command": {
-        "type": "parallel",
-        "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "INTAKE DEPLOYED"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "name": "RUN INTAKE 1",
+      "name": "RUN_INTAKE",
       "waypointRelativePos": 0.6000000000000001,
       "command": {
         "type": "parallel",
@@ -306,7 +255,7 @@
             {
               "type": "named",
               "data": {
-                "name": "RUN INTAKE 1"
+                "name": "RUN_INTAKE"
               }
             }
           ]
@@ -314,7 +263,7 @@
       }
     },
     {
-      "name": "SPEAKER PREP 1",
+      "name": "SPEAKER_PREP",
       "waypointRelativePos": 1.35,
       "command": {
         "type": "parallel",
@@ -331,7 +280,7 @@
       }
     },
     {
-      "name": "SPEAKER SCORE 1",
+      "name": "SPEAKER_SCORE",
       "waypointRelativePos": 2.0,
       "command": {
         "type": "parallel",
@@ -340,7 +289,7 @@
             {
               "type": "named",
               "data": {
-                "name": "SPEAKER SCORE 1"
+                "name": "SPEAKER_SCORE"
               }
             }
           ]
@@ -348,7 +297,7 @@
       }
     },
     {
-      "name": "RUN INTAKE 2",
+      "name": "RUN_INTAKE",
       "waypointRelativePos": 2.6,
       "command": {
         "type": "parallel",
@@ -357,7 +306,7 @@
             {
               "type": "named",
               "data": {
-                "name": "RUN INTAKE 2"
+                "name": "RUN_INTAKE"
               }
             }
           ]
@@ -365,7 +314,7 @@
       }
     },
     {
-      "name": "SPEAKER PREP 2",
+      "name": "SPEAKER_PREP",
       "waypointRelativePos": 3.25,
       "command": {
         "type": "parallel",
@@ -374,7 +323,7 @@
             {
               "type": "named",
               "data": {
-                "name": "SPEAKER PREP 2"
+                "name": "SPEAKER_PREP"
               }
             }
           ]
@@ -382,7 +331,7 @@
       }
     },
     {
-      "name": "SPEAKER SCORE 2",
+      "name": "SPEAKER_SCORE",
       "waypointRelativePos": 4.0,
       "command": {
         "type": "parallel",
@@ -391,7 +340,7 @@
             {
               "type": "named",
               "data": {
-                "name": "SPEAKER SCORE 2"
+                "name": "SPEAKER_SCORE"
               }
             }
           ]
@@ -399,7 +348,7 @@
       }
     },
     {
-      "name": "RUN INTAKE 3",
+      "name": "RUN_INTAKE",
       "waypointRelativePos": 4.75,
       "command": {
         "type": "parallel",
@@ -408,7 +357,7 @@
             {
               "type": "named",
               "data": {
-                "name": "RUN INTAKE 3"
+                "name": "RUN_INTAKE"
               }
             }
           ]
@@ -416,7 +365,7 @@
       }
     },
     {
-      "name": "SPEAKER PREP 3",
+      "name": "SPEAKER_PREP",
       "waypointRelativePos": 5.3500000000000005,
       "command": {
         "type": "parallel",
@@ -425,7 +374,7 @@
             {
               "type": "named",
               "data": {
-                "name": "SPEAKER PREP 3"
+                "name": "SPEAKER_PREP"
               }
             }
           ]
@@ -433,7 +382,7 @@
       }
     },
     {
-      "name": "SPEAKER SCORE 3",
+      "name": "SPEAKER_SCORE",
       "waypointRelativePos": 6.0,
       "command": {
         "type": "parallel",
@@ -442,7 +391,7 @@
             {
               "type": "named",
               "data": {
-                "name": "SPEAKER SCORE 3"
+                "name": "SPEAKER_SCORE"
               }
             }
           ]

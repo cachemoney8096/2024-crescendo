@@ -1,8 +1,6 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.conveyor.Conveyor;
@@ -26,30 +24,16 @@ public class SpeakerShootSequence extends SequentialCommandGroup {
       boolean waitUntilRotated) {
     addRequirements(conveyor, shooter);
     addCommands(
-        new InstantCommand(
-            () -> {
-              System.out.println("is teleop in shoot" + waitUntilRotated);
-            }),
-        new ConditionalCommand(
-            new PrintCommand("Waiting for robot heading")
-                .andThen(
-                    new WaitUntilCommand(
-                        () ->
-                            drive.getDiffCurrentTargetYawDeg()
-                                < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES))
-                .withTimeout(2.0)
-                .andThen(new PrintCommand("Done waiting for target heading")),
-            new InstantCommand(),
-            () -> waitUntilRotated),
-        new PrintCommand("Waiting for shooter at desired and spun up"),
         new WaitUntilCommand(
-            () -> {
-              return shooter.atDesiredPosition() && shooter.isShooterSpunUp();
-            }),
-        new PrintCommand("Done waiting for shooter at desired and spun up"),
-        new PrintCommand("Waiting for elevator at desired"),
-        new WaitUntilCommand(() -> elevator.atDesiredPosition()),
-        new PrintCommand("Done waiting for elevator at desired"),
+                () -> {
+                  return elevator.atDesiredPosition()
+                      && shooter.atDesiredPosition()
+                      && shooter.isShooterSpunUp()
+                      && (!waitUntilRotated
+                          || drive.getDiffCurrentTargetYawDeg()
+                              < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES);
+                })
+            .withTimeout(2.0),
         Conveyor.shoot(conveyor),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.IDLE)),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME, true)));

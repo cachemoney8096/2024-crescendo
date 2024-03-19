@@ -1,0 +1,110 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.7289985049768751,
+      "y": 4.331918999408469
+    },
+    "rotation": -60.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "INTAKE DEPLOY"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "SPEAKER PREP PRELOAD"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "SPEAKER SCORE"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RIGHT TO 8"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "8 TO SHOOT AT STAGE RIGHT"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SPEAKER SCORE"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SHOOT AT STAGE RIGHT TO 6"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "6 TO SHOOT AT STAGE RIGHT"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SPEAKER SCORE"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SHOOT AT STAGE RIGHT TO 7"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "7 TO SHOOT AT STAGE RIGHT"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SPEAKER SCORE"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "STOP SUBSYSTEMS"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}

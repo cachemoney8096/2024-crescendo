@@ -602,11 +602,6 @@ public class DriveSubsystem extends SubsystemBase {
   @Override
   public void initSendable(SendableBuilder builder) {
     super.initSendable(builder);
-    addChild("Rotate to target controller", DriveCal.ROTATE_TO_TARGET_PID_CONTROLLER);
-    addChild("Front Right", frontRight);
-    addChild("Front Left", frontLeft);
-    addChild("Rear Right", rearRight);
-    addChild("Rear Left", rearLeft);
     builder.addDoubleProperty(
         "Throttle multiplier",
         () -> {
@@ -649,12 +644,6 @@ public class DriveSubsystem extends SubsystemBase {
     builder.addDoubleProperty(
         "Rear Right Distance (m)", () -> rearRight.getPosition().distanceMeters, null);
     builder.addDoubleProperty(
-        "Rear Right Velocity (mps)", () -> rearRight.getState().speedMetersPerSecond, null);
-    builder.addDoubleProperty(
-        "Rear Right Desired Velocity (mps)",
-        () -> rearRight.desiredState.speedMetersPerSecond,
-        null);
-    builder.addDoubleProperty(
         "Rear Right Velocity Error (mps)",
         () ->
             rearRight.desiredState.speedMetersPerSecond - rearRight.getState().speedMetersPerSecond,
@@ -663,9 +652,35 @@ public class DriveSubsystem extends SubsystemBase {
     builder.addDoubleProperty("Keep Heading FF [0,1]", () -> KeepHeadingFF, null);
     builder.addDoubleProperty("Rotation Controller Input", () -> rotControllerInput, null);
     builder.addDoubleProperty(
-        "Yaw error", () -> targetHeadingDegrees - getPose().getRotation().getDegrees(), null);
+        "Yaw error",
+        () -> (targetHeadingDegrees - getPose().getRotation().getDegrees()) % 360,
+        null);
     builder.addDoubleProperty("Target Heading (tag detection)", () -> tagTargetHeading, null);
     builder.addDoubleProperty(
         "getDiffCurrentTargetYawDeg", () -> getDiffCurrentTargetYawDeg(), null);
+    builder.addDoubleProperty(
+        "Front left desired speed mps", () -> frontLeft.desiredState.speedMetersPerSecond, null);
+    builder.addDoubleProperty(
+        "Front right desired speed mps", () -> frontRight.desiredState.speedMetersPerSecond, null);
+    builder.addDoubleProperty(
+        "Rear left desired speed mps", () -> rearLeft.desiredState.speedMetersPerSecond, null);
+    builder.addDoubleProperty(
+        "Rear right desired speed mps", () -> rearRight.desiredState.speedMetersPerSecond, null);
+    builder.addDoubleProperty(
+        "Front left current speed mps", () -> frontLeft.getState().speedMetersPerSecond, null);
+    builder.addDoubleProperty(
+        "Front right current speed mps", () -> frontRight.getState().speedMetersPerSecond, null);
+    builder.addDoubleProperty(
+        "Rear left current speed mps", () -> rearLeft.getState().speedMetersPerSecond, null);
+    builder.addDoubleProperty(
+        "Rear right current speed mps", () -> rearRight.getState().speedMetersPerSecond, null);
+    builder.addDoubleProperty(
+        "Front left desired position", () -> frontLeft.desiredState.angle.getRadians(), null);
+    builder.addDoubleProperty(
+        "Front right desired position", () -> frontRight.desiredState.angle.getRadians(), null);
+    builder.addDoubleProperty(
+        "Rear left desired position", () -> rearLeft.desiredState.angle.getRadians(), null);
+    builder.addDoubleProperty(
+        "Rear right desired position", () -> rearRight.desiredState.angle.getRadians(), null);
   }
 }

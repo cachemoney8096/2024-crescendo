@@ -15,6 +15,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
+import frc.robot.utils.CRTUtil;
 import frc.robot.utils.SendableHelper;
 import frc.robot.utils.SparkMaxUtils;
 import java.util.Optional;
@@ -34,12 +35,15 @@ public class Elevator extends SubsystemBase {
     INTAKING
   }
 
+  private CRTUtil crtUtil = CRTUtil.init(26.0, 44.0, 3.45575, 11, 0.05).get();
+
   public CANSparkMax leftMotor =
       new CANSparkMax(RobotMap.LEFT_ELEVATOR_CAN_ID, MotorType.kBrushless);
   public CANSparkMax rightMotor =
       new CANSparkMax(RobotMap.RIGHT_ELEVATOR_CAN_ID, MotorType.kBrushless);
 
   private final RelativeEncoder leftMotorEncoderRel = leftMotor.getEncoder();
+  private final RelativeEncoder rightMotorEncoderRel = rightMotor.getEncoder();
   private final AbsoluteEncoder leftMotorEncoderAbs = leftMotor.getAbsoluteEncoder(Type.kDutyCycle);
   private final AbsoluteEncoder rightMotorEncoderAbs =
       rightMotor.getAbsoluteEncoder(Type.kDutyCycle);
@@ -100,22 +104,20 @@ public class Elevator extends SubsystemBase {
     int errors = 0;
     errors += SparkMaxUtils.check(leftMotor.restoreFactoryDefaults());
     errors += SparkMaxUtils.check(rightMotor.restoreFactoryDefaults());
-    errors += SparkMaxUtils.check(leftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 20));
+    // errors += SparkMaxUtils.check(leftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 20));
     errors += SparkMaxUtils.check(leftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 20));
     errors += SparkMaxUtils.check(leftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 50));
     errors += SparkMaxUtils.check(leftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500));
     errors += SparkMaxUtils.check(leftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500));
     errors += SparkMaxUtils.check(leftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 200));
     errors += SparkMaxUtils.check(leftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 200));
-    errors += SparkMaxUtils.check(rightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 20));
+    // errors += SparkMaxUtils.check(rightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 20));
     errors += SparkMaxUtils.check(rightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 20));
     errors += SparkMaxUtils.check(rightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 50));
     errors += SparkMaxUtils.check(rightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500));
     errors += SparkMaxUtils.check(rightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500));
     errors += SparkMaxUtils.check(rightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 200));
     errors += SparkMaxUtils.check(rightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 200));
-
-    errors += SparkMaxUtils.check(rightMotor.follow(leftMotor, true));
 
     errors += SparkMaxUtils.check(leftMotor.setIdleMode(IdleMode.kBrake));
     errors += SparkMaxUtils.check(rightMotor.setIdleMode(IdleMode.kBrake));
@@ -128,22 +130,37 @@ public class Elevator extends SubsystemBase {
             rightMotor.setSmartCurrentLimit(ElevatorCal.ELEVATOR_CURRENT_LIMIT_AMPS));
 
     errors += SparkMaxUtils.check(leftMotorEncoderAbs.setInverted(true));
+    rightMotor.setInverted(true);
+
     errors +=
         SparkMaxUtils.check(
             SparkMaxUtils.UnitConversions.setLinearFromGearRatio(
                 leftMotorEncoderRel,
                 ElevatorConstants.ELEVATOR_GEAR_RATIO,
                 ElevatorConstants.ELEVATOR_DRUM_DIAMETER_IN));
+    errors +=
+        SparkMaxUtils.check(
+            SparkMaxUtils.UnitConversions.setLinearFromGearRatio(
+                rightMotorEncoderRel,
+                ElevatorConstants.ELEVATOR_GEAR_RATIO,
+                ElevatorConstants.ELEVATOR_DRUM_DIAMETER_IN));
 
-    errors += SparkMaxUtils.check(setZeroFromAbsolute());
+    errors += SparkMaxUtils.check(setLeftZeroFromAbsolute());
+    errors += SparkMaxUtils.check(setRightZeroFromAbsolute());
 
     return errors == 0;
   }
 
   /** Zeroes leftMotorEncoderRel so it returns inches from home. */
-  private REVLibError setZeroFromAbsolute() {
+  private REVLibError setLeftZeroFromAbsolute() {
     // TODO absolute encoder zeroing
     return leftMotorEncoderRel.setPosition(ElevatorCal.POSITION_HOME_INCHES);
+  }
+
+  /** Zeroes rightMotorEncoderRel so it returns inches from home. */
+  private REVLibError setRightZeroFromAbsolute() {
+    // TODO absolute encoder zeroing
+    return rightMotorEncoderRel.setPosition(ElevatorCal.POSITION_HOME_INCHES);
   }
 
   /** If true, use elevator control parameters for note scoring as opposed to climbing */
@@ -159,6 +176,7 @@ public class Elevator extends SubsystemBase {
     currentPIDController.reset(leftMotorEncoderRel.getPosition());
   }
 
+  /** True if the elevator is near OR below home. */
   private boolean nearHome() {
     return leftMotorEncoderRel.getPosition() < (elevatorPositions.get(ElevatorPosition.HOME) + 1.0);
   }
@@ -188,6 +206,7 @@ public class Elevator extends SubsystemBase {
     }
 
     leftMotor.setVoltage(voltageToSet);
+    rightMotor.setVoltage(voltageToSet);
 
     prevVelocityInPerSec = nextVelocityInPerSec;
     prevTimestamp = Optional.of(timestamp);
@@ -208,7 +227,11 @@ public class Elevator extends SubsystemBase {
   public boolean atDesiredPosition() {
     double desiredPositionIn = elevatorPositions.get(desiredPosition);
     double currentPositionIn = leftMotorEncoderRel.getPosition();
-    return Math.abs(desiredPositionIn - currentPositionIn) < ElevatorCal.ELEVATOR_MARGIN_INCHES;
+    double elevatorMarginInches = ElevatorCal.ELEVATOR_MARGIN_INCHES;
+    if (desiredPosition == ElevatorPosition.PRE_CLIMB) {
+      elevatorMarginInches = 1;
+    }
+    return Math.abs(desiredPositionIn - currentPositionIn) < elevatorMarginInches;
   }
 
   /**
@@ -259,12 +282,13 @@ public class Elevator extends SubsystemBase {
     super.initSendable(builder);
     SendableHelper.addChild(builder, this, currentPIDController, "CurrentElevatorController");
     builder.addDoubleProperty(
-        "Elevator Position (in)",
-        leftMotorEncoderRel::getPosition,
-        leftMotorEncoderRel::setPosition);
+        "Left Elevator Position (in)", leftMotorEncoderRel::getPosition, null);
     builder.addDoubleProperty(
-        "Right Motor Position (rots)", () -> rightMotor.getEncoder().getPosition(), null);
-    builder.addDoubleProperty("Elevator Vel (in per s)", leftMotorEncoderRel::getVelocity, null);
+        "Right Elevator Position (in)", rightMotorEncoderRel::getPosition, null);
+    builder.addDoubleProperty(
+        "Left Elevator Vel (in per s)", leftMotorEncoderRel::getVelocity, null);
+    builder.addDoubleProperty(
+        "Right Elevator Vel (in per s)", rightMotorEncoderRel::getVelocity, null);
     builder.addDoubleProperty(
         "Elevator Left Abs Pos (deg)", leftMotorEncoderAbs::getPosition, null);
     builder.addDoubleProperty(
@@ -289,6 +313,12 @@ public class Elevator extends SubsystemBase {
     builder.addBooleanProperty(
         "Holding climb home position",
         () -> desiredPosition == ElevatorPosition.HOME && nearHome() && !currentlyUsingNoteControl,
+        null);
+    builder.addDoubleProperty(
+        "CRT calculated position",
+        () ->
+            crtUtil.getAbsolutePosition(
+                leftMotorEncoderAbs.getPosition(), rightMotorEncoderAbs.getPosition()),
         null);
   }
 }

@@ -272,6 +272,10 @@ public class Intake extends SubsystemBase {
     return getPivotPosition() > IntakeCal.CONVEYOR_ZONE_THRESHOLD_DEGREES;
   }
 
+  public boolean almostClearOfConveyorZone() {
+    return getPivotPosition() > IntakeCal.INTAKE_ALMOST_CLEAR_OF_CONVEYOR_DEGREES;
+  }
+
   public void startRollers() {
     intakeTalonLeft.set(IntakeCal.INTAKING_POWER);
     intakeTalonRight.set(IntakeCal.INTAKING_POWER);
@@ -351,6 +355,7 @@ public class Intake extends SubsystemBase {
         },
         null);
     builder.addBooleanProperty("clear of conveyor", this::clearOfConveyorZone, null);
+    builder.addBooleanProperty("almost clear of conveyor", this::almostClearOfConveyorZone, null);
     builder.addBooleanProperty("near deployed", () -> nearDeployed(), null);
     builder.addBooleanProperty("deployed desired", () -> deployedDesired(), null);
   }
