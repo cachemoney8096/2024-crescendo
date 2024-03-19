@@ -231,6 +231,9 @@ public class Elevator extends SubsystemBase {
     if (desiredPosition == ElevatorPosition.PRE_CLIMB) {
       elevatorMarginInches = 1;
     }
+    if (desiredPosition == ElevatorPosition.SCORE_TRAP){
+      elevatorMarginInches = 2;
+    }
     return Math.abs(desiredPositionIn - currentPositionIn) < elevatorMarginInches;
   }
 
