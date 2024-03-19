@@ -50,9 +50,7 @@ public class SwerveModule implements Sendable {
     turningEncoder = turningSparkMax.getAbsoluteEncoder(Type.kDutyCycle);
     turningPIDController = turningSparkMax.getPIDController();
 
-    desiredState.angle =
-        new Rotation2d(turningEncoder.getPosition())
-            .plus(Rotation2d.fromRadians(chassisAngularOffsetRadians));
+    desiredState.angle = Rotation2d.fromRadians(turningEncoder.getPosition());
     drivingTalon.setPosition(0);
   }
 
@@ -184,6 +182,15 @@ public class SwerveModule implements Sendable {
         drivingTalon.getPosition().getValue(),
         new Rotation2d(turningEncoder.getPosition() - chassisAngularOffsetRadians));
   }
+  
+  /** Ensures the value a is in [0, b) */
+  public static double mod(double a, double b) {
+    double r = a % b;
+    if (r < 0) {
+      r += b;
+    }
+    return r;
+  }
 
   /**
    * Sets the desired state for the module.
@@ -191,26 +198,26 @@ public class SwerveModule implements Sendable {
    * @param desiredState Desired state with speed and angle. Angle is relative to chassis (no offset
    *     needed).
    */
-  public void setDesiredState(SwerveModuleState desiredState) {
+  public void setDesiredState(SwerveModuleState inputState) {
     // Apply chassis angular offset to the desired state.
-    SwerveModuleState correctedDesiredState = new SwerveModuleState();
-    correctedDesiredState.speedMetersPerSecond = desiredState.speedMetersPerSecond;
-    correctedDesiredState.angle =
-        desiredState.angle.plus(Rotation2d.fromRadians(chassisAngularOffsetRadians));
+    inputState.angle = inputState.angle.plus(Rotation2d.fromRadians(chassisAngularOffsetRadians));
 
     // Optimize the reference state to avoid spinning further than 90 degrees.
-    SwerveModuleState optimizedDesiredState =
+    inputState =
         SwerveModuleState.optimize(
-            correctedDesiredState, new Rotation2d(turningEncoder.getPosition()));
+            inputState, new Rotation2d(turningEncoder.getPosition()));
+
+    // Ensure optimized state 
+    inputState.angle = Rotation2d.fromRadians(mod(inputState.angle.getRadians(), 2.0 * Math.PI));
 
     // Setting global desiredState to be optimized for the shuffleboard
-    this.desiredState = optimizedDesiredState;
+    this.desiredState = inputState;
 
     // Command driving and turning SPARKS MAX towards their respective setpoints.
     drivingTalon.setControl(
-        new VelocityDutyCycle(optimizedDesiredState.speedMetersPerSecond).withSlot(0));
+        new VelocityDutyCycle(inputState.speedMetersPerSecond).withSlot(0));
     turningPIDController.setReference(
-        optimizedDesiredState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
+        inputState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
   }
 
   /** Zeroes all the SwerveModule encoders. */
