@@ -66,10 +66,7 @@ import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.JoystickUtil;
 import frc.robot.utils.MatchStateUtil;
 import java.util.TreeMap;
-import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -104,6 +101,8 @@ public class RobotContainer implements Sendable {
   }
 
   PrepState prepState = PrepState.OFF;
+
+  public boolean isTeleop = false;
 
   public boolean driveFieldRelative = true;
 
@@ -337,14 +336,7 @@ public class RobotContainer implements Sendable {
 
     driverController
         .leftTrigger()
-        .onTrue(
-            new InstantCommand(() -> System.out.println("driver controller left trigger pressed"))
-                .andThen(
-                    new SequentialCommandGroup(
-                        new InstantCommand(() -> 
-                            System.out.println("we @ score button")),
-                        driverLeftTriggerCommand
-                        )));
+        .onTrue(driverLeftTriggerCommand);
 
     driverController
         .leftBumper()
@@ -456,7 +448,7 @@ public class RobotContainer implements Sendable {
                     },
                     drive),
                 new InstantCommand(),
-                matchState::isTeleop)
+                () -> isTeleop)
             .withName("Manual Drive"));
   }
 
@@ -487,12 +479,23 @@ public class RobotContainer implements Sendable {
         .onFalse(
             new InstantCommand(() -> conveyor.stopRollers()).andThen(() -> intake.stopRollers()));
 
-    BiFunction<Double, Double, Command> operatorPrepCreator = (Double distanceMeters, Double targetHeadingWhenRed) -> {
-        return new InstantCommand(
-                    () -> shooter.setShooterDistance(distanceMeters))
+    operatorController
+        .povDown()
+        .onTrue(
+            new InstantCommand(
+                    () -> shooter.setShooterDistance(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS))
+                .andThen(() -> drive.setTargetHeadingDegrees(matchState.isBlue() ? 0.0 : 180.0))
+                .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
+                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR)));
+
+    operatorController
+        .povLeft()
+        .onTrue(
+            new InstantCommand(
+                    () -> shooter.setShooterDistance(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS))
                 .andThen(
                     () -> {
-                      final double redDeg = targetHeadingWhenRed;
+                      double redDeg = 120.0;
                       drive.setTargetHeadingDegrees(
                           matchState.isBlue()
                               ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg))
@@ -500,33 +503,72 @@ public class RobotContainer implements Sendable {
                               : redDeg);
                     })
                 .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
-                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR));
-    };
+                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR)));
 
-    operatorController
-        .povDown()
-        .onTrue(
-            operatorPrepCreator.apply(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS, 180.0));
-    operatorController
-        .povLeft()
-        .onTrue(
-            operatorPrepCreator.apply(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS, 120.0));
     operatorController
         .povRight()
         .onTrue(
-            operatorPrepCreator.apply(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS, 240.0));
+            new InstantCommand(
+                    () -> shooter.setShooterDistance(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS))
+                .andThen(
+                    () -> {
+                      double redDeg = 240.0;
+                      drive.setTargetHeadingDegrees(
+                          matchState.isBlue()
+                              ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg))
+                                  .getDegrees()
+                              : redDeg);
+                    })
+                .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
+                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR)));
+
     operatorController
         .b()
         .onTrue(
-            operatorPrepCreator.apply(Units.inchesToMeters(142.0), 160.0));
+            new InstantCommand(() -> shooter.setShooterDistance(Units.inchesToMeters(142.0)))
+                .andThen(
+                    () -> {
+                      double redDeg = 160.0;
+                      drive.setTargetHeadingDegrees(
+                          matchState.isBlue()
+                              ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg))
+                                  .getDegrees()
+                              : redDeg);
+                    })
+                .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
+                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR)));
+
     operatorController
         .x()
         .onTrue(
-            operatorPrepCreator.apply(Units.inchesToMeters(100.0), 202.0));
+            new InstantCommand(() -> shooter.setShooterDistance(Units.inchesToMeters(100.0)))
+                .andThen(
+                    () -> {
+                      double redDeg = 202.0;
+                      drive.setTargetHeadingDegrees(
+                          matchState.isBlue()
+                              ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg))
+                                  .getDegrees()
+                              : redDeg);
+                    })
+                .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
+                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR)));
+
     operatorController
         .y()
         .onTrue(
-            operatorPrepCreator.apply(Units.inchesToMeters(174.0), 190.0));
+            new InstantCommand(() -> shooter.setShooterDistance(Units.inchesToMeters(174.0)))
+                .andThen(
+                    () -> {
+                      double redDeg = 190.0;
+                      drive.setTargetHeadingDegrees(
+                          matchState.isBlue()
+                              ? GeometryUtil.flipFieldRotation(Rotation2d.fromDegrees(redDeg))
+                                  .getDegrees()
+                              : redDeg);
+                    })
+                .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)))
+                .andThen(new InstantCommand(() -> prepState = PrepState.OPERATOR)));
 
     operatorController
         .leftBumper()
