@@ -98,4 +98,6 @@ public class ShooterCal {
   public static final double ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES = 4.0;
 
   public static final double SUBWOOFER_SHOT_DISTANCE_METERS = 1.16;
+
+  public static final double LATCH_SAFE_MARGIN_DEGREES = 5.0;
 }
