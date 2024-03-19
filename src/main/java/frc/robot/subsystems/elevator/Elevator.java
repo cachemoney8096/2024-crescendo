@@ -35,7 +35,7 @@ public class Elevator extends SubsystemBase {
     INTAKING
   }
 
-  private CRTUtil crtUtil = CRTUtil.init(44.0, 26.0, 3.45575, 11, 0.05).get();
+  private CRTUtil crtUtil = CRTUtil.init(26.0, 44.0, 3.45575, 11, 0.05).get();
 
   public CANSparkMax leftMotor =
       new CANSparkMax(RobotMap.LEFT_ELEVATOR_CAN_ID, MotorType.kBrushless);
