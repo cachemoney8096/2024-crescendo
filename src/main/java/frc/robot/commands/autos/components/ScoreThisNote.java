@@ -48,7 +48,8 @@ public class ScoreThisNote extends SequentialCommandGroup {
         new SpeakerShootSequence(conveyor, shooter, elevator, drive),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME, true)),
         new PrintCommand("ScoreThisNote - done score"),
-        new GoHomeSequence(intake, elevator, shooter, conveyor, intakeLimelight, false, false, false),
+        new GoHomeSequence(
+            intake, elevator, shooter, conveyor, intakeLimelight, false, false, false),
         new PrintCommand("ScoreThisNote - done home"));
   }
 }

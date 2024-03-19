@@ -38,7 +38,16 @@ public class ScoreTwoNotes extends SequentialCommandGroup {
     addRequirements(intake, elevator, shooter, conveyor);
     addCommands(
         new InstantCommand(() -> initialYaw = drive.getPose().getRotation()),
-        new OneFiveLeave(intake, elevator, shooter, conveyor, drive, matchState, shooterLimelight, intakeLimelight, lights),
+        new OneFiveLeave(
+            intake,
+            elevator,
+            shooter,
+            conveyor,
+            drive,
+            matchState,
+            shooterLimelight,
+            intakeLimelight,
+            lights),
         new PrintCommand("ScoreTwoNotes - OneFiveLeave done"),
         new InstantCommand(
             () -> {

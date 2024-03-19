@@ -43,7 +43,8 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
     addRequirements(intake, elevator, shooter, conveyor);
 
     addCommands(
-        new GoHomeSequence(intake, elevator, shooter, conveyor, intakeLimelight, true, false, false),
+        new GoHomeSequence(
+            intake, elevator, shooter, conveyor, intakeLimelight, true, false, false),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SLIGHTLY_UP, true)),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
         new RunCommand(
@@ -74,15 +75,11 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                       tagDetection = interimTagDetection;*/
                     } else {
                       tagDetection = interimTagDetection;
-                      //shooterLimelight.resetOdometryDuringPrep(drive);
-                      System.out.println(
-                          "tag degrees: " + tagDetection.get().getFirst().getDegrees());
+                      // shooterLimelight.resetOdometryDuringPrep(drive);
                       drive.setTargetHeadingDegrees(tagDetection.get().getFirst().getDegrees());
                       shooter.setShooterDistance(tagDetection.get().getSecond());
                     }
                   }
-
-                  shooter.readyToShoot = true;
                 })
             .until(
                 () -> {

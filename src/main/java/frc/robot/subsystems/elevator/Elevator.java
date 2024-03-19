@@ -282,13 +282,13 @@ public class Elevator extends SubsystemBase {
     super.initSendable(builder);
     SendableHelper.addChild(builder, this, currentPIDController, "CurrentElevatorController");
     builder.addDoubleProperty(
-        "Left Elevator Position (in)",
-        leftMotorEncoderRel::getPosition, null);
+        "Left Elevator Position (in)", leftMotorEncoderRel::getPosition, null);
     builder.addDoubleProperty(
-        "Right Elevator Position (in)",
-        rightMotorEncoderRel::getPosition, null);
-    builder.addDoubleProperty("Left Elevator Vel (in per s)", leftMotorEncoderRel::getVelocity, null);
-    builder.addDoubleProperty("Right Elevator Vel (in per s)", rightMotorEncoderRel::getVelocity, null);
+        "Right Elevator Position (in)", rightMotorEncoderRel::getPosition, null);
+    builder.addDoubleProperty(
+        "Left Elevator Vel (in per s)", leftMotorEncoderRel::getVelocity, null);
+    builder.addDoubleProperty(
+        "Right Elevator Vel (in per s)", rightMotorEncoderRel::getVelocity, null);
     builder.addDoubleProperty(
         "Elevator Left Abs Pos (deg)", leftMotorEncoderAbs::getPosition, null);
     builder.addDoubleProperty(

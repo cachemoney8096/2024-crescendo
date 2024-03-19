@@ -147,7 +147,6 @@ public class IntakeLimelight extends SubsystemBase {
 
   public Optional<Transform2d> checkForTag() {
     if (getValidTarget() != 1) {
-      System.out.println("no valid targets");
       return Optional.empty();
     }
 
