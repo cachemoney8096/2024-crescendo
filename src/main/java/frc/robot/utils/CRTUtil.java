@@ -33,8 +33,8 @@ public class CRTUtil {
       return Optional.empty();
     }
     CRTUtil crtUtil = new CRTUtil(mainGearRatioTerm, secondaryGearRatioTerm, mainGearCircumference, requiredMaxRotations);
-    double fractionalPrecisionDenominator = Math.ceil(mainGearCircumference/allowedError);
-    //double fractionalPrecisionDenominator = 6;
+    //double fractionalPrecisionDenominator = Math.ceil(mainGearCircumference/allowedError);
+    double fractionalPrecisionDenominator = 6;
     crtUtil.initTable(fractionalPrecisionDenominator);
     if(!crtUtil.validateTable()){
       return Optional.empty();

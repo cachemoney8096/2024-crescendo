@@ -15,6 +15,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
+import frc.robot.utils.CRTUtil;
 import frc.robot.utils.SendableHelper;
 import frc.robot.utils.SparkMaxUtils;
 import java.util.Optional;
@@ -33,6 +34,8 @@ public class Elevator extends SubsystemBase {
     SLIGHTLY_UP,
     INTAKING
   }
+
+  private CRTUtil crtUtil = CRTUtil.init(44.0, 26.0, 3.45575, 11, 0.05).get();
 
   public CANSparkMax leftMotor =
       new CANSparkMax(RobotMap.LEFT_ELEVATOR_CAN_ID, MotorType.kBrushless);
@@ -302,5 +305,6 @@ public class Elevator extends SubsystemBase {
         "Holding climb home position",
         () -> desiredPosition == ElevatorPosition.HOME && nearHome() && !currentlyUsingNoteControl,
         null);
+    builder.addDoubleProperty("CRT calculated position", ()->crtUtil.getAbsolutePosition(leftMotorEncoderAbs.getPosition(), rightMotorEncoderAbs.getPosition()), null);
   }
 }
