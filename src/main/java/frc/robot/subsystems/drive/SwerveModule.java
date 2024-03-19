@@ -182,7 +182,7 @@ public class SwerveModule implements Sendable {
         drivingTalon.getPosition().getValue(),
         new Rotation2d(turningEncoder.getPosition() - chassisAngularOffsetRadians));
   }
-  
+
   /** Ensures the value a is in [0, b) */
   public static double mod(double a, double b) {
     double r = a % b;
@@ -204,18 +204,16 @@ public class SwerveModule implements Sendable {
 
     // Optimize the reference state to avoid spinning further than 90 degrees.
     inputState =
-        SwerveModuleState.optimize(
-            inputState, new Rotation2d(turningEncoder.getPosition()));
+        SwerveModuleState.optimize(inputState, new Rotation2d(turningEncoder.getPosition()));
 
-    // Ensure optimized state 
+    // Ensure optimized state
     inputState.angle = Rotation2d.fromRadians(mod(inputState.angle.getRadians(), 2.0 * Math.PI));
 
     // Setting global desiredState to be optimized for the shuffleboard
     this.desiredState = inputState;
 
     // Command driving and turning SPARKS MAX towards their respective setpoints.
-    drivingTalon.setControl(
-        new VelocityDutyCycle(inputState.speedMetersPerSecond).withSlot(0));
+    drivingTalon.setControl(new VelocityDutyCycle(inputState.speedMetersPerSecond).withSlot(0));
     turningPIDController.setReference(
         inputState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
   }

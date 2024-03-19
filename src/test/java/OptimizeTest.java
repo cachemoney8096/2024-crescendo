@@ -1,30 +1,36 @@
-import org.junit.*;
-import org.junit.jupiter.api.Test;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import org.junit.*;
+import org.junit.jupiter.api.Test;
 
 public class OptimizeTest {
 
   static final double EPSILON_MPS = 1e-4;
   static final double EPSILON_DEG = 1e-4;
 
-  void testState(double desiredRad, double currentRad, boolean expectedFlip)
-  {
+  void testState(double desiredRad, double currentRad, boolean expectedFlip) {
     SwerveModuleState desiredState = new SwerveModuleState(1.0, Rotation2d.fromRadians(desiredRad));
-    SwerveModuleState optimizedState = SwerveModuleState.optimize(desiredState, Rotation2d.fromRadians(currentRad));
+    SwerveModuleState optimizedState =
+        SwerveModuleState.optimize(desiredState, Rotation2d.fromRadians(currentRad));
     if (expectedFlip) {
-      Assert.assertEquals(optimizedState.speedMetersPerSecond, -desiredState.speedMetersPerSecond, EPSILON_MPS);
-      Assert.assertEquals(optimizedState.angle.getRadians(), desiredState.angle.plus(Rotation2d.fromRadians(Math.PI)).getRadians(), EPSILON_DEG);
-    }
-    else {
-      Assert.assertEquals(optimizedState.speedMetersPerSecond, desiredState.speedMetersPerSecond, EPSILON_MPS);
-      Assert.assertEquals(optimizedState.angle.getRadians(), desiredState.angle.getRadians(), EPSILON_DEG);
+      Assert.assertEquals(
+          optimizedState.speedMetersPerSecond, -desiredState.speedMetersPerSecond, EPSILON_MPS);
+      Assert.assertEquals(
+          optimizedState.angle.getRadians(),
+          desiredState.angle.plus(Rotation2d.fromRadians(Math.PI)).getRadians(),
+          EPSILON_DEG);
+    } else {
+      Assert.assertEquals(
+          optimizedState.speedMetersPerSecond, desiredState.speedMetersPerSecond, EPSILON_MPS);
+      Assert.assertEquals(
+          optimizedState.angle.getRadians(), desiredState.angle.getRadians(), EPSILON_DEG);
     }
 
     // Following don't actually pass, is that a problem?
-    // Assert.assertTrue(optimizedState.angle.getRadians() + " < " + -Math.PI, optimizedState.angle.getRadians() >= -Math.PI);
-    // Assert.assertTrue(optimizedState.angle.getRadians() + " > " + Math.PI, optimizedState.angle.getRadians() <= Math.PI);
+    // Assert.assertTrue(optimizedState.angle.getRadians() + " < " + -Math.PI,
+    // optimizedState.angle.getRadians() >= -Math.PI);
+    // Assert.assertTrue(optimizedState.angle.getRadians() + " > " + Math.PI,
+    // optimizedState.angle.getRadians() <= Math.PI);
   }
 
   @Test

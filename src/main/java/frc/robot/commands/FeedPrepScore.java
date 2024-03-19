@@ -24,7 +24,8 @@ public class FeedPrepScore extends SequentialCommandGroup {
       IntakeLimelight intakeLimelight) {
     addRequirements(elevator, conveyor, intake, shooter);
     addCommands(
-        new GoHomeSequence(intake, elevator, shooter, conveyor, intakeLimelight, true, false, false),
+        new GoHomeSequence(
+            intake, elevator, shooter, conveyor, intakeLimelight, true, false, false),
         new WaitUntilCommand(elevator::elevatorBelowInterferenceZone),
         new ConditionalCommand(
             new InstantCommand(() -> drive.setTargetHeadingDegrees(315.0)),

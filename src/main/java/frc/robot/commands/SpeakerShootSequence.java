@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -26,13 +25,15 @@ public class SpeakerShootSequence extends SequentialCommandGroup {
     addRequirements(conveyor, shooter);
     addCommands(
         new WaitUntilCommand(
-            () -> {
-              return elevator.atDesiredPosition() &&
-                     shooter.atDesiredPosition() &&
-                     shooter.isShooterSpunUp() &&
-                     (!waitUntilRotated ||
-                      drive.getDiffCurrentTargetYawDeg() < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES);
-            }).withTimeout(2.0),
+                () -> {
+                  return elevator.atDesiredPosition()
+                      && shooter.atDesiredPosition()
+                      && shooter.isShooterSpunUp()
+                      && (!waitUntilRotated
+                          || drive.getDiffCurrentTargetYawDeg()
+                              < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES);
+                })
+            .withTimeout(2.0),
         Conveyor.shoot(conveyor),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.IDLE)),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME, true)));

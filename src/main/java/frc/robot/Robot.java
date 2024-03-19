@@ -11,7 +11,6 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -132,13 +131,16 @@ public class Robot extends TimedRobot {
     matchState.updateMatchState(false);
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
-    // If there's a path planner auto and the robot didn't initialize its pose from tags, then initialize from the path's starting pose
+    // If there's a path planner auto and the robot didn't initialize its pose from tags, then
+    // initialize from the path's starting pose
     if (m_autonomousCommand != null && m_robotContainer.getAutonomousName() != null) {
       if (m_robotContainer.shooterLimelight.checkForTag().isEmpty()) {
         Pose2d pathStartingPose =
             PathPlannerAuto.getStaringPoseFromAutoFile(m_robotContainer.getAutonomousName());
-        if (Math.abs(m_robotContainer.drive.getPose().getX()) < Constants.ODOMETRY_MARGIN_FOR_ZEROING_M
-            && Math.abs(m_robotContainer.drive.getPose().getY()) < Constants.ODOMETRY_MARGIN_FOR_ZEROING_M) {
+        if (Math.abs(m_robotContainer.drive.getPose().getX())
+                < Constants.ODOMETRY_MARGIN_FOR_ZEROING_M
+            && Math.abs(m_robotContainer.drive.getPose().getY())
+                < Constants.ODOMETRY_MARGIN_FOR_ZEROING_M) {
           if (matchState.isRed()) {
             Pose2d flippedPose = GeometryUtil.flipFieldPose(pathStartingPose);
             m_robotContainer.drive.resetOdometry(flippedPose);

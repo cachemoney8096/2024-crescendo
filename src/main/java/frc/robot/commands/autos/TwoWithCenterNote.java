@@ -37,7 +37,8 @@ public class TwoWithCenterNote extends SequentialCommandGroup {
       Lights lights) {
     NamedCommands.registerCommand(
         "goHomeWithShooterSpunUp",
-        new GoHomeSequence(intake, elevator, shooter, conveyor, intakeLimelight, true, false, false));
+        new GoHomeSequence(
+            intake, elevator, shooter, conveyor, intakeLimelight, true, false, false));
     NamedCommands.registerCommand(
         "intakeNote",
         new IntakeSequence(intake, elevator, conveyor, shooter, lights).withTimeout(5.0));

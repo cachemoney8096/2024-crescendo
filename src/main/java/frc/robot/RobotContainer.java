@@ -313,8 +313,7 @@ public class RobotContainer implements Sendable {
             new InstantCommand(intake::stopRollers)));
     selectCommandMap.put(
         PrepState.CLIMB,
-        new SequentialCommandGroup(
-            new ClimbSequence(intake, elevator, shooter, conveyor)));
+        new SequentialCommandGroup(new ClimbSequence(intake, elevator, shooter, conveyor)));
     selectCommandMap.put(
         PrepState.FEED,
         new SequentialCommandGroup(
@@ -327,16 +326,12 @@ public class RobotContainer implements Sendable {
         PrepState.AMP,
         new SequentialCommandGroup(
             new AmpScore(drive, conveyor, intake, shooter, elevator, intakeLimelight)));
-    selectCommandMap.put(
-        PrepState.OPERATOR,
-        new SequentialCommandGroup(
-            Conveyor.shoot(conveyor)));
+    selectCommandMap.put(PrepState.OPERATOR, new SequentialCommandGroup(Conveyor.shoot(conveyor)));
 
-    SelectCommand<PrepState> driverLeftTriggerCommand = new SelectCommand<PrepState>(selectCommandMap, this::getAndClearPrepState);
+    SelectCommand<PrepState> driverLeftTriggerCommand =
+        new SelectCommand<PrepState>(selectCommandMap, this::getAndClearPrepState);
 
-    driverController
-        .leftTrigger()
-        .onTrue(driverLeftTriggerCommand);
+    driverController.leftTrigger().onTrue(driverLeftTriggerCommand);
 
     driverController
         .leftBumper()

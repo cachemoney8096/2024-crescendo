@@ -652,7 +652,9 @@ public class DriveSubsystem extends SubsystemBase {
     builder.addDoubleProperty("Keep Heading FF [0,1]", () -> KeepHeadingFF, null);
     builder.addDoubleProperty("Rotation Controller Input", () -> rotControllerInput, null);
     builder.addDoubleProperty(
-        "Yaw error", () -> (targetHeadingDegrees - getPose().getRotation().getDegrees()) % 360, null);
+        "Yaw error",
+        () -> (targetHeadingDegrees - getPose().getRotation().getDegrees()) % 360,
+        null);
     builder.addDoubleProperty("Target Heading (tag detection)", () -> tagTargetHeading, null);
     builder.addDoubleProperty(
         "getDiffCurrentTargetYawDeg", () -> getDiffCurrentTargetYawDeg(), null);

@@ -237,7 +237,6 @@ public class Conveyor extends SubsystemBase {
   /** Stop the conveor rollers. */
   public static Command stop(Conveyor conveyor) {
     return new InstantCommand(conveyor::stopRollers, conveyor).ignoringDisable(true);
-
   }
 
   /** backs the currently held note a little bit back into the conveyor to crush it */
