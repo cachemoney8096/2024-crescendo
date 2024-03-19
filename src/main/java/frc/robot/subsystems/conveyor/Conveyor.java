@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc.robot.Robot;
 import frc.robot.RobotMap;
 import frc.robot.utils.SparkMaxUtils;
 import java.util.function.DoubleConsumer;
@@ -33,17 +34,7 @@ public class Conveyor extends SubsystemBase {
 
   /** False is blocked (i.e. there is a note) */
   public DigitalInput intakeBeamBreakSensor = new DigitalInput(RobotMap.INTAKE_BEAM_BREAK_DIO);
-
-  /**
-   * These aren't actually limit switches; we just use SparkLimitSwitch objects to access them
-   * easily. At the moment, only sensor one actually exists. Sensor one is the closest to the
-   * intake. True means blocked (there is a note). TODO: If we use these, add them to Shuffleboard.
-   */
-  SparkLimitSwitch
-      beamBreakSensorOne = frontMotor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen),
-      beamBreakSensorTwo = frontMotor.getReverseLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen),
-      beamBreakSensorThree = backMotor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen),
-      beamBreakSensorFour = backMotor.getReverseLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
+  public DigitalInput conveyorBeamBreakSensor = new DigitalInput(RobotMap.CONVEYOR_BEAM_BREAK_DIO);
 
   /**
    * Used to define the current position of the note.
@@ -123,11 +114,6 @@ public class Conveyor extends SubsystemBase {
                 ConveyorConstants.BACK_GEAR_RATIO,
                 ConveyorConstants.CONVEYOR_MOTOR_ROLLER_DIAMETER_IN));
 
-    errors += SparkMaxUtils.check(beamBreakSensorOne.enableLimitSwitch(false));
-    errors += SparkMaxUtils.check(beamBreakSensorTwo.enableLimitSwitch(false));
-    errors += SparkMaxUtils.check(beamBreakSensorThree.enableLimitSwitch(false));
-    errors += SparkMaxUtils.check(beamBreakSensorFour.enableLimitSwitch(false));
-
     backMotorEncoder.setPosition(0.0);
     frontMotorEncoder.setPosition(0.0);
 
@@ -197,7 +183,7 @@ public class Conveyor extends SubsystemBase {
             new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SPEED), conveyor),
             new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SPEED)),
             new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
-            new WaitUntilCommand(() -> conveyor.beamBreakSensorOne.isPressed()))
+            new WaitUntilCommand(() -> !conveyor.conveyorBeamBreakSensor.get()))
         .withName("Start Receive");
   }
 
@@ -226,7 +212,7 @@ public class Conveyor extends SubsystemBase {
                 () -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED), conveyor),
             new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED)),
             new WaitCommand(0.1),
-            new WaitUntilCommand(() -> !conveyor.beamBreakSensorOne.isPressed()),
+            new WaitUntilCommand(() -> conveyor.conveyorBeamBreakSensor.get()),
             Conveyor.stop(conveyor),
             new InstantCommand(() -> conveyor.stopRollers()),
             new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", true)),
@@ -276,7 +262,7 @@ public class Conveyor extends SubsystemBase {
           return backMotorEncoder.getVelocity();
         },
         null);
-    builder.addBooleanProperty("beamBreakSensorOne", () -> beamBreakSensorOne.isPressed(), null);
+    builder.addBooleanProperty("beamBreakSensor", () -> !conveyorBeamBreakSensor.get(), null);
     builder.addBooleanProperty("Intake Sensor", () -> intakeBeamBreakSensor.get(), null);
   }
 }

@@ -15,7 +15,7 @@ public class ConveyorCal {
   public static final double SCORE_AMP_FRONT_SPEED = -0.5, SCORE_AMP_BACK_SPEED = -0.5;
 
   /** The power used for each conveyor motor to receive the note */
-  public static final double RECEIVE_SPEED = 1.0, RECEIVE_SLOW_SPEED = 0.15;
+  public static final double RECEIVE_SPEED = 1.0, RECEIVE_SLOW_SPEED = 0.25;
 
   /** The power used for the front conveyer to backup the note */
   public static final double FRONT_BACKUP_SPEED = -1.0;
