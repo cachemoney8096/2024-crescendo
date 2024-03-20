@@ -30,7 +30,7 @@ public class ScoreThisNote extends SequentialCommandGroup {
       IntakeLimelight intakeLimelight,
       DriveSubsystem drive,
       Lights lights) {
-    addRequirements(intake, elevator, shooter, conveyor, lights);
+    addRequirements(intake, elevator, shooter, conveyor);
     addCommands(
         new SpeakerPrepScoreSequence(
                 intake,

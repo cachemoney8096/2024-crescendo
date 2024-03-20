@@ -35,7 +35,7 @@ public class OneFiveLeave extends SequentialCommandGroup {
     final double NO_Y_DISTANCE = 0.0;
     final boolean FIELD_RELATIVE = true;
 
-    addRequirements(intake, elevator, shooter, conveyor, drive, lights);
+    addRequirements(intake, elevator, shooter, conveyor, drive);
     addCommands(
         new RotateToSpeaker(drive, shooterLimelight),
         drive.turnInPlace(1.0),

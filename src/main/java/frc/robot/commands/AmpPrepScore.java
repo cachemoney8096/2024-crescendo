@@ -22,7 +22,7 @@ public class AmpPrepScore extends SequentialCommandGroup {
   /** Creates a new AmpPreScore. */
   public AmpPrepScore(
       Elevator elevator, Conveyor conveyor, Intake intake, Shooter shooter, DriveSubsystem drive, Lights lights) {
-    addRequirements(conveyor, elevator, intake, shooter, lights);
+    addRequirements(conveyor, elevator, intake, shooter);
 
     SequentialCommandGroup moveWhenNotSafe =
         new SequentialCommandGroup(

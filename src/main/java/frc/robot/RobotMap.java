@@ -34,5 +34,6 @@ public class RobotMap {
   public static final int CANDLE_CAN_ID = 17;
 
   public static final int INTAKE_BEAM_BREAK_DIO = 9;
-  public static final int CONVEYOR_BEAM_BREAK_DIO = Constants.PLACEHOLDER_INT;
+  public static final int FRONT_CONVEYOR_BEAM_BREAK_DIO = 7;
+  public static final int BACK_CONVEYOR_BEAM_BREAK_DIO = 8;
 }

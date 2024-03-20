@@ -7,6 +7,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkLimitSwitch;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DigitalGlitchFilter;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -36,7 +37,7 @@ public class Conveyor extends SubsystemBase {
 
   /** False is blocked (i.e. there is a note) */
   public DigitalInput intakeBeamBreakSensor = new DigitalInput(RobotMap.INTAKE_BEAM_BREAK_DIO);
-  public DigitalInput conveyorBeamBreakSensor = new DigitalInput(RobotMap.CONVEYOR_BEAM_BREAK_DIO);
+  public DigitalInput frontConveyorBeamBreakSensor = new DigitalInput(RobotMap.FRONT_CONVEYOR_BEAM_BREAK_DIO);
 
   /**
    * Used to define the current position of the note.
@@ -185,7 +186,7 @@ public class Conveyor extends SubsystemBase {
             new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SPEED), conveyor),
             new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SPEED)),
             new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
-            new WaitUntilCommand(() -> !conveyor.conveyorBeamBreakSensor.get()))
+            new WaitUntilCommand(() -> !conveyor.frontConveyorBeamBreakSensor.get()))
         .withName("Start Receive");
   }
 
@@ -214,10 +215,10 @@ public class Conveyor extends SubsystemBase {
                 () -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED), conveyor),
             new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED)),
             new WaitCommand(0.1),
-            new WaitUntilCommand(() -> conveyor.conveyorBeamBreakSensor.get()),
+            new WaitUntilCommand(() -> conveyor.frontConveyorBeamBreakSensor.get()),
             Conveyor.stop(conveyor),
             new InstantCommand(() -> conveyor.stopRollers()),
-            new InstantCommand(() -> lights.setLEDColor(LightCode.HAS_NOTE), lights),
+            new InstantCommand(() -> lights.setLEDColor(LightCode.HAS_NOTE)),
             new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", true)),
             new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE))
         .withName("Finish Receive");
@@ -265,7 +266,7 @@ public class Conveyor extends SubsystemBase {
           return backMotorEncoder.getVelocity();
         },
         null);
-    builder.addBooleanProperty("beamBreakSensor", () -> !conveyorBeamBreakSensor.get(), null);
+    builder.addBooleanProperty("beamBreakSensor", () -> !frontConveyorBeamBreakSensor.get(), null);
     builder.addBooleanProperty("Intake Sensor", () -> intakeBeamBreakSensor.get(), null);
   }
 }

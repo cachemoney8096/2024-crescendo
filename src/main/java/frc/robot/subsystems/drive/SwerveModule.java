@@ -180,7 +180,7 @@ public class SwerveModule implements Sendable {
     }
     if (Math.abs(getEncoderRelativePositionRad() - getEncoderAbsPositionRad())
         > DriveCal.TURNING_ENCODER_ZEROING_THRESHOLD_DEG) {
-      turningRelativeEncoder.setPosition(getEncoderAbsPositionRad());
+      turningRelativeEncoder.setPosition(getEncoderAbsPositionRad() + chassisAngularOffsetRadians);
       // turningPIDController.reset(getEncoderRelativePositionRad());
       // TODO
     }

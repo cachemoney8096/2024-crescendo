@@ -13,7 +13,7 @@ import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 
 public class UnclimbSequence extends SequentialCommandGroup {
   public UnclimbSequence(Elevator elevator, Shooter shooter, Conveyor conveyor, Lights lights) {
-    addRequirements(elevator, shooter, conveyor, lights);
+    addRequirements(elevator, shooter, conveyor);
     addCommands(
         new InstantCommand(() -> lights.setLEDColor(LightCode.OFF)),
         Conveyor.stop(conveyor),

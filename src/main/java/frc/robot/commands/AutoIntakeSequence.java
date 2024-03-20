@@ -19,7 +19,7 @@ import frc.robot.subsystems.lights.Lights;
  */
 public class AutoIntakeSequence extends SequentialCommandGroup {
   public AutoIntakeSequence(Intake intake, Elevator elevator, Conveyor conveyor, Lights lights) {
-    addRequirements(intake, elevator, conveyor, lights);
+    addRequirements(intake, elevator, conveyor);
 
     addCommands(
         new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", false)),

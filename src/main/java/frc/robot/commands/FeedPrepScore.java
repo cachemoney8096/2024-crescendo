@@ -25,7 +25,7 @@ public class FeedPrepScore extends SequentialCommandGroup {
       MatchStateUtil matchState,
       IntakeLimelight intakeLimelight,
       Lights lights) {
-    addRequirements(elevator, conveyor, intake, shooter, lights);
+    addRequirements(elevator, conveyor, intake, shooter);
     addCommands(
         new InstantCommand(() -> lights.setLEDColor(LightCode.FEED)),
         new GoHomeSequence(
