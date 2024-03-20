@@ -53,6 +53,7 @@ public class TwoWithCenterNote extends SequentialCommandGroup {
                 shooterLimelight,
                 intakeLimelight,
                 drive,
+                lights,
                 () -> {
                   return false;
                 })

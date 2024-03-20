@@ -12,6 +12,8 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelight;
+import frc.robot.subsystems.lights.Lights;
+import frc.robot.subsystems.lights.Lights.LightCode;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 
@@ -25,7 +27,8 @@ public class ClimbPrepSequence extends SequentialCommandGroup {
       Elevator elevator,
       Shooter shooter,
       Conveyor conveyor,
-      IntakeLimelight intakeLimelight) {
+      IntakeLimelight intakeLimelight,
+      Lights lights) {
     final SequentialCommandGroup restOfPrep =
         new SequentialCommandGroup(
             new InstantCommand(
@@ -40,8 +43,8 @@ public class ClimbPrepSequence extends SequentialCommandGroup {
             new WaitUntilCommand(intake::clearOfConveyorZone),
             new InstantCommand(
                 () -> elevator.setDesiredPosition(ElevatorPosition.PRE_CLIMB, true)));
-    addRequirements(intake, elevator, shooter, conveyor);
+    addRequirements(intake, elevator, shooter, conveyor, lights);
 
-    addCommands(new ParallelCommandGroup(Conveyor.crushNote(conveyor), restOfPrep));
+    addCommands(new InstantCommand(() -> lights.setLEDColor(LightCode.CLIMB_PREP)), new ParallelCommandGroup(Conveyor.crushNote(conveyor), restOfPrep));
   }
 }

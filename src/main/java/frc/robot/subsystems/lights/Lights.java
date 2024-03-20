@@ -2,13 +2,13 @@ package frc.robot.subsystems.lights;
 
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix.led.CANdleConfiguration;
 import com.ctre.phoenix.led.RainbowAnimation;
-import com.ctre.phoenix.led.StrobeAnimation;
 import frc.robot.RobotMap;
 import java.util.TreeMap;
 
-public class Lights {
+public class Lights extends SubsystemBase {
   /**
    * Tree map of light code enums and integers that represent the R, G, B values of each light code
    * enum
@@ -20,14 +20,14 @@ public class Lights {
   private LightCode currentLightStatus = LightCode.OFF;
 
   public enum LightCode {
-    NOTELESS, // red
-    INTAKING, // blue
-    READY_TO_SHOOT, // green
-    ALIGNING_TO_TAG, // orange
-    HOLDING_NOTE, // yellow
-    OFF, // no lights are on
-    NO_TAG,
-    PARTY_MODE;
+    OFF, // nothing, used for prepState = OFF and UnclimbSequence
+    INTAKING, // purple
+    HAS_NOTE, // green
+    SPEAKER_PREP, // blue
+    FEED, // red
+    AMP_PREP, // red, both feed are amp prep are red
+    CLIMB_PREP, // yellow
+    READY_TO_SCORE // rainbow
   }
 
   public Lights() {
@@ -36,28 +36,23 @@ public class Lights {
     candle.configAllSettings(config);
 
     lightOptionsMap = new TreeMap<LightCode, Integer[]>();
-    lightOptionsMap.put(LightCode.NOTELESS, new Integer[] {255, 0, 0});
-    lightOptionsMap.put(LightCode.INTAKING, new Integer[] {0, 0, 255});
-    lightOptionsMap.put(LightCode.READY_TO_SHOOT, new Integer[] {0, 255, 0});
-    lightOptionsMap.put(LightCode.ALIGNING_TO_TAG, new Integer[] {255, 165, 0});
-    lightOptionsMap.put(LightCode.HOLDING_NOTE, new Integer[] {255, 255, 102});
     lightOptionsMap.put(LightCode.OFF, new Integer[] {0, 0, 0});
+    lightOptionsMap.put(LightCode.INTAKING, new Integer[] {255, 0, 255});
+    lightOptionsMap.put(LightCode.HAS_NOTE, new Integer[] {0, 255, 0});
+    lightOptionsMap.put(LightCode.SPEAKER_PREP, new Integer[] {0, 0, 255});
+    lightOptionsMap.put(LightCode.FEED, new Integer[] {255, 0, 0});
+    lightOptionsMap.put(LightCode.AMP_PREP, new Integer[] {255, 0, 0});
+    lightOptionsMap.put(LightCode.CLIMB_PREP, new Integer[] {255, 255, 0});
   }
 
-  public void toggleCode(LightCode light) {
-    if (currentLightStatus == light) {
-      currentLightStatus = LightCode.OFF;
-    } else {
-      currentLightStatus = light;
-    }
+  public void setLEDColor(LightCode light) {
+    currentLightStatus = light;
     setLEDs();
   }
 
   private void setLEDs() {
-    if (currentLightStatus == LightCode.PARTY_MODE) {
-      setPartyMode();
-    } else if (currentLightStatus == LightCode.NO_TAG) {
-      setNoTag();
+    if (currentLightStatus == LightCode.READY_TO_SCORE) {
+      setRainbow();
     } else {
       candle.setLEDs(
           lightOptionsMap.get(currentLightStatus)[0],
@@ -66,12 +61,7 @@ public class Lights {
     }
   }
 
-  private void setNoTag() {
-    StrobeAnimation strobeAnim = new StrobeAnimation(255, 0, 255);
-    candle.animate(strobeAnim);
-  }
-
-  public void setPartyMode() {
+  private void setRainbow() {
     RainbowAnimation rainbowAnim =
         new RainbowAnimation(
             LightsConstants.LIGHT_BRIGHTNESS,

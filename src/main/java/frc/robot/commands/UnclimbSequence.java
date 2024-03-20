@@ -6,13 +6,16 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
+import frc.robot.subsystems.lights.Lights;
+import frc.robot.subsystems.lights.Lights.LightCode;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 
 public class UnclimbSequence extends SequentialCommandGroup {
-  public UnclimbSequence(Elevator elevator, Shooter shooter, Conveyor conveyor) {
-    addRequirements(elevator, shooter, conveyor);
+  public UnclimbSequence(Elevator elevator, Shooter shooter, Conveyor conveyor, Lights lights) {
+    addRequirements(elevator, shooter, conveyor, lights);
     addCommands(
+        new InstantCommand(() -> lights.setLEDColor(LightCode.OFF)),
         Conveyor.stop(conveyor),
         new InstantCommand(
             () -> {

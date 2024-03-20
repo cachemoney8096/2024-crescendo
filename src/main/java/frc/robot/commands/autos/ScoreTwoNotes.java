@@ -35,7 +35,7 @@ public class ScoreTwoNotes extends SequentialCommandGroup {
       IntakeLimelight intakeLimelight,
       Lights lights) {
 
-    addRequirements(intake, elevator, shooter, conveyor);
+    addRequirements(intake, elevator, shooter, conveyor, lights);
     addCommands(
         new InstantCommand(() -> initialYaw = drive.getPose().getRotation()),
         new OneFiveLeave(
@@ -67,7 +67,8 @@ public class ScoreTwoNotes extends SequentialCommandGroup {
             conveyor,
             shooterLimelight,
             intakeLimelight,
-            drive // goes home at the end of ScoreThisNote
+            drive, // goes home at the end of ScoreThisNote
+            lights
             ),
         new PrintCommand("ScoreTwoNotes - Done scoring"),
         new InstantCommand(drive::setForwardTargetHeading),

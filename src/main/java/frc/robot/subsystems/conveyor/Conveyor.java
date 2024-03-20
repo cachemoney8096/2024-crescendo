@@ -18,6 +18,8 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Robot;
 import frc.robot.RobotMap;
+import frc.robot.subsystems.lights.Lights;
+import frc.robot.subsystems.lights.Lights.LightCode;
 import frc.robot.utils.SparkMaxUtils;
 import java.util.function.DoubleConsumer;
 
@@ -206,7 +208,7 @@ public class Conveyor extends SubsystemBase {
    * Assuming a note is here, then runs until it's positioned correctly. Notably, it won't do
    * anything if there's not a note.
    */
-  public static Command finishReceive(Conveyor conveyor) {
+  public static Command finishReceive(Conveyor conveyor, Lights lights) {
     return new SequentialCommandGroup(
             new InstantCommand(
                 () -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED), conveyor),
@@ -215,6 +217,7 @@ public class Conveyor extends SubsystemBase {
             new WaitUntilCommand(() -> conveyor.conveyorBeamBreakSensor.get()),
             Conveyor.stop(conveyor),
             new InstantCommand(() -> conveyor.stopRollers()),
+            new InstantCommand(() -> lights.setLEDColor(LightCode.HAS_NOTE), lights),
             new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", true)),
             new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE))
         .withName("Finish Receive");
