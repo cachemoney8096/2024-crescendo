@@ -5,10 +5,13 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.GeometryUtil;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -20,6 +23,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SelectCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -57,6 +61,7 @@ import frc.robot.subsystems.intake.Intake.IntakePosition;
 import frc.robot.subsystems.intake.IntakeCal;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelight;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelightConstants;
+import frc.robot.subsystems.intakeLimelight.IntakeLimelight.NoteDetection;
 import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
@@ -65,6 +70,8 @@ import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.JoystickUtil;
 import frc.robot.utils.MatchStateUtil;
+
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.BooleanSupplier;
 
@@ -108,6 +115,8 @@ public class RobotContainer implements Sendable {
 
   /** What was the last command the auto initiated */
   public String pathCmd = "";
+
+  private Optional<frc.robot.subsystems.intakeLimelight.IntakeLimelight.NoteDetection> noteDetectionOptional = Optional.empty();
 
   /**
    * A chooser for autonomous commands. String in pair should be the path's name, and null if no
@@ -283,10 +292,42 @@ public class RobotContainer implements Sendable {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
+
+
   private void configureDriver() {
+    BooleanSupplier driverRotationCommanded =
+        () -> {
+          return Math.abs(driverController.getRightX()) > 0.05;
+        };
+    BooleanSupplier driverCommanded = 
+        () ->{
+            return Math.abs(driverController.getRightX()) > 0.05 || Math.abs(driverController.getLeftX()) > 0.05;
+        };
+
     driverController
         .rightTrigger()
-        .whileTrue(new IntakeSequence(intake, elevator, conveyor, shooter, lights));
+        .whileTrue(new SequentialCommandGroup(
+            new IntakeSequence(intake, elevator, conveyor, shooter, lights),
+            new ParallelRaceGroup(
+                new SequentialCommandGroup(
+                    new WaitUntilCommand(()->{
+                        noteDetectionOptional = intakeLimelight.getNotePos();
+                        return noteDetectionOptional.isPresent();
+                    }),
+                    new InstantCommand(
+                        ()->{
+                            NoteDetection noteDetection = noteDetectionOptional.get();
+                            Pose2d robotPose = drive.getPastBufferedPose(noteDetection.latencySec);
+                            double angle = noteDetection.yawAngleDeg<0?noteDetection.yawAngleDeg+360:noteDetection.yawAngleDeg;
+                            Pose2d notePose = robotPose.plus(new Transform2d(noteDetection.distanceMeters*Math.cos(angle), noteDetection.distanceMeters*Math.sin(angle), Rotation2d.fromDegrees(angle)));
+                            PathPlannerPath pathToNote = drive.pathToPoint(notePose, 0.0);
+                            drive.followTrajectoryCommand(pathToNote, false);
+                        }
+                    )
+                ),
+                new WaitUntilCommand(()->!driverCommanded.getAsBoolean())
+            )
+            ));
     driverController
         .rightTrigger()
         .onFalse(
@@ -296,10 +337,6 @@ public class RobotContainer implements Sendable {
                         intake, elevator, shooter, conveyor, intakeLimelight, false, false, true))
                 .beforeStarting(() -> prepState = PrepState.OFF));
 
-    BooleanSupplier driverRotationCommanded =
-        () -> {
-          return Math.abs(driverController.getRightX()) > 0.05;
-        };
 
     TreeMap<PrepState, Command> selectCommandMap = new TreeMap<PrepState, Command>();
     selectCommandMap.put(
