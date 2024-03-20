@@ -9,7 +9,6 @@ import com.pathplanner.lib.util.GeometryUtil;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -495,17 +494,35 @@ public class RobotContainer implements Sendable {
         .onTrue(operatorPrepCreator.apply(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS, 180.0));
     operatorController
         .povLeft()
-        .onTrue(operatorPrepCreator.apply(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS, 120.0));
+        .onTrue(
+            operatorPrepCreator.apply(
+                ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS,
+                ShooterCal.SUBWOOFER_SHOT_LEFT_RED_DEGREES));
 
     operatorController
         .povRight()
-        .onTrue(operatorPrepCreator.apply(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS, 240.0));
+        .onTrue(
+            operatorPrepCreator.apply(
+                ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS,
+                ShooterCal.SUBWOOFER_SHOT_RIGHT_RED_DEGREES));
 
-    operatorController.b().onTrue(operatorPrepCreator.apply(Units.inchesToMeters(142.0), 160.0));
+    operatorController
+        .b()
+        .onTrue(
+            operatorPrepCreator.apply(
+                ShooterCal.AMP_SHOT_DISTANCE_METERS, ShooterCal.AMP_SHOT_RED_DEGREES));
 
-    operatorController.x().onTrue(operatorPrepCreator.apply(Units.inchesToMeters(100.0), 202.0));
+    operatorController
+        .x()
+        .onTrue(
+            operatorPrepCreator.apply(
+                ShooterCal.PODIUM_SHOT_DISTANCE_METERS, ShooterCal.PODIUM_SHOT_RED_DEGREES));
 
-    operatorController.y().onTrue(operatorPrepCreator.apply(Units.inchesToMeters(174.0), 190.0));
+    operatorController
+        .y()
+        .onTrue(
+            operatorPrepCreator.apply(
+                ShooterCal.STAGE_SHOT_DISTANCE_METERS, ShooterCal.STAGE_SHOT_RED_DEGREES));
 
     operatorController
         .leftBumper()
