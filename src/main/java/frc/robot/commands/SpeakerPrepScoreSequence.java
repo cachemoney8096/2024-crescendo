@@ -82,12 +82,8 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                       "tag degrees: " + tagDetection.get().getFirst().getDegrees());
                   drive.setTargetHeadingDegrees(tagDetection.get().getFirst().getDegrees());
                   shooter.setShooterDistance(tagDetection.get().getSecond());
-                  
-                  shooter.readyToShoot = true;
-
                 }
               }
-              // shooter.readyToShoot = true;
             })
             .until(
                 () -> {
