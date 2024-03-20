@@ -10,6 +10,8 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakePosition;
+import frc.robot.subsystems.lights.Lights;
+import frc.robot.subsystems.lights.Lights.LightCode;
 import frc.robot.subsystems.shooter.Shooter;
 
 /**
@@ -19,8 +21,8 @@ import frc.robot.subsystems.shooter.Shooter;
 public class AmpPrepScore extends SequentialCommandGroup {
   /** Creates a new AmpPreScore. */
   public AmpPrepScore(
-      Elevator elevator, Conveyor conveyor, Intake intake, Shooter shooter, DriveSubsystem drive) {
-    addRequirements(conveyor, elevator, intake, shooter);
+      Elevator elevator, Conveyor conveyor, Intake intake, Shooter shooter, DriveSubsystem drive, Lights lights) {
+    addRequirements(conveyor, elevator, intake, shooter, lights);
 
     SequentialCommandGroup moveWhenNotSafe =
         new SequentialCommandGroup(
@@ -33,6 +35,7 @@ public class AmpPrepScore extends SequentialCommandGroup {
             new WaitUntilCommand(elevator::elevatorAboveIntakeInterferenceZone));
 
     addCommands(
+        new InstantCommand(() -> lights.setLEDColor(LightCode.AMP_PREP)),
         new InstantCommand(() -> conveyor.stopRollers()),
         new ConditionalCommand(
             new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SCORE_AMP, true)),

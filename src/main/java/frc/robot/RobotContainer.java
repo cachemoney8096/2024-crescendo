@@ -57,6 +57,7 @@ import frc.robot.subsystems.intake.IntakeCal;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelight;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelightConstants;
 import frc.robot.subsystems.lights.Lights;
+import frc.robot.subsystems.lights.Lights.LightCode;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.subsystems.shooter.ShooterCal;
@@ -282,14 +283,15 @@ public class RobotContainer implements Sendable {
    * joysticks}.
    */
   private void configureDriver() {
-    new Trigger(() -> !conveyor.intakeBeamBreakSensor.get()).onTrue(Conveyor.rumbleBriefly(conveyor));
+    new Trigger(() -> !conveyor.intakeBeamBreakSensor.get())
+        .onTrue(Conveyor.rumbleBriefly(conveyor));
     driverController
         .rightTrigger()
         .whileTrue(new IntakeSequence(intake, elevator, conveyor, shooter, lights));
     driverController
         .rightTrigger()
         .onFalse(
-            Conveyor.finishReceive(conveyor)
+            Conveyor.finishReceive(conveyor, lights)
                 .andThen(
                     new GoHomeSequence(
                         intake, elevator, shooter, conveyor, intakeLimelight, false, false, true))
@@ -345,13 +347,14 @@ public class RobotContainer implements Sendable {
                     shooterLimelight,
                     intakeLimelight,
                     drive,
+                    lights,
                     driverRotationCommanded)));
     driverController
         .rightBumper()
         .onTrue(
             new SequentialCommandGroup(
                 new InstantCommand(() -> prepState = PrepState.AMP),
-                new AmpPrepScore(elevator, conveyor, intake, shooter, drive)));
+                new AmpPrepScore(elevator, conveyor, intake, shooter, drive, lights)));
     // bottom right back button
     driverController
         .povLeft()
@@ -369,9 +372,9 @@ public class RobotContainer implements Sendable {
             new SequentialCommandGroup(
                 new InstantCommand(() -> prepState = PrepState.FEED),
                 new FeedPrepScore(
-                    elevator, conveyor, intake, shooter, drive, matchState, intakeLimelight)));
+                    elevator, conveyor, intake, shooter, drive, matchState, intakeLimelight, lights)));
     // bottom left back button
-    driverController.povRight().onTrue(new UnclimbSequence(elevator, shooter, conveyor));
+    driverController.povRight().onTrue(new UnclimbSequence(elevator, shooter, conveyor, lights));
 
     BooleanSupplier driverJoysticksActive =
         () -> {
@@ -387,7 +390,7 @@ public class RobotContainer implements Sendable {
         .onTrue(
             new InstantCommand(() -> prepState = PrepState.CLIMB)
                 .andThen(
-                    new ClimbPrepSequence(intake, elevator, shooter, conveyor, intakeLimelight))
+                    new ClimbPrepSequence(intake, elevator, shooter, conveyor, intakeLimelight, lights))
                 .andThen(new WaitUntilCommand(() -> elevator.atDesiredPosition()))
                 // .andThen(new SetTrapLineupPosition(intakeLimelight,
                 // drive).withTimeout(4.0)));
@@ -548,6 +551,35 @@ public class RobotContainer implements Sendable {
     elevator.burnFlashSparks();
     shooter.burnFlashSparks();
     Timer.delay(0.25);
+  }
+
+  /** @return true when the currently prepped state is ready to score */
+  public boolean readyToScoreCheck() {
+    switch (prepState) {
+      case OFF:
+        lights.setLEDColor(LightCode.OFF);
+        return false;
+      case CLIMB:
+        return intake.nearDeployed() && elevator.atDesiredPosition() && shooter.atDesiredPosition();
+      case SPEAKER:
+        return elevator.atDesiredPosition()
+            && shooter.atDesiredPosition()
+            && shooter.isShooterSpunUp()
+            && drive.getDiffCurrentTargetYawDeg()
+                < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES;
+      case FEED:
+        return elevator.atDesiredPosition()
+            && shooter.atDesiredPosition()
+            && shooter.isShooterSpunUp();
+      case AMP:
+        return elevator.atDesiredPosition();
+      case OPERATOR:
+        return shooter.isShooterSpunUp()
+            && shooter.atDesiredPosition()
+            && drive.getDiffCurrentTargetYawDeg()
+                < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES;
+    }
+    return false;
   }
 
   /**

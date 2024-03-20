@@ -24,16 +24,16 @@ public class SpeakerShootSequence extends SequentialCommandGroup {
       boolean waitUntilRotated) {
     addRequirements(conveyor, shooter);
     addCommands(
-        new WaitUntilCommand(
-                () -> {
-                  return elevator.atDesiredPosition()
-                      && shooter.atDesiredPosition()
-                      && shooter.isShooterSpunUp()
-                      && (!waitUntilRotated
-                          || drive.getDiffCurrentTargetYawDeg()
-                              < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES);
-                })
-            .withTimeout(2.0),
+        // new WaitUntilCommand(
+        //         () -> {
+        //           return elevator.atDesiredPosition()
+        //               && shooter.atDesiredPosition()
+        //               && shooter.isShooterSpunUp()
+        //               && (!waitUntilRotated
+        //                   || drive.getDiffCurrentTargetYawDeg()
+        //                       < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES);
+        //         })
+        //     .withTimeout(2.0),
         Conveyor.shoot(conveyor),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.IDLE)),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME, true)));

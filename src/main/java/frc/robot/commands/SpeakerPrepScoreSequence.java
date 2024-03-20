@@ -14,6 +14,8 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelight;
+import frc.robot.subsystems.lights.Lights;
+import frc.robot.subsystems.lights.Lights.LightCode;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
@@ -37,12 +39,14 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
       ShooterLimelight shooterLimelight,
       IntakeLimelight intakeLimelight,
       DriveSubsystem drive,
+      Lights lights,
       BooleanSupplier driverControllerInput) {
 
     // Drive is not a requirement!!
-    addRequirements(intake, elevator, shooter, conveyor);
+    addRequirements(intake, elevator, shooter, conveyor, lights);
 
     addCommands(
+        new InstantCommand(() -> lights.setLEDColor(LightCode.SPEAKER_PREP)),
         new GoHomeSequence(
             intake, elevator, shooter, conveyor, intakeLimelight, true, false, false),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SLIGHTLY_UP, true)),

@@ -19,12 +19,12 @@ public class ClimbSequence extends SequentialCommandGroup {
   public ClimbSequence(Intake intake, Elevator elevator, Shooter shooter, Conveyor conveyor) {
     addRequirements(intake, elevator, shooter, conveyor);
     addCommands(
-        new WaitUntilCommand(
-            () -> {
-              return intake.nearDeployed()
-                  && elevator.atDesiredPosition()
-                  && shooter.atDesiredPosition();
-            }),
+        // new WaitUntilCommand(
+        //     () -> {
+        //       return intake.nearDeployed()
+        //           && elevator.atDesiredPosition()
+        //           && shooter.atDesiredPosition();
+        //     }),
         new InstantCommand(() -> elevator.setControlParams(false)),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME, false)),
         new WaitUntilCommand(elevator::atDesiredPosition),

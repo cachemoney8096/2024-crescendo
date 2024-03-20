@@ -81,6 +81,9 @@ public class Robot extends TimedRobot {
     // robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+    if (m_robotContainer.readyToScoreCheck()) {
+      m_robotContainer.lights.setLEDColor(LightCode.READY_TO_SCORE);
+    }
   }
 
   /** This function is called once each time the robot enters disabled mode. */
@@ -197,7 +200,6 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
-    m_robotContainer.lights.toggleCode(LightCode.NOTELESS);
     m_robotContainer.intake.stopRollers();
     m_robotContainer.conveyor.stopRollers();
     m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);
