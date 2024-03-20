@@ -10,6 +10,8 @@ import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.REVLibError;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
 import com.revrobotics.SparkPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,6 +20,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.subsystems.elevator.ElevatorCal;
+import frc.robot.subsystems.intake.IntakeCal;
 import frc.robot.utils.AbsoluteEncoderChecker;
 import frc.robot.utils.SparkMaxUtils;
 
@@ -25,7 +29,8 @@ public class SwerveModule implements Sendable {
   public final TalonFX drivingTalon;
   public final CANSparkMax turningSparkMax;
 
-  private final AbsoluteEncoder turningEncoder;
+  private final RelativeEncoder turningRelativeEncoder;
+  private final AbsoluteEncoder turningAbsoluteEncoder;
   private AbsoluteEncoderChecker turningAbsoluteEncoderChecker = new AbsoluteEncoderChecker();
 
   private final SparkPIDController turningPIDController;
@@ -47,10 +52,12 @@ public class SwerveModule implements Sendable {
     initDriveTalon();
     SparkMaxUtils.initWithRetry(this::initTurnSpark, DriveCal.SPARK_INIT_RETRY_ATTEMPTS);
 
-    turningEncoder = turningSparkMax.getAbsoluteEncoder(Type.kDutyCycle);
+    turningRelativeEncoder = turningSparkMax.getEncoder();
+    turningAbsoluteEncoder = turningSparkMax.getAbsoluteEncoder(Type.kDutyCycle);
     turningPIDController = turningSparkMax.getPIDController();
 
-    desiredState.angle = Rotation2d.fromRadians(turningEncoder.getPosition());
+    // desiredState.angle = Rotation2d.fromRadians(turningAbsoluteEncoder.getPosition());
+    desiredState.angle = Rotation2d.fromRadians(turningRelativeEncoder.getPosition());
     drivingTalon.setPosition(0);
   }
 
@@ -61,11 +68,11 @@ public class SwerveModule implements Sendable {
     errors += SparkMaxUtils.check(turningSparkMax.restoreFactoryDefaults());
 
     errors +=
-        SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 500));
+        SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 20));
     errors +=
-        SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 500));
+        SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 20));
     errors +=
-        SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 500));
+        SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 20));
     errors +=
         SparkMaxUtils.check(turningSparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500));
     errors +=
@@ -80,19 +87,29 @@ public class SwerveModule implements Sendable {
 
     turningSparkMax.setInverted(false);
 
-    AbsoluteEncoder turningEncoderTmp = turningSparkMax.getAbsoluteEncoder(Type.kDutyCycle);
+    RelativeEncoder tunringRelativeEncoderTmp = turningSparkMax.getEncoder();
+    AbsoluteEncoder turningAbsoluteEncoderTmp = turningSparkMax.getAbsoluteEncoder(Type.kDutyCycle);
     SparkPIDController turningPidTmp = turningSparkMax.getPIDController();
-    errors += SparkMaxUtils.check(turningPidTmp.setFeedbackDevice(turningEncoderTmp));
+    
+    errors += SparkMaxUtils.check(turningPidTmp.setFeedbackDevice(turningAbsoluteEncoderTmp));
+
+    errors +=
+        SparkMaxUtils.check(
+            SparkMaxUtils.UnitConversions.setRadsFromGearRatio(
+                tunringRelativeEncoderTmp, DriveConstants.TURN_MODULE_RELATIVE_ENCODER_GEAR_RATIO));
 
     // Gear ratio 1.0 because the encoder is 1:1 with the module (doesn't involve the actual turning
     // gear ratio)
     errors +=
         SparkMaxUtils.check(
             SparkMaxUtils.UnitConversions.setRadsFromGearRatio(
-                turningEncoderTmp, DriveConstants.TURN_MODULE_ENCODER_GEAR_RATIO));
+                turningAbsoluteEncoderTmp, DriveConstants.TURN_MODULE_ABSOLUTE_ENCODER_GEAR_RATIO));
 
     errors +=
-        SparkMaxUtils.check(turningEncoderTmp.setInverted(DriveConstants.TURNING_ENCODER_INVERTED));
+        SparkMaxUtils.check(turningRelativeEncoder.setInverted(DriveConstants.TURNING_ENCODER_INVERTED));
+
+    errors +=
+        SparkMaxUtils.check(turningAbsoluteEncoderTmp.setInverted(DriveConstants.TURNING_ENCODER_INVERTED));
 
     errors += SparkMaxUtils.check(turningPidTmp.setPositionPIDWrappingEnabled(true));
     errors +=
@@ -157,6 +174,18 @@ public class SwerveModule implements Sendable {
     turningSparkMax.burnFlash();
   }
 
+  public void considerZeroingEncoder() {
+    if (Math.abs(turningAbsoluteEncoder.getPosition()) < 0.01) {
+      return;
+    }
+    if (Math.abs(getEncoderRelativePositionRad() - getEncoderAbsPositionRad())
+        > DriveCal.TURNING_ENCODER_ZEROING_THRESHOLD_DEG) {
+      turningRelativeEncoder.setPosition(getEncoderAbsPositionRad());
+      // turningPIDController.reset(getEncoderRelativePositionRad());
+      // TODO
+    }
+  }
+
   /**
    * Returns the current state of the module.
    *
@@ -165,9 +194,12 @@ public class SwerveModule implements Sendable {
   public SwerveModuleState getState() {
     // Apply chassis angular offset to the encoder position to get the position
     // relative to the chassis.
+    // return new SwerveModuleState(
+    //     drivingTalon.getVelocity().getValue(),
+    //     new Rotation2d(turningAbsoluteEncoder.getPosition() - chassisAngularOffsetRadians));
     return new SwerveModuleState(
         drivingTalon.getVelocity().getValue(),
-        new Rotation2d(turningEncoder.getPosition() - chassisAngularOffsetRadians));
+        new Rotation2d(turningRelativeEncoder.getPosition() - chassisAngularOffsetRadians));
   }
 
   /**
@@ -178,9 +210,12 @@ public class SwerveModule implements Sendable {
   public SwerveModulePosition getPosition() {
     // Apply chassis angular offset to the encoder position to get the position
     // relative to the chassis.
+    // return new SwerveModulePosition(
+    //     drivingTalon.getPosition().getValue(),
+    //     new Rotation2d(turningAbsoluteEncoder.getPosition() - chassisAngularOffsetRadians));
     return new SwerveModulePosition(
         drivingTalon.getPosition().getValue(),
-        new Rotation2d(turningEncoder.getPosition() - chassisAngularOffsetRadians));
+        new Rotation2d(turningRelativeEncoder.getPosition() - chassisAngularOffsetRadians));
   }
 
   /** Ensures the value a is in [0, b) */
@@ -203,8 +238,10 @@ public class SwerveModule implements Sendable {
     inputState.angle = inputState.angle.plus(Rotation2d.fromRadians(chassisAngularOffsetRadians));
 
     // Optimize the reference state to avoid spinning further than 90 degrees.
+    // inputState =
+    //     SwerveModuleState.optimize(inputState, new Rotation2d(turningAbsoluteEncoder.getPosition()));
     inputState =
-        SwerveModuleState.optimize(inputState, new Rotation2d(turningEncoder.getPosition()));
+        SwerveModuleState.optimize(inputState, new Rotation2d(turningRelativeEncoder.getPosition()));
 
     // Ensure optimized state
     inputState.angle = Rotation2d.fromRadians(mod(inputState.angle.getRadians(), 2.0 * Math.PI));
@@ -224,11 +261,15 @@ public class SwerveModule implements Sendable {
   }
 
   public double getEncoderAbsPositionRad() {
-    return turningEncoder.getPosition();
+    return turningAbsoluteEncoder.getPosition();
+  }
+
+  public double getEncoderRelativePositionRad() {
+    return turningRelativeEncoder.getPosition();
   }
 
   public void periodic() {
-    turningAbsoluteEncoderChecker.addReading(turningEncoder.getPosition());
+    turningAbsoluteEncoderChecker.addReading(turningAbsoluteEncoder.getPosition());
   }
 
   public void initSendable(SendableBuilder builder) {
@@ -285,7 +326,8 @@ public class SwerveModule implements Sendable {
           return drivingTalon.getVelocity().getValue();
         },
         null);
-    builder.addDoubleProperty("Steering Pos (rad)", turningEncoder::getPosition, null);
+    builder.addDoubleProperty("Steering Pos (rad) - absolute", turningAbsoluteEncoder::getPosition, null);
+    builder.addDoubleProperty("Steering Pos (rad) - relative", turningRelativeEncoder::getPosition, null);
     builder.addDoubleProperty(
         "Desired Vel (m/s)",
         () -> {

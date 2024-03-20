@@ -125,6 +125,7 @@ public class Robot extends TimedRobot {
     if (!matchState.isRealMatch()) {
       m_robotContainer.shooter.considerZeroingEncoder();
       m_robotContainer.intake.considerZeroingEncoder();
+      m_robotContainer.drive.considerZeroingSwerveEncoders();
     }
     m_robotContainer.shooterLimelight.resetOdometryWithTags(
         m_PoseEstimator, m_robotContainer.drive);

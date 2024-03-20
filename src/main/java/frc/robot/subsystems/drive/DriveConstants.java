@@ -42,7 +42,8 @@ public class DriveConstants {
   public static final int DRIVING_MOTOR_STATOR_CURRENT_LIMIT_AMPS = 120; // amps
   public static final int TURNING_MOTOR_CURRENT_LIMIT_AMPS = 20; // amps
 
-  public static final double TURN_MODULE_ENCODER_GEAR_RATIO = 1.0;
+  public static final double TURN_MODULE_RELATIVE_ENCODER_GEAR_RATIO = 1.0;
+  public static final double TURN_MODULE_ABSOLUTE_ENCODER_GEAR_RATIO = 1.0;
 
   /** Distance between centers of right and left wheels on robot */
   public static final double TRACK_WIDTH_METERS = Units.inchesToMeters(21.5);
