@@ -65,6 +65,8 @@ import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.JoystickUtil;
 import frc.robot.utils.MatchStateUtil;
+
+import java.time.Instant;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
@@ -332,7 +334,7 @@ public class RobotContainer implements Sendable {
     SelectCommand<PrepState> driverLeftTriggerCommand =
         new SelectCommand<PrepState>(selectCommandMap, this::getAndClearPrepState);
 
-    driverController.leftTrigger().onTrue(driverLeftTriggerCommand);
+    driverController.leftTrigger().onTrue(driverLeftTriggerCommand.andThen(new InstantCommand(() -> lights.setLEDColor(LightCode.OFF))));
 
     driverController
         .leftBumper()
@@ -567,7 +569,6 @@ public class RobotContainer implements Sendable {
   public boolean readyToScoreCheck() {
     switch (prepState) {
       case OFF:
-        lights.setLEDColor(LightCode.OFF);
         return false;
       case CLIMB:
         return intake.nearDeployed() && elevator.atDesiredPosition() && shooter.atDesiredPosition();
