@@ -269,6 +269,14 @@ public class Shooter extends SubsystemBase {
   }
 
   /**
+   * Sends pivot to the latch position but doesn't use arbitrary latch holding voltage (applies controlPosition()). Should be called every cycle
+   * when this is desired.
+   */
+  private void controlPositionWhenPastLatch() {
+    controlPosition(ShooterCal.LATCH_ANGLE_DEGREES, false);
+  }
+
+  /**
    * Sends pivot to the latch position (applies controlPosition()). Should be called every cycle
    * when this is desired.
    */
@@ -386,7 +394,9 @@ public class Shooter extends SubsystemBase {
           break;
         case LATCH:
           stopShooter();
-          if (closeToLatch()) {
+          if (getPivotPositionDegrees() - ShooterCal.LATCH_ANGLE_DEGREES > ShooterCal.LATCH_SAFE_MARGIN_DEGREES) {
+            controlPositionWhenPastLatch();
+          } else if (closeToLatch()) {
             controlPositionToHoldLatch();
           } else {
             controlPositionToLatch();
