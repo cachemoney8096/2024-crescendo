@@ -374,7 +374,14 @@ public class RobotContainer implements Sendable {
             new SequentialCommandGroup(
                 new InstantCommand(() -> prepState = PrepState.FEED),
                 new FeedPrepScore(
-                    elevator, conveyor, intake, shooter, drive, matchState, intakeLimelight, lights)));
+                    elevator,
+                    conveyor,
+                    intake,
+                    shooter,
+                    drive,
+                    matchState,
+                    intakeLimelight,
+                    lights)));
     // bottom left back button
     driverController.povRight().onTrue(new UnclimbSequence(elevator, shooter, conveyor, lights));
 
@@ -392,7 +399,8 @@ public class RobotContainer implements Sendable {
         .onTrue(
             new InstantCommand(() -> prepState = PrepState.CLIMB)
                 .andThen(
-                    new ClimbPrepSequence(intake, elevator, shooter, conveyor, intakeLimelight, lights))
+                    new ClimbPrepSequence(
+                        intake, elevator, shooter, conveyor, intakeLimelight, lights))
                 .andThen(new WaitUntilCommand(() -> elevator.atDesiredPosition()))
                 // .andThen(new SetTrapLineupPosition(intakeLimelight, drive).withTimeout(4.0)));
                 .andThen(
@@ -593,7 +601,9 @@ public class RobotContainer implements Sendable {
     Timer.delay(0.25);
   }
 
-  /** @return true when the currently prepped state is ready to score */
+  /**
+   * @return true when the currently prepped state is ready to score
+   */
   public boolean readyToScoreCheck() {
     switch (prepState) {
       case OFF:
