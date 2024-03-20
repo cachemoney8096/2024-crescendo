@@ -58,5 +58,5 @@ public class DriveCal {
       MEDIUM_ANGULAR_SPEED_RAD_PER_SEC = Math.PI,
       MEDIUM_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = Math.PI;
     
-  public static final double TURNING_ENCODER_ZEROING_THRESHOLD_DEG = Constants.PLACEHOLDER_DOUBLE;
+  public static final double TURNING_ENCODER_ZEROING_THRESHOLD_DEG = 5.0;
 }

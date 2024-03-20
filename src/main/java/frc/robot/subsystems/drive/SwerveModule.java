@@ -91,7 +91,7 @@ public class SwerveModule implements Sendable {
     AbsoluteEncoder turningAbsoluteEncoderTmp = turningSparkMax.getAbsoluteEncoder(Type.kDutyCycle);
     SparkPIDController turningPidTmp = turningSparkMax.getPIDController();
     
-    errors += SparkMaxUtils.check(turningPidTmp.setFeedbackDevice(turningAbsoluteEncoderTmp));
+    errors += SparkMaxUtils.check(turningPidTmp.setFeedbackDevice(turningRelativeEncoder));
 
     errors +=
         SparkMaxUtils.check(
@@ -104,9 +104,6 @@ public class SwerveModule implements Sendable {
         SparkMaxUtils.check(
             SparkMaxUtils.UnitConversions.setRadsFromGearRatio(
                 turningAbsoluteEncoderTmp, DriveConstants.TURN_MODULE_ABSOLUTE_ENCODER_GEAR_RATIO));
-
-    errors +=
-        SparkMaxUtils.check(turningRelativeEncoder.setInverted(DriveConstants.TURNING_ENCODER_INVERTED));
 
     errors +=
         SparkMaxUtils.check(turningAbsoluteEncoderTmp.setInverted(DriveConstants.TURNING_ENCODER_INVERTED));
