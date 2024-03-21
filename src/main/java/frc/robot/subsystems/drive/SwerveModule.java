@@ -14,6 +14,8 @@ import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
 import com.revrobotics.SparkPIDController;
+import com.revrobotics.CANSparkBase.ControlType;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -177,9 +179,8 @@ public class SwerveModule implements Sendable {
     }
     if (Math.abs(getEncoderRelativePositionRad() - getEncoderAbsPositionRad())
         > DriveCal.TURNING_ENCODER_ZEROING_THRESHOLD_DEG) {
-      turningRelativeEncoder.setPosition(getEncoderAbsPositionRad() + chassisAngularOffsetRadians);
-      // turningPIDController.reset(getEncoderRelativePositionRad());
-      // TODO
+      turningRelativeEncoder.setPosition(getEncoderAbsPositionRad() - chassisAngularOffsetRadians);
+      turningPIDController.setReference(getEncoderRelativePositionRad(), ControlType.kPosition);
     }
   }
 
