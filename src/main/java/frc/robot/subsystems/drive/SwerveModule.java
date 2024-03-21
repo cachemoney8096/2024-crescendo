@@ -91,7 +91,7 @@ public class SwerveModule implements Sendable {
     AbsoluteEncoder turningAbsoluteEncoderTmp = turningSparkMax.getAbsoluteEncoder(Type.kDutyCycle);
     SparkPIDController turningPidTmp = turningSparkMax.getPIDController();
     
-    errors += SparkMaxUtils.check(turningPidTmp.setFeedbackDevice(turningRelativeEncoder));
+    errors += SparkMaxUtils.check(turningPidTmp.setFeedbackDevice(tunringRelativeEncoderTmp));
 
     errors +=
         SparkMaxUtils.check(
@@ -196,7 +196,7 @@ public class SwerveModule implements Sendable {
     //     new Rotation2d(turningAbsoluteEncoder.getPosition() - chassisAngularOffsetRadians));
     return new SwerveModuleState(
         drivingTalon.getVelocity().getValue(),
-        new Rotation2d(turningRelativeEncoder.getPosition() - chassisAngularOffsetRadians));
+        new Rotation2d(turningRelativeEncoder.getPosition()));
   }
 
   /**
@@ -212,7 +212,7 @@ public class SwerveModule implements Sendable {
     //     new Rotation2d(turningAbsoluteEncoder.getPosition() - chassisAngularOffsetRadians));
     return new SwerveModulePosition(
         drivingTalon.getPosition().getValue(),
-        new Rotation2d(turningRelativeEncoder.getPosition() - chassisAngularOffsetRadians));
+        new Rotation2d(turningRelativeEncoder.getPosition()));
   }
 
   /** Ensures the value a is in [0, b) */
@@ -231,8 +231,6 @@ public class SwerveModule implements Sendable {
    *     needed).
    */
   public void setDesiredState(SwerveModuleState inputState) {
-    // Apply chassis angular offset to the desired state.
-    inputState.angle = inputState.angle.plus(Rotation2d.fromRadians(chassisAngularOffsetRadians));
 
     // Optimize the reference state to avoid spinning further than 90 degrees.
     // inputState =
