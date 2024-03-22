@@ -621,5 +621,6 @@ public class RobotContainer implements Sendable {
         },
         null);
     builder.addStringProperty("pathCmd", () -> pathCmd, null);
+    builder.addBooleanProperty("Using heading from tag", () -> usingTagHeading, null);
   }
 }
