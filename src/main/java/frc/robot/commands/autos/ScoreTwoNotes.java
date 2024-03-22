@@ -67,8 +67,8 @@ public class ScoreTwoNotes extends SequentialCommandGroup {
             conveyor,
             shooterLimelight,
             intakeLimelight,
-            drive // goes home at the end of ScoreThisNote
-            ),
+            drive, // goes home at the end of ScoreThisNote
+            lights),
         new PrintCommand("ScoreTwoNotes - Done scoring"),
         new InstantCommand(drive::setForwardTargetHeading),
         drive.turnInPlace(0.5),

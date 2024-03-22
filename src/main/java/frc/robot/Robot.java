@@ -11,6 +11,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -50,6 +51,7 @@ public class Robot extends TimedRobot {
      * autonomous chooser on the dashboard.
      */
     DataLogManager.start();
+    DriverStation.startDataLog(DataLogManager.getLog()); // log joystick data
     URCL.start();
 
     m_robotContainer = new RobotContainer(matchState);
@@ -79,6 +81,9 @@ public class Robot extends TimedRobot {
     // robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+    if (m_robotContainer.readyToScoreCheck()) {
+      m_robotContainer.lights.setLEDColor(LightCode.READY_TO_SCORE);
+    }
   }
 
   /** This function is called once each time the robot enters disabled mode. */
@@ -120,6 +125,7 @@ public class Robot extends TimedRobot {
     if (!matchState.isRealMatch()) {
       m_robotContainer.shooter.considerZeroingEncoder();
       m_robotContainer.intake.considerZeroingEncoder();
+      m_robotContainer.drive.considerZeroingSwerveEncoders();
     }
     m_robotContainer.shooterLimelight.resetOdometryWithTags(
         m_PoseEstimator, m_robotContainer.drive);
@@ -195,7 +201,6 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
-    m_robotContainer.lights.toggleCode(LightCode.NOTELESS);
     m_robotContainer.intake.stopRollers();
     m_robotContainer.conveyor.stopRollers();
     m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);

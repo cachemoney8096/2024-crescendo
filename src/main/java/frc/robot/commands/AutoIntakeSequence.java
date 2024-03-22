@@ -11,7 +11,6 @@ import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakePosition;
 import frc.robot.subsystems.lights.Lights;
-import frc.robot.subsystems.lights.Lights.LightCode;
 
 /**
  * Puts the intake into the deployed position then gets elevator to home position Checks that
@@ -23,7 +22,6 @@ public class AutoIntakeSequence extends SequentialCommandGroup {
     addRequirements(intake, elevator, conveyor);
 
     addCommands(
-        new InstantCommand(() -> lights.toggleCode(LightCode.INTAKING)),
         new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", false)),
         new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.DEPLOYED)),
         new WaitUntilCommand(intake::almostClearOfConveyorZone),
@@ -33,10 +31,8 @@ public class AutoIntakeSequence extends SequentialCommandGroup {
         new InstantCommand(intake::startRollers),
         Conveyor.startReceive(conveyor),
         new ParallelCommandGroup(
-                Conveyor.rumbleBriefly(conveyor),
                 new InstantCommand(intake::stopRollers, intake),
-                Conveyor.finishReceive(conveyor).finallyDo(conveyor::stopRollers))
-            .finallyDo(conveyor::stopRollers),
-        new InstantCommand(() -> lights.toggleCode(LightCode.INTAKING)));
+                Conveyor.finishReceive(conveyor, lights).finallyDo(conveyor::stopRollers))
+            .finallyDo(conveyor::stopRollers));
   }
 }

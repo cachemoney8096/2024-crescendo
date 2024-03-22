@@ -42,7 +42,7 @@ public class OneFiveLeave extends SequentialCommandGroup {
         drive.stopDrivingCommand(),
         new PrintCommand("OneFiveLeave - Done rotating"),
         new ScoreThisNote(
-            intake, elevator, shooter, conveyor, shooterLimelight, intakeLimelight, drive),
+            intake, elevator, shooter, conveyor, shooterLimelight, intakeLimelight, drive, lights),
         new PrintCommand("OneFiveLeave - Done scoring"),
         new ParallelCommandGroup(
             new PrintCommand("OneFiveLeave - Intaking"),

@@ -599,6 +599,13 @@ public class DriveSubsystem extends SubsystemBase {
         .withTimeout(timeoutSec);
   }
 
+  public void considerZeroingSwerveEncoders() {
+    frontLeft.considerZeroingEncoder();
+    frontRight.considerZeroingEncoder();
+    rearLeft.considerZeroingEncoder();
+    rearRight.considerZeroingEncoder();
+  }
+
   @Override
   public void initSendable(SendableBuilder builder) {
     super.initSendable(builder);

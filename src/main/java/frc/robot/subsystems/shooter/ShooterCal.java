@@ -108,4 +108,6 @@ public class ShooterCal {
       AMP_SHOT_RED_DEGREES = 160,
       PODIUM_SHOT_RED_DEGREES = 202.0,
       STAGE_SHOT_RED_DEGREES = 190.0;
+
+  public static final double LATCH_SAFE_MARGIN_DEGREES = 5.0;
 }

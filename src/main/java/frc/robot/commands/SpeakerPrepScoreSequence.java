@@ -14,6 +14,8 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelight;
+import frc.robot.subsystems.lights.Lights;
+import frc.robot.subsystems.lights.Lights.LightCode;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
@@ -37,12 +39,14 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
       ShooterLimelight shooterLimelight,
       IntakeLimelight intakeLimelight,
       DriveSubsystem drive,
+      Lights lights,
       BooleanSupplier driverControllerInput) {
 
     // Drive is not a requirement!!
     addRequirements(intake, elevator, shooter, conveyor);
 
     addCommands(
+        new InstantCommand(() -> lights.setLEDColor(LightCode.SPEAKER_PREP)),
         new GoHomeSequence(
             intake, elevator, shooter, conveyor, intakeLimelight, true, false, false),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SLIGHTLY_UP, true)),
@@ -55,27 +59,33 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                           currentChassisSpeeds.vxMetersPerSecond,
                           currentChassisSpeeds.vyMetersPerSecond);
 
-                  if (driveVelocityMps.getNorm() > 0.02
-                      || Math.abs(currentChassisSpeeds.omegaRadiansPerSecond)
-                          > Units.degreesToRadians(10)) {
-                    /*Pair<Rotation2d, Double> p =
-                        ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
-                            drive.getPose(), drive.matchState.isBlue());
-                    drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
-                    shooter.setShooterDistance(p.getSecond());*/
+                  Optional<Pair<Rotation2d, Double>> interimTagDetection =
+                      shooterLimelight.checkForTag();
+                  if (interimTagDetection.isEmpty()) {
+                    // Pair<Rotation2d, Double> p =
+                    // ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
+                    //     drive.getPose(), drive.matchState.isBlue());
+                    // drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
+                    // shooter.setShooterDistance(p.getSecond());
+                    tagDetection = interimTagDetection;
                   } else {
-                    Optional<Pair<Rotation2d, Double>> interimTagDetection =
-                        shooterLimelight.checkForTag();
-                    if (interimTagDetection.isEmpty()) {
-                      /*Pair<Rotation2d, Double> p =
-                          ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
-                              drive.getPose(), drive.matchState.isBlue());
-                       drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
-                      shooter.setShooterDistance(p.getSecond());
-                      tagDetection = interimTagDetection;*/
+                    if (driveVelocityMps.getNorm() > 0.02
+                        || Math.abs(currentChassisSpeeds.omegaRadiansPerSecond)
+                            > Units.degreesToRadians(10)) {
+                      // // get pose, find limelight stuff from <that> pose use limelight to prep
+                      // // sequence
+                      // tagDetection = interimTagDetection;
+                      // Pair<Rotation2d, Double> p =
+                      // ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
+                      //     drive.getPastBufferedPose(shooterLimelight.getLatencySeconds()),
+                      // drive.matchState.isBlue());
+                      // drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
+                      // shooter.setShooterDistance(tagDetection.get().getSecond());
                     } else {
                       tagDetection = interimTagDetection;
-                      // shooterLimelight.resetOdometryDuringPrep(drive);
+                      shooterLimelight.resetOdometryDuringPrep(drive);
+                      System.out.println(
+                          "tag degrees: " + tagDetection.get().getFirst().getDegrees());
                       drive.setTargetHeadingDegrees(tagDetection.get().getFirst().getDegrees());
                       shooter.setShooterDistance(tagDetection.get().getSecond());
                     }

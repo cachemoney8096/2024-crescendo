@@ -35,7 +35,7 @@ public class Elevator extends SubsystemBase {
     INTAKING
   }
 
-  private CRTUtil crtUtil = CRTUtil.init(26.0, 44.0, 3.45575, 11, 0.05).get();
+  private CRTUtil crtUtil = CRTUtil.init(26.0, 44.0, 3.45575, 15, 1).get();
 
   public CANSparkMax leftMotor =
       new CANSparkMax(RobotMap.LEFT_ELEVATOR_CAN_ID, MotorType.kBrushless);
@@ -230,6 +230,9 @@ public class Elevator extends SubsystemBase {
     double elevatorMarginInches = ElevatorCal.ELEVATOR_MARGIN_INCHES;
     if (desiredPosition == ElevatorPosition.PRE_CLIMB) {
       elevatorMarginInches = 1;
+    }
+    if (desiredPosition == ElevatorPosition.SCORE_TRAP) {
+      elevatorMarginInches = 2;
     }
     return Math.abs(desiredPositionIn - currentPositionIn) < elevatorMarginInches;
   }
