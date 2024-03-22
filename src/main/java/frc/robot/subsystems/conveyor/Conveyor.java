@@ -267,8 +267,8 @@ public class Conveyor extends SubsystemBase {
           return backMotorEncoder.getVelocity();
         },
         null);
-    builder.addBooleanProperty("Front Conveyor Beam Break", () -> frontConveyorBeamBreakSensor.get(), null);
-    builder.addBooleanProperty("Back Conveyor Beam Break", () -> backConveyorBeamBreakSensor.get(), null);
-    builder.addBooleanProperty("Intake Beam Break", () -> intakeBeamBreakSensor.get(), null);
+    builder.addBooleanProperty("Front conveyor sensor sees note", () -> !frontConveyorBeamBreakSensor.get(), null);
+    builder.addBooleanProperty("Back conveyor sensor sees note", () -> !backConveyorBeamBreakSensor.get(), null);
+    builder.addBooleanProperty("Intake sensor sees note", () -> !intakeBeamBreakSensor.get(), null);
   }
 }

@@ -105,6 +105,8 @@ public class RobotContainer implements Sendable {
 
   public boolean driveFieldRelative = true;
 
+  public boolean usingTagHeading = false;
+
   /** What was the last command the auto initiated */
   public String pathCmd = "";
 
@@ -339,6 +341,7 @@ public class RobotContainer implements Sendable {
         .onTrue(
             new SequentialCommandGroup(
                 new InstantCommand(() -> prepState = PrepState.SPEAKER),
+                new InstantCommand(() -> usingTagHeading = false),
                 new SpeakerPrepScoreSequence(
                     intake,
                     elevator,
@@ -348,7 +351,8 @@ public class RobotContainer implements Sendable {
                     intakeLimelight,
                     drive,
                     lights,
-                    driverRotationCommanded)));
+                    driverRotationCommanded),
+                new InstantCommand(() -> usingTagHeading = true)));
     driverController
         .rightBumper()
         .onTrue(
@@ -576,6 +580,7 @@ public class RobotContainer implements Sendable {
             && shooter.isShooterSpunUp()
             && drive.getDiffCurrentTargetYawDeg()
                 < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES
+            && usingTagHeading
             && elevator.atDesiredPosition();
       case FEED:
         return elevator.atDesiredPosition()
