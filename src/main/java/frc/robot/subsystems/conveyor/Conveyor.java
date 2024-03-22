@@ -38,6 +38,7 @@ public class Conveyor extends SubsystemBase {
   /** False is blocked (i.e. there is a note) */
   public DigitalInput intakeBeamBreakSensor = new DigitalInput(RobotMap.INTAKE_BEAM_BREAK_DIO);
   public DigitalInput frontConveyorBeamBreakSensor = new DigitalInput(RobotMap.FRONT_CONVEYOR_BEAM_BREAK_DIO);
+  public DigitalInput backConveyorBeamBreakSensor = new DigitalInput(RobotMap.BACK_CONVEYOR_BEAM_BREAK_DIO);
 
   /**
    * Used to define the current position of the note.
@@ -186,7 +187,7 @@ public class Conveyor extends SubsystemBase {
             new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SPEED), conveyor),
             new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SPEED)),
             new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
-            new WaitUntilCommand(() -> !conveyor.frontConveyorBeamBreakSensor.get()))
+            new WaitUntilCommand(() -> !conveyor.backConveyorBeamBreakSensor.get()))
         .withName("Start Receive");
   }
 
@@ -266,7 +267,8 @@ public class Conveyor extends SubsystemBase {
           return backMotorEncoder.getVelocity();
         },
         null);
-    builder.addBooleanProperty("beamBreakSensor", () -> !frontConveyorBeamBreakSensor.get(), null);
-    builder.addBooleanProperty("Intake Sensor", () -> intakeBeamBreakSensor.get(), null);
+    builder.addBooleanProperty("Front Conveyor Beam Break", () -> frontConveyorBeamBreakSensor.get(), null);
+    builder.addBooleanProperty("Back Conveyor Beam Break", () -> backConveyorBeamBreakSensor.get(), null);
+    builder.addBooleanProperty("Intake Beam Break", () -> intakeBeamBreakSensor.get(), null);
   }
 }

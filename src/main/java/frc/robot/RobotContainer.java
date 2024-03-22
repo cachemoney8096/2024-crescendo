@@ -65,8 +65,6 @@ import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.JoystickUtil;
 import frc.robot.utils.MatchStateUtil;
-
-import java.time.Instant;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
@@ -577,7 +575,8 @@ public class RobotContainer implements Sendable {
             && shooter.atDesiredPosition()
             && shooter.isShooterSpunUp()
             && drive.getDiffCurrentTargetYawDeg()
-                < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES;
+                < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES
+            && elevator.atDesiredPosition();
       case FEED:
         return elevator.atDesiredPosition()
             && shooter.atDesiredPosition()
