@@ -4,10 +4,10 @@ import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.Constants;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
@@ -19,6 +19,7 @@ import frc.robot.subsystems.lights.Lights.LightCode;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
+import frc.robot.utils.DeltaAngleSpeedCalcUtil;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
@@ -30,6 +31,7 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
 
   Optional<Pair<Rotation2d, Double>> tagDetection = Optional.empty();
   double distanceFromSpeakerMeters = 0.0;
+  double tempSpeedOfNote = 12.58;
 
   public SpeakerPrepScoreSequence(
       Intake intake,
@@ -53,42 +55,41 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
         new RunCommand(
                 () -> {
-                  ChassisSpeeds currentChassisSpeeds = drive.getCurrentChassisSpeeds();
-                  Translation2d driveVelocityMps =
-                      new Translation2d(
-                          currentChassisSpeeds.vxMetersPerSecond,
-                          currentChassisSpeeds.vyMetersPerSecond);
+                  tagDetection = shooterLimelight.checkForTag();
 
-                  Optional<Pair<Rotation2d, Double>> interimTagDetection =
-                      shooterLimelight.checkForTag();
-                  if (interimTagDetection.isEmpty()) {
-                    // Pair<Rotation2d, Double> p =
-                    // ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
-                    //     drive.getPose(), drive.matchState.isBlue());
-                    // drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
-                    // shooter.setShooterDistance(p.getSecond());
-                    tagDetection = interimTagDetection;
-                  } else {
-                    if (driveVelocityMps.getNorm() > 0.02
-                        || Math.abs(currentChassisSpeeds.omegaRadiansPerSecond)
-                            > Units.degreesToRadians(10)) {
-                      // // get pose, find limelight stuff from <that> pose use limelight to prep
-                      // // sequence
-                      // tagDetection = interimTagDetection;
-                      // Pair<Rotation2d, Double> p =
-                      // ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
-                      //     drive.getPastBufferedPose(shooterLimelight.getLatencySeconds()),
-                      // drive.matchState.isBlue());
-                      // drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
-                      // shooter.setShooterDistance(tagDetection.get().getSecond());
-                    } else {
-                      tagDetection = interimTagDetection;
-                      shooterLimelight.resetOdometryDuringPrep(drive);
-                      System.out.println(
-                          "tag degrees: " + tagDetection.get().getFirst().getDegrees());
-                      drive.setTargetHeadingDegrees(tagDetection.get().getFirst().getDegrees());
-                      shooter.setShooterDistance(tagDetection.get().getSecond());
-                    }
+                  if (!tagDetection.isEmpty()) {
+                    Pair<Rotation2d, Double> p =
+                        ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
+                            drive.getPastBufferedPose(shooterLimelight.getLatencySeconds()),
+                            drive.matchState.isBlue());
+                    ChassisSpeeds currentSpeeds = drive.getCurrentChassisSpeeds();
+                    DeltaAngleSpeedCalcUtil DeltaAngleSpeedCalcUtil =
+                        new DeltaAngleSpeedCalcUtil(tempSpeedOfNote);
+                    // { delta azimuth DEGREES , delta elevation DEGREES }
+                    Translation2d currentSpeedsXY =
+                        new Translation2d(
+                            currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
+                    currentSpeedsXY.rotateBy(p.getFirst());
+                    double currentElevationAngle =
+                        Math.atan(Constants.SPEAKER_HEIGHT_METERS / tagDetection.get().getSecond());
+
+                    Pair<Double, Double> calcDeltaAngles =
+                        DeltaAngleSpeedCalcUtil.calcDeltaAngle(
+                            currentSpeedsXY.getX(),
+                            currentSpeedsXY.getY(),
+                            tagDetection.get().getSecond());
+                    shooter.calcDeltaAngleAzimuthDeg = calcDeltaAngles.getFirst();
+                    shooter.calcDeltaAngleElevationDeg = calcDeltaAngles.getSecond();
+
+                    new InstantCommand(
+                        () ->
+                            drive.setTargetHeadingDegrees(
+                                drive.getHeadingDegrees() + calcDeltaAngles.getFirst()));
+                    new InstantCommand(
+                        () ->
+                            shooter.controlPositionWithAngle(
+                                (currentElevationAngle + calcDeltaAngles.getSecond()),
+                                isScheduled()));
                   }
                 })
             .until(
