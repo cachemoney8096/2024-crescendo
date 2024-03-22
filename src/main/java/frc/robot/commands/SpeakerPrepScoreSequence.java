@@ -4,7 +4,6 @@ import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -21,13 +20,11 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
 import frc.robot.utils.DeltaAngleSpeedCalcUtil;
-
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 /**
- * gets the robot ready to shoot a ring into the speaker. gets intake and
- * elevator into position,
+ * gets the robot ready to shoot a ring into the speaker. gets intake and elevator into position,
  * spins up the shooter
  */
 public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
@@ -57,37 +54,47 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SLIGHTLY_UP, true)),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT)),
         new RunCommand(
-            () -> {
-              tagDetection = shooterLimelight.checkForTag();
-              if (tagDetection.isEmpty()) {
-                return;
-              }
-              ChassisSpeeds currentSpeeds = drive.getCurrentChassisSpeeds();
-              DeltaAngleSpeedCalcUtil DeltaAngleSpeedCalcUtil = new DeltaAngleSpeedCalcUtil(tempSpeedOfNote);
-              // { delta azimuth DEGREES , delta elevation DEGREES }
-              if (tagDetection.isPresent()) {
-                Translation2d currentSpeedsXY = new Translation2d(currentSpeeds.vxMetersPerSecond,
-                    currentSpeeds.vyMetersPerSecond);
-                currentSpeedsXY.rotateBy(tagDetection.get().getFirst());
-                Pair<Double, Double> calcDeltaAngles = DeltaAngleSpeedCalcUtil.calcDeltaAngle(currentSpeedsXY.getX(),
-                    currentSpeedsXY.getY(), tagDetection.get().getSecond());
-                double currentElevationAngle = Math
-                    .atan(Constants.SPEAKER_HEIGHT_METERS / tagDetection.get().getSecond());
-                new InstantCommand(
-                    () -> drive.setTargetHeadingDegrees(drive.getHeadingDegrees() + calcDeltaAngles.getFirst()));
-                new InstantCommand(
-                    () -> shooter.controlPositionWithAngle((currentElevationAngle + calcDeltaAngles.getSecond()),
-                        isScheduled()));
-              };
-            })
-    // .until(
-    // () -> {
-    // // Translation2d currentSpeedsXY =
-    // // new Translation2d(
-    // // currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
-    // // boolean currentlyStatic = currentSpeedsXY.getNorm() < 0.1;
-    // })
-    );
-    // Conveyor.backUpNote(conveyor));
+                () -> {
+                  tagDetection = shooterLimelight.checkForTag();
+
+                  if (!tagDetection.isEmpty()) {
+                    Pair<Rotation2d, Double> p =
+                        ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
+                            drive.getPastBufferedPose(shooterLimelight.getLatencySeconds()),
+                            drive.matchState.isBlue());
+                    ChassisSpeeds currentSpeeds = drive.getCurrentChassisSpeeds();
+                    DeltaAngleSpeedCalcUtil DeltaAngleSpeedCalcUtil =
+                        new DeltaAngleSpeedCalcUtil(tempSpeedOfNote);
+                    // { delta azimuth DEGREES , delta elevation DEGREES }
+                    Translation2d currentSpeedsXY =
+                        new Translation2d(
+                            currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
+                    currentSpeedsXY.rotateBy(p.getFirst());
+                    double currentElevationAngle =
+                        Math.atan(Constants.SPEAKER_HEIGHT_METERS / tagDetection.get().getSecond());
+
+                    Pair<Double, Double> calcDeltaAngles =
+                        DeltaAngleSpeedCalcUtil.calcDeltaAngle(
+                            currentSpeedsXY.getX(),
+                            currentSpeedsXY.getY(),
+                            tagDetection.get().getSecond());
+                    shooter.calcDeltaAngleAzimuthDeg = calcDeltaAngles.getFirst();
+                    shooter.calcDeltaAngleElevationDeg = calcDeltaAngles.getSecond();
+
+                    new InstantCommand(
+                        () ->
+                            drive.setTargetHeadingDegrees(
+                                drive.getHeadingDegrees() + calcDeltaAngles.getFirst()));
+                    new InstantCommand(
+                        () ->
+                            shooter.controlPositionWithAngle(
+                                (currentElevationAngle + calcDeltaAngles.getSecond()),
+                                isScheduled()));
+                  }
+                })
+            .until(
+                () -> {
+                  return tagDetection.isPresent() || driverControllerInput.getAsBoolean();
+                }));
   }
 }

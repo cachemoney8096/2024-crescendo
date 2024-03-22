@@ -95,6 +95,11 @@ public class Shooter extends SubsystemBase {
   double desiredVelDegPerSec = 0.0;
   double actualVelDegPerSec = 0.0;
   double prevActualVelocitDegPerSec = 0.0;
+
+  public double calcDeltaAngleAzimuthDeg = 0.0;
+  public double calcDeltaAngleElevationDeg = 0.0;
+
+
   private double periodSec = 0.0;
   private double armDemandVoltsA;
   private double armDemandVoltsB;
@@ -301,6 +306,7 @@ public class Shooter extends SubsystemBase {
   private void controlPositionWithDistance(double distance) {
     controlPosition(pivotAngleMap.get(distance), false);
   }
+
   public void controlPositionWithAngle(double angleDeg, boolean holdLatchVoltage) {
     controlPosition(angleDeg, holdLatchVoltage);
   }
@@ -458,5 +464,7 @@ public class Shooter extends SubsystemBase {
         null);
     builder.addBooleanProperty("Clear of conveyor", this::clearOfConveyorZone, null);
     builder.addBooleanProperty("Close to latch", this::closeToLatch, null);
+    builder.addDoubleProperty("Shooting on the go: calc angle azimuth deg ", () -> calcDeltaAngleAzimuthDeg, null);
+    builder.addDoubleProperty("Shooting on the go: calc angle elevation deg ", () -> calcDeltaAngleElevationDeg, null);
   }
 }
