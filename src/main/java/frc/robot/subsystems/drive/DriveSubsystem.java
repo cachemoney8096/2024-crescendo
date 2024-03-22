@@ -643,6 +643,14 @@ public class DriveSubsystem extends SubsystemBase {
     builder.addDoubleProperty(
         "Rear Right Module Pos (rad)", () -> rearRight.getPosition().angle.getRadians(), null);
     builder.addDoubleProperty(
+        "Front Left Module Pos (deg)", () -> frontLeft.getPosition().angle.getDegrees(), null);
+    builder.addDoubleProperty(
+        "Front Right Module Pos (deg)", () -> frontRight.getPosition().angle.getDegrees(), null);
+    builder.addDoubleProperty(
+        "Rear Left Module Pos (deg)", () -> rearLeft.getPosition().angle.getDegrees(), null);
+    builder.addDoubleProperty(
+        "Rear Right Module Pos (deg)", () -> rearRight.getPosition().angle.getDegrees(), null);
+    builder.addDoubleProperty(
         "Front Left Distance (m)", () -> frontLeft.getPosition().distanceMeters, null);
     builder.addDoubleProperty(
         "Front Right Distance (m)", () -> frontRight.getPosition().distanceMeters, null);

@@ -289,14 +289,11 @@ public class RobotContainer implements Sendable {
         .onTrue(Conveyor.rumbleBriefly(conveyor));
     driverController
         .rightTrigger()
-        .whileTrue(new IntakeSequence(intake, elevator, conveyor, shooter, lights));
+        .whileTrue(new IntakeSequence(intake, elevator, conveyor, shooter, lights).finallyDo(() -> Conveyor.finishReceive(conveyor, lights)));
     driverController
         .rightTrigger()
-        .onFalse(
-            Conveyor.finishReceive(conveyor, lights)
-                .andThen(
-                    new GoHomeSequence(
-                        intake, elevator, shooter, conveyor, intakeLimelight, false, false, true))
+        .onFalse(new GoHomeSequence(
+                        intake, elevator, shooter, conveyor, intakeLimelight, false, false, true)
                 .beforeStarting(() -> prepState = PrepState.OFF));
 
     BooleanSupplier driverRotationCommanded =

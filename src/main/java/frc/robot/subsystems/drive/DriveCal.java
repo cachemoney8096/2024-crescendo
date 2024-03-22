@@ -2,6 +2,7 @@ package frc.robot.subsystems.drive;
 
 import com.pathplanner.lib.util.PIDConstants;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.util.Units;
 
 public class DriveCal {
   public static final int SPARK_INIT_RETRY_ATTEMPTS = 5;
@@ -19,10 +20,10 @@ public class DriveCal {
    * Angular offset of the modules relative to the zeroing fixture in radians. Ideally should be
    * relative to the fixture but they are actually slightly different.
    */
-  public static double SWERVE_FRONT_LEFT_ANGULAR_OFFSET_RAD = 3.764,
-      SWERVE_FRONT_RIGHT_ANGULAR_OFFSET_RAD = 3.593 + Math.PI,
-      SWERVE_BACK_LEFT_ANGULAR_OFFSET_RAD = 0.466 + Math.PI,
-      SWERVE_BACK_RIGHT_ANGULAR_OFFSET_RAD = 0.551;
+  public static double SWERVE_FRONT_LEFT_ANGULAR_OFFSET_RAD = 3.648 + Math.PI,
+      SWERVE_FRONT_RIGHT_ANGULAR_OFFSET_RAD = 3.599,
+      SWERVE_BACK_LEFT_ANGULAR_OFFSET_RAD = 0.411,
+      SWERVE_BACK_RIGHT_ANGULAR_OFFSET_RAD = 0.564 + Math.PI;
 
   /**
    * Angular offsets of the modules relative to the chassis in radians. The modules form an O when
@@ -57,5 +58,5 @@ public class DriveCal {
       MEDIUM_ANGULAR_SPEED_RAD_PER_SEC = Math.PI,
       MEDIUM_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = Math.PI;
 
-  public static final double TURNING_ENCODER_ZEROING_THRESHOLD_DEG = 5.0;
+  public static final double TURNING_ENCODER_ZEROING_THRESHOLD_RAD = Units.degreesToRadians(5.0);
 }
