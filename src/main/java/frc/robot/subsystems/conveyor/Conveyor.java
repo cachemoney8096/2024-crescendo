@@ -5,9 +5,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkLimitSwitch;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.DigitalGlitchFilter;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -17,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.robot.Robot;
 import frc.robot.RobotMap;
 import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.lights.Lights.LightCode;
@@ -37,8 +34,11 @@ public class Conveyor extends SubsystemBase {
 
   /** False is blocked (i.e. there is a note) */
   public DigitalInput intakeBeamBreakSensor = new DigitalInput(RobotMap.INTAKE_BEAM_BREAK_DIO);
-  public DigitalInput frontConveyorBeamBreakSensor = new DigitalInput(RobotMap.FRONT_CONVEYOR_BEAM_BREAK_DIO);
-  public DigitalInput backConveyorBeamBreakSensor = new DigitalInput(RobotMap.BACK_CONVEYOR_BEAM_BREAK_DIO);
+
+  public DigitalInput frontConveyorBeamBreakSensor =
+      new DigitalInput(RobotMap.FRONT_CONVEYOR_BEAM_BREAK_DIO);
+  public DigitalInput backConveyorBeamBreakSensor =
+      new DigitalInput(RobotMap.BACK_CONVEYOR_BEAM_BREAK_DIO);
 
   /**
    * Used to define the current position of the note.
@@ -267,8 +267,10 @@ public class Conveyor extends SubsystemBase {
           return backMotorEncoder.getVelocity();
         },
         null);
-    builder.addBooleanProperty("Front conveyor sensor sees note", () -> !frontConveyorBeamBreakSensor.get(), null);
-    builder.addBooleanProperty("Back conveyor sensor sees note", () -> !backConveyorBeamBreakSensor.get(), null);
+    builder.addBooleanProperty(
+        "Front conveyor sensor sees note", () -> !frontConveyorBeamBreakSensor.get(), null);
+    builder.addBooleanProperty(
+        "Back conveyor sensor sees note", () -> !backConveyorBeamBreakSensor.get(), null);
     builder.addBooleanProperty("Intake sensor sees note", () -> !intakeBeamBreakSensor.get(), null);
   }
 }

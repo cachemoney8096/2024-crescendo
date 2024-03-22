@@ -7,23 +7,19 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
 import com.revrobotics.SparkPIDController;
-import com.revrobotics.CANSparkBase.ControlType;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.subsystems.elevator.ElevatorCal;
-import frc.robot.subsystems.intake.IntakeCal;
 import frc.robot.utils.AbsoluteEncoderChecker;
 import frc.robot.utils.SparkMaxUtils;
 
@@ -92,7 +88,7 @@ public class SwerveModule implements Sendable {
     RelativeEncoder tunringRelativeEncoderTmp = turningSparkMax.getEncoder();
     AbsoluteEncoder turningAbsoluteEncoderTmp = turningSparkMax.getAbsoluteEncoder(Type.kDutyCycle);
     SparkPIDController turningPidTmp = turningSparkMax.getPIDController();
-    
+
     errors += SparkMaxUtils.check(turningPidTmp.setFeedbackDevice(tunringRelativeEncoderTmp));
 
     errors +=
@@ -108,7 +104,8 @@ public class SwerveModule implements Sendable {
                 turningAbsoluteEncoderTmp, DriveConstants.TURN_MODULE_ABSOLUTE_ENCODER_GEAR_RATIO));
 
     errors +=
-        SparkMaxUtils.check(turningAbsoluteEncoderTmp.setInverted(DriveConstants.TURNING_ENCODER_INVERTED));
+        SparkMaxUtils.check(
+            turningAbsoluteEncoderTmp.setInverted(DriveConstants.TURNING_ENCODER_INVERTED));
 
     errors += SparkMaxUtils.check(turningPidTmp.setPositionPIDWrappingEnabled(true));
     errors +=
@@ -235,9 +232,11 @@ public class SwerveModule implements Sendable {
 
     // Optimize the reference state to avoid spinning further than 90 degrees.
     // inputState =
-    //     SwerveModuleState.optimize(inputState, new Rotation2d(turningAbsoluteEncoder.getPosition()));
+    //     SwerveModuleState.optimize(inputState, new
+    // Rotation2d(turningAbsoluteEncoder.getPosition()));
     inputState =
-        SwerveModuleState.optimize(inputState, new Rotation2d(turningRelativeEncoder.getPosition()));
+        SwerveModuleState.optimize(
+            inputState, new Rotation2d(turningRelativeEncoder.getPosition()));
 
     // Ensure optimized state
     inputState.angle = Rotation2d.fromRadians(mod(inputState.angle.getRadians(), 2.0 * Math.PI));
@@ -322,8 +321,10 @@ public class SwerveModule implements Sendable {
           return drivingTalon.getVelocity().getValue();
         },
         null);
-    builder.addDoubleProperty("Steering Pos (rad) - absolute", turningAbsoluteEncoder::getPosition, null);
-    builder.addDoubleProperty("Steering Pos (rad) - relative", turningRelativeEncoder::getPosition, null);
+    builder.addDoubleProperty(
+        "Steering Pos (rad) - absolute", turningAbsoluteEncoder::getPosition, null);
+    builder.addDoubleProperty(
+        "Steering Pos (rad) - relative", turningRelativeEncoder::getPosition, null);
     builder.addDoubleProperty(
         "Desired Vel (m/s)",
         () -> {

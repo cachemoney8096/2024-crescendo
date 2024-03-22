@@ -51,7 +51,7 @@ public class Robot extends TimedRobot {
      * autonomous chooser on the dashboard.
      */
     DataLogManager.start();
-    DriverStation.startDataLog(DataLogManager.getLog()); //log joystick data
+    DriverStation.startDataLog(DataLogManager.getLog()); // log joystick data
     URCL.start();
 
     m_robotContainer = new RobotContainer(matchState);
