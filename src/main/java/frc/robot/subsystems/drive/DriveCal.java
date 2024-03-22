@@ -2,7 +2,6 @@ package frc.robot.subsystems.drive;
 
 import com.pathplanner.lib.util.PIDConstants;
 import edu.wpi.first.math.controller.PIDController;
-import frc.robot.Constants;
 
 public class DriveCal {
   public static final int SPARK_INIT_RETRY_ATTEMPTS = 5;
@@ -57,6 +56,6 @@ public class DriveCal {
       MEDIUM_LINEAR_ACCELERATION_METERS_PER_SEC_SQ = 2.0,
       MEDIUM_ANGULAR_SPEED_RAD_PER_SEC = Math.PI,
       MEDIUM_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = Math.PI;
-    
+
   public static final double TURNING_ENCODER_ZEROING_THRESHOLD_DEG = 5.0;
 }

@@ -334,7 +334,11 @@ public class RobotContainer implements Sendable {
     SelectCommand<PrepState> driverLeftTriggerCommand =
         new SelectCommand<PrepState>(selectCommandMap, this::getAndClearPrepState);
 
-    driverController.leftTrigger().onTrue(driverLeftTriggerCommand.andThen(new InstantCommand(() -> lights.setLEDColor(LightCode.OFF))));
+    driverController
+        .leftTrigger()
+        .onTrue(
+            driverLeftTriggerCommand.andThen(
+                new InstantCommand(() -> lights.setLEDColor(LightCode.OFF))));
 
     driverController
         .leftBumper()
@@ -411,7 +415,8 @@ public class RobotContainer implements Sendable {
                         new SequentialCommandGroup(
                                 new SetTrapLineupPosition(intakeLimelight, drive),
                                 new PIDToPoint(drive),
-                                Conveyor.rumbleBriefly(conveyor)) //rumble after auto drive finishes
+                                Conveyor.rumbleBriefly(
+                                    conveyor)) // rumble after auto drive finishes
                             .raceWith(new WaitUntilCommand(driverJoysticksActive))
                             .schedule())
                 .andThen(new InstantCommand(() -> driveFieldRelative = false))
@@ -578,8 +583,7 @@ public class RobotContainer implements Sendable {
         return elevator.atDesiredPosition()
             && shooter.atDesiredPosition()
             && shooter.isShooterSpunUp()
-            && drive.getDiffCurrentTargetYawDeg()
-                < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES
+            && drive.getDiffCurrentTargetYawDeg() < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES
             && usingTagHeading
             && elevator.atDesiredPosition();
       case FEED:

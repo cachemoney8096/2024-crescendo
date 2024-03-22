@@ -45,6 +45,8 @@ public class ClimbPrepSequence extends SequentialCommandGroup {
                 () -> elevator.setDesiredPosition(ElevatorPosition.PRE_CLIMB, true)));
     addRequirements(intake, elevator, shooter, conveyor);
 
-    addCommands(new InstantCommand(() -> lights.setLEDColor(LightCode.CLIMB_PREP)), new ParallelCommandGroup(Conveyor.crushNote(conveyor), restOfPrep));
+    addCommands(
+        new InstantCommand(() -> lights.setLEDColor(LightCode.CLIMB_PREP)),
+        new ParallelCommandGroup(Conveyor.crushNote(conveyor), restOfPrep));
   }
 }
