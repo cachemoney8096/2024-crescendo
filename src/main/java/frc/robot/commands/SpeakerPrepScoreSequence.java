@@ -20,6 +20,8 @@ import frc.robot.subsystems.lights.Lights.LightCode;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
+import frc.robot.utils.DeltaAngleSpeedCalcUtil;
+
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
@@ -32,7 +34,7 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
 
   Optional<Pair<Rotation2d, Double>> tagDetection = Optional.empty();
   double distanceFromSpeakerMeters = 0.0;
-  double tempSpeedOfNote = 12.16;
+  double tempSpeedOfNote = 12.58;
 
   public SpeakerPrepScoreSequence(
       Intake intake,
