@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.util.Units;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -75,4 +76,6 @@ public final class Constants {
   public static final double NOTE_HEIGHT_INCHES = 2.0;
 
   public static final double ODOMETRY_MARGIN_FOR_ZEROING_M = 0.2; // arbitrary value for now
+  
+  public static final double SPEAKER_HEIGHT_METERS = Units.inchesToMeters(77.9528);
 }
