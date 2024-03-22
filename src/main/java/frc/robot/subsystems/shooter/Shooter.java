@@ -301,7 +301,9 @@ public class Shooter extends SubsystemBase {
   private void controlPositionWithDistance(double distance) {
     controlPosition(pivotAngleMap.get(distance), false);
   }
-
+  public void controlPositionWithAngle(double angleDeg, boolean holdLatchVoltage) {
+    controlPosition(angleDeg, holdLatchVoltage);
+  }
   /**
    * Set pivot to a specific angle using voltage. Needs to be called every cycle.
    *
