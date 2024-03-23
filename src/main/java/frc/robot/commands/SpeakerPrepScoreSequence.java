@@ -62,11 +62,11 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                   Optional<Pair<Rotation2d, Double>> interimTagDetection =
                       shooterLimelight.checkForTag();
                   if (interimTagDetection.isEmpty()) {
-                    // Pair<Rotation2d, Double> p =
-                    // ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
-                    //     drive.getPose(), drive.matchState.isBlue());
-                    // drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
-                    // shooter.setShooterDistance(p.getSecond());
+                    Pair<Rotation2d, Double> p =
+                    ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
+                        drive.getPose(), drive.matchState.isBlue());
+                    drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
+                    shooter.setShooterDistance(p.getSecond());
                     tagDetection = interimTagDetection;
                   } else {
                     if (driveVelocityMps.getNorm() > 0.02
@@ -74,13 +74,13 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                             > Units.degreesToRadians(10)) {
                       // // get pose, find limelight stuff from <that> pose use limelight to prep
                       // // sequence
-                      // tagDetection = interimTagDetection;
-                      // Pair<Rotation2d, Double> p =
-                      // ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
-                      //     drive.getPastBufferedPose(shooterLimelight.getLatencySeconds()),
-                      // drive.matchState.isBlue());
-                      // drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
-                      // shooter.setShooterDistance(tagDetection.get().getSecond());
+                      tagDetection = interimTagDetection;
+                      Pair<Rotation2d, Double> p =
+                      ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
+                          drive.getPastBufferedPose(shooterLimelight.getLatencySeconds()),
+                      drive.matchState.isBlue());
+                      drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
+                      shooter.setShooterDistance(tagDetection.get().getSecond());
                     } else {
                       tagDetection = interimTagDetection;
                       shooterLimelight.resetOdometryDuringPrep(drive);
@@ -93,7 +93,7 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                 })
             .until(
                 () -> {
-                  return tagDetection.isPresent() || driverControllerInput.getAsBoolean();
+                  return false;
                 }));
   }
 }

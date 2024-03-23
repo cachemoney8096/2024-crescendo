@@ -32,6 +32,8 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.limelightCamMode;
+import frc.robot.Constants.limelightPipeline;
 import frc.robot.commands.AmpPrepScore;
 import frc.robot.commands.AmpScore;
 import frc.robot.commands.AutoIntakeSequence;
@@ -73,6 +75,7 @@ import frc.robot.subsystems.shooterLimelight.ShooterLimelightConstants;
 import frc.robot.utils.JoystickUtil;
 import frc.robot.utils.MatchStateUtil;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
@@ -309,28 +312,8 @@ public class RobotContainer implements Sendable {
 
     driverController
         .rightTrigger()
-        .whileTrue(new SequentialCommandGroup(
-            new IntakeSequence(intake, elevator, conveyor, shooter, lights),
-            new ParallelRaceGroup(
-                new SequentialCommandGroup(
-                    new WaitUntilCommand(()->{
-                        noteDetectionOptional = intakeLimelight.getNotePos();
-                        return noteDetectionOptional.isPresent();
-                    }),
-                    new InstantCommand(
-                        ()->{
-                            NoteDetection noteDetection = noteDetectionOptional.get();
-                            Pose2d robotPose = drive.getPastBufferedPose(noteDetection.latencySec);
-                            double angle = noteDetection.yawAngleDeg<0?noteDetection.yawAngleDeg+360:noteDetection.yawAngleDeg;
-                            Pose2d notePose = robotPose.plus(new Transform2d(noteDetection.distanceMeters*Math.cos(angle), noteDetection.distanceMeters*Math.sin(angle), Rotation2d.fromDegrees(angle)));
-                            PathPlannerPath pathToNote = drive.pathToPoint(notePose, 0.0);
-                            drive.followTrajectoryCommand(pathToNote, false);
-                        }
-                    )
-                ),
-                new WaitUntilCommand(()->!driverCommanded.getAsBoolean())
-            )
-            ));
+        .whileTrue(
+            new IntakeSequence(intake, elevator, conveyor, shooter, lights));
     driverController
         .rightTrigger()
         .onFalse(new GoHomeSequence(
