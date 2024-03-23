@@ -84,8 +84,6 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                     } else {
                       tagDetection = interimTagDetection;
                       shooterLimelight.resetOdometryDuringPrep(drive);
-                      System.out.println(
-                          "tag degrees: " + tagDetection.get().getFirst().getDegrees());
                       drive.setTargetHeadingDegrees(tagDetection.get().getFirst().getDegrees());
                       shooter.setShooterDistance(tagDetection.get().getSecond());
                     }

@@ -21,6 +21,8 @@ public class PIDToPoint extends SequentialCommandGroup {
 
   Transform2d transform = new Transform2d();
 
+  static public boolean finishedPid = false;
+
   static double clamp(double value, double threshold) {
     if (value > threshold) {
       return threshold;
@@ -35,6 +37,7 @@ public class PIDToPoint extends SequentialCommandGroup {
     addRequirements(drive);
 
     addCommands(
+        new InstantCommand((() -> finishedPid = false)),
         new InstantCommand(
             () -> {
               System.out.println("target pose: " + drive.targetPose);
@@ -73,6 +76,7 @@ public class PIDToPoint extends SequentialCommandGroup {
               return (Math.abs(xController.getPositionError()) < 0.01
                   && Math.abs(yController.getPositionError()) < 0.01);
             }),
+        new InstantCommand((() -> finishedPid = true)),
         new InstantCommand(() -> drive.stopDriving()));
   }
 }

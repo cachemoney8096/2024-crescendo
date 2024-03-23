@@ -17,10 +17,12 @@ import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
@@ -139,13 +141,16 @@ public class RobotContainer implements Sendable {
     elevator = new Elevator();
     intake = new Intake();
     shooter = new Shooter();
+    lights = new Lights();
     conveyor =
         new Conveyor(
             (double val) -> {
               driverController.getHID().setRumble(RumbleType.kBothRumble, val);
               operatorController.getHID().setRumble(RumbleType.kBothRumble, val);
+            },
+            () -> {
+                lights.setLEDColor(LightCode.HAS_NOTE);
             });
-    lights = new Lights();
     shooterLimelight =
         new ShooterLimelight(
             ShooterLimelightConstants.SHOOTER_LIMELIGHT_PITCH_DEGREES,
@@ -299,7 +304,6 @@ public class RobotContainer implements Sendable {
    * joysticks}.
    */
 
-
   private void configureDriver() {
     BooleanSupplier driverRotationCommanded =
         () -> {
@@ -316,9 +320,12 @@ public class RobotContainer implements Sendable {
             new IntakeSequence(intake, elevator, conveyor, shooter, lights));
     driverController
         .rightTrigger()
-        .onFalse(new GoHomeSequence(
-                        intake, elevator, shooter, conveyor, intakeLimelight, false, false, true)
-                .beforeStarting(() -> prepState = PrepState.OFF));
+
+        .onFalse(
+            Conveyor.finishReceive(conveyor, lights)
+                .andThen(
+                    new GoHomeSequence(
+                        intake, elevator, shooter, conveyor, intakeLimelight, false, false, true))                .beforeStarting(() -> prepState = PrepState.OFF));
 
 
     TreeMap<PrepState, Command> selectCommandMap = new TreeMap<PrepState, Command>();
@@ -386,6 +393,12 @@ public class RobotContainer implements Sendable {
         .onTrue(
             new GoHomeSequence(
                     intake, elevator, shooter, conveyor, intakeLimelight, false, true, true)
+                .beforeStarting(() -> {
+                    lights.setLEDColor(
+                        !conveyor.backConveyorBeamBreakSensor.get() ?
+                        LightCode.HAS_NOTE :
+                        LightCode.OFF);
+                })
                 .beforeStarting(() -> driveFieldRelative = true)
                 .beforeStarting(() -> drive.throttle(1.0))
                 .beforeStarting(() -> prepState = PrepState.OFF));
@@ -595,7 +608,9 @@ public class RobotContainer implements Sendable {
       case OFF:
         return false;
       case CLIMB:
-        return intake.nearDeployed() && elevator.atPosition(ElevatorPosition.PRE_CLIMB) && shooter.atDesiredPosition();
+        return intake.nearDeployed() &&
+        elevator.atPosition(ElevatorPosition.PRE_CLIMB) &&
+        shooter.atDesiredPosition() && PIDToPoint.finishedPid;
       case SPEAKER:
         return elevator.atPosition(ElevatorPosition.HOME)
             && shooter.atDesiredPosition()

@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -65,10 +66,12 @@ public class Conveyor extends SubsystemBase {
   private ConveyorPosition currentNotePosition = ConveyorPosition.NO_NOTE;
 
   public DoubleConsumer rumbleSetter;
+  public Runnable hasNoteFunc;
 
-  public Conveyor(DoubleConsumer rumbleSetter) {
+  public Conveyor(DoubleConsumer rumbleSetter, Runnable setHasNote) {
     SparkMaxUtils.initWithRetry(this::setUpConveyorSparks, ConveyorCal.SPARK_INIT_RETRY_ATTEMPTS);
     this.rumbleSetter = rumbleSetter;
+    this.hasNoteFunc = setHasNote;
   }
 
   /** Does all the initialization for the sparks, return true on success */
@@ -91,7 +94,7 @@ public class Conveyor extends SubsystemBase {
     errors += SparkMaxUtils.check(backMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 200));
     errors += SparkMaxUtils.check(backMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 200));
     errors += SparkMaxUtils.check(frontMotor.setIdleMode(IdleMode.kBrake));
-    errors += SparkMaxUtils.check(backMotor.setIdleMode(IdleMode.kCoast));
+    errors += SparkMaxUtils.check(backMotor.setIdleMode(IdleMode.kBrake));
 
     Timer.delay(0.1);
 
@@ -211,7 +214,8 @@ public class Conveyor extends SubsystemBase {
    * anything if there's not a note.
    */
   public static Command finishReceive(Conveyor conveyor, Lights lights) {
-    return new SequentialCommandGroup(
+    return new ConditionalCommand( 
+      new SequentialCommandGroup(
             new InstantCommand(
                 () -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED), conveyor),
             new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED)),
@@ -219,10 +223,13 @@ public class Conveyor extends SubsystemBase {
             new WaitUntilCommand(() -> conveyor.frontConveyorBeamBreakSensor.get()),
             Conveyor.stop(conveyor),
             new InstantCommand(() -> conveyor.stopRollers()),
-            new InstantCommand(() -> lights.setLEDColor(LightCode.HAS_NOTE)),
             new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", true)),
-            new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE))
-        .withName("Finish Receive");
+            new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE)),
+            new InstantCommand(),
+            () -> {
+              return !conveyor.frontConveyorBeamBreakSensor.get();
+            }
+    ).withName("Finish Receive");
   }
 
   /** Stop the conveor rollers. */
@@ -237,6 +244,36 @@ public class Conveyor extends SubsystemBase {
         new InstantCommand(() -> conveyor.backMotor.set(-ConveyorCal.RECEIVE_SPEED)),
         new WaitCommand(1.0),
         Conveyor.stop(conveyor));
+  }
+
+  private boolean sawNote = false;
+
+  @Override
+  public void periodic()
+  {
+    if (!intakeBeamBreakSensor.get()) {
+      if (sawNote)
+      {
+        // see and previously saw
+      }
+      else
+      {
+        sawNote = true;
+        Conveyor.rumbleBriefly(this).schedule();
+        hasNoteFunc.run();
+      }
+    }
+    else
+    {
+      if (sawNote)
+      {
+        sawNote = false;
+      }
+      else
+      {
+        // don't see didn't see do nothing
+      }
+    }
   }
 
   @Override

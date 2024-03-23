@@ -20,6 +20,7 @@ public class Lights {
   private LightCode currentLightStatus = LightCode.OFF;
 
   public enum LightCode {
+    DISABLED,
     OFF, // nothing, used for prepState = OFF and UnclimbSequence
     INTAKING, // purple
     HAS_NOTE, // green
@@ -36,6 +37,7 @@ public class Lights {
     candle.configAllSettings(config);
 
     lightOptionsMap = new TreeMap<LightCode, Integer[]>();
+    lightOptionsMap.put(LightCode.DISABLED, new Integer[] {255, 45, 0});
     lightOptionsMap.put(LightCode.OFF, new Integer[] {0, 0, 0});
     lightOptionsMap.put(LightCode.INTAKING, new Integer[] {255, 0, 255});
     lightOptionsMap.put(LightCode.HAS_NOTE, new Integer[] {0, 255, 0});

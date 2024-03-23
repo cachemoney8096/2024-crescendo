@@ -82,17 +82,13 @@ public class Robot extends TimedRobot {
     // robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
-    if (m_robotContainer.prepState == PrepState.OFF){
-      m_robotContainer.lights.setLEDColor(LightCode.OFF);
-    } else if (m_robotContainer.readyToScoreCheck()) {
-      m_robotContainer.lights.setLEDColor(LightCode.READY_TO_SCORE);
-    }
   }
 
   /** This function is called once each time the robot enters disabled mode. */
   @Override
   public void disabledInit() {
     matchState.setTeleop(false);
+    m_robotContainer.lights.setLEDColor(LightCode.DISABLED);
     LimelightHelpers.getLatestResults(
         IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME); // It takes 2.5-3s on first run
     LimelightHelpers.getLatestResults(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
@@ -228,7 +224,11 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    if (m_robotContainer.readyToScoreCheck()) {
+      m_robotContainer.lights.setLEDColor(LightCode.READY_TO_SCORE);
+    }
+  }
 
   @Override
   public void testInit() {
