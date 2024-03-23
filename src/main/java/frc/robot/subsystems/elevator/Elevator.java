@@ -237,6 +237,19 @@ public class Elevator extends SubsystemBase {
     return Math.abs(desiredPositionIn - currentPositionIn) < elevatorMarginInches;
   }
 
+  public boolean atPosition(ElevatorPosition pos){
+    double checkPositionIn = elevatorPositions.get(pos);
+    double currentPositionIn = leftMotorEncoderRel.getPosition();
+    double elevatorMarginInches = ElevatorCal.ELEVATOR_MARGIN_INCHES;
+    if (pos == ElevatorPosition.PRE_CLIMB) {
+      elevatorMarginInches = 1;
+    }
+    if (pos == ElevatorPosition.SCORE_TRAP) {
+      elevatorMarginInches = 2;
+    }
+    return Math.abs(checkPositionIn - currentPositionIn) < elevatorMarginInches;
+  }
+
   /**
    * @return true if the elevator's current position is less than the elevator-intake interference
    *     zone

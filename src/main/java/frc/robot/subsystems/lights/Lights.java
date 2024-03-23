@@ -1,5 +1,6 @@
 package frc.robot.subsystems.lights;
 
+import com.ctre.phoenix.led.Animation;
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdleConfiguration;
@@ -53,6 +54,7 @@ public class Lights {
     if (currentLightStatus == LightCode.READY_TO_SCORE) {
       setRainbow();
     } else {
+      candle.animate(null);
       candle.setLEDs(
           lightOptionsMap.get(currentLightStatus)[0],
           lightOptionsMap.get(currentLightStatus)[1],

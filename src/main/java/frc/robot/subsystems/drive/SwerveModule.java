@@ -136,7 +136,7 @@ public class SwerveModule implements Sendable {
     // TODO check status codes
     TalonFXConfigurator cfg = drivingTalon.getConfigurator();
     TalonFXConfiguration toApply = new TalonFXConfiguration();
-    toApply.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // TODO: check this
+    toApply.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // TODO: check this
     toApply.Feedback.SensorToMechanismRatio =
         DriveConstants.DRIVING_MOTOR_REDUCTION / DriveConstants.WHEEL_CIRCUMFERENCE_METERS;
     toApply.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS;

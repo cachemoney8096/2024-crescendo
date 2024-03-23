@@ -306,6 +306,8 @@ public class DriveSubsystem extends SubsystemBase {
 
     var swerveModuleStates =
         DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds);
+
+        System.out.println(swerveModuleStates[0].angle);
     setModuleStates(swerveModuleStates);
   }
 

@@ -51,6 +51,7 @@ import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.conveyor.ConveyorCal;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakePosition;
 import frc.robot.subsystems.intake.IntakeCal;
@@ -92,7 +93,7 @@ public class RobotContainer implements Sendable {
   public ShooterLimelight shooterLimelight;
   public IntakeLimelight intakeLimelight;
 
-  private enum PrepState {
+  public enum PrepState {
     OFF,
     CLIMB,
     SPEAKER,
@@ -575,20 +576,18 @@ public class RobotContainer implements Sendable {
       case OFF:
         return false;
       case CLIMB:
-        return intake.nearDeployed() && elevator.atDesiredPosition() && shooter.atDesiredPosition();
+        return intake.nearDeployed() && elevator.atPosition(ElevatorPosition.PRE_CLIMB) && shooter.atDesiredPosition();
       case SPEAKER:
-        return elevator.atDesiredPosition()
+        return elevator.atPosition(ElevatorPosition.HOME)
             && shooter.atDesiredPosition()
             && shooter.isShooterSpunUp()
-            && drive.getDiffCurrentTargetYawDeg() < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES
-            && usingTagHeading
-            && elevator.atDesiredPosition();
+            && drive.getDiffCurrentTargetYawDeg() < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES;
       case FEED:
-        return elevator.atDesiredPosition()
+        return elevator.atPosition(ElevatorPosition.HOME)
             && shooter.atDesiredPosition()
             && shooter.isShooterSpunUp();
       case AMP:
-        return elevator.atDesiredPosition();
+        return elevator.atPosition(ElevatorPosition.SCORE_AMP);
       case OPERATOR:
         return shooter.isShooterSpunUp()
             && shooter.atDesiredPosition()
@@ -623,5 +622,6 @@ public class RobotContainer implements Sendable {
         null);
     builder.addStringProperty("pathCmd", () -> pathCmd, null);
     builder.addBooleanProperty("Using heading from tag", () -> usingTagHeading, null);
+    builder.addBooleanProperty("ready to score (leds)", () -> readyToScoreCheck(), null);
   }
 }

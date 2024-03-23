@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.RobotContainer.PrepState;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelightConstants;
 import frc.robot.subsystems.lights.Lights.LightCode;
@@ -81,7 +82,9 @@ public class Robot extends TimedRobot {
     // robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
-    if (m_robotContainer.readyToScoreCheck()) {
+    if (m_robotContainer.prepState == PrepState.OFF){
+      m_robotContainer.lights.setLEDColor(LightCode.OFF);
+    } else if (m_robotContainer.readyToScoreCheck()) {
       m_robotContainer.lights.setLEDColor(LightCode.READY_TO_SCORE);
     }
   }
