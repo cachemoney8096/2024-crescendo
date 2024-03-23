@@ -12,6 +12,7 @@ import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -25,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SelectCommand;
@@ -35,6 +37,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.limelightCamMode;
+import frc.robot.Constants.limelightLedMode;
 import frc.robot.Constants.limelightPipeline;
 import frc.robot.commands.AmpPrepScore;
 import frc.robot.commands.AmpScore;
@@ -83,6 +86,8 @@ import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 
+import javax.xml.crypto.dsig.Transform;
+
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -125,6 +130,7 @@ public class RobotContainer implements Sendable {
   public String pathCmd = "";
 
   private Optional<frc.robot.subsystems.intakeLimelight.IntakeLimelight.NoteDetection> noteDetectionOptional = Optional.empty();
+  private Optional<Command> driveToNoteCmd = Optional.empty();
 
   /**
    * A chooser for autonomous commands. String in pair should be the path's name, and null if no
@@ -304,23 +310,134 @@ public class RobotContainer implements Sendable {
    * joysticks}.
    */
 
+   public boolean intakeStartedPath = false;
+
   private void configureDriver() {
-    BooleanSupplier driverRotationCommanded =
+
+    BooleanSupplier driverJoysticksActive =
         () -> {
-          return Math.abs(driverController.getRightX()) > 0.05;
-        };
-    BooleanSupplier driverCommanded = 
-        () ->{
-            return Math.abs(driverController.getRightX()) > 0.05 || Math.abs(driverController.getLeftX()) > 0.05;
+          return Math.abs(driverController.getLeftY()) > 0.2
+              || Math.abs(driverController.getLeftX()) > 0.2
+              || Math.abs(driverController.getRightY()) > 0.2
+              || Math.abs(driverController.getRightX()) > 0.2;
         };
 
     driverController
         .rightTrigger()
-        .whileTrue(
-            new IntakeSequence(intake, elevator, conveyor, shooter, lights));
+        // .whileTrue(
+        //     new IntakeSequence(intake, elevator, conveyor, shooter, lights));
+        .whileTrue(new ParallelDeadlineGroup(
+            new IntakeSequence(intake, elevator, conveyor, shooter, lights),
+            new SequentialCommandGroup(
+                new InstantCommand(() -> {
+                    intakeStartedPath = false;
+                    intakeLimelight.setLimelightValues(
+                        limelightLedMode.OFF,
+                        limelightCamMode.VISION_PROCESSING,
+                        limelightPipeline.NOTE_PIPELINE
+                    );
+                }),
+            new RunCommand(()-> {
+                final boolean intakeClearOfLL = intake.clearOfLimeLight();
+                if (intakeStartedPath)
+                {
+                    if (driveToNoteCmd.isEmpty())
+                    {
+                        drive.setNoMove();
+                        return;
+                    }
+
+                    if (driveToNoteCmd.get().isFinished())
+                    {
+                        driveToNoteCmd = Optional.empty();
+                        drive.setNoMove();
+                        return;
+                    }
+
+                    driveToNoteCmd.get().execute();
+                    if (!IntakeSequence.gotNote)
+                    {
+                        lights.setBlink(LightCode.INTAKING);
+                    }
+                    return;
+                }
+
+                if (intakeClearOfLL) {
+                    noteDetectionOptional = intakeLimelight.getNotePos();
+                }
+
+                if (!driverJoysticksActive.getAsBoolean() && noteDetectionOptional.isPresent())
+                {
+                    // start path
+                    intakeStartedPath = true;
+                    var noteDetection = noteDetectionOptional.get();
+                    Pose2d robotPoseAtDetection = drive.getPastBufferedPose(noteDetection.latencySec);
+                    final double adjustmentMeters = Units.inchesToMeters(2.0);
+                    Translation2d poseAtDetectionToNote = new Translation2d(noteDetection.distanceMeters - adjustmentMeters, 0.0).rotateBy(Rotation2d.fromDegrees(noteDetection.yawAngleDeg));
+                    Pose2d goalPose = robotPoseAtDetection.plus(
+                        new Transform2d(poseAtDetectionToNote, Rotation2d.fromDegrees(noteDetection.yawAngleDeg))
+                    );
+                    PathPlannerPath pathToNote = drive.pathToPoint(goalPose, 0.0);
+                    driveToNoteCmd = Optional.of(drive.followTrajectoryCommand(pathToNote, false));
+                    driveToNoteCmd.get().initialize();
+                    driveToNoteCmd.get().execute();
+                    lights.setBlink(LightCode.INTAKING);
+                    return;
+                }
+
+                // use driver
+                
+                    if (!IntakeSequence.gotNote)
+                    {
+                        lights.setLEDColor(LightCode.INTAKING);
+                    }
+                
+                driveToNoteCmd = Optional.empty();
+                intakeStartedPath = false;
+                if (matchState.isBlue()) {
+                        drive.rotateOrKeepHeading(
+                            JoystickUtil.squareAxis(
+                                MathUtil.applyDeadband(-driverController.getLeftY(), 0.1)),
+                            JoystickUtil.squareAxis(
+                                MathUtil.applyDeadband(-driverController.getLeftX(), 0.1)),
+                            JoystickUtil.squareAxis(
+                                MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
+                            driveFieldRelative, // always field relative
+                            getCardinalDirectionDegrees());
+                      } else {
+                        if (driveFieldRelative) {
+                          drive.rotateOrKeepHeading(
+                              JoystickUtil.squareAxis(
+                                  MathUtil.applyDeadband(driverController.getLeftY(), 0.1)),
+                              JoystickUtil.squareAxis(
+                                  MathUtil.applyDeadband(driverController.getLeftX(), 0.1)),
+                              JoystickUtil.squareAxis(
+                                  MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
+                              driveFieldRelative, // always field relative
+                              getCardinalDirectionDegrees());
+                        } else {
+                          drive.rotateOrKeepHeading(
+                              JoystickUtil.squareAxis(
+                                  MathUtil.applyDeadband(-driverController.getLeftY(), 0.1)),
+                              JoystickUtil.squareAxis(
+                                  MathUtil.applyDeadband(-driverController.getLeftX(), 0.1)),
+                              JoystickUtil.squareAxis(
+                                  MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
+                              driveFieldRelative, // always field relative
+                              getCardinalDirectionDegrees());
+                        }
+                      }
+                
+            }, drive)).finallyDo(() -> {
+                
+        intakeLimelight.setLimelightValues(
+                Constants.limelightLedMode.OFF,
+                Constants.limelightCamMode.DRIVER_CAMERA,
+                Constants.limelightPipeline.NOTE_PIPELINE);
+            })
+            ));
     driverController
         .rightTrigger()
-
         .onFalse(
             Conveyor.finishReceive(conveyor, lights)
                 .andThen(
@@ -364,6 +481,11 @@ public class RobotContainer implements Sendable {
             driverLeftTriggerCommand.andThen(
                 new InstantCommand(() -> lights.setLEDColor(LightCode.OFF))));
 
+    BooleanSupplier driverRotationCommanded =
+        () -> {
+          return Math.abs(driverController.getRightX()) > 0.05;
+        };
+
     driverController
         .leftBumper()
         .onTrue(
@@ -381,12 +503,7 @@ public class RobotContainer implements Sendable {
                     lights,
                     driverRotationCommanded),
                 new InstantCommand(() -> usingTagHeading = true)));
-    driverController
-        .rightBumper()
-        .onTrue(
-            new SequentialCommandGroup(
-                new InstantCommand(() -> prepState = PrepState.AMP),
-                new AmpPrepScore(elevator, conveyor, intake, shooter, drive, lights)));
+
     // bottom right back button
     driverController
         .povLeft()
@@ -419,15 +536,12 @@ public class RobotContainer implements Sendable {
                     intakeLimelight,
                     lights)));
     // bottom left back button
-    driverController.povRight().onTrue(new UnclimbSequence(elevator, shooter, conveyor, lights));
-
-    BooleanSupplier driverJoysticksActive =
-        () -> {
-          return Math.abs(driverController.getLeftY()) > 0.2
-              || Math.abs(driverController.getLeftX()) > 0.2
-              || Math.abs(driverController.getRightY()) > 0.2
-              || Math.abs(driverController.getRightX()) > 0.2;
-        };
+    driverController
+        .povRight()
+        .onTrue(
+            new SequentialCommandGroup(
+                new InstantCommand(() -> prepState = PrepState.AMP),
+                new AmpPrepScore(elevator, conveyor, intake, shooter, drive, lights)));
 
     // top left back button
     driverController
@@ -588,6 +702,8 @@ public class RobotContainer implements Sendable {
             new InstantCommand(
                     () -> intake.rezeroIntakeToPosition(IntakeCal.INTAKE_DEPLOYED_POSITION_DEGREES))
                 .ignoringDisable(true));
+
+    operatorController.start().onTrue(new UnclimbSequence(elevator, shooter, conveyor, lights));
   }
 
   private void burnFlashAllSparks() {

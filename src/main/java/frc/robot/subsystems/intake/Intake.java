@@ -281,6 +281,10 @@ public class Intake extends SubsystemBase {
     intakeTalonRight.set(IntakeCal.INTAKING_POWER);
   }
 
+  public boolean clearOfLimeLight() {
+    return getPivotPosition() < IntakeCal.LIMELIGHT_BLOCKED_THRESHOLD || nearDeployed();
+  }
+
   public void stopRollers() {
     intakeTalonLeft.stopMotor();
     intakeTalonRight.stopMotor();

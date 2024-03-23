@@ -76,8 +76,12 @@ public class IntakeLimelight extends SubsystemBase {
     kTargetHeight = targetHeightMeters;
     setLimelightValues(
         Constants.limelightLedMode.OFF,
-        Constants.limelightCamMode.DRIVER_CAMERA,
-        Constants.limelightPipeline.TAG_PIPELINE);
+        Constants.limelightCamMode.VISION_PROCESSING,
+        Constants.limelightPipeline.NOTE_PIPELINE);
+    // setLimelightValues(
+    //     Constants.limelightLedMode.OFF,
+    //     Constants.limelightCamMode.DRIVER_CAMERA,
+    //     Constants.limelightPipeline.TAG_PIPELINE);
 
     m_simDevice = SimDevice.create("limelight-intake");
     if (m_simDevice != null) {
@@ -428,7 +432,7 @@ public class IntakeLimelight extends SubsystemBase {
     LimelightTarget_Detector[] targets_Detector = llresults.targetingResults.targets_Detector;
 
     if (targets_Detector.length == 0) {
-      System.out.println("Didn't see note");
+      // System.out.println("Didn't see note");
       return Optional.empty();
     }
 
@@ -451,7 +455,7 @@ public class IntakeLimelight extends SubsystemBase {
     double yawAngleXDegrees = lowestDetection.tx;
     double adjustedYawAngleDegrees = yawAngleXDegrees + IntakeLimelightCal.LIMELIGHT_YAW_DEGREES;
     return Optional.of(
-        new NoteDetection(getLatency(), noteDistanceMeters, adjustedYawAngleDegrees));
+        new NoteDetection(getLatency(), -noteDistanceMeters, -adjustedYawAngleDegrees));
   }
 
   @Override
@@ -459,6 +463,31 @@ public class IntakeLimelight extends SubsystemBase {
     builder.addDoubleProperty("Latency", () -> getLatency(), null);
     builder.addDoubleProperty("Tx", () -> getOffSetX(), null);
     builder.addDoubleProperty("Ty", () -> getOffSetY(), null);
+    // builder.addDoubleProperty("Note Latency (sec)", () -> {
+    //   var maybeNotePos = getNotePos();
+    //   if (maybeNotePos.isEmpty())
+    //   {
+    //     return 0.0;
+    //   }
+    //   return maybeNotePos.get().latencySec;
+    // }, null);
+    builder.addDoubleProperty("Note Distance (m)", () -> {
+      var maybeNotePos = getNotePos();
+      if (maybeNotePos.isEmpty())
+      {
+        return 0.0;
+      }
+      return maybeNotePos.get().distanceMeters;
+    }, null);
+    // builder.addDoubleProperty("Note Angle (deg)", () -> {
+    //   var maybeNotePos = getNotePos();
+    //   if (maybeNotePos.isEmpty())
+    //   {
+    //     return 0.0;
+    //   }
+    //   return maybeNotePos.get().yawAngleDeg;
+    // }, null);
+
     builder.addBooleanProperty("Valid Target", () -> isValidTarget(), null);
     builder.addBooleanProperty("Connected", () -> CheckConnection(), null);
   }

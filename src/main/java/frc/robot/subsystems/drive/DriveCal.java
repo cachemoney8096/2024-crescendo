@@ -53,8 +53,8 @@ public class DriveCal {
   public static final PIDConstants PATH_TRANSLATION_CONTROLLER = new PIDConstants(7.0, 0.0, 0.0),
       PATH_ROTATION_CONTROLLER = new PIDConstants(9.0, 0.0, 0.0);
 
-  public static final double MEDIUM_LINEAR_SPEED_METERS_PER_SEC = 2.0,
-      MEDIUM_LINEAR_ACCELERATION_METERS_PER_SEC_SQ = 2.0,
+  public static final double MEDIUM_LINEAR_SPEED_METERS_PER_SEC = 4.0,
+      MEDIUM_LINEAR_ACCELERATION_METERS_PER_SEC_SQ = 4.0,
       MEDIUM_ANGULAR_SPEED_RAD_PER_SEC = Math.PI,
       MEDIUM_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = Math.PI;
 

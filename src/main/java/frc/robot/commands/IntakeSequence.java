@@ -21,12 +21,15 @@ import frc.robot.subsystems.shooter.Shooter.ShooterMode;
  * game piece Stops and stowes intake
  */
 public class IntakeSequence extends SequentialCommandGroup {
+  public static boolean gotNote = false;
+
   public IntakeSequence(
       Intake intake, Elevator elevator, Conveyor conveyor, Shooter shooter, Lights lights) {
     addRequirements(intake, elevator, conveyor, shooter);
 
     addCommands(
-        new InstantCommand(() -> lights.setLEDColor(LightCode.INTAKING)),
+        new InstantCommand(() -> {lights.setLEDColor(LightCode.INTAKING);
+        gotNote = false;}),
         new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", false)),
         new InstantCommand(
             () -> {

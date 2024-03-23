@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.RobotMap;
+import frc.robot.commands.IntakeSequence;
 import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.lights.Lights.LightCode;
 import frc.robot.utils.SparkMaxUtils;
@@ -260,6 +261,7 @@ public class Conveyor extends SubsystemBase {
       {
         sawNote = true;
         Conveyor.rumbleBriefly(this).schedule();
+        IntakeSequence.gotNote = true;
         hasNoteFunc.run();
       }
     }

@@ -54,6 +54,10 @@ public class IntakeCal {
   /** Exact safe position is 186, so we use a higher threshold here to be safe */
   public static final double CONVEYOR_ZONE_THRESHOLD_DEGREES = 196.0;
 
+/** Lower than this up to almost 270, intake blocks camera view */
+  public static final double LIMELIGHT_BLOCKED_THRESHOLD = 202.0;
+  
+
   /** intake power [-1.0,1.0] */
   public static final double INTAKING_POWER = 0.6, REVERSE_INTAKING_POWER = -1.0;
 
