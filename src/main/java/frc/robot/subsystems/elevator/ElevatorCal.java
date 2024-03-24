@@ -52,6 +52,6 @@ public final class ElevatorCal {
    * move without first moving the elevator. This value should be the bottom or top, respectively,
    * of the range of values that cause intake-elevator interference
    */
-  public static final double ELEVATOR_INTERFERENCE_THRESHOLD_MINIMUM_INCHES = 4.25,
+  public static final double ELEVATOR_INTERFERENCE_THRESHOLD_MINIMUM_INCHES = 3.75,
       ELEVATOR_INTERFERENCE_THRESHOLD_MAXIMUM_INCHES = 18.5;
 }

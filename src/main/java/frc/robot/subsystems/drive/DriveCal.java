@@ -41,13 +41,15 @@ public class DriveCal {
 
   /** Controller on module speed for rotating to target, input degrees [-180,180], output [0,1]. */
   public static final PIDController ROTATE_TO_TARGET_PID_CONTROLLER =
-      new PIDController(0.012, 0, 0.000);
+      new PIDController(0.013, 0, 0.00);
 
   /** Feed forward for rotating to target, gets added to or subtracted from PID controller. */
   public static final double ROTATE_TO_TARGET_FF = 0.01;
 
   /** If the desired chassis rotation is below this value in [0,1], it is ignored */
   public static final double ROTATION_DEADBAND_THRESHOLD = 0.04;
+
+  public static final double ROTATION_DEADBAND_THRESHOLD_DEG = 2.0;
 
   /** path finding controller for translation and rotation; used in PathPlanner */
   public static final PIDConstants PATH_TRANSLATION_CONTROLLER = new PIDConstants(7.0, 0.0, 0.0),

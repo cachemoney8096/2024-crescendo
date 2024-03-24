@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.RobotContainer.PrepState;
+import frc.robot.subsystems.drive.DriveCal;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.SwerveModule;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelightConstants;
@@ -152,7 +153,8 @@ public class Robot extends TimedRobot {
       var talon = module.drivingTalon;
       var currentConfig = module.appliedConfiguration;
       var conigurator = talon.getConfigurator();
-      currentConfig.CurrentLimits.SupplyCurrentLimit = 50;
+      currentConfig.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_SUPPLY_CURRENT_LIMIT_AMPS;
+      currentConfig.CurrentLimits.StatorCurrentLimit = DriveConstants.DRIVING_MOTOR_STATOR_AUTO_CURRENT_LIMIT_AMPS;
       conigurator.apply(currentConfig);
     }
 
@@ -230,7 +232,8 @@ public class Robot extends TimedRobot {
       var talon = module.drivingTalon;
       var currentConfig = module.appliedConfiguration;
       var conigurator = talon.getConfigurator();
-      currentConfig.CurrentLimits.SupplyCurrentLimit = 40;
+      currentConfig.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_SUPPLY_CURRENT_LIMIT_AMPS;
+      currentConfig.CurrentLimits.StatorCurrentLimit = DriveConstants.DRIVING_MOTOR_STATOR_TELEOP_CURRENT_LIMIT_AMPS;
       conigurator.apply(currentConfig);
     }
 

@@ -17,11 +17,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -98,6 +100,9 @@ public class DriveSubsystem extends SubsystemBase {
   /** Provides info on our alliance color and whether this is a real match. */
   public MatchStateUtil matchState;
 
+  /** Interpolation map storing rotational velocities (deg/s) as keys and the amount the robot overshoots at each velocity (deg) as values */
+  private InterpolatingDoubleTreeMap yawOffsetMap;
+
   public DriveSubsystem(MatchStateUtil matchState) {
     intializeGyro();
     this.matchState = matchState;
@@ -134,6 +139,11 @@ public class DriveSubsystem extends SubsystemBase {
         },
         this // Reference to this subsystem to set requirements
         );
+      yawOffsetMap = new InterpolatingDoubleTreeMap();
+      yawOffsetMap.put(0.0, 0.0);
+      yawOffsetMap.put(120.0, 5.0);
+      yawOffsetMap.put(167.0, 22.0);
+      yawOffsetMap.put(330.0, 50.0);
   }
 
   public void intializeGyro() {
@@ -370,7 +380,7 @@ public class DriveSubsystem extends SubsystemBase {
   public void keepHeading(double x, double y, boolean fieldRelative) {
     double currentHeadingDegrees = getHeadingDegrees();
     double headingDifferenceDegrees = currentHeadingDegrees - targetHeadingDegrees;
-    double offsetHeadingDegrees = MathUtil.inputModulus(headingDifferenceDegrees, -180, 180);
+    double offsetHeadingDegrees = MathUtil.inputModulus(headingDifferenceDegrees, -180, 180); 
 
     double pidRotation =
         DriveCal.ROTATE_TO_TARGET_PID_CONTROLLER.calculate(offsetHeadingDegrees, 0.0);
@@ -384,6 +394,8 @@ public class DriveSubsystem extends SubsystemBase {
     if (Math.abs(desiredRotation) < DriveCal.ROTATION_DEADBAND_THRESHOLD) {
       desiredRotation = 0;
     }
+
+    desiredRotation = MathUtil.clamp(desiredRotation, -1.0, 1.0);
 
     drive(x, y, desiredRotation, fieldRelative);
   }
@@ -425,7 +437,7 @@ public class DriveSubsystem extends SubsystemBase {
     } else if (rot == 0) {
       keepHeading(x, y, fieldRelative);
     } else {
-      targetHeadingDegrees = getHeadingDegrees();
+      targetHeadingDegrees = getHeadingDegrees() + calculateYawOffsetDeg(Units.radiansToDegrees(lastSetChassisSpeeds.omegaRadiansPerSecond));
       drive(x, y, rot, fieldRelative);
     }
   }
@@ -606,6 +618,13 @@ public class DriveSubsystem extends SubsystemBase {
         .withTimeout(timeoutSec);
   }
 
+  /** Calculate the amount the robot will overshoot in degrees, given rotational velocity in degrees/second. Negative or positive values can be passed in, the function will adjust. It will return the correct sign depending on our current velocity. */
+  private double calculateYawOffsetDeg(double rotationalVelocityDeg) {
+    double posRotationalVelocityDeg = Math.abs(rotationalVelocityDeg);
+    double posOffsetDeg = yawOffsetMap.get(posRotationalVelocityDeg);
+    return posOffsetDeg * Math.signum(lastSetChassisSpeeds.omegaRadiansPerSecond);
+  }
+
   public void considerZeroingSwerveEncoders() {
     frontLeft.considerZeroingEncoder();
     frontRight.considerZeroingEncoder();
@@ -705,5 +724,6 @@ public class DriveSubsystem extends SubsystemBase {
     builder.addDoubleProperty(
         "Rear right desired position", () -> rearRight.desiredState.angle.getRadians(), null);
     builder.addBooleanProperty("Near Target heading", this::nearTarget, null);
+    builder.addDoubleProperty("yaw offset treemap value", () -> calculateYawOffsetDeg(Units.radiansToDegrees(lastSetChassisSpeeds.omegaRadiansPerSecond)), null);
       }
 }
