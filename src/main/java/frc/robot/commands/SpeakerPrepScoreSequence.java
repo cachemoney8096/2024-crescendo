@@ -72,18 +72,17 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                     if (driveVelocityMps.getNorm() > 0.02
                         || Math.abs(currentChassisSpeeds.omegaRadiansPerSecond)
                             > Units.degreesToRadians(10)) {
-                      // // get pose, find limelight stuff from <that> pose use limelight to prep
-                      // // sequence
+                      // get pose, find limelight stuff from <that> pose use limelight to prep
+                      // sequence
                       tagDetection = interimTagDetection;
-                      Pair<Rotation2d, Double> p =
-                      ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
-                          drive.getPastBufferedPose(shooterLimelight.getLatencySeconds()),
-                      drive.matchState.isBlue());
+                    Pair<Rotation2d, Double> p =
+                    ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
+                        drive.getPose(), drive.matchState.isBlue());
                       drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
-                      shooter.setShooterDistance(tagDetection.get().getSecond());
+                      shooter.setShooterDistance(p.getSecond());
                     } else {
                       tagDetection = interimTagDetection;
-                      shooterLimelight.resetOdometryDuringPrep(drive);
+                      // shooterLimelight.resetOdometryDuringPrep(drive);
                       drive.setTargetHeadingDegrees(tagDetection.get().getFirst().getDegrees());
                       shooter.setShooterDistance(tagDetection.get().getSecond());
                     }
@@ -92,6 +91,6 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
             .until(
                 () -> {
                   return false;
-                }));
+                }).finallyDo(() -> shooterLimelight.resetOdometryDuringPrep(drive)));
   }
 }

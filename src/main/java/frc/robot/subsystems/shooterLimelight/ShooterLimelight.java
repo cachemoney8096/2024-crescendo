@@ -194,9 +194,15 @@ public class ShooterLimelight extends SubsystemBase {
   public void resetOdometryDuringPrep(DriveSubsystem drive) {
     if (Math.abs(getBotPose3d_wpiBlue().getSecond().getZ())
         < ShooterLimelightCal.LARGE_VALUE_CORRECTOR_MARGIN) {
-      Pose2d currentPose = getBotPose2d_wpiBlue().getSecond();
-      drive.resetOdometry(currentPose);
-      drive.resetYawToAngle(currentPose.getRotation().getDegrees());
+      Pose2d newPose = getBotPose2d_wpiBlue().getSecond();
+      Pose2d curPose = drive.getPose();
+      var update = newPose.minus(curPose);
+      if (Math.abs(update.getRotation().getDegrees()) > 20.0)
+      {
+        return;
+      }
+      drive.resetOdometry(newPose);
+      // drive.resetYawToAngle(newPose.getRotation().getDegrees());
     }
   }
 

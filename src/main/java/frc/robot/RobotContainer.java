@@ -85,6 +85,7 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 import javax.xml.crypto.dsig.Transform;
 
@@ -129,9 +130,11 @@ public class RobotContainer implements Sendable {
   /** What was the last command the auto initiated */
   public String pathCmd = "";
 
-  private Optional<frc.robot.subsystems.intakeLimelight.IntakeLimelight.NoteDetection> noteDetectionOptional = Optional.empty();
-  private Optional<Command> driveToNoteCmd = Optional.empty();
-
+  /** Translation is a unit direction for robot movement
+   * Rotation is desired robot heading
+   */
+  private Optional<Pair<Translation2d, Rotation2d>> noteDirectionOptional = Optional.empty();
+  
   /**
    * A chooser for autonomous commands. String in pair should be the path's name, and null if no
    * path
@@ -310,7 +313,8 @@ public class RobotContainer implements Sendable {
    * joysticks}.
    */
 
-   public boolean intakeStartedPath = false;
+   public boolean intakeLockedOn = false;
+   public boolean intakeNoteTooClose = false;
 
   private void configureDriver() {
 
@@ -323,6 +327,19 @@ public class RobotContainer implements Sendable {
         };
 
     driverController
+        .rightBumper()
+        .whileTrue(
+            new IntakeSequence(intake, elevator, conveyor, shooter, lights));
+    driverController
+        .rightBumper()
+        .onFalse(
+            Conveyor.finishReceive(conveyor, lights)
+                .andThen(
+                    new GoHomeSequence(
+                        intake, elevator, shooter, conveyor, intakeLimelight, false, false, true))                .beforeStarting(() -> prepState = PrepState.OFF));
+
+
+    driverController
         .rightTrigger()
         // .whileTrue(
         //     new IntakeSequence(intake, elevator, conveyor, shooter, lights));
@@ -330,7 +347,9 @@ public class RobotContainer implements Sendable {
             new IntakeSequence(intake, elevator, conveyor, shooter, lights),
             new SequentialCommandGroup(
                 new InstantCommand(() -> {
-                    intakeStartedPath = false;
+                    intakeLockedOn = false;
+                    intakeNoteTooClose = false;
+                    noteDirectionOptional = Optional.empty();
                     intakeLimelight.setLimelightValues(
                         limelightLedMode.OFF,
                         limelightCamMode.VISION_PROCESSING,
@@ -339,61 +358,17 @@ public class RobotContainer implements Sendable {
                 }),
             new RunCommand(()-> {
                 final boolean intakeClearOfLL = intake.clearOfLimeLight();
-                if (intakeStartedPath)
+                Optional<frc.robot.subsystems.intakeLimelight.IntakeLimelight.NoteDetection> latestNoteDetectionOptional = Optional.empty();
+                if (!intakeNoteTooClose && intakeClearOfLL)
                 {
-                    if (driveToNoteCmd.isEmpty())
-                    {
-                        drive.setNoMove();
-                        return;
-                    }
-
-                    if (driveToNoteCmd.get().isFinished())
-                    {
-                        driveToNoteCmd = Optional.empty();
-                        drive.setNoMove();
-                        return;
-                    }
-
-                    driveToNoteCmd.get().execute();
-                    if (!IntakeSequence.gotNote)
-                    {
-                        lights.setBlink(LightCode.INTAKING);
-                    }
-                    return;
+                    latestNoteDetectionOptional = intakeLimelight.getNotePos();
                 }
 
-                if (intakeClearOfLL) {
-                    noteDetectionOptional = intakeLimelight.getNotePos();
-                }
-
-                if (!driverJoysticksActive.getAsBoolean() && noteDetectionOptional.isPresent())
-                {
-                    // start path
-                    intakeStartedPath = true;
-                    var noteDetection = noteDetectionOptional.get();
-                    Pose2d robotPoseAtDetection = drive.getPastBufferedPose(noteDetection.latencySec);
-                    final double adjustmentMeters = Units.inchesToMeters(2.0);
-                    Translation2d poseAtDetectionToNote = new Translation2d(noteDetection.distanceMeters - adjustmentMeters, 0.0).rotateBy(Rotation2d.fromDegrees(noteDetection.yawAngleDeg));
-                    Pose2d goalPose = robotPoseAtDetection.plus(
-                        new Transform2d(poseAtDetectionToNote, Rotation2d.fromDegrees(noteDetection.yawAngleDeg))
-                    );
-                    PathPlannerPath pathToNote = drive.pathToPoint(goalPose, 0.0);
-                    driveToNoteCmd = Optional.of(drive.followTrajectoryCommand(pathToNote, false));
-                    driveToNoteCmd.get().initialize();
-                    driveToNoteCmd.get().execute();
-                    lights.setBlink(LightCode.INTAKING);
-                    return;
-                }
-
-                // use driver
-                
+                Runnable driveNormal = () -> {
                     if (!IntakeSequence.gotNote)
                     {
                         lights.setLEDColor(LightCode.INTAKING);
                     }
-                
-                driveToNoteCmd = Optional.empty();
-                intakeStartedPath = false;
                 if (matchState.isBlue()) {
                         drive.rotateOrKeepHeading(
                             JoystickUtil.squareAxis(
@@ -427,7 +402,82 @@ public class RobotContainer implements Sendable {
                               getCardinalDirectionDegrees());
                         }
                       }
-                
+                };
+
+                if (IntakeSequence.gotNote)
+                {
+                    driveNormal.run();
+                    return;
+                }
+
+                Consumer<Pair<Translation2d, Rotation2d>> driveToPose = (Pair<Translation2d, Rotation2d> noteDirection) -> {                
+                    if (!IntakeSequence.gotNote)
+                    {
+                        lights.setBlink(LightCode.INTAKING);
+                    }
+                    drive.setTargetHeadingDegrees(noteDirection.getSecond().getDegrees());
+                    
+                    var driverTranslationInput = new Translation2d(
+                        JoystickUtil.squareAxis(
+                                  MathUtil.applyDeadband(-driverController.getLeftX(), 0.1)),
+                        JoystickUtil.squareAxis(
+                                  MathUtil.applyDeadband(-driverController.getLeftY(), 0.1)));
+                    var driveThrottle = driverTranslationInput.getNorm();
+                    var driveTranslation = noteDirection.getFirst().times(driveThrottle);
+                    drive.rotateOrKeepHeading(
+                        driveTranslation.getX(),
+                        driveTranslation.getY(),
+                        0.0,
+                        true,
+                        -1);
+                };
+
+                if (intakeNoteTooClose)
+                {
+                    // Affect throttle with past detection
+                    assert noteDirectionOptional.isPresent();
+                    driveToPose.accept(noteDirectionOptional.get());
+                    return;
+                }
+
+                if (latestNoteDetectionOptional.isPresent())
+                {                    
+                    // Set goal
+                    var latestNoteDetection = latestNoteDetectionOptional.get();
+                    final double adjustmentMeters = Units.inchesToMeters(6.0);
+                    Translation2d poseAtDetectionToNote = new Translation2d(latestNoteDetection.distanceMeters - adjustmentMeters, 0.0).rotateBy(Rotation2d.fromDegrees(latestNoteDetection.yawAngleDeg));
+                    Pose2d robotPoseAtDetection = drive.getPastBufferedPose(latestNoteDetection.latencySec);
+                    Pose2d curPose = drive.getPose();
+                    Pose2d goalPose = robotPoseAtDetection.plus(
+                        new Transform2d(poseAtDetectionToNote, Rotation2d.fromDegrees(latestNoteDetection.yawAngleDeg)));
+                    Translation2d toNoteTranslation = goalPose.getTranslation().minus(curPose.getTranslation());
+
+                    // Keep in mind: these are robot relative
+                    noteDirectionOptional = Optional.of(Pair.of(toNoteTranslation.div(toNoteTranslation.getNorm()), goalPose.getRotation()));
+
+                    // Check distance
+                    if (latestNoteDetection.distanceMeters < 1.7) {
+                        intakeNoteTooClose = true;
+                    }
+
+                    // Affect throttle
+                    driveToPose.accept(noteDirectionOptional.get());
+                    return;
+                }
+                else
+                {
+                    if (noteDirectionOptional.isEmpty())
+                    {
+                        driveNormal.run();
+                        return;
+                    }
+    
+                    if (noteDirectionOptional.isPresent())
+                    {
+                        driveToPose.accept(noteDirectionOptional.get());
+                        return;
+                    }
+                }
             }, drive)).finallyDo(() -> {
                 
         intakeLimelight.setLimelightValues(
@@ -461,6 +511,7 @@ public class RobotContainer implements Sendable {
     selectCommandMap.put(
         PrepState.FEED,
         new SequentialCommandGroup(
+            new InstantCommand(() -> shooterLimelight.resetOdometryDuringPrep(drive)),
             new SpeakerShootSequence(conveyor, shooter, elevator, drive, false)));
     selectCommandMap.put(
         PrepState.SPEAKER,
@@ -728,12 +779,12 @@ public class RobotContainer implements Sendable {
         elevator.atPosition(ElevatorPosition.PRE_CLIMB) &&
         shooter.atDesiredPosition() && PIDToPoint.finishedPid;
       case SPEAKER:
-        return elevator.atPosition(ElevatorPosition.HOME)
+        return elevator.atPosition(ElevatorPosition.SLIGHTLY_UP)
             && shooter.atDesiredPosition()
             && shooter.isShooterSpunUp()
             && drive.getDiffCurrentTargetYawDeg() < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES;
       case FEED:
-        return elevator.atPosition(ElevatorPosition.HOME)
+        return elevator.atPosition(ElevatorPosition.SLIGHTLY_UP)
             && shooter.atDesiredPosition()
             && shooter.isShooterSpunUp();
       case AMP:

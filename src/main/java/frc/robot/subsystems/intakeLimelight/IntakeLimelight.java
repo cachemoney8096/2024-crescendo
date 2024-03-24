@@ -452,6 +452,12 @@ public class IntakeLimelight extends SubsystemBase {
                 - Units.inchesToMeters(Constants.NOTE_HEIGHT_INCHES / 2))
             / Math.tan(Units.degreesToRadians(angleLimelightToNoteDegrees));
 
+    if (noteDistanceMeters > 0.0)
+    {
+      // noteDistanceMeters inverted so this checks if the only note seen is above the camera.
+      return Optional.empty();
+    }
+
     double yawAngleXDegrees = lowestDetection.tx;
     double adjustedYawAngleDegrees = yawAngleXDegrees + IntakeLimelightCal.LIMELIGHT_YAW_DEGREES;
     return Optional.of(

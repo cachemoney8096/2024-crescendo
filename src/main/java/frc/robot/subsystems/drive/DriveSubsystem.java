@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotMap;
+import frc.robot.subsystems.shooter.ShooterCal;
 import frc.robot.utils.GeometryUtils;
 import frc.robot.utils.MatchStateUtil;
 import frc.robot.utils.PoseBuffer;
@@ -589,6 +590,10 @@ public class DriveSubsystem extends SubsystemBase {
     return Math.abs(getHeadingDegrees() - targetHeadingDegrees) % 360;
   }
 
+  public boolean nearTarget() {
+    return getDiffCurrentTargetYawDeg() < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES;
+  }
+
   /**
    * Provides no input to rotateOrKeepHeading for the input amount of time, allowing turning in
    * place towards the current target heading
@@ -699,5 +704,6 @@ public class DriveSubsystem extends SubsystemBase {
         "Rear left desired position", () -> rearLeft.desiredState.angle.getRadians(), null);
     builder.addDoubleProperty(
         "Rear right desired position", () -> rearRight.desiredState.angle.getRadians(), null);
-  }
+    builder.addBooleanProperty("Near Target heading", this::nearTarget, null);
+      }
 }

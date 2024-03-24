@@ -35,6 +35,8 @@ public class SwerveModule implements Sendable {
 
   private double chassisAngularOffsetRadians = 0;
 
+  public TalonFXConfiguration appliedConfiguration;
+
   /** Desired velocity and angle. This angle includes the chassis offset. */
   public SwerveModuleState desiredState = new SwerveModuleState(0.0, new Rotation2d());
 
@@ -149,6 +151,7 @@ public class SwerveModule implements Sendable {
     toApply.Slot0.kI = DriveCal.DRIVING_I;
     toApply.Slot0.kD = DriveCal.DRIVING_D;
     toApply.Slot0.kV = DriveCal.DRIVING_FF;
+    appliedConfiguration = toApply;
     cfg.apply(toApply);
     final double fastUpdateFrequencyHz = 50.0; // TODO change to faster for better odometry
     final double slowUpdateFrequencyHz = 50.0;
