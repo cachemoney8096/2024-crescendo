@@ -369,39 +369,15 @@ public class RobotContainer implements Sendable {
                     {
                         lights.setLEDColor(LightCode.INTAKING);
                     }
-                if (matchState.isBlue()) {
-                        drive.rotateOrKeepHeading(
-                            JoystickUtil.squareAxis(
-                                MathUtil.applyDeadband(-driverController.getLeftY(), 0.1)),
-                            JoystickUtil.squareAxis(
-                                MathUtil.applyDeadband(-driverController.getLeftX(), 0.1)),
-                            JoystickUtil.squareAxis(
-                                MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
+                final var translationInputs = JoystickUtil.computeDriveXY(driverController, driveFieldRelative, matchState.isBlue());
+                final var rotationInput = JoystickUtil.squareAxis(
+                                MathUtil.applyDeadband(-driverController.getRightX(), 0.05));
+                drive.rotateOrKeepHeading(
+                            translationInputs.getFirst(),
+                            translationInputs.getSecond(),
+                            rotationInput,
                             driveFieldRelative, // always field relative
                             getCardinalDirectionDegrees());
-                      } else {
-                        if (driveFieldRelative) {
-                          drive.rotateOrKeepHeading(
-                              JoystickUtil.squareAxis(
-                                  MathUtil.applyDeadband(driverController.getLeftY(), 0.1)),
-                              JoystickUtil.squareAxis(
-                                  MathUtil.applyDeadband(driverController.getLeftX(), 0.1)),
-                              JoystickUtil.squareAxis(
-                                  MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
-                              driveFieldRelative, // always field relative
-                              getCardinalDirectionDegrees());
-                        } else {
-                          drive.rotateOrKeepHeading(
-                              JoystickUtil.squareAxis(
-                                  MathUtil.applyDeadband(-driverController.getLeftY(), 0.1)),
-                              JoystickUtil.squareAxis(
-                                  MathUtil.applyDeadband(-driverController.getLeftX(), 0.1)),
-                              JoystickUtil.squareAxis(
-                                  MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
-                              driveFieldRelative, // always field relative
-                              getCardinalDirectionDegrees());
-                        }
-                      }
                 };
 
                 if (IntakeSequence.gotNote)
@@ -623,39 +599,15 @@ public class RobotContainer implements Sendable {
         new ConditionalCommand(
                 new RunCommand(
                     () -> {
-                      if (matchState.isBlue()) {
-                        drive.rotateOrKeepHeading(
-                            JoystickUtil.squareAxis(
-                                MathUtil.applyDeadband(-driverController.getLeftY(), 0.1)),
-                            JoystickUtil.squareAxis(
-                                MathUtil.applyDeadband(-driverController.getLeftX(), 0.1)),
-                            JoystickUtil.squareAxis(
-                                MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
+                final var translationInputs = JoystickUtil.computeDriveXY(driverController, driveFieldRelative, matchState.isBlue());
+                final var rotationInput = JoystickUtil.squareAxis(
+                                MathUtil.applyDeadband(-driverController.getRightX(), 0.05));
+                drive.rotateOrKeepHeading(
+                            translationInputs.getFirst(),
+                            translationInputs.getSecond(),
+                            rotationInput,
                             driveFieldRelative, // always field relative
                             getCardinalDirectionDegrees());
-                      } else {
-                        if (driveFieldRelative) {
-                          drive.rotateOrKeepHeading(
-                              JoystickUtil.squareAxis(
-                                  MathUtil.applyDeadband(driverController.getLeftY(), 0.1)),
-                              JoystickUtil.squareAxis(
-                                  MathUtil.applyDeadband(driverController.getLeftX(), 0.1)),
-                              JoystickUtil.squareAxis(
-                                  MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
-                              driveFieldRelative, // always field relative
-                              getCardinalDirectionDegrees());
-                        } else {
-                          drive.rotateOrKeepHeading(
-                              JoystickUtil.squareAxis(
-                                  MathUtil.applyDeadband(-driverController.getLeftY(), 0.1)),
-                              JoystickUtil.squareAxis(
-                                  MathUtil.applyDeadband(-driverController.getLeftX(), 0.1)),
-                              JoystickUtil.squareAxis(
-                                  MathUtil.applyDeadband(-driverController.getRightX(), 0.05)),
-                              driveFieldRelative, // always field relative
-                              getCardinalDirectionDegrees());
-                        }
-                      }
                     },
                     drive),
                 new InstantCommand(),
