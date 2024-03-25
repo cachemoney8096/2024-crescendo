@@ -279,10 +279,10 @@ public class DriveSubsystem extends SubsystemBase {
     Rotation2d frontRightCurrRot = frontRight.getPosition().angle;
     Rotation2d rearLeftCurrRot = rearLeft.getPosition().angle;
     Rotation2d rearRightCurrRot = rearRight.getPosition().angle;
-    frontLeft.setDesiredState(new SwerveModuleState(0, frontLeftCurrRot));
-    frontRight.setDesiredState(new SwerveModuleState(0, frontRightCurrRot));
-    rearLeft.setDesiredState(new SwerveModuleState(0, rearLeftCurrRot));
-    rearRight.setDesiredState(new SwerveModuleState(0, rearRightCurrRot));
+    frontLeft.setDesiredState(new SwerveModuleState(0, frontLeftCurrRot), true);
+    frontRight.setDesiredState(new SwerveModuleState(0, frontRightCurrRot), true);
+    rearLeft.setDesiredState(new SwerveModuleState(0, rearLeftCurrRot), true);
+    rearRight.setDesiredState(new SwerveModuleState(0, rearRightCurrRot), true);
   }
 
   /**
@@ -323,10 +323,10 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void setX() {
-    frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-    frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-    rearLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-    rearRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+    frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)), true);
+    frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), true);
+    rearLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), true);
+    rearRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)), true);
   }
 
   /**
@@ -337,10 +337,10 @@ public class DriveSubsystem extends SubsystemBase {
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(
         desiredStates, DriveConstants.MAX_SPEED_METERS_PER_SECOND);
-    frontLeft.setDesiredState(desiredStates[0]);
-    frontRight.setDesiredState(desiredStates[1]);
-    rearLeft.setDesiredState(desiredStates[2]);
-    rearRight.setDesiredState(desiredStates[3]);
+    frontLeft.setDesiredState(desiredStates[0], false);
+    frontRight.setDesiredState(desiredStates[1], false);
+    rearLeft.setDesiredState(desiredStates[2], false);
+    rearRight.setDesiredState(desiredStates[3], false);
   }
 
   /** Resets the drive encoders to currently read a position of 0. */

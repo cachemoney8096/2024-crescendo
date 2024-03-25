@@ -143,6 +143,7 @@ public class Robot extends TimedRobot {
     matchState.updateMatchState(false);
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
+    m_robotContainer.drive.setNoMove();
     SwerveModule[] moduleArray = {
       m_robotContainer.drive.frontLeft,
       m_robotContainer.drive.frontRight,
@@ -222,6 +223,7 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
+    m_robotContainer.drive.setNoMove();
     SwerveModule[] moduleArray = {
       m_robotContainer.drive.frontLeft,
       m_robotContainer.drive.frontRight,
