@@ -41,7 +41,12 @@ public class DriveCal {
 
   /** Controller on module speed for rotating to target, input degrees [-180,180], output [0,1]. */
   public static final PIDController ROTATE_TO_TARGET_PID_CONTROLLER =
-      new PIDController(0.013, 0, 0.00);
+      new PIDController(0.03, 0, 0.00);
+
+  /** The value for the keepHeading interpolation table based on normalized translation velocity when the robot is motionless (in xy).
+   * We want the lowest output to be 0.013 (that is tuned), 
+   */
+  public static final double MIN_ROTATE_TO_TARGET_PID_OUTPUT = 0.013 / ROTATE_TO_TARGET_PID_CONTROLLER.getP();
 
   /** Feed forward for rotating to target, gets added to or subtracted from PID controller. */
   public static final double ROTATE_TO_TARGET_FF = 0.01;

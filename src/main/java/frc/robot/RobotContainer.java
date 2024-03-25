@@ -39,6 +39,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.limelightCamMode;
 import frc.robot.Constants.limelightLedMode;
 import frc.robot.Constants.limelightPipeline;
+import frc.robot.RobotContainer.PrepState;
 import frc.robot.commands.AmpPrepScore;
 import frc.robot.commands.AmpScore;
 import frc.robot.commands.AutoIntakeSequence;
@@ -183,7 +184,7 @@ public class RobotContainer implements Sendable {
         new SequentialCommandGroup(
             new InstantCommand(() -> pathCmd = "SPEAKER SCORE"),
             new WaitCommand(0.25),
-            Conveyor.shoot(conveyor)));
+            Conveyor.shoot(conveyor, ConveyorCal.NOTE_EXIT_TIME_SHOOTER_AUTO_SECONDS)));
     NamedCommands.registerCommand(
         "INTAKE DEPLOY",
         new InstantCommand(() -> pathCmd = "INTAKE DEPLOY")
@@ -368,6 +369,8 @@ public class RobotContainer implements Sendable {
                     if (!IntakeSequence.gotNote)
                     {
                         lights.setLEDColor(LightCode.INTAKING);
+                    } else {
+                        lights.setLEDColor(LightCode.HAS_NOTE);
                     }
                 final var translationInputs = JoystickUtil.computeDriveXY(driverController, driveFieldRelative, matchState.isBlue());
                 final var rotationInput = JoystickUtil.squareAxis(
@@ -390,6 +393,8 @@ public class RobotContainer implements Sendable {
                     if (!IntakeSequence.gotNote)
                     {
                         lights.setBlink(LightCode.INTAKING);
+                    } else {
+                        lights.setLEDColor(LightCode.HAS_NOTE);
                     }
                     drive.setTargetHeadingDegrees(noteDirection.getSecond().getDegrees());
                     
@@ -466,6 +471,10 @@ public class RobotContainer implements Sendable {
         .rightTrigger()
         .onFalse(
             Conveyor.finishReceive(conveyor, lights)
+            .andThen(new InstantCommand(() -> lights.setLEDColor(
+                        !conveyor.backConveyorBeamBreakSensor.get() ?
+                        LightCode.HAS_NOTE :
+                        LightCode.OFF)))
                 .andThen(
                     new GoHomeSequence(
                         intake, elevator, shooter, conveyor, intakeLimelight, false, false, true))                .beforeStarting(() -> prepState = PrepState.OFF));
@@ -487,7 +496,8 @@ public class RobotContainer implements Sendable {
     selectCommandMap.put(
         PrepState.FEED,
         new SequentialCommandGroup(
-            new InstantCommand(() -> shooterLimelight.resetOdometryDuringPrep(drive)),
+            // new InstantCommand(() -> shooterLimelight.resetOdometryDuringPrep(drive)),
+            new InstantCommand(() -> System.out.println("feeding - speaker shoot sequence is next")),
             new SpeakerShootSequence(conveyor, shooter, elevator, drive, false)));
     selectCommandMap.put(
         PrepState.SPEAKER,
@@ -496,7 +506,8 @@ public class RobotContainer implements Sendable {
     selectCommandMap.put(
         PrepState.AMP,
         new SequentialCommandGroup(
-            new AmpScore(drive, conveyor, intake, shooter, elevator, intakeLimelight)));
+            new AmpScore(drive, conveyor, intake, shooter, elevator, intakeLimelight),
+            new InstantCommand(() -> drive.throttle(1.0))));
     selectCommandMap.put(PrepState.OPERATOR, new SequentialCommandGroup(Conveyor.shoot(conveyor)));
 
     SelectCommand<PrepState> driverLeftTriggerCommand =
@@ -562,17 +573,18 @@ public class RobotContainer implements Sendable {
                     matchState,
                     intakeLimelight,
                     lights)));
-    // bottom left back button
-    driverController
-        .povRight()
-        .onTrue(
-            new SequentialCommandGroup(
-                new InstantCommand(() -> prepState = PrepState.AMP),
-                new AmpPrepScore(elevator, conveyor, intake, shooter, drive, lights)));
-
     // top left back button
     driverController
         .povUp()
+        .onTrue(
+            new SequentialCommandGroup(
+                new InstantCommand(() -> prepState = PrepState.AMP),
+                new AmpPrepScore(elevator, conveyor, intake, shooter, drive, lights),
+                new InstantCommand(() -> drive.throttle(0.6))));
+
+    // bottom left back button
+    driverController
+        .povRight()
         .onTrue(
             new InstantCommand(() -> prepState = PrepState.CLIMB)
                 .andThen(
@@ -725,23 +737,35 @@ public class RobotContainer implements Sendable {
   public boolean readyToScoreCheck() {
     switch (prepState) {
       case OFF:
+        if (drive.throttleMultiplier != 1.0){
+        drive.throttle(1.0);}
         return false;
       case CLIMB:
+        if (drive.throttleMultiplier != 0.3){
+        drive.throttle(0.3);}
         return intake.nearDeployed() &&
         elevator.atPosition(ElevatorPosition.PRE_CLIMB) &&
         shooter.atDesiredPosition() && PIDToPoint.finishedPid;
       case SPEAKER:
+        if (drive.throttleMultiplier != 1.0){
+        drive.throttle(1.0);}
         return elevator.atPosition(ElevatorPosition.SLIGHTLY_UP)
             && shooter.atDesiredPosition()
             && shooter.isShooterSpunUp()
             && drive.getDiffCurrentTargetYawDeg() < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES;
       case FEED:
+        if (drive.throttleMultiplier != 1.0){
+        drive.throttle(1.0);}
         return elevator.atPosition(ElevatorPosition.SLIGHTLY_UP)
             && shooter.atDesiredPosition()
             && shooter.isShooterSpunUp();
       case AMP:
+        if (drive.throttleMultiplier != 0.6){
+        drive.throttle(0.6);}
         return elevator.atPosition(ElevatorPosition.SCORE_AMP);
       case OPERATOR:
+        if (drive.throttleMultiplier != 1.0){
+        drive.throttle(1.0);}
         return shooter.isShooterSpunUp()
             && shooter.atDesiredPosition()
             && drive.getDiffCurrentTargetYawDeg()

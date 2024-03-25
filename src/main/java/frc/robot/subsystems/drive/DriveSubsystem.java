@@ -27,6 +27,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -93,7 +94,7 @@ public class DriveSubsystem extends SubsystemBase {
           getModulePositions());
 
   /** Multiplier for drive speed, does not affect trajectory following */
-  private double throttleMultiplier = 1.0;
+  public double throttleMultiplier = 1.0;
 
   private double rotControllerInput = 0.0;
 
@@ -102,6 +103,9 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Interpolation map storing rotational velocities (deg/s) as keys and the amount the robot overshoots at each velocity (deg) as values */
   private InterpolatingDoubleTreeMap yawOffsetMap;
+
+  /** Interpolation map to convert drive velocities (m/s) as keys and a value in [0,1] for the keepheading PID multiplier as values */
+  private InterpolatingDoubleTreeMap velocityToMultiplierMap;
 
   public DriveSubsystem(MatchStateUtil matchState) {
     intializeGyro();
@@ -139,11 +143,19 @@ public class DriveSubsystem extends SubsystemBase {
         },
         this // Reference to this subsystem to set requirements
         );
+
       yawOffsetMap = new InterpolatingDoubleTreeMap();
       yawOffsetMap.put(0.0, 0.0);
       yawOffsetMap.put(120.0, 5.0);
       yawOffsetMap.put(167.0, 22.0);
       yawOffsetMap.put(330.0, 50.0);
+
+      velocityToMultiplierMap = new InterpolatingDoubleTreeMap();
+      velocityToMultiplierMap.put(0.0, DriveCal.MIN_ROTATE_TO_TARGET_PID_OUTPUT);
+      velocityToMultiplierMap.put(DriveConstants.MAX_SPEED_METERS_PER_SECOND, 1.0);
+
+      SmartDashboard.putNumber("Norm Velocity (mps)", 0);
+      SmartDashboard.putNumber("Velocity PID multiplier", 0);
   }
 
   public void intializeGyro() {
@@ -317,8 +329,6 @@ public class DriveSubsystem extends SubsystemBase {
 
     var swerveModuleStates =
         DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds);
-
-        System.out.println(swerveModuleStates[0].angle);
     setModuleStates(swerveModuleStates);
   }
 
@@ -385,6 +395,16 @@ public class DriveSubsystem extends SubsystemBase {
     double pidRotation =
         DriveCal.ROTATE_TO_TARGET_PID_CONTROLLER.calculate(offsetHeadingDegrees, 0.0);
     double ffRotation = Math.signum(offsetHeadingDegrees) * DriveCal.ROTATE_TO_TARGET_FF;
+
+    double normVelocity = new Translation2d(lastSetChassisSpeeds.vxMetersPerSecond, lastSetChassisSpeeds.vyMetersPerSecond).getNorm();
+
+    SmartDashboard.putNumber("Norm Velocity (mps)", normVelocity);
+
+    double velocityMultiplier = velocityToMultiplierMap.get(normVelocity);
+
+    SmartDashboard.putNumber("Velocity PID multiplier", velocityMultiplier);
+
+    pidRotation *= velocityMultiplier;
 
     KeepHeadingPID = pidRotation;
     KeepHeadingFF = ffRotation;

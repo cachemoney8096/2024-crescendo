@@ -222,7 +222,7 @@ public class SwerveModule implements Sendable {
   public double getDesiredVelocityMps(double inputVelocityMps) {
     // Allow any decrease in desired speed
     final double prevDesiredVelocityMps = desiredState.speedMetersPerSecond;
-    if (Math.abs(inputVelocityMps) < Math.abs(prevDesiredVelocityMps) || Math.signum(inputVelocityMps) != Math.signum(prevDesiredVelocityMps)) {
+    if (Math.abs(inputVelocityMps) < Math.abs(prevDesiredVelocityMps)) {
       return inputVelocityMps;
     }
 

@@ -162,15 +162,20 @@ public class Conveyor extends SubsystemBase {
   }
 
   /** Send note to the shooter. */
-  public static Command shoot(Conveyor conveyor) {
+  public static Command shoot(Conveyor conveyor, double waitTime) {
     return new SequentialCommandGroup(
         new InstantCommand(
             () -> conveyor.frontMotor.set(ConveyorCal.PREPARE_TO_SHOOT_FRONT_SPEED), conveyor),
         new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.PREPARE_TO_SHOOT_BACK_SPEED)),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
-        new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_SHOOTER_SECONDS),
+        new WaitCommand(waitTime),
         Conveyor.stop(conveyor),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.NO_NOTE));
+  }
+
+  /** Send note to the shooter. */
+  public static Command shoot(Conveyor conveyor) {
+    return Conveyor.shoot(conveyor, ConveyorCal.NOTE_EXIT_TIME_SHOOTER_TELEOP_SECONDS);
   }
 
   /** Score note into the trap or the amp */
