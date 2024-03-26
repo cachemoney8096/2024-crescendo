@@ -334,7 +334,7 @@ public class RobotContainer implements Sendable {
     driverController
         .rightBumper()
         .onFalse(
-            Conveyor.finishReceive(conveyor, lights)
+            Conveyor.finishReceive(conveyor, lights, true)
                 .andThen(
                     new GoHomeSequence(
                         intake, elevator, shooter, conveyor, intakeLimelight, false, false, true))                .beforeStarting(() -> prepState = PrepState.OFF));
@@ -470,7 +470,7 @@ public class RobotContainer implements Sendable {
     driverController
         .rightTrigger()
         .onFalse(
-            Conveyor.finishReceive(conveyor, lights)
+            Conveyor.finishReceive(conveyor, lights, true)
             .andThen(new InstantCommand(() -> lights.setLEDColor(
                         !conveyor.backConveyorBeamBreakSensor.get() ?
                         LightCode.HAS_NOTE :

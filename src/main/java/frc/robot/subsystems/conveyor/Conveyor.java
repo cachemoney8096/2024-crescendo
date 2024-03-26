@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.RobotMap;
 import frc.robot.commands.IntakeSequence;
 import frc.robot.subsystems.lights.Lights;
-import frc.robot.subsystems.lights.Lights.LightCode;
 import frc.robot.utils.SparkMaxUtils;
 import java.util.function.DoubleConsumer;
 
@@ -222,8 +221,19 @@ public class Conveyor extends SubsystemBase {
    */
   public static Command finishReceive(Conveyor conveyor, Lights lights, boolean letGoOfTrigger) {
     return new ConditionalCommand(
-      // new ConditionalCommand
-      new SequentialCommandGroup(
+            finishReceiveFunctionalCmd(conveyor, lights),
+            new SequentialCommandGroup(
+                new ParallelRaceGroup(
+                    new WaitCommand(1.0),
+                    new WaitUntilCommand(() -> !conveyor.backConveyorBeamBreakSensor.get())),
+                finishReceiveFunctionalCmd(conveyor, lights)),
+            () -> !letGoOfTrigger)
+        .withName("Finish Receive");
+  }
+
+  public static Command finishReceiveFunctionalCmd(Conveyor conveyor, Lights lights) {
+    return new ConditionalCommand(
+        new SequentialCommandGroup(
             new InstantCommand(
                 () -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED), conveyor),
             new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED)),
@@ -233,14 +243,13 @@ public class Conveyor extends SubsystemBase {
             new InstantCommand(() -> conveyor.stopRollers()),
             new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", true)),
             new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE)),
-            new InstantCommand(),
-            () -> {
-              return !conveyor.frontConveyorBeamBreakSensor.get();
-            }
-    ).withName("Finish Receive");
+        new InstantCommand(),
+        () -> {
+          return !conveyor.frontConveyorBeamBreakSensor.get();
+        });
   }
 
-  public static Command finishReceive(Conveyor conveyor, Lights lights){
+  public static Command finishReceive(Conveyor conveyor, Lights lights) {
     return finishReceive(conveyor, lights, false);
   }
 
@@ -261,29 +270,20 @@ public class Conveyor extends SubsystemBase {
   private boolean sawNote = false;
 
   @Override
-  public void periodic()
-  {
+  public void periodic() {
     if (!intakeBeamBreakSensor.get()) {
-      if (sawNote)
-      {
+      if (sawNote) {
         // see and previously saw
-      }
-      else
-      {
+      } else {
         sawNote = true;
         Conveyor.rumbleBriefly(this).schedule();
         IntakeSequence.gotNote = true;
         hasNoteFunc.run();
       }
-    }
-    else
-    {
-      if (sawNote)
-      {
+    } else {
+      if (sawNote) {
         sawNote = false;
-      }
-      else
-      {
+      } else {
         // don't see didn't see do nothing
       }
     }

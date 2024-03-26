@@ -88,6 +88,8 @@ public class Elevator extends SubsystemBase {
   private double desiredSetpointPosition = 0.0;
   private double desiredSetpointVelocity = 0.0;
 
+  private boolean elevatorManualControl = false;
+
   public Elevator() {
     SparkMaxUtils.initWithRetry(this::initSparks, ElevatorConstants.MAX_INIT_RETRY_ATTEMPTS);
     elevatorPositions = new TreeMap<ElevatorPosition, Double>();
@@ -165,10 +167,11 @@ public class Elevator extends SubsystemBase {
     return rightMotorEncoderRel.setPosition(ElevatorCal.POSITION_HOME_INCHES);
   }
 
-  // /** Manually runs the elevator given [-1,1] input */
-  // public void manualRunElevator(double controllerInput){
-  //   elevator
-  // }
+  /** Manually runs the elevator given [-1,1] input */
+  public void manualRunElevator(double controllerInput){
+    elevatorManualControl = true;
+
+  }
 
   /** If true, use elevator control parameters for note scoring as opposed to climbing */
   public void setControlParams(boolean useNoteControlParams) {
