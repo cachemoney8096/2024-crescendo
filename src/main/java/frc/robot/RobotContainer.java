@@ -508,7 +508,9 @@ public class RobotContainer implements Sendable {
         new SequentialCommandGroup(
             new AmpScore(drive, conveyor, intake, shooter, elevator, intakeLimelight),
             new InstantCommand(() -> drive.throttle(1.0))));
-    selectCommandMap.put(PrepState.OPERATOR, new SequentialCommandGroup(Conveyor.shoot(conveyor)));
+    selectCommandMap.put(PrepState.OPERATOR, new SequentialCommandGroup(Conveyor.shoot(conveyor),
+    new InstantCommand(()->shooterLimelight.resetOdometryDuringPrep(drive)),
+    new InstantCommand(()->System.out.println("rezeroed odemetry in speakerprep"))));
 
     SelectCommand<PrepState> driverLeftTriggerCommand =
         new SelectCommand<PrepState>(selectCommandMap, this::getAndClearPrepState);

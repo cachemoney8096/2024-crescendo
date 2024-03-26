@@ -59,7 +59,7 @@ public class IntakeCal {
   
 
   /** intake power [-1.0,1.0] */
-  public static final double INTAKING_POWER = 0.6, REVERSE_INTAKING_POWER = -1.0;
+  public static final double INTAKING_POWER = 0.75, REVERSE_INTAKING_POWER = -1.0;
 
   public static final int PIVOT_MOTOR_CURRENT_LIMIT_AMPS = 50;
   public static final double INTAKING_TALONS_CURRENT_LIMIT_AMPS = 50.0;

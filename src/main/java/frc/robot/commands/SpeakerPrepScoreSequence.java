@@ -91,6 +91,6 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
             .until(
                 () -> {
                   return false;
-                }).finallyDo(() -> shooterLimelight.resetOdometryDuringPrep(drive)));
+                }).finallyDo(() -> {shooterLimelight.resetOdometryDuringPrep(drive);System.out.println("rezeroed odemetry in speakerprep");}));
   }
 }
