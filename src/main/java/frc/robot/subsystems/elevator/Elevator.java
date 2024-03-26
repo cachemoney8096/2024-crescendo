@@ -152,16 +152,23 @@ public class Elevator extends SubsystemBase {
   }
 
   /** Zeroes leftMotorEncoderRel so it returns inches from home. */
-  private REVLibError setLeftZeroFromAbsolute() {
+  public REVLibError setLeftZeroFromAbsolute() {
     // TODO absolute encoder zeroing
+    // Note that this is run in RobotContainer for operator, so please make sure that still works if we add CRT
     return leftMotorEncoderRel.setPosition(ElevatorCal.POSITION_HOME_INCHES);
   }
 
   /** Zeroes rightMotorEncoderRel so it returns inches from home. */
-  private REVLibError setRightZeroFromAbsolute() {
+  public REVLibError setRightZeroFromAbsolute() {
     // TODO absolute encoder zeroing
+    // Note that this is run in RobotContainer for operator, so please make sure that still works if we add CRT
     return rightMotorEncoderRel.setPosition(ElevatorCal.POSITION_HOME_INCHES);
   }
+
+  // /** Manually runs the elevator given [-1,1] input */
+  // public void manualRunElevator(double controllerInput){
+  //   elevator
+  // }
 
   /** If true, use elevator control parameters for note scoring as opposed to climbing */
   public void setControlParams(boolean useNoteControlParams) {

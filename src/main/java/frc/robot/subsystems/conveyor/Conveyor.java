@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -219,8 +220,9 @@ public class Conveyor extends SubsystemBase {
    * Assuming a note is here, then runs until it's positioned correctly. Notably, it won't do
    * anything if there's not a note.
    */
-  public static Command finishReceive(Conveyor conveyor, Lights lights) {
-    return new ConditionalCommand( 
+  public static Command finishReceive(Conveyor conveyor, Lights lights, boolean letGoOfTrigger) {
+    return new ConditionalCommand(
+      // new ConditionalCommand
       new SequentialCommandGroup(
             new InstantCommand(
                 () -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED), conveyor),
@@ -236,6 +238,10 @@ public class Conveyor extends SubsystemBase {
               return !conveyor.frontConveyorBeamBreakSensor.get();
             }
     ).withName("Finish Receive");
+  }
+
+  public static Command finishReceive(Conveyor conveyor, Lights lights){
+    return finishReceive(conveyor, lights, false);
   }
 
   /** Stop the conveor rollers. */

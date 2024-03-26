@@ -721,6 +721,28 @@ public class RobotContainer implements Sendable {
                 .ignoringDisable(true));
 
     operatorController.start().onTrue(new UnclimbSequence(elevator, shooter, conveyor, lights));
+    operatorController.back().onTrue(
+        new InstantCommand(() -> elevator.setLeftZeroFromAbsolute()).andThen(
+            new InstantCommand(() -> elevator.setRightZeroFromAbsolute())));
+    
+    // elevator.setDefaultCommand(
+    //     new ConditionalCommand(
+    //             new RunCommand(
+    //                 () -> {
+    //             final var translationInputs = JoystickUtil.computeDriveXY(driverController, driveFieldRelative, matchState.isBlue());
+    //             final var rotationInput = JoystickUtil.squareAxis(
+    //                             MathUtil.applyDeadband(-driverController.getRightX(), 0.05));
+    //             drive.rotateOrKeepHeading(
+    //                         translationInputs.getFirst(),
+    //                         translationInputs.getSecond(),
+    //                         rotationInput,
+    //                         driveFieldRelative, // always field relative
+    //                         getCardinalDirectionDegrees());
+    //                 },
+    //                 drive),
+    //             new InstantCommand(),
+    //             () -> matchState.isTeleop())
+    //         .withName("Manual Drive"));
   }
 
   private void burnFlashAllSparks() {
