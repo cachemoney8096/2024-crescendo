@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
@@ -60,6 +61,9 @@ public class Robot extends TimedRobot {
     DataLogManager.start();
     DriverStation.startDataLog(DataLogManager.getLog()); // log joystick data
     URCL.start();
+
+    SignalLogger.setPath("/u/logs/");
+    SignalLogger.start();
 
     m_robotContainer = new RobotContainer(matchState);
     RobotController.setBrownoutVoltage(Constants.BROWNOUT_VOLTAGE);
