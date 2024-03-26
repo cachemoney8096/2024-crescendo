@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -75,9 +76,11 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                       // get pose, find limelight stuff from <that> pose use limelight to prep
                       // sequence
                       tagDetection = interimTagDetection;
+                    double arbitraryLimelightLatencySec = 0.7;
+                    Pose2d futurePose = drive.extrapolatePastPoseBasedOnVelocity(-arbitraryLimelightLatencySec);
                     Pair<Rotation2d, Double> p =
                     ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
-                        drive.getPose(), drive.matchState.isBlue());
+                        futurePose, drive.matchState.isBlue());
                       drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
                       shooter.setShooterDistance(p.getSecond());
                     } else {
