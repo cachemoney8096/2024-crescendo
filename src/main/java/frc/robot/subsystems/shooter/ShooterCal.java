@@ -93,7 +93,7 @@ public class ShooterCal {
   public static final double CONVEYOR_ZONE_THRESHOLD_DEGREES = 110.0;
 
   public static final double SHOOT_CLEAR_STAGE_ANGLE_DEGREES = 135.0;
-  public static final double SHOOT_CLEAR_STAGE_VOLTAGE = 4.75;
+  public static final double SHOOT_CLEAR_STAGE_VOLTAGE = 5.0;
 
   public static final double ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES = 4.0;
 
