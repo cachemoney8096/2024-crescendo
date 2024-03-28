@@ -12,7 +12,7 @@
         "y": 6.267902332100961
       },
       "isLocked": false,
-      "linkedName": "5 INTAKE RED"
+      "linkedName": "5 INTAKE BLUE"
     },
     {
       "anchor": {
@@ -25,7 +25,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "SHOOT AT 2 RED"
+      "linkedName": "SHOOT AT 2 BLUE"
     }
   ],
   "rotationTargets": [],

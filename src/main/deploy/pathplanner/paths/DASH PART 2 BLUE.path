@@ -12,7 +12,7 @@
         "y": 8.452775778699717
       },
       "isLocked": false,
-      "linkedName": "DASH 4 RED"
+      "linkedName": "DASH 4 BLUE"
     },
     {
       "anchor": {
@@ -25,7 +25,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "DASH FAR SHOOT RED"
+      "linkedName": "DASH FAR SHOOT BLUE"
     }
   ],
   "rotationTargets": [],

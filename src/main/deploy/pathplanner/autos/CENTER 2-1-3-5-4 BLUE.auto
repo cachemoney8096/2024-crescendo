@@ -45,7 +45,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "CENTER TO 2 RED"
+            "pathName": "CENTER TO 2 BLUE"
           }
         },
         {
@@ -63,7 +63,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "2 TO 1 RED"
+            "pathName": "2 TO 1 BLUE"
           }
         },
         {
@@ -81,7 +81,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "1 TO 3 RED"
+            "pathName": "1 TO 3 BLUE"
           }
         },
         {
@@ -118,13 +118,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "3 TO 5 RED"
+            "pathName": "3 TO 5 BLUE"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "5 TO SHOOT AT 2 RED"
+            "pathName": "5 TO SHOOT AT 2 BLUE"
           }
         },
         {
@@ -142,13 +142,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "2 TO 4 RED"
+            "pathName": "2 TO 4 BLUE"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "4 TO SHOOT AT 2 RED"
+            "pathName": "4 TO SHOOT AT 2 BLUE"
           }
         },
         {

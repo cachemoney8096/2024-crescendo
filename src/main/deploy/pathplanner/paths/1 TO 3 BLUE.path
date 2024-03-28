@@ -12,7 +12,7 @@
         "y": 6.280135513974733
       },
       "isLocked": false,
-      "linkedName": "1 INTAKE RED"
+      "linkedName": "1 INTAKE BLUE"
     },
     {
       "anchor": {
@@ -25,7 +25,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "3 INTAKE RED"
+      "linkedName": "3 INTAKE BLUE"
     }
   ],
   "rotationTargets": [],
