@@ -1,0 +1,52 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 8.571929180895399,
+        "y": 8.7
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 7.824199310435658,
+        "y": 8.452775778699717
+      },
+      "isLocked": false,
+      "linkedName": "DASH 4 RED"
+    },
+    {
+      "anchor": {
+        "x": 5.273245750195204,
+        "y": 7.167100584201169
+      },
+      "prevControl": {
+        "x": 6.26270825689827,
+        "y": 7.703935361580978
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "DASH FAR SHOOT RED"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 5.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 7.0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "DASH BLUE",
+  "previewStartingState": {
+    "rotation": 0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": false
+}

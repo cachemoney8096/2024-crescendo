@@ -1,0 +1,70 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 8.996765021307821,
+        "y": 6.7683938701210735
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 7.784551712621944,
+        "y": 6.728012493062023
+      },
+      "isLocked": false,
+      "linkedName": "4 INTAKE RED"
+    },
+    {
+      "anchor": {
+        "x": 5.533824400982135,
+        "y": 6.467671379787204
+      },
+      "prevControl": {
+        "x": 6.324646163181215,
+        "y": 6.855807674578312
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "SHOOT AT 2 RED"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "eventMarkers": [
+    {
+      "name": "INTAKE",
+      "waypointRelativePos": 0,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "INTAKE"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 5.0,
+    "maxAcceleration": 6.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "CENTER BLUE",
+  "previewStartingState": {
+    "rotation": 0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": false
+}

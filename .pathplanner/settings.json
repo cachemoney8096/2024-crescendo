@@ -4,9 +4,11 @@
   "holonomicMode": true,
   "pathFolders": [
     "CENTER",
+    "CENTER BLUE",
     "CENTER RED",
-    "LEFT RED",
     "DASH RED",
+    "LEFT RED",
+    "DASH BLUE",
     "RIGHT"
   ],
   "autoFolders": [],
