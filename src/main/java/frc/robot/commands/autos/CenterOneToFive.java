@@ -27,7 +27,7 @@ public class CenterOneToFive extends SequentialCommandGroup {
     addCommands(
         new ConditionalCommand(
             new PathPlannerAuto("CENTER 2-1-3-5-4 RED"),
-            new PathPlannerAuto("CENTER 2-1-3-5-4"),
+            new PathPlannerAuto("CENTER 2-1-3-5-4 BLUE"),
             () -> isRed));
   }
 }

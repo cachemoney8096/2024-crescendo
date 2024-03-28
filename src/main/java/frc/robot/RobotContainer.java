@@ -278,7 +278,7 @@ public class RobotContainer implements Sendable {
         new Pair<Command, String>(
             new CenterOneToFive(
                 drive, intake, elevator, shooter, conveyor, shooterLimelight, false),
-            "CENTER 2-1-3-5-4"));
+            "CENTER 2-1-3-5-4 BLUE"));
     autonChooser.addOption(
         "RED score notes 2-1-3-5-4",
         new Pair<Command, String>(
@@ -298,7 +298,7 @@ public class RobotContainer implements Sendable {
         "BLUE dash left",
         new Pair<Command, String>(
             new DashAuto(drive, intake, elevator, shooter, conveyor, shooterLimelight, true),
-            "DASH"));
+            "DASH BLUE"));
     autonChooser.addOption(
         "RED dash right",
         new Pair<Command, String>(

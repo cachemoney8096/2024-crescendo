@@ -27,8 +27,7 @@ public class DashAuto extends SequentialCommandGroup {
     addCommands(
         new ConditionalCommand(
             new PathPlannerAuto("DASH RED"),
-            // new PathPlannerAuto("DASH"),
-            new PathPlannerAuto("DASH RED"),
+            new PathPlannerAuto("DASH BLUE"),
             () -> isRed));
   }
 }
