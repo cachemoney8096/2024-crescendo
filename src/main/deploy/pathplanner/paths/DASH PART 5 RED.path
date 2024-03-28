@@ -3,37 +3,43 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 8.608213035870516,
-        "y": 5.425891236041731
+        "x": 5.273245750195204,
+        "y": 7.167100584201169
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.689061632752894,
-        "y": 6.267902332100961
+        "x": 7.0037065259315705,
+        "y": 7.299468362825615
       },
       "isLocked": false,
-      "linkedName": "5 INTAKE RED"
+      "linkedName": "DASH FAR SHOOT RED"
     },
     {
       "anchor": {
-        "x": 5.533824400982135,
-        "y": 6.467671379787204
+        "x": 9.36655154328827,
+        "y": 4.670937638171573
       },
       "prevControl": {
-        "x": 6.737723896744089,
-        "y": 6.515060113453561
+        "x": 8.672645086030913,
+        "y": 6.672963174630054
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "SHOOT AT 2 RED"
+      "linkedName": "6 INTAKE DASH RED"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.55,
+      "rotationDegrees": -45.0,
+      "rotateFast": false
+    }
+  ],
   "constraintZones": [],
   "eventMarkers": [
     {
       "name": "INTAKE",
-      "waypointRelativePos": 0,
+      "waypointRelativePos": 0.25,
       "command": {
         "type": "parallel",
         "data": {
@@ -50,20 +56,20 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 5.0,
-    "maxAcceleration": 6.0,
+    "maxVelocity": 4.0,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0,
+    "rotation": -45.0,
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "CENTER RED",
+  "folder": "DASH RED",
   "previewStartingState": {
-    "rotation": -10.0,
+    "rotation": 0,
     "velocity": 0
   },
   "useDefaultConstraints": false

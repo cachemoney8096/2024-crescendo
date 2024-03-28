@@ -57,6 +57,7 @@ import frc.robot.commands.SpeakerPrepScoreSequence;
 import frc.robot.commands.SpeakerShootSequence;
 import frc.robot.commands.UnclimbSequence;
 import frc.robot.commands.autos.CenterOneToFive;
+import frc.robot.commands.autos.DashAuto;
 import frc.robot.commands.autos.ScoreFourFromCenterLine;
 import frc.robot.commands.autos.ScoreTwoNotes;
 import frc.robot.commands.autos.SideSixToEight;
@@ -203,6 +204,12 @@ public class RobotContainer implements Sendable {
                 new SpeakerPrepScoreAuto(
                     intake, elevator, shooter, conveyor, ShooterCal.AUTO_SHOOTING_DISTANCE_M)));
     NamedCommands.registerCommand(
+        "SPEAKER PREP DASH PRELOAD",
+        new InstantCommand(() -> pathCmd = "SPEAKER PREP DASH PRELOAD")
+            .andThen(
+                new SpeakerPrepScoreAutoPreload(
+                    intake, elevator, shooter, conveyor, ShooterCal.AUTO_DASH_SHOOTING_DISTANCE_M)));
+    NamedCommands.registerCommand(
         "SPEAKER PREP FAR",
         new InstantCommand(() -> pathCmd = "SPEAKER PREP FAR")
             .andThen(
@@ -287,6 +294,16 @@ public class RobotContainer implements Sendable {
         new Pair<Command, String>(
             new SideSixToEight(drive, intake, elevator, shooter, conveyor, shooterLimelight, true),
             "LEFT 8-6-7 RED"));
+    autonChooser.addOption(
+        "BLUE dash left",
+        new Pair<Command, String>(
+            new DashAuto(drive, intake, elevator, shooter, conveyor, shooterLimelight, true),
+            "DASH"));
+    autonChooser.addOption(
+        "RED dash right",
+        new Pair<Command, String>(
+            new DashAuto(drive, intake, elevator, shooter, conveyor, shooterLimelight, true),
+            "DASH RED"));
     SmartDashboard.putData(autonChooser);
   }
 
