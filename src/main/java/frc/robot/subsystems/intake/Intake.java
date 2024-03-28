@@ -281,6 +281,11 @@ public class Intake extends SubsystemBase {
     intakeTalonRight.set(IntakeCal.INTAKING_POWER);
   }
 
+  public void startRollersAuto() {
+    intakeTalonLeft.set(IntakeCal.AUTO_INTAKING_POWER);
+    intakeTalonRight.set(IntakeCal.AUTO_INTAKING_POWER);
+  }
+
   public boolean clearOfLimeLight() {
     return getPivotPosition() < IntakeCal.LIMELIGHT_BLOCKED_THRESHOLD || nearDeployed();
   }

@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.533824400982135,
-        "y": 6.467671379787204
+        "x": 8.608213035870516,
+        "y": 5.425891236041731
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.354338352195223,
-        "y": 6.852303996274659
+        "x": 7.689061632752895,
+        "y": 6.267902332100961
       },
       "isLocked": false,
-      "linkedName": "SHOOT AT 2 RED"
+      "linkedName": "5 INTAKE RED"
     },
     {
       "anchor": {
-        "x": 8.996765021307821,
-        "y": 6.7683938701210735
+        "x": 5.533824400982135,
+        "y": 6.467671379787204
       },
       "prevControl": {
-        "x": 7.5723713299278455,
-        "y": 6.74665918776282
+        "x": 6.737723896744089,
+        "y": 6.515060113453561
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "4 INTAKE RED"
+      "linkedName": "SHOOT AT 2 RED"
     }
   ],
   "rotationTargets": [],
@@ -33,9 +33,9 @@
   "eventMarkers": [
     {
       "name": "INTAKE",
-      "waypointRelativePos": 0.25,
+      "waypointRelativePos": 0,
       "command": {
-        "type": "sequential",
+        "type": "parallel",
         "data": {
           "commands": [
             {
@@ -50,14 +50,14 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 6.0,
-    "maxAcceleration": 7.0,
+    "maxVelocity": 5.0,
+    "maxAcceleration": 6.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0,
+    "rotation": 0.0,
     "rotateFast": false
   },
   "reversed": false,

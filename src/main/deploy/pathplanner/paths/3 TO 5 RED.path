@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.533824400982135,
-        "y": 6.467671379787204
+        "x": 2.7728071289475915,
+        "y": 4.243963960150143
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.354338352195223,
-        "y": 6.852303996274659
+        "x": 3.256789809875916,
+        "y": 7.014194294261604
       },
       "isLocked": false,
-      "linkedName": "SHOOT AT 2 RED"
+      "linkedName": "3 INTAKE RED"
     },
     {
       "anchor": {
-        "x": 8.996765021307821,
-        "y": 6.7683938701210735
+        "x": 8.608213035870516,
+        "y": 5.425891236041731
       },
       "prevControl": {
-        "x": 7.5723713299278455,
-        "y": 6.74665918776282
+        "x": 6.591697711173199,
+        "y": 6.9156671276305515
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "4 INTAKE RED"
+      "linkedName": "5 INTAKE RED"
     }
   ],
   "rotationTargets": [],
@@ -33,7 +33,7 @@
   "eventMarkers": [
     {
       "name": "INTAKE",
-      "waypointRelativePos": 0.25,
+      "waypointRelativePos": 0.55,
       "command": {
         "type": "sequential",
         "data": {
@@ -42,6 +42,23 @@
               "type": "named",
               "data": {
                 "name": "INTAKE"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "SPEAKER SCORE",
+      "waypointRelativePos": 0,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "SPEAKER SCORE"
               }
             }
           ]
@@ -57,13 +74,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0,
+    "rotation": -10.0,
     "rotateFast": false
   },
   "reversed": false,
   "folder": "CENTER RED",
   "previewStartingState": {
-    "rotation": -10.0,
+    "rotation": -25.0,
     "velocity": 0
   },
   "useDefaultConstraints": false

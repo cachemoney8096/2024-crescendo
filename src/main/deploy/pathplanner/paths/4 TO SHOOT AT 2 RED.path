@@ -3,45 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 8.534126782539278,
-        "y": 6.875285750571502
+        "x": 8.996765021307821,
+        "y": 6.7683938701210735
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.9394027359483275,
-        "y": 6.2742479770673825
+        "x": 7.784551712621944,
+        "y": 6.728012493062023
       },
       "isLocked": false,
-      "linkedName": "4 INTAKE"
+      "linkedName": "4 INTAKE RED"
     },
     {
       "anchor": {
-        "x": 2.347835552813963,
-        "y": 4.852280561703981
+        "x": 5.533824400982135,
+        "y": 6.467671379787204
       },
       "prevControl": {
-        "x": 4.576073152146307,
-        "y": 5.65855074567292
+        "x": 6.324646163181215,
+        "y": 6.855807674578312
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "SHOOT AT 2 RED"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "eventMarkers": [
     {
-      "name": "SPEAKER PREP",
-      "waypointRelativePos": 0.3,
+      "name": "INTAKE",
+      "waypointRelativePos": 0,
       "command": {
-        "type": "sequential",
+        "type": "parallel",
         "data": {
           "commands": [
             {
               "type": "named",
               "data": {
-                "name": "SPEAKER PREP"
+                "name": "INTAKE"
               }
             }
           ]

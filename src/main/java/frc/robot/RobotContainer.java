@@ -183,7 +183,7 @@ public class RobotContainer implements Sendable {
         "SPEAKER SCORE",
         new SequentialCommandGroup(
             new InstantCommand(() -> pathCmd = "SPEAKER SCORE"),
-            new WaitCommand(0.25),
+            new WaitCommand(0.1),
             Conveyor.shoot(conveyor, ConveyorCal.NOTE_EXIT_TIME_SHOOTER_AUTO_SECONDS)));
     NamedCommands.registerCommand(
         "INTAKE DEPLOY",
@@ -202,6 +202,12 @@ public class RobotContainer implements Sendable {
             .andThen(
                 new SpeakerPrepScoreAuto(
                     intake, elevator, shooter, conveyor, ShooterCal.AUTO_SHOOTING_DISTANCE_M)));
+    NamedCommands.registerCommand(
+        "SPEAKER PREP FAR",
+        new InstantCommand(() -> pathCmd = "SPEAKER PREP FAR")
+            .andThen(
+                new SpeakerPrepScoreAuto(
+                    intake, elevator, shooter, conveyor, ShooterCal.AUTO_FAR_SHOOTING_DISTANCE_M)));
     NamedCommands.registerCommand(
         "SPEAKER PREP STAGE",
         new InstantCommand(() -> pathCmd = "SPEAKER PREP STAGE")
