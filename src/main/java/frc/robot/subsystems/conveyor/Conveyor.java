@@ -194,7 +194,7 @@ public class Conveyor extends SubsystemBase {
   public static Command startReceive(Conveyor conveyor) {
     return new SequentialCommandGroup(
             new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SPEED), conveyor),
-            new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SPEED)),
+            new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_MEDIUM_SPEED)),
             new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
             new WaitUntilCommand(() -> !conveyor.backConveyorBeamBreakSensor.get()))
         .withName("Start Receive");
