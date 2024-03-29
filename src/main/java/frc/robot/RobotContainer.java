@@ -360,8 +360,7 @@ public class RobotContainer implements Sendable {
             Conveyor.finishReceive(conveyor, lights, true)
                 .andThen(
                     new GoHomeSequence(
-                        intake, elevator, shooter, conveyor, intakeLimelight, false, false, true))                .beforeStarting(() -> prepState = PrepState.OFF));
-
+                        intake, elevator, shooter, conveyor, intakeLimelight, false, false, true)).beforeStarting(() -> prepState = PrepState.OFF));
 
     driverController
         .rightTrigger()
