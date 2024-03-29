@@ -262,6 +262,13 @@ public class DriveSubsystem extends SubsystemBase {
     resetYawToAngle(matchState.isBlue() ? 0 : 180);
   }
 
+  public void resetOdometryToCenterSubwoofer() {
+    double odometryXMeters = matchState.isBlue() ? 1.168 : 15.429;
+    double odometryYMeters = matchState.isBlue() ? 5.467 : 5.422;
+    double odometryYawDeg = matchState.isBlue() ? 5.162 : -174.872;
+    resetOdometry(new Pose2d(odometryXMeters, odometryYMeters, Rotation2d.fromDegrees(odometryYawDeg)));
+  }
+
   /**
    * Correction for swerve second order dynamics issue. Borrowed from 254:
    * https://github.com/Team254/FRC-2022-Public/blob/main/src/main/java/com/team254/frc2022/subsystems/Drive.java#L325
