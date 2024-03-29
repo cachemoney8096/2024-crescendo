@@ -439,13 +439,15 @@ public class RobotContainer implements Sendable {
                 if (intakeNoteTooClose)
                 {
                     // Affect throttle with past detection
-                    assert noteDirectionOptional.isPresent();
-                    driveToPose.accept(noteDirectionOptional.get());
+                    // assert noteDirectionOptional.isPresent();
+                    if (noteDirectionOptional.isPresent()) {
+                        driveToPose.accept(noteDirectionOptional.get());
+                    }
                     return;
                 }
 
                 if (latestNoteDetectionOptional.isPresent())
-                {                    
+                {                   
                     // Set goal
                     var latestNoteDetection = latestNoteDetectionOptional.get();
                     final double adjustmentMeters = Units.inchesToMeters(6.0);
@@ -460,7 +462,7 @@ public class RobotContainer implements Sendable {
                     noteDirectionOptional = Optional.of(Pair.of(toNoteTranslation.div(toNoteTranslation.getNorm()), goalPose.getRotation()));
 
                     // Check distance
-                    if (latestNoteDetection.distanceMeters < 1.7) {
+                    if (latestNoteDetection.distanceMeters < 1.7) { // lowering this allows the robot to continuously turn to the note
                         intakeNoteTooClose = true;
                     }
 
