@@ -263,7 +263,9 @@ public class Conveyor extends SubsystemBase {
     return new SequentialCommandGroup(
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SPEED)),
         new InstantCommand(() -> conveyor.backMotor.set(-ConveyorCal.RECEIVE_SPEED)),
+        new InstantCommand(() -> System.out.println("starting crush")),
         new WaitCommand(1.0),
+        new InstantCommand(() -> System.out.println("ending crush")),
         Conveyor.stop(conveyor));
   }
 

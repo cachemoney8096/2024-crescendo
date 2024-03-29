@@ -111,5 +111,5 @@ public class ShooterCal {
       PODIUM_SHOT_RED_DEGREES = 205.0,
       STAGE_SHOT_RED_DEGREES = 190.0;
 
-  public static final double LATCH_SAFE_MARGIN_DEGREES = 5.0;
+  public static final double LATCH_SAFE_MARGIN_DEGREES = 20.0;
 }

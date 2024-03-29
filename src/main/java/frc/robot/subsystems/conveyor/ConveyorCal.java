@@ -3,7 +3,7 @@ package frc.robot.subsystems.conveyor;
 public class ConveyorCal {
   public static final int SPARK_INIT_RETRY_ATTEMPTS = 5;
 
-  public static final int CONVEYOR_CURRENT_LIMIT_AMPS = 20;
+  public static final int CONVEYOR_CURRENT_LIMIT_AMPS = 30;
 
   /** The power used for each conveyor motor when moving towards the shooter (forwards) */
   public static final double PREPARE_TO_SHOOT_FRONT_SPEED = 1.0, PREPARE_TO_SHOOT_BACK_SPEED = 1.0;

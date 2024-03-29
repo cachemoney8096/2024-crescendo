@@ -385,7 +385,7 @@ public class RobotContainer implements Sendable {
                 Optional<frc.robot.subsystems.intakeLimelight.IntakeLimelight.NoteDetection> latestNoteDetectionOptional = Optional.empty();
                 if (!intakeNoteTooClose && intakeClearOfLL)
                 {
-                    latestNoteDetectionOptional = intakeLimelight.getNotePos();
+                    latestNoteDetectionOptional = intakeLimelight.getNotePos(true);
                 }
 
                 Runnable driveNormal = () -> {

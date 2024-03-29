@@ -421,10 +421,16 @@ public class IntakeLimelight extends SubsystemBase {
    * @return If empty, no note detected. First value is note yaw in degrees (ccw), second value is
    *     distance in meters.
    */
-  public Optional<NoteDetection> getNotePos() {
+  public Optional<NoteDetection> getNotePos(boolean changePipeline) {
     // TODO filter low confidence detection in LL dashboard, hopefully
     if (getPipeline() != Constants.limelightPipeline.NOTE_PIPELINE) {
-      setPipeline(Constants.limelightPipeline.NOTE_PIPELINE);
+      if (changePipeline)
+      {
+        setPipeline(Constants.limelightPipeline.NOTE_PIPELINE);
+      }
+      else {
+        return Optional.empty();
+      }
     }
 
     LimelightHelpers.LimelightResults llresults =
@@ -478,7 +484,7 @@ public class IntakeLimelight extends SubsystemBase {
     //   return maybeNotePos.get().latencySec;
     // }, null);
     builder.addDoubleProperty("Note Distance (m)", () -> {
-      var maybeNotePos = getNotePos();
+      var maybeNotePos = getNotePos(false);
       if (maybeNotePos.isEmpty())
       {
         return 0.0;
