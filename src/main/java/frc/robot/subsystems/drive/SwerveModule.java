@@ -14,7 +14,6 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
 import com.revrobotics.SparkPIDController;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -143,7 +142,8 @@ public class SwerveModule implements Sendable {
     toApply.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // TODO: check this
     toApply.Feedback.SensorToMechanismRatio =
         DriveConstants.DRIVING_MOTOR_REDUCTION / DriveConstants.WHEEL_CIRCUMFERENCE_METERS;
-    toApply.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_SUPPLY_CURRENT_LIMIT_AMPS;
+    toApply.CurrentLimits.SupplyCurrentLimit =
+        DriveConstants.DRIVING_MOTOR_SUPPLY_CURRENT_LIMIT_AMPS;
     toApply.CurrentLimits.SupplyCurrentLimitEnable = true;
     toApply.CurrentLimits.StatorCurrentLimit =
         DriveConstants.DRIVING_MOTOR_STATOR_TELEOP_CURRENT_LIMIT_AMPS;

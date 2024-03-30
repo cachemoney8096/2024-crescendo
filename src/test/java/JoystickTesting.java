@@ -1,5 +1,4 @@
 import frc.robot.utils.JoystickUtil;
-
 import org.junit.*;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +33,8 @@ public class JoystickTesting {
     testDeadband(0.7071, -0.7071, 0.7071, -0.7071);
 
     // Basic tests not at limits
-    testDeadband(0.55, 0.0, 0.25, 0.0); // 0.55 is halfway past deadband, with squaring comes out to 0.25
+    testDeadband(
+        0.55, 0.0, 0.25, 0.0); // 0.55 is halfway past deadband, with squaring comes out to 0.25
 
     // Test at 45s
     testDeadband(0.7071 * 0.55, -0.7071 * 0.55, 0.7071 * 0.25, -0.7071 * 0.25);

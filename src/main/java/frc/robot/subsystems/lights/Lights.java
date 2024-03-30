@@ -1,15 +1,10 @@
 package frc.robot.subsystems.lights;
 
-import com.ctre.phoenix.led.Animation;
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
-import com.ctre.phoenix.led.TwinkleAnimation.TwinklePercent;
-import com.ctre.phoenix.led.TwinkleOffAnimation.TwinkleOffPercent;
 import com.ctre.phoenix.led.CANdleConfiguration;
 import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
-import com.ctre.phoenix.led.TwinkleAnimation;
-
 import frc.robot.RobotMap;
 import java.util.TreeMap;
 
@@ -74,10 +69,15 @@ public class Lights {
     if (currentLightStatus == LightCode.READY_TO_SCORE) {
       setRainbow();
     } else {
-      var twinkle = new StrobeAnimation(lightOptionsMap.get(currentLightStatus)[0],
-          lightOptionsMap.get(currentLightStatus)[1],
-          lightOptionsMap.get(currentLightStatus)[2],
-          0, 0.1, -1, 0);
+      var twinkle =
+          new StrobeAnimation(
+              lightOptionsMap.get(currentLightStatus)[0],
+              lightOptionsMap.get(currentLightStatus)[1],
+              lightOptionsMap.get(currentLightStatus)[2],
+              0,
+              0.1,
+              -1,
+              0);
       // twinkle.setDivider(TwinklePercent.Percent42);
       candle.animate(twinkle);
     }

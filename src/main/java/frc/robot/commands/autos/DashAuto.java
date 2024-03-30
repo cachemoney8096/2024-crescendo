@@ -26,8 +26,6 @@ public class DashAuto extends SequentialCommandGroup {
     /** Initialize sequential commands that run for the "15 second autonomous phase" */
     addCommands(
         new ConditionalCommand(
-            new PathPlannerAuto("DASH RED"),
-            new PathPlannerAuto("DASH BLUE"),
-            () -> isRed));
+            new PathPlannerAuto("DASH RED"), new PathPlannerAuto("DASH BLUE"), () -> isRed));
   }
 }

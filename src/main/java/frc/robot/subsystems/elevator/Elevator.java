@@ -156,21 +156,22 @@ public class Elevator extends SubsystemBase {
   /** Zeroes leftMotorEncoderRel so it returns inches from home. */
   public REVLibError setLeftZeroFromAbsolute() {
     // TODO absolute encoder zeroing
-    // Note that this is run in RobotContainer for operator, so please make sure that still works if we add CRT
+    // Note that this is run in RobotContainer for operator, so please make sure that still works if
+    // we add CRT
     return leftMotorEncoderRel.setPosition(ElevatorCal.POSITION_HOME_INCHES);
   }
 
   /** Zeroes rightMotorEncoderRel so it returns inches from home. */
   public REVLibError setRightZeroFromAbsolute() {
     // TODO absolute encoder zeroing
-    // Note that this is run in RobotContainer for operator, so please make sure that still works if we add CRT
+    // Note that this is run in RobotContainer for operator, so please make sure that still works if
+    // we add CRT
     return rightMotorEncoderRel.setPosition(ElevatorCal.POSITION_HOME_INCHES);
   }
 
   /** Manually runs the elevator given [-1,1] input */
-  public void manualRunElevator(double controllerInput){
+  public void manualRunElevator(double controllerInput) {
     elevatorManualControl = true;
-
   }
 
   /** If true, use elevator control parameters for note scoring as opposed to climbing */
@@ -247,7 +248,7 @@ public class Elevator extends SubsystemBase {
     return Math.abs(desiredPositionIn - currentPositionIn) < elevatorMarginInches;
   }
 
-  public boolean atPosition(ElevatorPosition pos){
+  public boolean atPosition(ElevatorPosition pos) {
     double checkPositionIn = elevatorPositions.get(pos);
     double currentPositionIn = leftMotorEncoderRel.getPosition();
     double elevatorMarginInches = ElevatorCal.ELEVATOR_MARGIN_INCHES;

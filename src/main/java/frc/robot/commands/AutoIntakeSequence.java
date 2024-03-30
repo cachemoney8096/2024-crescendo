@@ -22,7 +22,7 @@ public class AutoIntakeSequence extends SequentialCommandGroup {
     addRequirements(intake, elevator, conveyor);
 
     addCommands(
-      new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", false)),
+        new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", false)),
         new InstantCommand(() -> intake.setDesiredIntakePosition(IntakePosition.DEPLOYED)),
         new WaitUntilCommand(intake::almostClearOfConveyorZone),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.INTAKING, true)),

@@ -28,8 +28,11 @@ public class IntakeSequence extends SequentialCommandGroup {
     addRequirements(intake, elevator, conveyor, shooter);
 
     addCommands(
-        new InstantCommand(() -> {lights.setLEDColor(LightCode.INTAKING);
-        gotNote = false;}),
+        new InstantCommand(
+            () -> {
+              lights.setLEDColor(LightCode.INTAKING);
+              gotNote = false;
+            }),
         new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", false)),
         new InstantCommand(
             () -> {

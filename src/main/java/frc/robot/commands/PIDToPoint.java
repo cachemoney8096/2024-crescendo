@@ -21,7 +21,7 @@ public class PIDToPoint extends SequentialCommandGroup {
 
   Transform2d transform = new Transform2d();
 
-  static public boolean finishedPid = false;
+  public static boolean finishedPid = false;
 
   static double clamp(double value, double threshold) {
     if (value > threshold) {

@@ -424,11 +424,9 @@ public class IntakeLimelight extends SubsystemBase {
   public Optional<NoteDetection> getNotePos(boolean changePipeline) {
     // TODO filter low confidence detection in LL dashboard, hopefully
     if (getPipeline() != Constants.limelightPipeline.NOTE_PIPELINE) {
-      if (changePipeline)
-      {
+      if (changePipeline) {
         setPipeline(Constants.limelightPipeline.NOTE_PIPELINE);
-      }
-      else {
+      } else {
         return Optional.empty();
       }
     }
@@ -458,8 +456,7 @@ public class IntakeLimelight extends SubsystemBase {
                 - Units.inchesToMeters(Constants.NOTE_HEIGHT_INCHES / 2))
             / Math.tan(Units.degreesToRadians(angleLimelightToNoteDegrees));
 
-    if (noteDistanceMeters > 0.0)
-    {
+    if (noteDistanceMeters > 0.0) {
       // noteDistanceMeters inverted so this checks if the only note seen is above the camera.
       return Optional.empty();
     }
@@ -483,14 +480,16 @@ public class IntakeLimelight extends SubsystemBase {
     //   }
     //   return maybeNotePos.get().latencySec;
     // }, null);
-    builder.addDoubleProperty("Note Distance (m)", () -> {
-      var maybeNotePos = getNotePos(false);
-      if (maybeNotePos.isEmpty())
-      {
-        return 0.0;
-      }
-      return maybeNotePos.get().distanceMeters;
-    }, null);
+    builder.addDoubleProperty(
+        "Note Distance (m)",
+        () -> {
+          var maybeNotePos = getNotePos(false);
+          if (maybeNotePos.isEmpty()) {
+            return 0.0;
+          }
+          return maybeNotePos.get().distanceMeters;
+        },
+        null);
     // builder.addDoubleProperty("Note Angle (deg)", () -> {
     //   var maybeNotePos = getNotePos();
     //   if (maybeNotePos.isEmpty())

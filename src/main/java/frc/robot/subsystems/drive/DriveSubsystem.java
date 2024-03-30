@@ -101,10 +101,16 @@ public class DriveSubsystem extends SubsystemBase {
   /** Provides info on our alliance color and whether this is a real match. */
   public MatchStateUtil matchState;
 
-  /** Interpolation map storing rotational velocities (deg/s) as keys and the amount the robot overshoots at each velocity (deg) as values */
+  /**
+   * Interpolation map storing rotational velocities (deg/s) as keys and the amount the robot
+   * overshoots at each velocity (deg) as values
+   */
   private InterpolatingDoubleTreeMap yawOffsetMap;
 
-  /** Interpolation map to convert drive velocities (m/s) as keys and a value in [0,1] for the keepheading PID multiplier as values */
+  /**
+   * Interpolation map to convert drive velocities (m/s) as keys and a value in [0,1] for the
+   * keepheading PID multiplier as values
+   */
   private InterpolatingDoubleTreeMap velocityToMultiplierMap;
 
   public DriveSubsystem(MatchStateUtil matchState) {
@@ -144,18 +150,18 @@ public class DriveSubsystem extends SubsystemBase {
         this // Reference to this subsystem to set requirements
         );
 
-      yawOffsetMap = new InterpolatingDoubleTreeMap();
-      yawOffsetMap.put(0.0, 0.0);
-      yawOffsetMap.put(120.0, 5.0);
-      yawOffsetMap.put(167.0, 22.0);
-      yawOffsetMap.put(330.0, 50.0);
+    yawOffsetMap = new InterpolatingDoubleTreeMap();
+    yawOffsetMap.put(0.0, 0.0);
+    yawOffsetMap.put(120.0, 5.0);
+    yawOffsetMap.put(167.0, 22.0);
+    yawOffsetMap.put(330.0, 50.0);
 
-      velocityToMultiplierMap = new InterpolatingDoubleTreeMap();
-      velocityToMultiplierMap.put(0.0, DriveCal.MIN_ROTATE_TO_TARGET_PID_OUTPUT);
-      velocityToMultiplierMap.put(DriveConstants.MAX_SPEED_METERS_PER_SECOND, 1.0);
+    velocityToMultiplierMap = new InterpolatingDoubleTreeMap();
+    velocityToMultiplierMap.put(0.0, DriveCal.MIN_ROTATE_TO_TARGET_PID_OUTPUT);
+    velocityToMultiplierMap.put(DriveConstants.MAX_SPEED_METERS_PER_SECOND, 1.0);
 
-      SmartDashboard.putNumber("Norm Velocity (mps)", 0);
-      SmartDashboard.putNumber("Velocity PID multiplier", 0);
+    SmartDashboard.putNumber("Norm Velocity (mps)", 0);
+    SmartDashboard.putNumber("Velocity PID multiplier", 0);
   }
 
   public void intializeGyro() {
@@ -266,7 +272,8 @@ public class DriveSubsystem extends SubsystemBase {
     double odometryXMeters = matchState.isBlue() ? 1.168 : 15.429;
     double odometryYMeters = matchState.isBlue() ? 5.467 : 5.422;
     double odometryYawDeg = matchState.isBlue() ? 5.162 : -174.872;
-    resetOdometry(new Pose2d(odometryXMeters, odometryYMeters, Rotation2d.fromDegrees(odometryYawDeg)));
+    resetOdometry(
+        new Pose2d(odometryXMeters, odometryYMeters, Rotation2d.fromDegrees(odometryYawDeg)));
   }
 
   /**
@@ -397,13 +404,16 @@ public class DriveSubsystem extends SubsystemBase {
   public void keepHeading(double x, double y, boolean fieldRelative) {
     double currentHeadingDegrees = getHeadingDegrees();
     double headingDifferenceDegrees = currentHeadingDegrees - targetHeadingDegrees;
-    double offsetHeadingDegrees = MathUtil.inputModulus(headingDifferenceDegrees, -180, 180); 
+    double offsetHeadingDegrees = MathUtil.inputModulus(headingDifferenceDegrees, -180, 180);
 
     double pidRotation =
         DriveCal.ROTATE_TO_TARGET_PID_CONTROLLER.calculate(offsetHeadingDegrees, 0.0);
     double ffRotation = Math.signum(offsetHeadingDegrees) * DriveCal.ROTATE_TO_TARGET_FF;
 
-    double normVelocity = new Translation2d(lastSetChassisSpeeds.vxMetersPerSecond, lastSetChassisSpeeds.vyMetersPerSecond).getNorm();
+    double normVelocity =
+        new Translation2d(
+                lastSetChassisSpeeds.vxMetersPerSecond, lastSetChassisSpeeds.vyMetersPerSecond)
+            .getNorm();
 
     SmartDashboard.putNumber("Norm Velocity (mps)", normVelocity);
 
@@ -464,7 +474,10 @@ public class DriveSubsystem extends SubsystemBase {
     } else if (rot == 0) {
       keepHeading(x, y, fieldRelative);
     } else {
-      targetHeadingDegrees = getHeadingDegrees() + calculateYawOffsetDeg(Units.radiansToDegrees(lastSetChassisSpeeds.omegaRadiansPerSecond));
+      targetHeadingDegrees =
+          getHeadingDegrees()
+              + calculateYawOffsetDeg(
+                  Units.radiansToDegrees(lastSetChassisSpeeds.omegaRadiansPerSecond));
       drive(x, y, rot, fieldRelative);
     }
   }
@@ -566,13 +579,14 @@ public class DriveSubsystem extends SubsystemBase {
     List<Translation2d> bezierTranslations = PathPlannerPath.bezierFromPoses(curPose, finalPose);
     PathPlannerPath path =
         new PathPlannerPath(
-            bezierTranslations,
-            new PathConstraints(
-                DriveCal.MEDIUM_LINEAR_SPEED_METERS_PER_SEC,
-                DriveCal.MEDIUM_LINEAR_ACCELERATION_METERS_PER_SEC_SQ,
-                DriveCal.MEDIUM_ANGULAR_SPEED_RAD_PER_SEC,
-                DriveCal.MEDIUM_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ),
-            new GoalEndState(finalSpeedMetersPerSec, finalHolonomicRotation)).replan(curPose, lastSetChassisSpeeds);
+                bezierTranslations,
+                new PathConstraints(
+                    DriveCal.MEDIUM_LINEAR_SPEED_METERS_PER_SEC,
+                    DriveCal.MEDIUM_LINEAR_ACCELERATION_METERS_PER_SEC_SQ,
+                    DriveCal.MEDIUM_ANGULAR_SPEED_RAD_PER_SEC,
+                    DriveCal.MEDIUM_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ),
+                new GoalEndState(finalSpeedMetersPerSec, finalHolonomicRotation))
+            .replan(curPose, lastSetChassisSpeeds);
 
     return path;
   }
@@ -645,7 +659,11 @@ public class DriveSubsystem extends SubsystemBase {
         .withTimeout(timeoutSec);
   }
 
-  /** Calculate the amount the robot will overshoot in degrees, given rotational velocity in degrees/second. Negative or positive values can be passed in, the function will adjust. It will return the correct sign depending on our current velocity. */
+  /**
+   * Calculate the amount the robot will overshoot in degrees, given rotational velocity in
+   * degrees/second. Negative or positive values can be passed in, the function will adjust. It will
+   * return the correct sign depending on our current velocity.
+   */
   private double calculateYawOffsetDeg(double rotationalVelocityDeg) {
     double posRotationalVelocityDeg = Math.abs(rotationalVelocityDeg);
     double posOffsetDeg = yawOffsetMap.get(posRotationalVelocityDeg);
@@ -751,6 +769,11 @@ public class DriveSubsystem extends SubsystemBase {
     builder.addDoubleProperty(
         "Rear right desired position", () -> rearRight.desiredState.angle.getRadians(), null);
     builder.addBooleanProperty("Near Target heading", this::nearTarget, null);
-    builder.addDoubleProperty("yaw offset treemap value", () -> calculateYawOffsetDeg(Units.radiansToDegrees(lastSetChassisSpeeds.omegaRadiansPerSecond)), null);
-      }
+    builder.addDoubleProperty(
+        "yaw offset treemap value",
+        () ->
+            calculateYawOffsetDeg(
+                Units.radiansToDegrees(lastSetChassisSpeeds.omegaRadiansPerSecond)),
+        null);
+  }
 }

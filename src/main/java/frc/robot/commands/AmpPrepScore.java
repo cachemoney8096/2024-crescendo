@@ -46,7 +46,7 @@ public class AmpPrepScore extends SequentialCommandGroup {
             new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SCORE_AMP, true)),
             moveWhenNotSafe,
             () -> elevator.elevatorAboveIntakeInterferenceZone()),
-            new InstantCommand(
-                () -> intake.setDesiredIntakePosition(IntakePosition.ALMOST_CLEAR_OF_CONVEYOR)));
+        new InstantCommand(
+            () -> intake.setDesiredIntakePosition(IntakePosition.ALMOST_CLEAR_OF_CONVEYOR)));
   }
 }

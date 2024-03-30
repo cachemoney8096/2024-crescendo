@@ -11,16 +11,19 @@ public class JoystickUtil {
   public static final double DEADBAND = 0.1;
 
   /** Return X and Y outputs for drive */
-  public static Pair<Double, Double> computeDriveXY(CommandXboxController controller, boolean fieldRelative, boolean isBlue) {
+  public static Pair<Double, Double> computeDriveXY(
+      CommandXboxController controller, boolean fieldRelative, boolean isBlue) {
     final double xIn = isBlue || !fieldRelative ? -controller.getLeftY() : controller.getLeftY();
     final double yIn = isBlue || !fieldRelative ? -controller.getLeftX() : controller.getLeftX();
     return computeDriveXY(xIn, yIn);
   }
 
   public static Pair<Double, Double> computeDriveXY(double xIn, double yIn) {
-    double magnitude = Math.hypot(xIn, yIn); // if corner is 1.0,1.0, then change this line to Math.max(Math.abs(xIn), Math.abs(yIn))
-    if (magnitude < DEADBAND)
-    {
+    double magnitude =
+        Math.hypot(
+            xIn, yIn); // if corner is 1.0,1.0, then change this line to Math.max(Math.abs(xIn),
+    // Math.abs(yIn))
+    if (magnitude < DEADBAND) {
       return Pair.of(0.0, 0.0);
     }
     magnitude = MathUtil.applyDeadband(magnitude, DEADBAND, 1.0);

@@ -27,10 +27,8 @@ import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
 import frc.robot.utils.MatchStateUtil;
-
 import java.util.HashSet;
 import java.util.Optional;
-import java.util.TreeSet;
 import java.util.function.Function;
 
 /** Limelight for the shooter to identify game pieces */
@@ -197,8 +195,7 @@ public class ShooterLimelight extends SubsystemBase {
       Pose2d newPose = getBotPose2d_wpiBlue().getSecond();
       Pose2d curPose = drive.getPose();
       var update = newPose.minus(curPose);
-      if (Math.abs(update.getRotation().getDegrees()) > 20.0)
-      {
+      if (Math.abs(update.getRotation().getDegrees()) > 20.0) {
         return;
       }
       drive.resetOdometry(newPose);
@@ -233,15 +230,16 @@ public class ShooterLimelight extends SubsystemBase {
       return Optional.empty();
     }
 
-    Function<Double, Boolean> validTargetFunc = (Double id) -> {
-      long idInt = Math.round(id);
-      HashSet<Long> validIDs = new HashSet<Long>();
-      validIDs.add(3L);
-      validIDs.add(4L);
-      validIDs.add(7L);
-      validIDs.add(8L);
-      return validIDs.contains(idInt);
-    };
+    Function<Double, Boolean> validTargetFunc =
+        (Double id) -> {
+          long idInt = Math.round(id);
+          HashSet<Long> validIDs = new HashSet<Long>();
+          validIDs.add(3L);
+          validIDs.add(4L);
+          validIDs.add(7L);
+          validIDs.add(8L);
+          return validIDs.contains(idInt);
+        };
 
     int numValidTargets = 0;
     for (var target : targets) {

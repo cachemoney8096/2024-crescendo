@@ -43,10 +43,12 @@ public class DriveCal {
   public static final PIDController ROTATE_TO_TARGET_PID_CONTROLLER =
       new PIDController(0.03, 0, 0.00);
 
-  /** The value for the keepHeading interpolation table based on normalized translation velocity when the robot is motionless (in xy).
-   * We want the lowest output to be 0.013 (that is tuned), 
+  /**
+   * The value for the keepHeading interpolation table based on normalized translation velocity when
+   * the robot is motionless (in xy). We want the lowest output to be 0.013 (that is tuned),
    */
-  public static final double MIN_ROTATE_TO_TARGET_PID_OUTPUT = 0.013 / ROTATE_TO_TARGET_PID_CONTROLLER.getP();
+  public static final double MIN_ROTATE_TO_TARGET_PID_OUTPUT =
+      0.013 / ROTATE_TO_TARGET_PID_CONTROLLER.getP();
 
   /** Feed forward for rotating to target, gets added to or subtracted from PID controller. */
   public static final double ROTATE_TO_TARGET_FF = 0.01;

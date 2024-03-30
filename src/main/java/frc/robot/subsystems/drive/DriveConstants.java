@@ -39,7 +39,7 @@ public class DriveConstants {
   public static final IdleMode TURNING_MOTOR_IDLE_MODE = IdleMode.kBrake;
 
   public static final int DRIVING_MOTOR_SUPPLY_CURRENT_LIMIT_AMPS = 50; // amps
-//   public static final int DRIVING_MOTOR_STATOR_CURRENT_LIMIT_AMPS = 120; // amps
+  //   public static final int DRIVING_MOTOR_STATOR_CURRENT_LIMIT_AMPS = 120; // amps
   public static final int DRIVING_MOTOR_STATOR_AUTO_CURRENT_LIMIT_AMPS = 90; // amps
   public static final int DRIVING_MOTOR_STATOR_TELEOP_CURRENT_LIMIT_AMPS = 90; // amps
   public static final int TURNING_MOTOR_CURRENT_LIMIT_AMPS = 20; // amps
