@@ -176,7 +176,8 @@ public class RobotContainer implements Sendable {
         new SequentialCommandGroup(
             new InstantCommand(() -> pathCmd = "SPEAKER SCORE"),
             new WaitCommand(0.1),
-            Conveyor.shoot(conveyor, ConveyorCal.NOTE_EXIT_TIME_SHOOTER_AUTO_SECONDS)));
+            Conveyor.shoot(conveyor, ConveyorCal.NOTE_EXIT_TIME_SHOOTER_AUTO_SECONDS),
+            new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT))));
     NamedCommands.registerCommand(
         "INTAKE DEPLOY",
         new InstantCommand(() -> pathCmd = "INTAKE DEPLOY")

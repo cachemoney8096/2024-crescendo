@@ -36,7 +36,9 @@ public class Shooter extends SubsystemBase {
     /** Holding pivot onto the chain */
     LATCH,
     /** Shooter set high enough to shoot note over stage */
-    SHOOT_CLEAR_STAGE
+    SHOOT_CLEAR_STAGE,
+    /** Both spinning up the shooter and going to the right elevation angle for auto preload*/
+    SHOOT_FULL_SEND
   };
 
   private final CANSparkMax motorRight =
@@ -103,7 +105,7 @@ public class Shooter extends SubsystemBase {
 
   public Shooter() {
     pivotAngleMap = new InterpolatingDoubleTreeMap();
-    pivotAngleMap.put(Units.feetToMeters(3.4), 147.0); // artificial value
+    pivotAngleMap.put(Units.feetToMeters(3.4), 146.0); // artificial value
     pivotAngleMap.put(1.16, 144.0);
     pivotAngleMap.put(2.77, 122.0);
     pivotAngleMap.put(4.66, 112.0);
@@ -387,6 +389,10 @@ public class Shooter extends SubsystemBase {
           break;
         case SHOOT:
           spinUpShooter();
+          controlPositionWithDistance(shooterDistanceMeters);
+          break;
+        case SHOOT_FULL_SEND:
+          spinUpShooter(12.0);
           controlPositionWithDistance(shooterDistanceMeters);
           break;
         case SHOOT_CLEAR_STAGE:
