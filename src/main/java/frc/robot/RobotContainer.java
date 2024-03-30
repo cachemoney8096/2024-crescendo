@@ -351,6 +351,7 @@ public class RobotContainer implements Sendable {
         .whileTrue(new IntakeSequence(intake, elevator, conveyor, shooter, lights));
     driverController
         .rightBumper()
+        .and(() -> !buttonsLocked)
         .onFalse(
             Conveyor.finishReceive(conveyor, lights, true)
                 .andThen(
@@ -520,6 +521,7 @@ public class RobotContainer implements Sendable {
                         })));
     driverController
         .rightTrigger()
+        .and(() -> !buttonsLocked)
         .onFalse(
             Conveyor.finishReceive(conveyor, lights, true)
                 .andThen(
@@ -677,7 +679,7 @@ public class RobotContainer implements Sendable {
     driverController
         .back()
         .and(() -> !buttonsLocked)
-        .onTrue(new PartialClimbSequence(intake, elevator, shooter));
+        .onTrue(new InstantCommand(() -> buttonsLocked = true).andThen(new PartialClimbSequence(intake, elevator, shooter)));
 
     drive.setDefaultCommand(
         new ConditionalCommand(
@@ -765,7 +767,7 @@ public class RobotContainer implements Sendable {
                 ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS,
                 ShooterCal.SUBWOOFER_SHOT_RIGHT_RED_DEGREES));
 
-    operatorController.a().onTrue(new InstantCommand(() -> drive.resetOdometryToCenterSubwoofer()));
+    operatorController.a().and(() -> !buttonsLocked).onTrue(new InstantCommand(() -> drive.resetOdometryToCenterSubwoofer()));
 
     operatorController
         .b()
@@ -790,12 +792,14 @@ public class RobotContainer implements Sendable {
 
     operatorController
         .leftBumper()
+        .and(() -> !buttonsLocked)
         .onTrue(
             new InstantCommand(
                     () -> intake.rezeroIntakeToPosition(IntakeCal.INTAKE_STOWED_POSITION_DEGREES))
                 .ignoringDisable(true));
     operatorController
         .rightBumper()
+        .and(() -> !buttonsLocked)
         .onTrue(
             new InstantCommand(
                     () -> intake.rezeroIntakeToPosition(IntakeCal.INTAKE_DEPLOYED_POSITION_DEGREES))
@@ -808,6 +812,7 @@ public class RobotContainer implements Sendable {
                 .beforeStarting(new InstantCommand(() -> buttonsLocked = false)));
     operatorController
         .back()
+        .and(() -> !buttonsLocked)
         .onTrue(
             new InstantCommand(() -> elevator.setLeftZeroFromAbsolute())
                 .andThen(new InstantCommand(() -> elevator.setRightZeroFromAbsolute())));
