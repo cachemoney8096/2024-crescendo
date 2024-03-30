@@ -179,13 +179,13 @@ public class Conveyor extends SubsystemBase {
   }
 
   /** Score note into the trap or the amp */
-  public static Command scoreTrapOrAmp(Conveyor conveyor) {
+  public static Command scoreTrapOrAmp(Conveyor conveyor, boolean scoringAmp) {
     return new SequentialCommandGroup(
         new InstantCommand(
             () -> conveyor.frontMotor.set(ConveyorCal.SCORE_TRAP_FRONT_SPEED), conveyor),
         new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.SCORE_TRAP_BACK_SPEED)),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
-        new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_TRAP_AMP_SECONDS),
+        new WaitCommand(scoringAmp ? ConveyorCal.NOTE_EXIT_TIME_AMP_SECONDS : ConveyorCal.NOTE_EXIT_TIME_TRAP_SECONDS),
         Conveyor.stop(conveyor),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.NO_NOTE));
   }

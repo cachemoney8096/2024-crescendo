@@ -35,6 +35,6 @@ public class ClimbSequence extends SequentialCommandGroup {
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.SCORE_TRAP, true)),
         new WaitUntilCommand(elevator::atDesiredPosition),
         new WaitCommand(0.5),
-        Conveyor.scoreTrapOrAmp(conveyor));
+        Conveyor.scoreTrapOrAmp(conveyor, false));
   }
 }

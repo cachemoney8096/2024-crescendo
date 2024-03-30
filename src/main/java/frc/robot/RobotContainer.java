@@ -491,7 +491,7 @@ public class RobotContainer implements Sendable {
 
                                 // Check distance
                                 if (latestNoteDetection.distanceMeters
-                                    < 1.7) { // lowering this allows the robot to continuously turn
+                                    < 1.7) { // lowering this from 1.7 allows the robot to continuously turn
                                   // to the note
                                   intakeNoteTooClose = true;
                                 }
