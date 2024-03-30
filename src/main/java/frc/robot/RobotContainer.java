@@ -129,6 +129,8 @@ public class RobotContainer implements Sendable {
 
   public boolean usingTagHeading = false;
 
+  public boolean buttonsLocked = false;
+
   /** What was the last command the auto initiated */
   public String pathCmd = "";
 
@@ -352,6 +354,7 @@ public class RobotContainer implements Sendable {
 
     driverController
         .rightBumper()
+        .and(() -> !buttonsLocked)
         .whileTrue(
             new IntakeSequence(intake, elevator, conveyor, shooter, lights));
     driverController
@@ -364,6 +367,7 @@ public class RobotContainer implements Sendable {
 
     driverController
         .rightTrigger()
+        .and(() -> !buttonsLocked)
         // .whileTrue(
         //     new IntakeSequence(intake, elevator, conveyor, shooter, lights));
         .whileTrue(new ParallelDeadlineGroup(
@@ -516,7 +520,10 @@ public class RobotContainer implements Sendable {
             new InstantCommand(intake::stopRollers)));
     selectCommandMap.put(
         PrepState.CLIMB,
-        new SequentialCommandGroup(new ClimbSequence(intake, elevator, shooter, conveyor)));
+        new SequentialCommandGroup(
+            new InstantCommand(() -> buttonsLocked = true),   
+            new ClimbSequence(intake, elevator, shooter, conveyor)
+        ));
     selectCommandMap.put(
         PrepState.FEED,
         new SequentialCommandGroup(
@@ -541,6 +548,7 @@ public class RobotContainer implements Sendable {
 
     driverController
         .leftTrigger()
+        .and(() -> !buttonsLocked)
         .onTrue(
             driverLeftTriggerCommand.andThen(
                 new InstantCommand(() -> lights.setLEDColor(LightCode.OFF))));
@@ -552,6 +560,7 @@ public class RobotContainer implements Sendable {
 
     driverController
         .leftBumper()
+        .and(() -> !buttonsLocked)
         .onTrue(
             new SequentialCommandGroup(
                 new InstantCommand(() -> prepState = PrepState.SPEAKER),
@@ -571,6 +580,7 @@ public class RobotContainer implements Sendable {
     // bottom right back button
     driverController
         .povLeft()
+        .and(() -> !buttonsLocked)
         .onTrue(
             new GoHomeSequence(
                     intake, elevator, shooter, conveyor, intakeLimelight, false, true, true)
@@ -587,6 +597,7 @@ public class RobotContainer implements Sendable {
     // top right button
     driverController
         .povDown()
+        .and(() -> !buttonsLocked)
         .onTrue(
             new SequentialCommandGroup(
                 new InstantCommand(() -> prepState = PrepState.FEED),
@@ -602,6 +613,7 @@ public class RobotContainer implements Sendable {
     // top left back button
     driverController
         .povUp()
+        .and(() -> !buttonsLocked)
         .onTrue(
             new SequentialCommandGroup(
                 new InstantCommand(() -> prepState = PrepState.AMP),
@@ -611,6 +623,7 @@ public class RobotContainer implements Sendable {
     // bottom left back button
     driverController
         .povRight()
+        .and(() -> !buttonsLocked)
         .onTrue(
             new InstantCommand(() -> prepState = PrepState.CLIMB)
                 .andThen(
@@ -631,7 +644,7 @@ public class RobotContainer implements Sendable {
                 .andThen(new InstantCommand(() -> driveFieldRelative = false))
                 .andThen(new InstantCommand(() -> drive.throttle(0.3))));
 
-    driverController.back().onTrue(new PartialClimbSequence(intake, elevator, shooter));
+    driverController.back().and(() -> !buttonsLocked).onTrue(new PartialClimbSequence(intake, elevator, shooter));
 
     drive.setDefaultCommand(
         new ConditionalCommand(
@@ -698,9 +711,11 @@ public class RobotContainer implements Sendable {
 
     operatorController
         .povDown()
+        .and(() -> !buttonsLocked)
         .onTrue(operatorPrepCreator.apply(ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS, 180.0));
     operatorController
         .povLeft()
+        .and(() -> !buttonsLocked)
         .onTrue(
             operatorPrepCreator.apply(
                 ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS,
@@ -708,6 +723,7 @@ public class RobotContainer implements Sendable {
 
     operatorController
         .povRight()
+        .and(() -> !buttonsLocked)
         .onTrue(
             operatorPrepCreator.apply(
                 ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS,
@@ -717,18 +733,21 @@ public class RobotContainer implements Sendable {
 
     operatorController
         .b()
+        .and(() -> !buttonsLocked)
         .onTrue(
             operatorPrepCreator.apply(
                 ShooterCal.AMP_SHOT_DISTANCE_METERS, ShooterCal.AMP_SHOT_RED_DEGREES));
 
     operatorController
         .x()
+        .and(() -> !buttonsLocked)
         .onTrue(
             operatorPrepCreator.apply(
                 ShooterCal.PODIUM_SHOT_DISTANCE_METERS, ShooterCal.PODIUM_SHOT_RED_DEGREES));
 
     operatorController
         .y()
+        .and(() -> !buttonsLocked)
         .onTrue(
             operatorPrepCreator.apply(
                 ShooterCal.STAGE_SHOT_DISTANCE_METERS, ShooterCal.STAGE_SHOT_RED_DEGREES));
@@ -746,7 +765,7 @@ public class RobotContainer implements Sendable {
                     () -> intake.rezeroIntakeToPosition(IntakeCal.INTAKE_DEPLOYED_POSITION_DEGREES))
                 .ignoringDisable(true));
 
-    operatorController.start().onTrue(new UnclimbSequence(elevator, shooter, conveyor, lights));
+    operatorController.start().onTrue(new UnclimbSequence(elevator, shooter, conveyor, lights).andThen(new InstantCommand(() -> buttonsLocked = true)));
     operatorController.back().onTrue(
         new InstantCommand(() -> elevator.setLeftZeroFromAbsolute()).andThen(
             new InstantCommand(() -> elevator.setRightZeroFromAbsolute())));
