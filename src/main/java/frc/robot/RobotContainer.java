@@ -765,7 +765,7 @@ public class RobotContainer implements Sendable {
                     () -> intake.rezeroIntakeToPosition(IntakeCal.INTAKE_DEPLOYED_POSITION_DEGREES))
                 .ignoringDisable(true));
 
-    operatorController.start().onTrue(new UnclimbSequence(elevator, shooter, conveyor, lights).andThen(new InstantCommand(() -> buttonsLocked = false)));
+    operatorController.start().onTrue(new UnclimbSequence(elevator, shooter, conveyor, lights).beforeStarting(new InstantCommand(() -> buttonsLocked = false)));
     operatorController.back().onTrue(
         new InstantCommand(() -> elevator.setLeftZeroFromAbsolute()).andThen(
             new InstantCommand(() -> elevator.setRightZeroFromAbsolute())));
