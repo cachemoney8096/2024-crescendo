@@ -767,7 +767,7 @@ public class RobotContainer implements Sendable {
                 ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS,
                 ShooterCal.SUBWOOFER_SHOT_RIGHT_RED_DEGREES));
 
-    operatorController.a().and(() -> !buttonsLocked).onTrue(new InstantCommand(() -> drive.resetOdometryToCenterSubwoofer()));
+    operatorController.a().onTrue(new InstantCommand(() -> drive.resetOdometryToCenterSubwoofer()));
 
     operatorController
         .b()
