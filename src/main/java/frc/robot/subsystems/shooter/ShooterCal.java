@@ -79,6 +79,8 @@ public class ShooterCal {
 
   public static final double AUTO_PRELOAD_DISTANCE_M = Units.feetToMeters(3.4);
   public static final double AUTO_SHOOTING_DISTANCE_M = Units.feetToMeters(8.5);
+  public static final double AUTO_DASH_SHOOTING_DISTANCE_M = Units.feetToMeters(6.0);
+  public static final double AUTO_FAR_SHOOTING_DISTANCE_M = Units.feetToMeters(15.0);
 
   /** Stage left on blue, stage right on red */
   public static final double AUTO_STAGE_SHOOTING_DISTANCE_M = Units.feetToMeters(14.75);
@@ -92,22 +94,22 @@ public class ShooterCal {
   /** Position at which (or beyond) the shooter has potential to intersect the conveyor. */
   public static final double CONVEYOR_ZONE_THRESHOLD_DEGREES = 110.0;
 
-  public static final double SHOOT_CLEAR_STAGE_ANGLE_DEGREES = 128.0;
-  public static final double SHOOT_CLEAR_STAGE_VOLTAGE = 5.5;
+  public static final double SHOOT_CLEAR_STAGE_ANGLE_DEGREES = 135.0;
+  public static final double SHOOT_CLEAR_STAGE_VOLTAGE = 5.0;
 
   public static final double ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES = 4.0;
 
   public static final double SUBWOOFER_SHOT_DISTANCE_METERS = 1.16,
-      AMP_SHOT_DISTANCE_METERS = Units.inchesToMeters(142.0),
-      PODIUM_SHOT_DISTANCE_METERS = Units.inchesToMeters(100.0),
+      AMP_SHOT_DISTANCE_METERS = Units.inchesToMeters(147.0),
+      PODIUM_SHOT_DISTANCE_METERS = Units.inchesToMeters(115.0),
       STAGE_SHOT_DISTANCE_METERS = Units.inchesToMeters(174.0);
 
   /** Operator manual shoot angles */
   public static final double SUBWOOFER_SHOT_LEFT_RED_DEGREES = 120.0,
       SUBWOOFER_SHOT_RIGHT_RED_DEGREES = 240.0,
-      AMP_SHOT_RED_DEGREES = 160,
-      PODIUM_SHOT_RED_DEGREES = 202.0,
+      AMP_SHOT_RED_DEGREES = 148,
+      PODIUM_SHOT_RED_DEGREES = 205.0,
       STAGE_SHOT_RED_DEGREES = 190.0;
 
-  public static final double LATCH_SAFE_MARGIN_DEGREES = 5.0;
+  public static final double LATCH_SAFE_MARGIN_DEGREES = 20.0;
 }

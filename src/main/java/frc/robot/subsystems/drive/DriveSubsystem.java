@@ -17,14 +17,17 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -33,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotMap;
+import frc.robot.subsystems.shooter.ShooterCal;
 import frc.robot.utils.GeometryUtils;
 import frc.robot.utils.MatchStateUtil;
 import frc.robot.utils.PoseBuffer;
@@ -90,12 +94,24 @@ public class DriveSubsystem extends SubsystemBase {
           getModulePositions());
 
   /** Multiplier for drive speed, does not affect trajectory following */
-  private double throttleMultiplier = 1.0;
+  public double throttleMultiplier = 1.0;
 
   private double rotControllerInput = 0.0;
 
   /** Provides info on our alliance color and whether this is a real match. */
   public MatchStateUtil matchState;
+
+  /**
+   * Interpolation map storing rotational velocities (deg/s) as keys and the amount the robot
+   * overshoots at each velocity (deg) as values
+   */
+  private InterpolatingDoubleTreeMap yawOffsetMap;
+
+  /**
+   * Interpolation map to convert drive velocities (m/s) as keys and a value in [0,1] for the
+   * keepheading PID multiplier as values
+   */
+  private InterpolatingDoubleTreeMap velocityToMultiplierMap;
 
   public DriveSubsystem(MatchStateUtil matchState) {
     intializeGyro();
@@ -133,6 +149,19 @@ public class DriveSubsystem extends SubsystemBase {
         },
         this // Reference to this subsystem to set requirements
         );
+
+    yawOffsetMap = new InterpolatingDoubleTreeMap();
+    yawOffsetMap.put(0.0, 0.0);
+    yawOffsetMap.put(120.0, 5.0);
+    yawOffsetMap.put(167.0, 22.0);
+    yawOffsetMap.put(330.0, 50.0);
+
+    velocityToMultiplierMap = new InterpolatingDoubleTreeMap();
+    velocityToMultiplierMap.put(0.0, DriveCal.MIN_ROTATE_TO_TARGET_PID_OUTPUT);
+    velocityToMultiplierMap.put(DriveConstants.MAX_SPEED_METERS_PER_SECOND, 1.0);
+
+    SmartDashboard.putNumber("Norm Velocity (mps)", 0);
+    SmartDashboard.putNumber("Velocity PID multiplier", 0);
   }
 
   public void intializeGyro() {
@@ -239,6 +268,14 @@ public class DriveSubsystem extends SubsystemBase {
     resetYawToAngle(matchState.isBlue() ? 0 : 180);
   }
 
+  public void resetOdometryToCenterSubwoofer() {
+    double odometryXMeters = matchState.isBlue() ? 1.168 : 15.429;
+    double odometryYMeters = matchState.isBlue() ? 5.467 : 5.422;
+    double odometryYawDeg = matchState.isBlue() ? 5.162 : -174.872;
+    resetOdometry(
+        new Pose2d(odometryXMeters, odometryYMeters, Rotation2d.fromDegrees(odometryYawDeg)));
+  }
+
   /**
    * Correction for swerve second order dynamics issue. Borrowed from 254:
    * https://github.com/Team254/FRC-2022-Public/blob/main/src/main/java/com/team254/frc2022/subsystems/Drive.java#L325
@@ -268,10 +305,10 @@ public class DriveSubsystem extends SubsystemBase {
     Rotation2d frontRightCurrRot = frontRight.getPosition().angle;
     Rotation2d rearLeftCurrRot = rearLeft.getPosition().angle;
     Rotation2d rearRightCurrRot = rearRight.getPosition().angle;
-    frontLeft.setDesiredState(new SwerveModuleState(0, frontLeftCurrRot));
-    frontRight.setDesiredState(new SwerveModuleState(0, frontRightCurrRot));
-    rearLeft.setDesiredState(new SwerveModuleState(0, rearLeftCurrRot));
-    rearRight.setDesiredState(new SwerveModuleState(0, rearRightCurrRot));
+    frontLeft.setDesiredState(new SwerveModuleState(0, frontLeftCurrRot), true);
+    frontRight.setDesiredState(new SwerveModuleState(0, frontRightCurrRot), true);
+    rearLeft.setDesiredState(new SwerveModuleState(0, rearLeftCurrRot), true);
+    rearRight.setDesiredState(new SwerveModuleState(0, rearRightCurrRot), true);
   }
 
   /**
@@ -310,10 +347,10 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void setX() {
-    frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-    frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-    rearLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-    rearRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+    frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)), true);
+    frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), true);
+    rearLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), true);
+    rearRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)), true);
   }
 
   /**
@@ -324,10 +361,10 @@ public class DriveSubsystem extends SubsystemBase {
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(
         desiredStates, DriveConstants.MAX_SPEED_METERS_PER_SECOND);
-    frontLeft.setDesiredState(desiredStates[0]);
-    frontRight.setDesiredState(desiredStates[1]);
-    rearLeft.setDesiredState(desiredStates[2]);
-    rearRight.setDesiredState(desiredStates[3]);
+    frontLeft.setDesiredState(desiredStates[0], false);
+    frontRight.setDesiredState(desiredStates[1], false);
+    rearLeft.setDesiredState(desiredStates[2], false);
+    rearRight.setDesiredState(desiredStates[3], false);
   }
 
   /** Resets the drive encoders to currently read a position of 0. */
@@ -373,6 +410,19 @@ public class DriveSubsystem extends SubsystemBase {
         DriveCal.ROTATE_TO_TARGET_PID_CONTROLLER.calculate(offsetHeadingDegrees, 0.0);
     double ffRotation = Math.signum(offsetHeadingDegrees) * DriveCal.ROTATE_TO_TARGET_FF;
 
+    double normVelocity =
+        new Translation2d(
+                lastSetChassisSpeeds.vxMetersPerSecond, lastSetChassisSpeeds.vyMetersPerSecond)
+            .getNorm();
+
+    SmartDashboard.putNumber("Norm Velocity (mps)", normVelocity);
+
+    double velocityMultiplier = velocityToMultiplierMap.get(normVelocity);
+
+    SmartDashboard.putNumber("Velocity PID multiplier", velocityMultiplier);
+
+    pidRotation *= velocityMultiplier;
+
     KeepHeadingPID = pidRotation;
     KeepHeadingFF = ffRotation;
 
@@ -381,6 +431,8 @@ public class DriveSubsystem extends SubsystemBase {
     if (Math.abs(desiredRotation) < DriveCal.ROTATION_DEADBAND_THRESHOLD) {
       desiredRotation = 0;
     }
+
+    desiredRotation = MathUtil.clamp(desiredRotation, -1.0, 1.0);
 
     drive(x, y, desiredRotation, fieldRelative);
   }
@@ -422,7 +474,10 @@ public class DriveSubsystem extends SubsystemBase {
     } else if (rot == 0) {
       keepHeading(x, y, fieldRelative);
     } else {
-      targetHeadingDegrees = getHeadingDegrees();
+      targetHeadingDegrees =
+          getHeadingDegrees()
+              + calculateYawOffsetDeg(
+                  Units.radiansToDegrees(lastSetChassisSpeeds.omegaRadiansPerSecond));
       drive(x, y, rot, fieldRelative);
     }
   }
@@ -524,13 +579,14 @@ public class DriveSubsystem extends SubsystemBase {
     List<Translation2d> bezierTranslations = PathPlannerPath.bezierFromPoses(curPose, finalPose);
     PathPlannerPath path =
         new PathPlannerPath(
-            bezierTranslations,
-            new PathConstraints(
-                DriveCal.MEDIUM_LINEAR_SPEED_METERS_PER_SEC,
-                DriveCal.MEDIUM_LINEAR_ACCELERATION_METERS_PER_SEC_SQ,
-                DriveCal.MEDIUM_ANGULAR_SPEED_RAD_PER_SEC,
-                DriveCal.MEDIUM_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ),
-            new GoalEndState(finalSpeedMetersPerSec, finalHolonomicRotation));
+                bezierTranslations,
+                new PathConstraints(
+                    DriveCal.MEDIUM_LINEAR_SPEED_METERS_PER_SEC,
+                    DriveCal.MEDIUM_LINEAR_ACCELERATION_METERS_PER_SEC_SQ,
+                    DriveCal.MEDIUM_ANGULAR_SPEED_RAD_PER_SEC,
+                    DriveCal.MEDIUM_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ),
+                new GoalEndState(finalSpeedMetersPerSec, finalHolonomicRotation))
+            .replan(curPose, lastSetChassisSpeeds);
 
     return path;
   }
@@ -587,6 +643,10 @@ public class DriveSubsystem extends SubsystemBase {
     return Math.abs(getHeadingDegrees() - targetHeadingDegrees) % 360;
   }
 
+  public boolean nearTarget() {
+    return getDiffCurrentTargetYawDeg() < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES;
+  }
+
   /**
    * Provides no input to rotateOrKeepHeading for the input amount of time, allowing turning in
    * place towards the current target heading
@@ -597,6 +657,17 @@ public class DriveSubsystem extends SubsystemBase {
               rotateOrKeepHeading(0, 0, 0, true, -1);
             })
         .withTimeout(timeoutSec);
+  }
+
+  /**
+   * Calculate the amount the robot will overshoot in degrees, given rotational velocity in
+   * degrees/second. Negative or positive values can be passed in, the function will adjust. It will
+   * return the correct sign depending on our current velocity.
+   */
+  private double calculateYawOffsetDeg(double rotationalVelocityDeg) {
+    double posRotationalVelocityDeg = Math.abs(rotationalVelocityDeg);
+    double posOffsetDeg = yawOffsetMap.get(posRotationalVelocityDeg);
+    return posOffsetDeg * Math.signum(lastSetChassisSpeeds.omegaRadiansPerSecond);
   }
 
   public void considerZeroingSwerveEncoders() {
@@ -642,6 +713,14 @@ public class DriveSubsystem extends SubsystemBase {
         "Rear Left Module Pos (rad)", () -> rearLeft.getPosition().angle.getRadians(), null);
     builder.addDoubleProperty(
         "Rear Right Module Pos (rad)", () -> rearRight.getPosition().angle.getRadians(), null);
+    builder.addDoubleProperty(
+        "Front Left Module Pos (deg)", () -> frontLeft.getPosition().angle.getDegrees(), null);
+    builder.addDoubleProperty(
+        "Front Right Module Pos (deg)", () -> frontRight.getPosition().angle.getDegrees(), null);
+    builder.addDoubleProperty(
+        "Rear Left Module Pos (deg)", () -> rearLeft.getPosition().angle.getDegrees(), null);
+    builder.addDoubleProperty(
+        "Rear Right Module Pos (deg)", () -> rearRight.getPosition().angle.getDegrees(), null);
     builder.addDoubleProperty(
         "Front Left Distance (m)", () -> frontLeft.getPosition().distanceMeters, null);
     builder.addDoubleProperty(
@@ -689,5 +768,12 @@ public class DriveSubsystem extends SubsystemBase {
         "Rear left desired position", () -> rearLeft.desiredState.angle.getRadians(), null);
     builder.addDoubleProperty(
         "Rear right desired position", () -> rearRight.desiredState.angle.getRadians(), null);
+    builder.addBooleanProperty("Near Target heading", this::nearTarget, null);
+    builder.addDoubleProperty(
+        "yaw offset treemap value",
+        () ->
+            calculateYawOffsetDeg(
+                Units.radiansToDegrees(lastSetChassisSpeeds.omegaRadiansPerSecond)),
+        null);
   }
 }

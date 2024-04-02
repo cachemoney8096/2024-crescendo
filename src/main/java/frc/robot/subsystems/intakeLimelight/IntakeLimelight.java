@@ -76,8 +76,12 @@ public class IntakeLimelight extends SubsystemBase {
     kTargetHeight = targetHeightMeters;
     setLimelightValues(
         Constants.limelightLedMode.OFF,
-        Constants.limelightCamMode.DRIVER_CAMERA,
-        Constants.limelightPipeline.TAG_PIPELINE);
+        Constants.limelightCamMode.VISION_PROCESSING,
+        Constants.limelightPipeline.NOTE_PIPELINE);
+    // setLimelightValues(
+    //     Constants.limelightLedMode.OFF,
+    //     Constants.limelightCamMode.DRIVER_CAMERA,
+    //     Constants.limelightPipeline.TAG_PIPELINE);
 
     m_simDevice = SimDevice.create("limelight-intake");
     if (m_simDevice != null) {
@@ -417,10 +421,14 @@ public class IntakeLimelight extends SubsystemBase {
    * @return If empty, no note detected. First value is note yaw in degrees (ccw), second value is
    *     distance in meters.
    */
-  public Optional<NoteDetection> getNotePos() {
+  public Optional<NoteDetection> getNotePos(boolean changePipeline) {
     // TODO filter low confidence detection in LL dashboard, hopefully
     if (getPipeline() != Constants.limelightPipeline.NOTE_PIPELINE) {
-      setPipeline(Constants.limelightPipeline.NOTE_PIPELINE);
+      if (changePipeline) {
+        setPipeline(Constants.limelightPipeline.NOTE_PIPELINE);
+      } else {
+        return Optional.empty();
+      }
     }
 
     LimelightHelpers.LimelightResults llresults =
@@ -428,7 +436,7 @@ public class IntakeLimelight extends SubsystemBase {
     LimelightTarget_Detector[] targets_Detector = llresults.targetingResults.targets_Detector;
 
     if (targets_Detector.length == 0) {
-      System.out.println("Didn't see note");
+      // System.out.println("Didn't see note");
       return Optional.empty();
     }
 
@@ -448,10 +456,15 @@ public class IntakeLimelight extends SubsystemBase {
                 - Units.inchesToMeters(Constants.NOTE_HEIGHT_INCHES / 2))
             / Math.tan(Units.degreesToRadians(angleLimelightToNoteDegrees));
 
+    if (noteDistanceMeters > 0.0) {
+      // noteDistanceMeters inverted so this checks if the only note seen is above the camera.
+      return Optional.empty();
+    }
+
     double yawAngleXDegrees = lowestDetection.tx;
     double adjustedYawAngleDegrees = yawAngleXDegrees + IntakeLimelightCal.LIMELIGHT_YAW_DEGREES;
     return Optional.of(
-        new NoteDetection(getLatency(), noteDistanceMeters, adjustedYawAngleDegrees));
+        new NoteDetection(getLatency(), -noteDistanceMeters, -adjustedYawAngleDegrees));
   }
 
   @Override
@@ -459,6 +472,33 @@ public class IntakeLimelight extends SubsystemBase {
     builder.addDoubleProperty("Latency", () -> getLatency(), null);
     builder.addDoubleProperty("Tx", () -> getOffSetX(), null);
     builder.addDoubleProperty("Ty", () -> getOffSetY(), null);
+    // builder.addDoubleProperty("Note Latency (sec)", () -> {
+    //   var maybeNotePos = getNotePos();
+    //   if (maybeNotePos.isEmpty())
+    //   {
+    //     return 0.0;
+    //   }
+    //   return maybeNotePos.get().latencySec;
+    // }, null);
+    builder.addDoubleProperty(
+        "Note Distance (m)",
+        () -> {
+          var maybeNotePos = getNotePos(false);
+          if (maybeNotePos.isEmpty()) {
+            return 0.0;
+          }
+          return maybeNotePos.get().distanceMeters;
+        },
+        null);
+    // builder.addDoubleProperty("Note Angle (deg)", () -> {
+    //   var maybeNotePos = getNotePos();
+    //   if (maybeNotePos.isEmpty())
+    //   {
+    //     return 0.0;
+    //   }
+    //   return maybeNotePos.get().yawAngleDeg;
+    // }, null);
+
     builder.addBooleanProperty("Valid Target", () -> isValidTarget(), null);
     builder.addBooleanProperty("Connected", () -> CheckConnection(), null);
   }

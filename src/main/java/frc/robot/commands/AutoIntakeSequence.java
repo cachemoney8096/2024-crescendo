@@ -28,7 +28,7 @@ public class AutoIntakeSequence extends SequentialCommandGroup {
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.INTAKING, true)),
         new WaitUntilCommand(elevator::atDesiredPosition),
         new WaitUntilCommand(intake::nearDeployed),
-        new InstantCommand(intake::startRollers),
+        new InstantCommand(intake::startRollersAuto),
         Conveyor.startReceive(conveyor),
         new ParallelCommandGroup(
                 new InstantCommand(intake::stopRollers, intake),

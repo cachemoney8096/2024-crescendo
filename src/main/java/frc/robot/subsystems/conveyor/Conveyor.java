@@ -10,14 +10,16 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.RobotMap;
+import frc.robot.commands.IntakeSequence;
 import frc.robot.subsystems.lights.Lights;
-import frc.robot.subsystems.lights.Lights.LightCode;
 import frc.robot.utils.SparkMaxUtils;
 import java.util.function.DoubleConsumer;
 
@@ -65,10 +67,12 @@ public class Conveyor extends SubsystemBase {
   private ConveyorPosition currentNotePosition = ConveyorPosition.NO_NOTE;
 
   public DoubleConsumer rumbleSetter;
+  public Runnable hasNoteFunc;
 
-  public Conveyor(DoubleConsumer rumbleSetter) {
+  public Conveyor(DoubleConsumer rumbleSetter, Runnable setHasNote) {
     SparkMaxUtils.initWithRetry(this::setUpConveyorSparks, ConveyorCal.SPARK_INIT_RETRY_ATTEMPTS);
     this.rumbleSetter = rumbleSetter;
+    this.hasNoteFunc = setHasNote;
   }
 
   /** Does all the initialization for the sparks, return true on success */
@@ -91,7 +95,7 @@ public class Conveyor extends SubsystemBase {
     errors += SparkMaxUtils.check(backMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 200));
     errors += SparkMaxUtils.check(backMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 200));
     errors += SparkMaxUtils.check(frontMotor.setIdleMode(IdleMode.kBrake));
-    errors += SparkMaxUtils.check(backMotor.setIdleMode(IdleMode.kCoast));
+    errors += SparkMaxUtils.check(backMotor.setIdleMode(IdleMode.kBrake));
 
     Timer.delay(0.1);
 
@@ -158,25 +162,33 @@ public class Conveyor extends SubsystemBase {
   }
 
   /** Send note to the shooter. */
-  public static Command shoot(Conveyor conveyor) {
+  public static Command shoot(Conveyor conveyor, double waitTime) {
     return new SequentialCommandGroup(
         new InstantCommand(
             () -> conveyor.frontMotor.set(ConveyorCal.PREPARE_TO_SHOOT_FRONT_SPEED), conveyor),
         new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.PREPARE_TO_SHOOT_BACK_SPEED)),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
-        new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_SHOOTER_SECONDS),
+        new WaitCommand(waitTime),
         Conveyor.stop(conveyor),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.NO_NOTE));
   }
 
+  /** Send note to the shooter. */
+  public static Command shoot(Conveyor conveyor) {
+    return Conveyor.shoot(conveyor, ConveyorCal.NOTE_EXIT_TIME_SHOOTER_TELEOP_SECONDS);
+  }
+
   /** Score note into the trap or the amp */
-  public static Command scoreTrapOrAmp(Conveyor conveyor) {
+  public static Command scoreTrapOrAmp(Conveyor conveyor, boolean scoringAmp) {
     return new SequentialCommandGroup(
         new InstantCommand(
             () -> conveyor.frontMotor.set(ConveyorCal.SCORE_TRAP_FRONT_SPEED), conveyor),
         new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.SCORE_TRAP_BACK_SPEED)),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
-        new WaitCommand(ConveyorCal.NOTE_EXIT_TIME_TRAP_AMP_SECONDS),
+        new WaitCommand(
+            scoringAmp
+                ? ConveyorCal.NOTE_EXIT_TIME_AMP_SECONDS
+                : ConveyorCal.NOTE_EXIT_TIME_TRAP_SECONDS),
         Conveyor.stop(conveyor),
         new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.NO_NOTE));
   }
@@ -185,7 +197,7 @@ public class Conveyor extends SubsystemBase {
   public static Command startReceive(Conveyor conveyor) {
     return new SequentialCommandGroup(
             new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SPEED), conveyor),
-            new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SPEED)),
+            new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_MEDIUM_SPEED)),
             new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.PARTIAL_NOTE),
             new WaitUntilCommand(() -> !conveyor.backConveyorBeamBreakSensor.get()))
         .withName("Start Receive");
@@ -210,8 +222,21 @@ public class Conveyor extends SubsystemBase {
    * Assuming a note is here, then runs until it's positioned correctly. Notably, it won't do
    * anything if there's not a note.
    */
-  public static Command finishReceive(Conveyor conveyor, Lights lights) {
-    return new SequentialCommandGroup(
+  public static Command finishReceive(Conveyor conveyor, Lights lights, boolean letGoOfTrigger) {
+    return new ConditionalCommand(
+            finishReceiveFunctionalCmd(conveyor, lights),
+            new SequentialCommandGroup(
+                new ParallelRaceGroup(
+                    new WaitCommand(1.0),
+                    new WaitUntilCommand(() -> !conveyor.backConveyorBeamBreakSensor.get())),
+                finishReceiveFunctionalCmd(conveyor, lights)),
+            () -> !letGoOfTrigger)
+        .withName("Finish Receive");
+  }
+
+  public static Command finishReceiveFunctionalCmd(Conveyor conveyor, Lights lights) {
+    return new ConditionalCommand(
+        new SequentialCommandGroup(
             new InstantCommand(
                 () -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED), conveyor),
             new InstantCommand(() -> conveyor.backMotor.set(ConveyorCal.RECEIVE_SLOW_SPEED)),
@@ -219,10 +244,16 @@ public class Conveyor extends SubsystemBase {
             new WaitUntilCommand(() -> conveyor.frontConveyorBeamBreakSensor.get()),
             Conveyor.stop(conveyor),
             new InstantCommand(() -> conveyor.stopRollers()),
-            new InstantCommand(() -> lights.setLEDColor(LightCode.HAS_NOTE)),
             new InstantCommand(() -> SmartDashboard.putBoolean("Have Note", true)),
-            new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE))
-        .withName("Finish Receive");
+            new InstantCommand(() -> conveyor.currentNotePosition = ConveyorPosition.HOLDING_NOTE)),
+        new InstantCommand(),
+        () -> {
+          return !conveyor.frontConveyorBeamBreakSensor.get();
+        });
+  }
+
+  public static Command finishReceive(Conveyor conveyor, Lights lights) {
+    return finishReceive(conveyor, lights, false);
   }
 
   /** Stop the conveor rollers. */
@@ -235,8 +266,32 @@ public class Conveyor extends SubsystemBase {
     return new SequentialCommandGroup(
         new InstantCommand(() -> conveyor.frontMotor.set(ConveyorCal.RECEIVE_SPEED)),
         new InstantCommand(() -> conveyor.backMotor.set(-ConveyorCal.RECEIVE_SPEED)),
+        new InstantCommand(() -> System.out.println("starting crush")),
         new WaitCommand(1.0),
+        new InstantCommand(() -> System.out.println("ending crush")),
         Conveyor.stop(conveyor));
+  }
+
+  private boolean sawNote = false;
+
+  @Override
+  public void periodic() {
+    if (!intakeBeamBreakSensor.get()) {
+      if (sawNote) {
+        // see and previously saw
+      } else {
+        sawNote = true;
+        Conveyor.rumbleBriefly(this).schedule();
+        IntakeSequence.gotNote = true;
+        hasNoteFunc.run();
+      }
+    } else {
+      if (sawNote) {
+        sawNote = false;
+      } else {
+        // don't see didn't see do nothing
+      }
+    }
   }
 
   @Override

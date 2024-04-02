@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.GeometryUtil;
@@ -17,6 +18,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.drive.DriveConstants;
+import frc.robot.subsystems.drive.SwerveModule;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelightConstants;
 import frc.robot.subsystems.lights.Lights.LightCode;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
@@ -54,6 +56,9 @@ public class Robot extends TimedRobot {
     DriverStation.startDataLog(DataLogManager.getLog()); // log joystick data
     URCL.start();
 
+    SignalLogger.setPath("/u/logs/");
+    SignalLogger.start();
+
     m_robotContainer = new RobotContainer(matchState);
     RobotController.setBrownoutVoltage(Constants.BROWNOUT_VOLTAGE);
     m_PoseEstimator =
@@ -81,15 +86,14 @@ public class Robot extends TimedRobot {
     // robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
-    if (m_robotContainer.readyToScoreCheck()) {
-      m_robotContainer.lights.setLEDColor(LightCode.READY_TO_SCORE);
-    }
   }
 
   /** This function is called once each time the robot enters disabled mode. */
   @Override
   public void disabledInit() {
     matchState.setTeleop(false);
+
+    m_robotContainer.lights.setLEDColor(LightCode.DISABLED);
     LimelightHelpers.getLatestResults(
         IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME); // It takes 2.5-3s on first run
     LimelightHelpers.getLatestResults(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
@@ -136,6 +140,24 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     matchState.updateMatchState(false);
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+
+    m_robotContainer.drive.setNoMove();
+    SwerveModule[] moduleArray = {
+      m_robotContainer.drive.frontLeft,
+      m_robotContainer.drive.frontRight,
+      m_robotContainer.drive.rearLeft,
+      m_robotContainer.drive.rearRight
+    };
+    for (var module : moduleArray) {
+      var talon = module.drivingTalon;
+      var currentConfig = module.appliedConfiguration;
+      var conigurator = talon.getConfigurator();
+      currentConfig.CurrentLimits.SupplyCurrentLimit =
+          DriveConstants.DRIVING_MOTOR_SUPPLY_CURRENT_LIMIT_AMPS;
+      currentConfig.CurrentLimits.StatorCurrentLimit =
+          DriveConstants.DRIVING_MOTOR_STATOR_AUTO_CURRENT_LIMIT_AMPS;
+      conigurator.apply(currentConfig);
+    }
 
     // If there's a path planner auto and the robot didn't initialize its pose from tags, then
     // initialize from the path's starting pose
@@ -201,6 +223,29 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
+    m_robotContainer.drive.setNoMove();
+    SwerveModule[] moduleArray = {
+      m_robotContainer.drive.frontLeft,
+      m_robotContainer.drive.frontRight,
+      m_robotContainer.drive.rearLeft,
+      m_robotContainer.drive.rearRight
+    };
+    for (var module : moduleArray) {
+      var talon = module.drivingTalon;
+      var currentConfig = module.appliedConfiguration;
+      var conigurator = talon.getConfigurator();
+      currentConfig.CurrentLimits.SupplyCurrentLimit =
+          DriveConstants.DRIVING_MOTOR_SUPPLY_CURRENT_LIMIT_AMPS;
+      currentConfig.CurrentLimits.StatorCurrentLimit =
+          DriveConstants.DRIVING_MOTOR_STATOR_TELEOP_CURRENT_LIMIT_AMPS;
+      conigurator.apply(currentConfig);
+    }
+
+    m_robotContainer.lights.setLEDColor(
+        !m_robotContainer.conveyor.backConveyorBeamBreakSensor.get()
+            ? LightCode.HAS_NOTE
+            : LightCode.OFF);
+
     m_robotContainer.intake.stopRollers();
     m_robotContainer.conveyor.stopRollers();
     m_robotContainer.shooter.setShooterMode(ShooterMode.IDLE);
@@ -225,7 +270,11 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    if (m_robotContainer.readyToScoreCheck()) {
+      m_robotContainer.lights.setLEDColor(LightCode.READY_TO_SCORE);
+    }
+  }
 
   @Override
   public void testInit() {

@@ -1,0 +1,76 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.273245750195204,
+        "y": 7.167100584201169
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.905900455319429,
+        "y": 7.2337892407266295
+      },
+      "isLocked": false,
+      "linkedName": "DASH FAR SHOOT BLUE"
+    },
+    {
+      "anchor": {
+        "x": 9.087266813422517,
+        "y": 6.508230909980338
+      },
+      "prevControl": {
+        "x": 7.703076345967508,
+        "y": 7.526672993160801
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "5 INTAKE DASH BLUE"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": -20.0,
+      "rotateFast": false
+    }
+  ],
+  "constraintZones": [],
+  "eventMarkers": [
+    {
+      "name": "INTAKE",
+      "waypointRelativePos": 0.2,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "INTAKE"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 5.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -20.0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "DASH BLUE",
+  "previewStartingState": {
+    "rotation": 0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": false
+}

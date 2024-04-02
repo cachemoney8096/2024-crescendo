@@ -14,6 +14,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
 import com.revrobotics.SparkPIDController;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -34,6 +35,8 @@ public class SwerveModule implements Sendable {
   private final SparkPIDController turningPIDController;
 
   private double chassisAngularOffsetRadians = 0;
+
+  public TalonFXConfiguration appliedConfiguration;
 
   /** Desired velocity and angle. This angle includes the chassis offset. */
   public SwerveModuleState desiredState = new SwerveModuleState(0.0, new Rotation2d());
@@ -136,19 +139,21 @@ public class SwerveModule implements Sendable {
     // TODO check status codes
     TalonFXConfigurator cfg = drivingTalon.getConfigurator();
     TalonFXConfiguration toApply = new TalonFXConfiguration();
-    toApply.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // TODO: check this
+    toApply.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // TODO: check this
     toApply.Feedback.SensorToMechanismRatio =
         DriveConstants.DRIVING_MOTOR_REDUCTION / DriveConstants.WHEEL_CIRCUMFERENCE_METERS;
-    toApply.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVING_MOTOR_CURRENT_LIMIT_AMPS;
+    toApply.CurrentLimits.SupplyCurrentLimit =
+        DriveConstants.DRIVING_MOTOR_SUPPLY_CURRENT_LIMIT_AMPS;
     toApply.CurrentLimits.SupplyCurrentLimitEnable = true;
     toApply.CurrentLimits.StatorCurrentLimit =
-        DriveConstants.DRIVING_MOTOR_STATOR_CURRENT_LIMIT_AMPS;
+        DriveConstants.DRIVING_MOTOR_STATOR_TELEOP_CURRENT_LIMIT_AMPS;
     toApply.CurrentLimits.StatorCurrentLimitEnable = true;
     toApply.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     toApply.Slot0.kP = DriveCal.DRIVING_P;
     toApply.Slot0.kI = DriveCal.DRIVING_I;
     toApply.Slot0.kD = DriveCal.DRIVING_D;
     toApply.Slot0.kV = DriveCal.DRIVING_FF;
+    appliedConfiguration = toApply;
     cfg.apply(toApply);
     final double fastUpdateFrequencyHz = 50.0; // TODO change to faster for better odometry
     final double slowUpdateFrequencyHz = 50.0;
@@ -175,7 +180,7 @@ public class SwerveModule implements Sendable {
       return;
     }
     if (Math.abs(getEncoderRelativePositionRad() - getEncoderAbsPositionRad())
-        > DriveCal.TURNING_ENCODER_ZEROING_THRESHOLD_DEG) {
+        > DriveCal.TURNING_ENCODER_ZEROING_THRESHOLD_RAD) {
       turningRelativeEncoder.setPosition(getEncoderAbsPositionRad() - chassisAngularOffsetRadians);
       turningPIDController.setReference(getEncoderRelativePositionRad(), ControlType.kPosition);
     }
@@ -213,6 +218,28 @@ public class SwerveModule implements Sendable {
         new Rotation2d(turningRelativeEncoder.getPosition()));
   }
 
+  /** Applies slew rate. */
+  public double getDesiredVelocityMps(double inputVelocityMps) {
+    // Allow any decrease in desired speed
+    final double prevDesiredVelocityMps = desiredState.speedMetersPerSecond;
+    if (Math.abs(inputVelocityMps) < Math.abs(prevDesiredVelocityMps)) {
+      return inputVelocityMps;
+    }
+
+    // If the change is less than the max accel, allow it
+    final double maxAccelMpss = 15.0;
+    final double loopTimeS = 0.02;
+    final double maxVelChangeMps = maxAccelMpss * loopTimeS;
+    final double velChangeMps = inputVelocityMps - prevDesiredVelocityMps;
+    if (Math.abs(velChangeMps) < maxVelChangeMps) {
+      return inputVelocityMps;
+    }
+
+    // Clamp to max allowed change
+    final double allowedChangeMps = MathUtil.clamp(velChangeMps, -maxVelChangeMps, maxVelChangeMps);
+    return prevDesiredVelocityMps + allowedChangeMps;
+  }
+
   /** Ensures the value a is in [0, b) */
   public static double mod(double a, double b) {
     double r = a % b;
@@ -228,7 +255,7 @@ public class SwerveModule implements Sendable {
    * @param desiredState Desired state with speed and angle. Angle is relative to chassis (no offset
    *     needed).
    */
-  public void setDesiredState(SwerveModuleState inputState) {
+  public void setDesiredState(SwerveModuleState inputState, boolean overrideSlew) {
 
     // Optimize the reference state to avoid spinning further than 90 degrees.
     // inputState =
@@ -240,6 +267,10 @@ public class SwerveModule implements Sendable {
 
     // Ensure optimized state
     inputState.angle = Rotation2d.fromRadians(mod(inputState.angle.getRadians(), 2.0 * Math.PI));
+
+    if (!overrideSlew) {
+      inputState.speedMetersPerSecond = getDesiredVelocityMps(inputState.speedMetersPerSecond);
+    }
 
     // Setting global desiredState to be optimized for the shuffleboard
     this.desiredState = inputState;

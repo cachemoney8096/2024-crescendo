@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -62,38 +63,47 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                   Optional<Pair<Rotation2d, Double>> interimTagDetection =
                       shooterLimelight.checkForTag();
                   if (interimTagDetection.isEmpty()) {
-                    // Pair<Rotation2d, Double> p =
-                    // ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
-                    //     drive.getPose(), drive.matchState.isBlue());
-                    // drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
-                    // shooter.setShooterDistance(p.getSecond());
+                    Pair<Rotation2d, Double> p =
+                        ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
+                            drive.getPose(), drive.matchState.isBlue());
+                    drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
+                    shooter.setShooterDistance(p.getSecond());
                     tagDetection = interimTagDetection;
                   } else {
                     if (driveVelocityMps.getNorm() > 0.02
                         || Math.abs(currentChassisSpeeds.omegaRadiansPerSecond)
                             > Units.degreesToRadians(10)) {
-                      // // get pose, find limelight stuff from <that> pose use limelight to prep
-                      // // sequence
-                      // tagDetection = interimTagDetection;
-                      // Pair<Rotation2d, Double> p =
-                      // ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
-                      //     drive.getPastBufferedPose(shooterLimelight.getLatencySeconds()),
-                      // drive.matchState.isBlue());
-                      // drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
-                      // shooter.setShooterDistance(tagDetection.get().getSecond());
+                      // get pose, find limelight stuff from <that> pose use limelight to prep
+                      // sequence
+                      tagDetection = interimTagDetection;
+                      double arbitraryLimelightLatencySec = 0.7;
+                      Pose2d futurePose =
+                          drive.extrapolatePastPoseBasedOnVelocity(-arbitraryLimelightLatencySec);
+                      Pair<Rotation2d, Double> p =
+                          ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
+                              futurePose, drive.matchState.isBlue());
+                      drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
+                      shooter.setShooterDistance(p.getSecond());
                     } else {
                       tagDetection = interimTagDetection;
                       shooterLimelight.resetOdometryDuringPrep(drive);
-                      System.out.println(
-                          "tag degrees: " + tagDetection.get().getFirst().getDegrees());
-                      drive.setTargetHeadingDegrees(tagDetection.get().getFirst().getDegrees());
-                      shooter.setShooterDistance(tagDetection.get().getSecond());
+                      drive.setTargetHeadingDegrees(
+                          tagDetection.get().getFirst().getDegrees()
+                              + (drive.matchState.isBlue() ? 0.0 : -1.0));
+                      shooter.setShooterDistance(
+                          tagDetection.get().getSecond()
+                              * (drive.matchState.isBlue() ? 0.95 : 1.0));
                     }
                   }
                 })
             .until(
                 () -> {
-                  return tagDetection.isPresent() || driverControllerInput.getAsBoolean();
+                  return false;
+                })
+            .finallyDo(
+                () -> {
+                  shooterLimelight.resetOdometryDuringPrep(drive);
+                  System.out.println("rezeroed odemetry in speakerprep");
                 }));
   }
 }
