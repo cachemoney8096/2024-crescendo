@@ -41,6 +41,9 @@ public class SwerveModule implements Sendable {
   /** Desired velocity and angle. This angle includes the chassis offset. */
   public SwerveModuleState desiredState = new SwerveModuleState(0.0, new Rotation2d());
 
+  /** if true, set chassis speeds to half the desired value */
+  public boolean useHalfSpeed = false;
+
   /**
    * Constructs a SwerveModule and configures the driving and turning motor, encoder, and PID
    * controller.
@@ -275,8 +278,10 @@ public class SwerveModule implements Sendable {
     // Setting global desiredState to be optimized for the shuffleboard
     this.desiredState = inputState;
 
+    desiredState.speedMetersPerSecond = this.useHalfSpeed ? 0.5 * desiredState.speedMetersPerSecond : desiredState.speedMetersPerSecond;
+
     // Command driving and turning SPARKS MAX towards their respective setpoints.
-    drivingTalon.setControl(new VelocityDutyCycle(inputState.speedMetersPerSecond).withSlot(0));
+    drivingTalon.setControl(new VelocityDutyCycle(this.useHalfSpeed ? inputState.speedMetersPerSecond * 0.5 : inputState.speedMetersPerSecond).withSlot(0));
     turningPIDController.setReference(
         inputState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
   }
@@ -296,6 +301,10 @@ public class SwerveModule implements Sendable {
 
   public void periodic() {
     turningAbsoluteEncoderChecker.addReading(turningAbsoluteEncoder.getPosition());
+  }
+
+  public void useHalfSpeed(boolean useHalfSpeed) {
+    this.useHalfSpeed = useHalfSpeed;
   }
 
   public void initSendable(SendableBuilder builder) {

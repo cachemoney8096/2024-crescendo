@@ -129,10 +129,19 @@ public class RobotContainer implements Sendable {
   private Optional<Pair<Translation2d, Rotation2d>> noteDirectionOptional = Optional.empty();
 
   /**
+   * distance in meters from the note that autoIntake considers "too close." 
+   * lowering this from 1.7 allows the robot to continuously turn to the note
+   */
+  private double noteTooCloseThreshold = 1.7;
+
+  /**
    * A chooser for autonomous commands. String in pair should be the path's name, and null if no
    * path
    */
   private SendableChooser<Pair<Command, String>> autonChooser = new SendableChooser<>();
+
+  /** chooser for demo mode or real match */
+  private SendableChooser<Pair<Command, String>> demoSelector = new SendableChooser<>();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer(MatchStateUtil matchState) {
@@ -300,7 +309,22 @@ public class RobotContainer implements Sendable {
         new Pair<Command, String>(
             new DashAuto(drive, intake, elevator, shooter, conveyor, shooterLimelight, true),
             "DASH RED"));
+
     SmartDashboard.putData(autonChooser);
+
+    demoSelector.setDefaultOption(
+        "NORMAL mode",
+        new Pair<Command, String>(
+            new InstantCommand(() -> drive.useHalfSpeed(false)).andThen(new InstantCommand(() -> this.noteTooCloseThreshold = 1.7)),
+            "NORMAL mode"));
+
+    demoSelector.addOption(
+        "DEMO mode",
+        new Pair<Command, String>(
+            new InstantCommand(() -> drive.useHalfSpeed(true)).andThen(new InstantCommand(() -> this.noteTooCloseThreshold = 0.5)),
+            "DEMO mode"));
+
+    SmartDashboard.putData(demoSelector);
   }
 
   private PrepState getAndClearPrepState() {
@@ -492,9 +516,7 @@ public class RobotContainer implements Sendable {
 
                                 // Check distance
                                 if (latestNoteDetection.distanceMeters
-                                    < 1.7) { // lowering this from 1.7 allows the robot to
-                                  // continuously turn
-                                  // to the note
+                                    < this.noteTooCloseThreshold) {
                                   intakeNoteTooClose = true;
                                 }
 

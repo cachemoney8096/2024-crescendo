@@ -677,6 +677,13 @@ public class DriveSubsystem extends SubsystemBase {
     rearRight.considerZeroingEncoder();
   }
 
+  public void useHalfSpeed(boolean useHalfSpeed) {
+    frontLeft.useHalfSpeed(useHalfSpeed);
+    frontRight.useHalfSpeed(useHalfSpeed);
+    rearLeft.useHalfSpeed(useHalfSpeed);
+    rearRight.useHalfSpeed(useHalfSpeed);
+  }
+
   @Override
   public void initSendable(SendableBuilder builder) {
     super.initSendable(builder);
