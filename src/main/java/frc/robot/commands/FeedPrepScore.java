@@ -31,10 +31,10 @@ public class FeedPrepScore extends SequentialCommandGroup {
         new GoHomeSequence(
             intake, elevator, shooter, conveyor, intakeLimelight, true, false, false),
         new WaitUntilCommand(elevator::elevatorBelowInterferenceZone),
-        new ConditionalCommand(
-            new InstantCommand(() -> drive.setTargetHeadingDegrees(290.0)),
-            new InstantCommand(() -> drive.setTargetHeadingDegrees(220.0)),
-            matchState::isBlue),
+        // new ConditionalCommand(
+        //     new InstantCommand(() -> drive.setTargetHeadingDegrees(290.0)),
+        //     new InstantCommand(() -> drive.setTargetHeadingDegrees(220.0)),
+        //     matchState::isBlue), // TODO uncomment for real match
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT_CLEAR_STAGE)));
   }
 }

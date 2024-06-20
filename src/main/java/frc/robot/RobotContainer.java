@@ -140,9 +140,6 @@ public class RobotContainer implements Sendable {
    */
   private SendableChooser<Pair<Command, String>> autonChooser = new SendableChooser<>();
 
-  /** chooser for demo mode or real match */
-  private SendableChooser<Pair<Command, String>> demoSelector = new SendableChooser<>();
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer(MatchStateUtil matchState) {
     this.matchState = matchState;
@@ -312,19 +309,9 @@ public class RobotContainer implements Sendable {
 
     SmartDashboard.putData(autonChooser);
 
-    demoSelector.setDefaultOption(
-        "NORMAL mode",
-        new Pair<Command, String>(
-            new InstantCommand(() -> drive.useHalfSpeed(false)).andThen(new InstantCommand(() -> this.noteTooCloseThreshold = 1.7)),
-            "NORMAL mode"));
-
-    demoSelector.addOption(
-        "DEMO mode",
-        new Pair<Command, String>(
-            new InstantCommand(() -> drive.useHalfSpeed(true)).andThen(new InstantCommand(() -> this.noteTooCloseThreshold = 0.5)),
-            "DEMO mode"));
-
-    SmartDashboard.putData(demoSelector);
+    // TODO comment this stuff out for a real match
+    this.noteTooCloseThreshold = 0.5;
+    drive.throttleSpeed(true);
   }
 
   private PrepState getAndClearPrepState() {
@@ -677,28 +664,29 @@ public class RobotContainer implements Sendable {
                 new InstantCommand(() -> drive.throttle(0.6))));
 
     // bottom left back button
-    driverController
-        .povRight()
-        .and(() -> !buttonsLocked)
-        .onTrue(
-            new InstantCommand(() -> prepState = PrepState.CLIMB)
-                .andThen(
-                    new ClimbPrepSequence(
-                        intake, elevator, shooter, conveyor, intakeLimelight, lights))
-                .andThen(new WaitUntilCommand(() -> elevator.atDesiredPosition()))
-                // .andThen(new SetTrapLineupPosition(intakeLimelight,
-                // drive).withTimeout(4.0)));
-                .andThen(
-                    () ->
-                        new SequentialCommandGroup(
-                                new SetTrapLineupPosition(intakeLimelight, drive),
-                                new PIDToPoint(drive),
-                                Conveyor.rumbleBriefly(
-                                    conveyor)) // rumble after auto drive finishes
-                            .raceWith(new WaitUntilCommand(driverJoysticksActive))
-                            .schedule())
-                .andThen(new InstantCommand(() -> driveFieldRelative = false))
-                .andThen(new InstantCommand(() -> drive.throttle(0.3))));
+    // TODO uncommment for real match
+    // driverController
+    //     .povRight()
+    //     .and(() -> !buttonsLocked)
+    //     .onTrue(
+    //         new InstantCommand(() -> prepState = PrepState.CLIMB)
+    //             .andThen(
+    //                 new ClimbPrepSequence(
+    //                     intake, elevator, shooter, conveyor, intakeLimelight, lights))
+    //             .andThen(new WaitUntilCommand(() -> elevator.atDesiredPosition()))
+    //             // .andThen(new SetTrapLineupPosition(intakeLimelight,
+    //             // drive).withTimeout(4.0)));
+    //             .andThen(
+    //                 () ->
+    //                     new SequentialCommandGroup(
+    //                             new SetTrapLineupPosition(intakeLimelight, drive),
+    //                             new PIDToPoint(drive),
+    //                             Conveyor.rumbleBriefly(
+    //                                 conveyor)) // rumble after auto drive finishes
+    //                         .raceWith(new WaitUntilCommand(driverJoysticksActive))
+    //                         .schedule())
+    //             .andThen(new InstantCommand(() -> driveFieldRelative = false))
+    //             .andThen(new InstantCommand(() -> drive.throttle(0.3))));
 
     driverController
         .back()
@@ -951,5 +939,6 @@ public class RobotContainer implements Sendable {
     builder.addStringProperty("pathCmd", () -> pathCmd, null);
     builder.addBooleanProperty("Using heading from tag", () -> usingTagHeading, null);
     builder.addBooleanProperty("ready to score (leds)", () -> readyToScoreCheck(), null);
+    builder.addDoubleProperty("note too close threshold for auto intake", () -> this.noteTooCloseThreshold, null);
   }
 }

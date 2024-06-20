@@ -66,7 +66,7 @@ public class SpeakerPrepScoreSequence extends SequentialCommandGroup {
                     Pair<Rotation2d, Double> p =
                         ShooterLimelight.getRotationAndDistanceToSpeakerFromPose(
                             drive.getPose(), drive.matchState.isBlue());
-                    drive.setTargetHeadingDegrees(p.getFirst().getDegrees());
+                    // drive.setTargetHeadingDegrees(p.getFirst().getDegrees()); // TODO uncomment for real match
                     shooter.setShooterDistance(p.getSecond());
                     tagDetection = interimTagDetection;
                   } else {

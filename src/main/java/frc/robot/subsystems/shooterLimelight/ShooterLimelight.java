@@ -282,7 +282,9 @@ public class ShooterLimelight extends SubsystemBase {
                 new Rotation2d(
                     Units.degreesToRadians(
                         ShooterLimelightCal.LIMELIGHT_DETECTION_OFFSET_DEGREES)));
-    double distanceToTagMeters = robotToTag.getNorm();
+
+    // double distanceToTagMeters = robotToTag.getNorm(); // TODO uncomment for real match
+    double distanceToTagMeters = Units.feetToMeters(8.0);
 
     return Pair.of(angleToTag, distanceToTagMeters);
   }

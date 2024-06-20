@@ -677,11 +677,11 @@ public class DriveSubsystem extends SubsystemBase {
     rearRight.considerZeroingEncoder();
   }
 
-  public void useHalfSpeed(boolean useHalfSpeed) {
-    frontLeft.useHalfSpeed(useHalfSpeed);
-    frontRight.useHalfSpeed(useHalfSpeed);
-    rearLeft.useHalfSpeed(useHalfSpeed);
-    rearRight.useHalfSpeed(useHalfSpeed);
+  public void throttleSpeed(boolean useHalfSpeed) {
+    frontLeft.throttleSpeed(useHalfSpeed);
+    frontRight.throttleSpeed(useHalfSpeed);
+    rearLeft.throttleSpeed(useHalfSpeed);
+    rearRight.throttleSpeed(useHalfSpeed);
   }
 
   @Override
