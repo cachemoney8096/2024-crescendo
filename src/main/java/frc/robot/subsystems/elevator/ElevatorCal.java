@@ -40,7 +40,7 @@ public final class ElevatorCal {
       POSITION_SCORE_AMP_INCHES = 32.5,
       POSITION_PRE_CLIMB_INCHES = 38.0,
       POSITION_SLIGHTLY_UP_INCHES = 3.25,
-      POSITION_INTAKE_INCHES = 5.75;
+      POSITION_INTAKE_INCHES = 6.75;
 
   public static final int ELEVATOR_CURRENT_LIMIT_AMPS = 60;
 
