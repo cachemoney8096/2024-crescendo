@@ -310,8 +310,8 @@ public class RobotContainer implements Sendable {
     SmartDashboard.putData(autonChooser);
 
     // TODO comment this stuff out for a real match
-    this.noteTooCloseThreshold = 0.5;
-    drive.throttleSpeed(true);
+    // this.noteTooCloseThreshold = 0.5;
+    // drive.throttleSpeed(true);
   }
 
   private PrepState getAndClearPrepState() {
@@ -664,29 +664,29 @@ public class RobotContainer implements Sendable {
                 new InstantCommand(() -> drive.throttle(0.6))));
 
     // bottom left back button
-    // TODO uncommment for real match
-    // driverController
-    //     .povRight()
-    //     .and(() -> !buttonsLocked)
-    //     .onTrue(
-    //         new InstantCommand(() -> prepState = PrepState.CLIMB)
-    //             .andThen(
-    //                 new ClimbPrepSequence(
-    //                     intake, elevator, shooter, conveyor, intakeLimelight, lights))
-    //             .andThen(new WaitUntilCommand(() -> elevator.atDesiredPosition()))
-    //             // .andThen(new SetTrapLineupPosition(intakeLimelight,
-    //             // drive).withTimeout(4.0)));
-    //             .andThen(
-    //                 () ->
-    //                     new SequentialCommandGroup(
-    //                             new SetTrapLineupPosition(intakeLimelight, drive),
-    //                             new PIDToPoint(drive),
-    //                             Conveyor.rumbleBriefly(
-    //                                 conveyor)) // rumble after auto drive finishes
-    //                         .raceWith(new WaitUntilCommand(driverJoysticksActive))
-    //                         .schedule())
-    //             .andThen(new InstantCommand(() -> driveFieldRelative = false))
-    //             .andThen(new InstantCommand(() -> drive.throttle(0.3))));
+    // TODO comment out for demo mode
+    driverController
+        .povRight()
+        .and(() -> !buttonsLocked)
+        .onTrue(
+            new InstantCommand(() -> prepState = PrepState.CLIMB)
+                .andThen(
+                    new ClimbPrepSequence(
+                        intake, elevator, shooter, conveyor, intakeLimelight, lights))
+                .andThen(new WaitUntilCommand(() -> elevator.atDesiredPosition()))
+                // .andThen(new SetTrapLineupPosition(intakeLimelight,
+                // drive).withTimeout(4.0)));
+                .andThen(
+                    () ->
+                        new SequentialCommandGroup(
+                                new SetTrapLineupPosition(intakeLimelight, drive),
+                                new PIDToPoint(drive),
+                                Conveyor.rumbleBriefly(
+                                    conveyor)) // rumble after auto drive finishes
+                            .raceWith(new WaitUntilCommand(driverJoysticksActive))
+                            .schedule())
+                .andThen(new InstantCommand(() -> driveFieldRelative = false))
+                .andThen(new InstantCommand(() -> drive.throttle(0.3))));
 
     driverController
         .back()
