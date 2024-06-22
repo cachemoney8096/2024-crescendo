@@ -237,7 +237,8 @@ public class Elevator extends SubsystemBase {
 
   public boolean atDesiredPosition() {
     double desiredPositionIn = elevatorPositions.get(desiredPosition);
-    // double currentPositionIn = leftMotorEncoderRel.getPosition(); // TODO stupid fix for broken elevator
+    // double currentPositionIn = leftMotorEncoderRel.getPosition(); // TODO stupid fix for broken
+    // elevator
     double currentPositionIn = rightMotorEncoderRel.getPosition();
     double elevatorMarginInches = ElevatorCal.ELEVATOR_MARGIN_INCHES;
     if (desiredPosition == ElevatorPosition.PRE_CLIMB) {
@@ -251,7 +252,8 @@ public class Elevator extends SubsystemBase {
 
   public boolean atPosition(ElevatorPosition pos) {
     double checkPositionIn = elevatorPositions.get(pos);
-    // double currentPositionIn = leftMotorEncoderRel.getPosition(); // TODO stupid fix for broken elevator
+    // double currentPositionIn = leftMotorEncoderRel.getPosition(); // TODO stupid fix for broken
+    // elevator
     double currentPositionIn = rightMotorEncoderRel.getPosition();
     double elevatorMarginInches = ElevatorCal.ELEVATOR_MARGIN_INCHES;
     if (pos == ElevatorPosition.PRE_CLIMB) {

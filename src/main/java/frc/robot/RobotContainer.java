@@ -129,8 +129,8 @@ public class RobotContainer implements Sendable {
   private Optional<Pair<Translation2d, Rotation2d>> noteDirectionOptional = Optional.empty();
 
   /**
-   * distance in meters from the note that autoIntake considers "too close." 
-   * lowering this from 1.7 allows the robot to continuously turn to the note
+   * distance in meters from the note that autoIntake considers "too close." lowering this from 1.7
+   * allows the robot to continuously turn to the note
    */
   private double noteTooCloseThreshold = 1.7;
 
@@ -939,6 +939,7 @@ public class RobotContainer implements Sendable {
     builder.addStringProperty("pathCmd", () -> pathCmd, null);
     builder.addBooleanProperty("Using heading from tag", () -> usingTagHeading, null);
     builder.addBooleanProperty("ready to score (leds)", () -> readyToScoreCheck(), null);
-    builder.addDoubleProperty("note too close threshold for auto intake", () -> this.noteTooCloseThreshold, null);
+    builder.addDoubleProperty(
+        "note too close threshold for auto intake", () -> this.noteTooCloseThreshold, null);
   }
 }

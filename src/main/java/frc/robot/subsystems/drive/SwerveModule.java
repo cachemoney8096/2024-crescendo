@@ -278,10 +278,18 @@ public class SwerveModule implements Sendable {
     // Setting global desiredState to be optimized for the shuffleboard
     this.desiredState = inputState;
 
-    desiredState.speedMetersPerSecond = this.throttleSpeed ? 0.8 * desiredState.speedMetersPerSecond : desiredState.speedMetersPerSecond;
+    desiredState.speedMetersPerSecond =
+        this.throttleSpeed
+            ? 0.8 * desiredState.speedMetersPerSecond
+            : desiredState.speedMetersPerSecond;
 
     // Command driving and turning SPARKS MAX towards their respective setpoints.
-    drivingTalon.setControl(new VelocityDutyCycle(this.throttleSpeed ? inputState.speedMetersPerSecond * 0.8 : inputState.speedMetersPerSecond).withSlot(0));
+    drivingTalon.setControl(
+        new VelocityDutyCycle(
+                this.throttleSpeed
+                    ? inputState.speedMetersPerSecond * 0.8
+                    : inputState.speedMetersPerSecond)
+            .withSlot(0));
     turningPIDController.setReference(
         inputState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
   }
