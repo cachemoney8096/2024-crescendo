@@ -35,7 +35,8 @@ public class Elevator extends SubsystemBase {
     INTAKING
   }
 
-  private CRTUtil crtUtil = CRTUtil.init(26.0, 44.0, 3.45575, 15, 1).get();
+  private CRTUtil crtUtil = new CRTUtil(1, 44 / 26);
+  // private CRTUtil crtUtil = CRTUtil.init(26.0, 44.0, 3.45575, 15, 1).get();
 
   public CANSparkMax leftMotor =
       new CANSparkMax(RobotMap.LEFT_ELEVATOR_CAN_ID, MotorType.kBrushless);
@@ -222,6 +223,15 @@ public class Elevator extends SubsystemBase {
     prevVelocityInPerSec = nextVelocityInPerSec;
     prevTimestamp = Optional.of(timestamp);
   }
+  public void goUpSlowly() {
+    leftMotor.setVoltage(2);
+    rightMotor.setVoltage(2);
+  }
+
+  public void stopSendingVoltage() {
+    leftMotor.setVoltage(0);
+    rightMotor.setVoltage(0);
+  }
 
   public void setDesiredPosition(ElevatorPosition inputPosition, boolean useNoteParams) {
     this.desiredPosition = inputPosition;
@@ -346,10 +356,18 @@ public class Elevator extends SubsystemBase {
         () -> desiredPosition == ElevatorPosition.HOME && nearHome() && !currentlyUsingNoteControl,
         null);
     builder.addDoubleProperty(
-        "CRT calculated position",
+        "CRT Main Encoder Calculated Position",
         () ->
-            crtUtil.getAbsolutePosition(
-                leftMotorEncoderAbs.getPosition(), rightMotorEncoderAbs.getPosition()),
+            crtUtil
+                .fullRotations(
+                    leftMotorEncoderAbs.getPosition(), rightMotorEncoderAbs.getPosition())[0],
+        null);
+    builder.addDoubleProperty(
+        "CRT Secondary Encoder Calculated Position",
+        () ->
+            crtUtil
+                .fullRotations(
+                    leftMotorEncoderAbs.getPosition(), rightMotorEncoderAbs.getPosition())[1],
         null);
   }
 }

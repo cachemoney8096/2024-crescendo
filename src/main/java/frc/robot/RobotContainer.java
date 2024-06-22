@@ -781,7 +781,10 @@ public class RobotContainer implements Sendable {
                 ShooterCal.SUBWOOFER_SHOT_DISTANCE_METERS,
                 ShooterCal.SUBWOOFER_SHOT_RIGHT_RED_DEGREES));
 
-    operatorController.a().onTrue(new InstantCommand(() -> drive.resetOdometryToCenterSubwoofer()));
+    // operatorController.a().onTrue(new InstantCommand(() -> drive.resetOdometryToCenterSubwoofer())); // TODO uncomment this later
+
+    operatorController.a().whileTrue(new InstantCommand (() -> elevator.goUpSlowly()));
+    operatorController.a().onFalse(new InstantCommand (() -> elevator.stopSendingVoltage()));
 
     operatorController
         .b()
