@@ -27,7 +27,9 @@ import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
 import frc.robot.utils.MatchStateUtil;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.function.Function;
 
 /** Limelight for the shooter to identify game pieces */
 public class ShooterLimelight extends SubsystemBase {
@@ -190,9 +192,14 @@ public class ShooterLimelight extends SubsystemBase {
   public void resetOdometryDuringPrep(DriveSubsystem drive) {
     if (Math.abs(getBotPose3d_wpiBlue().getSecond().getZ())
         < ShooterLimelightCal.LARGE_VALUE_CORRECTOR_MARGIN) {
-      Pose2d currentPose = getBotPose2d_wpiBlue().getSecond();
-      drive.resetOdometry(currentPose);
-      drive.resetYawToAngle(currentPose.getRotation().getDegrees());
+      Pose2d newPose = getBotPose2d_wpiBlue().getSecond();
+      Pose2d curPose = drive.getPose();
+      var update = newPose.minus(curPose);
+      if (Math.abs(update.getRotation().getDegrees()) > 20.0) {
+        return;
+      }
+      drive.resetOdometry(newPose);
+      // drive.resetYawToAngle(newPose.getRotation().getDegrees());
     }
   }
 
@@ -220,6 +227,28 @@ public class ShooterLimelight extends SubsystemBase {
 
     targetsCount = targets.length;
     if (targets.length != 2) {
+      return Optional.empty();
+    }
+
+    Function<Double, Boolean> validTargetFunc =
+        (Double id) -> {
+          long idInt = Math.round(id);
+          HashSet<Long> validIDs = new HashSet<Long>();
+          validIDs.add(3L);
+          validIDs.add(4L);
+          validIDs.add(7L);
+          validIDs.add(8L);
+          return validIDs.contains(idInt);
+        };
+
+    int numValidTargets = 0;
+    for (var target : targets) {
+      if (validTargetFunc.apply(target.fiducialID)) {
+        numValidTargets++;
+      }
+    }
+
+    if (numValidTargets < 2) {
       return Optional.empty();
     }
 
@@ -253,7 +282,8 @@ public class ShooterLimelight extends SubsystemBase {
                 new Rotation2d(
                     Units.degreesToRadians(
                         ShooterLimelightCal.LIMELIGHT_DETECTION_OFFSET_DEGREES)));
-    double distanceToTagMeters = robotToTag.getNorm();
+
+    double distanceToTagMeters = robotToTag.getNorm(); // TODO uncomment for real match
 
     return Pair.of(angleToTag, distanceToTagMeters);
   }

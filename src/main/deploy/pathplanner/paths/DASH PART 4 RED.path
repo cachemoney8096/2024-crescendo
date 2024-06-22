@@ -1,0 +1,58 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 9.087266813422517,
+        "y": 6.508230909980338
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 8.394666812481775,
+        "y": 7.504047545132126
+      },
+      "isLocked": false,
+      "linkedName": "5 INTAKE DASH RED"
+    },
+    {
+      "anchor": {
+        "x": 5.273245750195204,
+        "y": 7.167100584201169
+      },
+      "prevControl": {
+        "x": 7.000677922652141,
+        "y": 7.114010950244122
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "DASH FAR SHOOT RED"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.7,
+      "rotationDegrees": 7.0,
+      "rotateFast": false
+    }
+  ],
+  "constraintZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 5.0,
+    "maxAcceleration": 6.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 7.0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "DASH RED",
+  "previewStartingState": {
+    "rotation": 0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": true
+}

@@ -32,6 +32,8 @@ public class SpeakerShootSequence extends SequentialCommandGroup {
         //                       < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES);
         //         })
         //     .withTimeout(2.0),
+        new InstantCommand(
+            () -> System.out.println("entered speaker shoot - conveyor.shoot is next")),
         Conveyor.shoot(conveyor),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.IDLE)),
         new InstantCommand(() -> elevator.setDesiredPosition(ElevatorPosition.HOME, true)));

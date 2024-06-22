@@ -31,7 +31,8 @@ public class AmpPrepScore extends SequentialCommandGroup {
 
     SequentialCommandGroup moveWhenNotSafe =
         new SequentialCommandGroup(
-            new InstantCommand(() -> drive.setTargetHeadingDegrees(90)),
+            new InstantCommand(
+                () -> drive.setTargetHeadingDegrees(90)), // TODO uncomment for real match
             new InstantCommand(() -> shooter.setShooterMode(Shooter.ShooterMode.IDLE)),
             new SafeDeploy(intake, elevator, true),
             new WaitUntilCommand(intake::clearOfConveyorZone),

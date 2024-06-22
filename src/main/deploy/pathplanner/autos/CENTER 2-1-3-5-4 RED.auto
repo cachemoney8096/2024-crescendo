@@ -30,7 +30,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 0.5
+                  "waitTime": 0.4
                 }
               },
               {
@@ -85,6 +85,25 @@
           }
         },
         {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "INTAKE"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 1.0
+                }
+              }
+            ]
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "SPEAKER PREP"
@@ -99,13 +118,49 @@
         {
           "type": "path",
           "data": {
-            "pathName": "3 TO 5 TO SHOOT AT 2 RED"
+            "pathName": "3 TO 5 RED"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5 TO SHOOT AT 2 RED"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SPEAKER PREP FAR"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SPEAKER SCORE"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "2 TO 4 RED"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "4 TO SHOOT AT 2 RED"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SPEAKER PREP FAR"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SPEAKER SCORE"
           }
         },
         {

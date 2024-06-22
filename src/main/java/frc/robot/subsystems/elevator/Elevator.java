@@ -88,6 +88,8 @@ public class Elevator extends SubsystemBase {
   private double desiredSetpointPosition = 0.0;
   private double desiredSetpointVelocity = 0.0;
 
+  private boolean elevatorManualControl = false;
+
   public Elevator() {
     SparkMaxUtils.initWithRetry(this::initSparks, ElevatorConstants.MAX_INIT_RETRY_ATTEMPTS);
     elevatorPositions = new TreeMap<ElevatorPosition, Double>();
@@ -152,15 +154,24 @@ public class Elevator extends SubsystemBase {
   }
 
   /** Zeroes leftMotorEncoderRel so it returns inches from home. */
-  private REVLibError setLeftZeroFromAbsolute() {
+  public REVLibError setLeftZeroFromAbsolute() {
     // TODO absolute encoder zeroing
+    // Note that this is run in RobotContainer for operator, so please make sure that still works if
+    // we add CRT
     return leftMotorEncoderRel.setPosition(ElevatorCal.POSITION_HOME_INCHES);
   }
 
   /** Zeroes rightMotorEncoderRel so it returns inches from home. */
-  private REVLibError setRightZeroFromAbsolute() {
+  public REVLibError setRightZeroFromAbsolute() {
     // TODO absolute encoder zeroing
+    // Note that this is run in RobotContainer for operator, so please make sure that still works if
+    // we add CRT
     return rightMotorEncoderRel.setPosition(ElevatorCal.POSITION_HOME_INCHES);
+  }
+
+  /** Manually runs the elevator given [-1,1] input */
+  public void manualRunElevator(double controllerInput) {
+    elevatorManualControl = true;
   }
 
   /** If true, use elevator control parameters for note scoring as opposed to climbing */
@@ -226,7 +237,9 @@ public class Elevator extends SubsystemBase {
 
   public boolean atDesiredPosition() {
     double desiredPositionIn = elevatorPositions.get(desiredPosition);
-    double currentPositionIn = leftMotorEncoderRel.getPosition();
+    // double currentPositionIn = leftMotorEncoderRel.getPosition(); // TODO stupid fix for broken
+    // elevator
+    double currentPositionIn = rightMotorEncoderRel.getPosition();
     double elevatorMarginInches = ElevatorCal.ELEVATOR_MARGIN_INCHES;
     if (desiredPosition == ElevatorPosition.PRE_CLIMB) {
       elevatorMarginInches = 1;
@@ -235,6 +248,21 @@ public class Elevator extends SubsystemBase {
       elevatorMarginInches = 2;
     }
     return Math.abs(desiredPositionIn - currentPositionIn) < elevatorMarginInches;
+  }
+
+  public boolean atPosition(ElevatorPosition pos) {
+    double checkPositionIn = elevatorPositions.get(pos);
+    // double currentPositionIn = leftMotorEncoderRel.getPosition(); // TODO stupid fix for broken
+    // elevator
+    double currentPositionIn = rightMotorEncoderRel.getPosition();
+    double elevatorMarginInches = ElevatorCal.ELEVATOR_MARGIN_INCHES;
+    if (pos == ElevatorPosition.PRE_CLIMB) {
+      elevatorMarginInches = 1;
+    }
+    if (pos == ElevatorPosition.SCORE_TRAP) {
+      elevatorMarginInches = 2;
+    }
+    return Math.abs(checkPositionIn - currentPositionIn) < elevatorMarginInches;
   }
 
   /**

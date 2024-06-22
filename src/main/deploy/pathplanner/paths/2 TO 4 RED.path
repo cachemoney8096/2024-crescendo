@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.7389214892389893,
-        "y": 5.484558433504332
+        "x": 5.533824400982135,
+        "y": 6.467671379787204
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.275007704268562,
-        "y": 6.08559620700845
+        "x": 6.354338352195223,
+        "y": 6.852303996274659
       },
       "isLocked": false,
       "linkedName": "SHOOT AT 2 RED"
     },
     {
       "anchor": {
-        "x": 8.534126782539278,
-        "y": 6.875285750571502
+        "x": 9.011238164994147,
+        "y": 7.166072289389235
       },
       "prevControl": {
-        "x": 6.085997314851773,
-        "y": 6.2302696033963505
+        "x": 7.586844473614171,
+        "y": 7.144337607030981
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,7 +33,7 @@
   "eventMarkers": [
     {
       "name": "INTAKE",
-      "waypointRelativePos": 0.7,
+      "waypointRelativePos": 0.25,
       "command": {
         "type": "sequential",
         "data": {
@@ -50,8 +50,8 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 5.5,
-    "maxAcceleration": 6.5,
+    "maxVelocity": 6.0,
+    "maxAcceleration": 7.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },
@@ -63,7 +63,7 @@
   "reversed": false,
   "folder": "CENTER RED",
   "previewStartingState": {
-    "rotation": 0,
+    "rotation": -10.0,
     "velocity": 0
   },
   "useDefaultConstraints": false
