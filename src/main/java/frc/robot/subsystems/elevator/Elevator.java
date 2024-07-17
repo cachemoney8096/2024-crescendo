@@ -194,32 +194,32 @@ public class Elevator extends SubsystemBase {
 
   /** Sets elevator motor voltage based on input position. Should be called every cycle. */
   private void controlPosition(double inputPositionInch) {
-    currentPIDController.setGoal(inputPositionInch);
-    elevatorDemandVoltsA = currentPIDController.calculate(leftMotorEncoderRel.getPosition());
-    final double timestamp = Timer.getFPGATimestamp();
-    final double nextVelocityInPerSec = currentPIDController.getSetpoint().velocity;
+    currentPIDController.setGoal(inputPositionInch); //set the pid controller's goal
+    elevatorDemandVoltsA = currentPIDController.calculate(leftMotorEncoderRel.getPosition()); //calculate the pid output based on the goal and the current position
+    final double timestamp = Timer.getFPGATimestamp(); //get the current timestamp
+    final double nextVelocityInPerSec = currentPIDController.getSetpoint().velocity; //calculate the next velocity we want to be at
     if (prevTimestamp.isPresent()) {
       elevatorDemandVoltsB =
           currentFeedforward.calculate(
-              prevVelocityInPerSec, nextVelocityInPerSec, timestamp - prevTimestamp.get());
+              prevVelocityInPerSec, nextVelocityInPerSec, timestamp - prevTimestamp.get()); //based on how velocity has changed, calculate a feedforward factor. for example, if it didn't change as much as we expect, we could be working against gravity.
     } else {
-      elevatorDemandVoltsB = currentFeedforward.calculate(nextVelocityInPerSec);
+      elevatorDemandVoltsB = currentFeedforward.calculate(nextVelocityInPerSec); //if we don't have a past velocity, we can't calculate a feedforward factor using acceleration
     }
     elevatorDemandVoltsC =
-        currentlyUsingNoteControl ? ElevatorCal.NOTE_SCORING_KS : ElevatorCal.CLIMBING_KS;
+        currentlyUsingNoteControl ? ElevatorCal.NOTE_SCORING_KS : ElevatorCal.CLIMBING_KS; //make sure we are applying enough voltage to move at all
 
-    desiredSetpointPosition = currentPIDController.getSetpoint().position;
+    desiredSetpointPosition = currentPIDController.getSetpoint().position; //these are for debug on shuffleboard
     desiredSetpointVelocity = currentPIDController.getSetpoint().velocity;
 
-    double voltageToSet = elevatorDemandVoltsA + elevatorDemandVoltsB + elevatorDemandVoltsC;
+    double voltageToSet = elevatorDemandVoltsA + elevatorDemandVoltsB + elevatorDemandVoltsC; //add it all up
     if (desiredPosition == ElevatorPosition.HOME && nearHome() && !currentlyUsingNoteControl) {
-      voltageToSet = ElevatorCal.CLIMBING_KS;
+      voltageToSet = ElevatorCal.CLIMBING_KS; //if we are pretty close to home, we aren't going to execute a pid curve, and are just going to "taxi in" rather than "taking off and landing"
     }
 
-    leftMotor.setVoltage(voltageToSet);
+    leftMotor.setVoltage(voltageToSet); //apply the voltage
     rightMotor.setVoltage(voltageToSet);
 
-    prevVelocityInPerSec = nextVelocityInPerSec;
+    prevVelocityInPerSec = nextVelocityInPerSec; //set our now previous velocity and timestamp for future calculations
     prevTimestamp = Optional.of(timestamp);
   }
 
