@@ -38,7 +38,9 @@ public class Shooter extends SubsystemBase {
     /** Shooter set high enough to shoot note over stage */
     SHOOT_CLEAR_STAGE,
     /** Both spinning up the shooter and going to the right elevation angle for auto preload */
-    SHOOT_FULL_SEND
+    SHOOT_FULL_SEND,
+    /** Laser shot feed thing */
+    SHOOT_LASER
   };
 
   private final CANSparkMax motorRight =
@@ -84,7 +86,7 @@ public class Shooter extends SubsystemBase {
               ShooterCal.PIVOT_MAX_ACCELERATION_DEG_PER_SECOND_SQUARED));
 
   /** What the shooter is currently doing */
-  private ShooterMode shooterMode = ShooterMode.IDLE;
+  public ShooterMode shooterMode = ShooterMode.IDLE;
 
   private boolean allowShooterMovement = false;
 
@@ -398,6 +400,10 @@ public class Shooter extends SubsystemBase {
         case SHOOT_CLEAR_STAGE:
           spinUpShooter(ShooterCal.SHOOT_CLEAR_STAGE_VOLTAGE);
           controlPosition(ShooterCal.SHOOT_CLEAR_STAGE_ANGLE_DEGREES, false);
+          break;
+        case SHOOT_LASER:
+          spinUpShooter(ShooterCal.SHOOT_LASER_VOLTAGE);
+          controlPosition(ShooterCal.LASER_SHOOT_ANGLE, false);
           break;
         case LATCH:
           stopShooter();

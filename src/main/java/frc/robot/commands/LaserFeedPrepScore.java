@@ -15,8 +15,8 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.utils.MatchStateUtil;
 
-public class FeedPrepScore extends SequentialCommandGroup {
-  public FeedPrepScore(
+public class LaserFeedPrepScore extends SequentialCommandGroup {
+  public LaserFeedPrepScore(
       Elevator elevator,
       Conveyor conveyor,
       Intake intake,
@@ -31,10 +31,6 @@ public class FeedPrepScore extends SequentialCommandGroup {
         new GoHomeSequence(
             intake, elevator, shooter, conveyor, intakeLimelight, true, false, false),
         new WaitUntilCommand(elevator::elevatorBelowInterferenceZone),
-        new ConditionalCommand(
-            new InstantCommand(() -> drive.setTargetHeadingDegrees(315.0)),
-            new InstantCommand(() -> drive.setTargetHeadingDegrees(220.0)),
-            matchState::isBlue), // TODO uncomment for real match
-        new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT_CLEAR_STAGE)));
+        new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT_LASER)));
   }
 }

@@ -269,11 +269,15 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void resetOdometryToCenterSubwoofer() {
+    double curYawDeg = gyro.getYaw().getValue();
+    double offsetToTargetDeg = targetHeadingDegrees - curYawDeg;
     double odometryXMeters = matchState.isBlue() ? 1.168 : 15.429;
     double odometryYMeters = matchState.isBlue() ? 5.467 : 5.422;
     double odometryYawDeg = matchState.isBlue() ? 5.162 : -174.872;
-    resetOdometry(
-        new Pose2d(odometryXMeters, odometryYMeters, Rotation2d.fromDegrees(odometryYawDeg)));
+    System.out.println(odometryXMeters + "x " + odometryYMeters + "y " + odometryYawDeg + "deg");
+    odometry.resetPosition(Rotation2d.fromDegrees(odometryYawDeg), getModulePositions(), new Pose2d(odometryXMeters, odometryYMeters, Rotation2d.fromDegrees(odometryYawDeg)));
+    gyro.setYaw(odometryYawDeg);
+    targetHeadingDegrees = odometryYawDeg + offsetToTargetDeg;
   }
 
   /**

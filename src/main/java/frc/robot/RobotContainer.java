@@ -44,6 +44,7 @@ import frc.robot.commands.ClimbSequence;
 import frc.robot.commands.FeedPrepScore;
 import frc.robot.commands.GoHomeSequence;
 import frc.robot.commands.IntakeSequence;
+import frc.robot.commands.LaserFeedPrepScore;
 import frc.robot.commands.PIDToPoint;
 import frc.robot.commands.PartialClimbSequence;
 import frc.robot.commands.SetTrapLineupPosition;
@@ -636,7 +637,22 @@ public class RobotContainer implements Sendable {
                 .beforeStarting(() -> driveFieldRelative = true)
                 .beforeStarting(() -> drive.throttle(1.0))
                 .beforeStarting(() -> prepState = PrepState.OFF));
-    driverController.start().onTrue(new InstantCommand(drive::resetYaw));
+    // driverController.start().onTrue(new InstantCommand(drive::resetYaw));
+    driverController
+        .povRight()
+        .and(() -> !buttonsLocked)
+        .onTrue(
+            new SequentialCommandGroup(
+                new InstantCommand(() -> prepState = PrepState.FEED),
+                new LaserFeedPrepScore(
+                    elevator,
+                    conveyor,
+                    intake,
+                    shooter,
+                    drive,
+                    matchState,
+                    intakeLimelight,
+                    lights)));
     // top right button
     driverController
         .povDown()
@@ -666,7 +682,7 @@ public class RobotContainer implements Sendable {
     // bottom left back button
     // TODO comment out for demo mode
     driverController
-        .povRight()
+        .start()
         .and(() -> !buttonsLocked)
         .onTrue(
             new InstantCommand(() -> prepState = PrepState.CLIMB)
@@ -708,7 +724,7 @@ public class RobotContainer implements Sendable {
                       drive.rotateOrKeepHeading(
                           translationInputs.getFirst(),
                           translationInputs.getSecond(),
-                          rotationInput,
+                          shooter.shooterMode==ShooterMode.SHOOT_LASER?rotationInput*0.5:rotationInput, //TODO test this
                           driveFieldRelative, // always field relative
                           getCardinalDirectionDegrees());
                     },
@@ -782,7 +798,7 @@ public class RobotContainer implements Sendable {
                 ShooterCal.SUBWOOFER_SHOT_RIGHT_RED_DEGREES));
 
     operatorController.a().onTrue(new InstantCommand(() -> drive.resetOdometryToCenterSubwoofer()));
-
+    // operatorController.a().onTrue(new InstantCommand(drive::resetYaw));
     operatorController
         .b()
         .and(() -> !buttonsLocked)
