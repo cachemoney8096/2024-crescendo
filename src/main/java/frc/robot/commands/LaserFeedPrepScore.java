@@ -1,7 +1,12 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import java.util.function.BooleanSupplier;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.conveyor.Conveyor;
@@ -13,6 +18,7 @@ import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.lights.Lights.LightCode;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
+import frc.robot.subsystems.shooterLimelight.ShooterLimelightCal;
 import frc.robot.utils.MatchStateUtil;
 
 public class LaserFeedPrepScore extends SequentialCommandGroup {
@@ -24,13 +30,25 @@ public class LaserFeedPrepScore extends SequentialCommandGroup {
       DriveSubsystem drive,
       MatchStateUtil matchState,
       IntakeLimelight intakeLimelight,
-      Lights lights) {
+      Lights lights,
+      BooleanSupplier rotationalInputOverride) {
     addRequirements(elevator, conveyor, intake, shooter);
+    Pose2d cornerPoseBlue = new Pose2d(0.0, 8.0, new Rotation2d(0.0));
+    Pose2d cornerPoseRed = new Pose2d(16.0, 8.0, new Rotation2d(0.0));
+    Pose2d cornerPose = drive.matchState.isBlue() ? cornerPoseBlue : cornerPoseRed;
     addCommands(
         new InstantCommand(() -> lights.setLEDColor(LightCode.FEED)),
         new GoHomeSequence(
             intake, elevator, shooter, conveyor, intakeLimelight, true, false, false),
         new WaitUntilCommand(elevator::elevatorBelowInterferenceZone),
-        new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT_LASER)));
+        new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT_LASER)),
+        //TODO 718AIM test auto aim to corner
+        new RunCommand(() -> {
+          Translation2d robotToCorner = cornerPose.getTranslation().minus(drive.getPose().getTranslation());
+          double angleToCorner = robotToCorner.getAngle().getDegrees() + 180.0 + ShooterLimelightCal.LIMELIGHT_DETECTION_OFFSET_DEGREES;
+          drive.setTargetHeadingDegrees(angleToCorner);
+        }).until(rotationalInputOverride)
+        );
   }
+
 }

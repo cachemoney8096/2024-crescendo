@@ -652,7 +652,8 @@ public class RobotContainer implements Sendable {
                     drive,
                     matchState,
                     intakeLimelight,
-                    lights)));
+                    lights,
+                    driverRotationCommanded)));
     // top right button
     driverController
         .povDown()
@@ -724,7 +725,8 @@ public class RobotContainer implements Sendable {
                       drive.rotateOrKeepHeading(
                           translationInputs.getFirst(),
                           translationInputs.getSecond(),
-                          shooter.shooterMode==ShooterMode.SHOOT_LASER?rotationInput*0.5:rotationInput, //TODO test this
+                          //TODO 718AIM test throttling rotation input in laser mode
+                          shooter.shooterMode==ShooterMode.SHOOT_LASER?rotationInput*0.5:rotationInput, 
                           driveFieldRelative, // always field relative
                           getCardinalDirectionDegrees());
                     },
