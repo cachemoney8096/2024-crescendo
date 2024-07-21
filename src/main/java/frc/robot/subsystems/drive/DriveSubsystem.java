@@ -268,6 +268,7 @@ public class DriveSubsystem extends SubsystemBase {
     resetYawToAngle(matchState.isBlue() ? 0 : 180);
   }
 
+  //TODO 718AIM Test rezeroing
   public void resetOdometryToCenterSubwoofer() {
     double odometryXMeters = matchState.isBlue() ? 1.168 : 15.429;
     double odometryYMeters = matchState.isBlue() ? 5.467 : 5.422;
@@ -649,6 +650,10 @@ public class DriveSubsystem extends SubsystemBase {
 
   public boolean nearTarget() {
     return getDiffCurrentTargetYawDeg() < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES;
+  }
+
+  public boolean nearTargetAuto(){
+    return getDiffCurrentTargetYawDeg() < 2.0;
   }
 
   /**

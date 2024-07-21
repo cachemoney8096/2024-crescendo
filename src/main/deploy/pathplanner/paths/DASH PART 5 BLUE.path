@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.273245750195204,
-        "y": 7.167100584201169
+        "x": 5.881071317698191,
+        "y": 7.688426043518754
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.0037065259315705,
-        "y": 7.299468362825615
+        "x": 8.557418225947565,
+        "y": 8.055993000874892
       },
       "isLocked": false,
       "linkedName": "DASH FAR SHOOT BLUE"
@@ -20,8 +20,8 @@
         "y": 4.670937638171573
       },
       "prevControl": {
-        "x": 8.672645086030913,
-        "y": 6.672963174630054
+        "x": 9.39593034741625,
+        "y": 7.228967346823582
       },
       "nextControl": null,
       "isLocked": false,
@@ -63,7 +63,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -45.0,
+    "rotation": -70.0,
     "rotateFast": false
   },
   "reversed": false,

@@ -50,6 +50,7 @@ import frc.robot.commands.PartialClimbSequence;
 import frc.robot.commands.SetTrapLineupPosition;
 import frc.robot.commands.SpeakerPrepScoreAuto;
 import frc.robot.commands.SpeakerPrepScoreAutoPreload;
+import frc.robot.commands.SpeakerPrepScoreAutoVision;
 import frc.robot.commands.SpeakerPrepScoreSequence;
 import frc.robot.commands.SpeakerShootSequence;
 import frc.robot.commands.UnclimbSequence;
@@ -218,6 +219,7 @@ public class RobotContainer implements Sendable {
             .andThen(
                 new SpeakerPrepScoreAuto(
                     intake, elevator, shooter, conveyor, ShooterCal.AUTO_FAR_SHOOTING_DISTANCE_M)));
+    NamedCommands.registerCommand("SPEAKER PREP FAR VISION", new InstantCommand(() -> pathCmd = "SPEAKER PREP FAR VISION").andThen(new SpeakerPrepScoreAutoVision(intake, elevator, shooter, conveyor, ShooterCal.AUTO_FAR_SHOOTING_DISTANCE_M, shooterLimelight, drive)));
     NamedCommands.registerCommand(
         "SPEAKER PREP STAGE",
         new InstantCommand(() -> pathCmd = "SPEAKER PREP STAGE")
@@ -601,6 +603,11 @@ public class RobotContainer implements Sendable {
           return Math.abs(driverController.getRightX()) > 0.05;
         };
 
+    BooleanSupplier cardinalCommanded = 
+        () -> {
+            return driverController.getHID().getAButton() || driverController.getHID().getBButton() || driverController.getHID().getXButton() || driverController.getHID().getYButton();
+        };
+
     driverController
         .leftBumper()
         .and(() -> !buttonsLocked)
@@ -653,7 +660,8 @@ public class RobotContainer implements Sendable {
                     matchState,
                     intakeLimelight,
                     lights,
-                    driverRotationCommanded)));
+                    driverRotationCommanded,
+                    cardinalCommanded)));
     // top right button
     driverController
         .povDown()

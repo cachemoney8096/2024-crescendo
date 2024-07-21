@@ -31,10 +31,11 @@ public class LaserFeedPrepScore extends SequentialCommandGroup {
       MatchStateUtil matchState,
       IntakeLimelight intakeLimelight,
       Lights lights,
-      BooleanSupplier rotationalInputOverride) {
+      BooleanSupplier rotationalInputOverride,
+      BooleanSupplier cardinalInputOverride) {
     addRequirements(elevator, conveyor, intake, shooter);
-    Pose2d cornerPoseBlue = new Pose2d(0.0, 8.0, new Rotation2d(0.0));
-    Pose2d cornerPoseRed = new Pose2d(16.0, 8.0, new Rotation2d(0.0));
+    Pose2d cornerPoseBlue = new Pose2d(0.0, 7.0, new Rotation2d(0.0));
+    Pose2d cornerPoseRed = new Pose2d(16.0, 7.0, new Rotation2d(0.0));
     Pose2d cornerPose = drive.matchState.isBlue() ? cornerPoseBlue : cornerPoseRed;
     addCommands(
         new InstantCommand(() -> lights.setLEDColor(LightCode.FEED)),
@@ -42,12 +43,13 @@ public class LaserFeedPrepScore extends SequentialCommandGroup {
             intake, elevator, shooter, conveyor, intakeLimelight, true, false, false),
         new WaitUntilCommand(elevator::elevatorBelowInterferenceZone),
         new InstantCommand(() -> shooter.setShooterMode(ShooterMode.SHOOT_LASER)),
-        //TODO 718AIM test auto aim to corner
         new RunCommand(() -> {
-          Translation2d robotToCorner = cornerPose.getTranslation().minus(drive.getPose().getTranslation());
-          double angleToCorner = robotToCorner.getAngle().getDegrees() + 180.0 + ShooterLimelightCal.LIMELIGHT_DETECTION_OFFSET_DEGREES;
-          drive.setTargetHeadingDegrees(angleToCorner);
-        }).until(rotationalInputOverride)
+          if(!rotationalInputOverride.getAsBoolean()){
+            Translation2d robotToCorner = cornerPose.getTranslation().minus(drive.getPose().getTranslation());
+            double angleToCorner = robotToCorner.getAngle().getDegrees() + 180.0;
+            drive.setTargetHeadingDegrees(angleToCorner);
+          }
+        }).until(()->{return cardinalInputOverride.getAsBoolean() || shooter.shooterMode != ShooterMode.SHOOT_LASER;}).andThen(new InstantCommand(()->System.out.println("override@laser")))
         );
   }
 

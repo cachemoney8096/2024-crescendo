@@ -110,7 +110,7 @@ public class Shooter extends SubsystemBase {
     pivotAngleMap.put(Units.feetToMeters(3.4), 146.0); // artificial value
     pivotAngleMap.put(1.16, 144.0);
     pivotAngleMap.put(2.77, 122.0);
-    pivotAngleMap.put(4.66, 112.0);
+    pivotAngleMap.put(4.66, 111.5);
 
     SparkMaxUtils.initWithRetry(this::initSparks, Constants.SPARK_INIT_RETRY_ATTEMPTS);
 

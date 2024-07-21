@@ -58,8 +58,8 @@ public class IntakeCal {
   public static final double LIMELIGHT_BLOCKED_THRESHOLD = 202.0;
 
   /** intake power [-1.0,1.0] */
-  public static final double AUTO_INTAKING_POWER = 0.9,
-      INTAKING_POWER = 0.75,
+  public static final double AUTO_INTAKING_POWER = 0.85,
+      INTAKING_POWER = 0.85,
       REVERSE_INTAKING_POWER = -1.0;
 
   public static final int PIVOT_MOTOR_CURRENT_LIMIT_AMPS = 50;
