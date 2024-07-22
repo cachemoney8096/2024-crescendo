@@ -45,6 +45,9 @@ public class ShooterCal {
   /** Goal position at the start of a match. */
   public static final double STARTING_POSITION_DEGREES = 80.0;
 
+  /** Laser shot angle */
+  public static final double LASER_SHOOT_ANGLE = 90.0;
+
   /** Shooter is spun up if within this margin of the goal speed (rev/min) */
   public static final double SHOOTER_SPEED_MARGIN_RPM = 40.0;
 
@@ -95,7 +98,8 @@ public class ShooterCal {
   public static final double CONVEYOR_ZONE_THRESHOLD_DEGREES = 110.0;
 
   public static final double SHOOT_CLEAR_STAGE_ANGLE_DEGREES = 135.0;
-  public static final double SHOOT_CLEAR_STAGE_VOLTAGE = 5.0;
+  public static final double SHOOT_CLEAR_STAGE_VOLTAGE = 5.5;
+  public static final double SHOOT_LASER_VOLTAGE = 7.0;
 
   public static final double ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES = 4.0;
 

@@ -268,12 +268,17 @@ public class DriveSubsystem extends SubsystemBase {
     resetYawToAngle(matchState.isBlue() ? 0 : 180);
   }
 
+  //TODO 718AIM Test rezeroing
   public void resetOdometryToCenterSubwoofer() {
     double odometryXMeters = matchState.isBlue() ? 1.168 : 15.429;
     double odometryYMeters = matchState.isBlue() ? 5.467 : 5.422;
-    double odometryYawDeg = matchState.isBlue() ? 5.162 : -174.872;
-    resetOdometry(
-        new Pose2d(odometryXMeters, odometryYMeters, Rotation2d.fromDegrees(odometryYawDeg)));
+    double curYawDeg = gyro.getYaw().getValue();
+    double offsetToTargetDeg = targetHeadingDegrees - curYawDeg;
+    double yawDeg = matchState.isBlue() ? 0 : 180;
+    gyro.setYaw(yawDeg);
+    Pose2d resetPose = new Pose2d(new Translation2d(odometryXMeters, odometryYMeters), Rotation2d.fromDegrees(yawDeg));
+    odometry.resetPosition(Rotation2d.fromDegrees(yawDeg), getModulePositions(), resetPose);
+    targetHeadingDegrees = yawDeg + offsetToTargetDeg;
   }
 
   /**
@@ -645,6 +650,10 @@ public class DriveSubsystem extends SubsystemBase {
 
   public boolean nearTarget() {
     return getDiffCurrentTargetYawDeg() < ShooterCal.ROBOT_HEADING_MARGIN_TO_SHOOT_DEGREES;
+  }
+
+  public boolean nearTargetAuto(){
+    return getDiffCurrentTargetYawDeg() < 2.0;
   }
 
   /**

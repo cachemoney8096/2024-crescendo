@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 9.147734780030131,
-        "y": 7.712058749533177
+        "x": 9.131741596816527,
+        "y": 7.89518245703158
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.935521471344254,
-        "y": 7.671677372474126
+        "x": 7.91952828813065,
+        "y": 7.854801079972529
       },
       "isLocked": false,
       "linkedName": "4 INTAKE BLUE"
@@ -50,14 +50,14 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 5.0,
-    "maxAcceleration": 6.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 4.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0,
+    "rotation": 6.0,
     "rotateFast": false
   },
   "reversed": false,
