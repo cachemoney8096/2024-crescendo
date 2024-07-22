@@ -53,6 +53,7 @@ import frc.robot.commands.SpeakerPrepScoreAutoPreload;
 import frc.robot.commands.SpeakerPrepScoreAutoVision;
 import frc.robot.commands.SpeakerPrepScoreSequence;
 import frc.robot.commands.SpeakerShootSequence;
+import frc.robot.commands.SpinMove;
 import frc.robot.commands.UnclimbSequence;
 import frc.robot.commands.autos.CenterOneToFive;
 import frc.robot.commands.autos.DashAuto;
@@ -360,7 +361,7 @@ public class RobotContainer implements Sendable {
               || Math.abs(driverController.getRightX()) > 0.2;
         };
 
-    driverController
+    /*driverController
         .rightBumper()
         .and(() -> !buttonsLocked)
         .whileTrue(new IntakeSequence(intake, elevator, conveyor, shooter, lights));
@@ -372,7 +373,14 @@ public class RobotContainer implements Sendable {
                 .andThen(
                     new GoHomeSequence(
                         intake, elevator, shooter, conveyor, intakeLimelight, false, false, true))
-                .beforeStarting(() -> prepState = PrepState.OFF));
+                .beforeStarting(() -> prepState = PrepState.OFF));*/
+
+    driverController
+        .rightBumper()
+        .and(() -> !buttonsLocked)
+        .onTrue(
+            new SpinMove(drive, SpinMove.Direction.RIGHT, 1.0, 10)
+        );
 
     driverController
         .rightTrigger()
@@ -608,7 +616,7 @@ public class RobotContainer implements Sendable {
             return driverController.getHID().getAButton() || driverController.getHID().getBButton() || driverController.getHID().getXButton() || driverController.getHID().getYButton();
         };
 
-    driverController
+    /*driverController
         .leftBumper()
         .and(() -> !buttonsLocked)
         .onTrue(
@@ -625,8 +633,13 @@ public class RobotContainer implements Sendable {
                     drive,
                     lights,
                     driverRotationCommanded),
-                new InstantCommand(() -> usingTagHeading = true)));
-
+                new InstantCommand(() -> usingTagHeading = true)));*/
+    driverController
+        .leftBumper()
+        .and(() -> !buttonsLocked)
+        .onTrue(
+            new SpinMove(drive, SpinMove.Direction.LEFT, 1.0, 10)
+        );
     // bottom right back button
     driverController
         .povLeft()

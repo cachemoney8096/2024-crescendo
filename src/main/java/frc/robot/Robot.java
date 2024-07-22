@@ -97,7 +97,7 @@ public class Robot extends TimedRobot {
     LimelightHelpers.getLatestResults(
         IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME); // It takes 2.5-3s on first run
     LimelightHelpers.getLatestResults(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
-
+    System.out.println("****** WARNING: ROBOT IS ON A TESTING BRANCH (james/spinMove). RESET TO MAIN FOR STANDARD FUNCTIONALITY. ******");
     if (!matchState.isRealMatch()) {
       m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kCoast);
       m_robotContainer.elevator.leftMotor.setIdleMode(IdleMode.kCoast);
