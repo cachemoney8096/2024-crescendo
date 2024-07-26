@@ -302,7 +302,7 @@ public class RobotContainer implements Sendable {
     autonChooser.addOption(
         "BLUE dash left",
         new Pair<Command, String>(
-            new DashAuto(drive, intake, elevator, shooter, conveyor, shooterLimelight, true),
+            new DashAuto(drive, intake, elevator, shooter, conveyor, shooterLimelight, false),
             "DASH BLUE"));
     autonChooser.addOption(
         "RED dash right",
@@ -733,7 +733,6 @@ public class RobotContainer implements Sendable {
                       drive.rotateOrKeepHeading(
                           translationInputs.getFirst(),
                           translationInputs.getSecond(),
-                          //TODO 718AIM test throttling rotation input in laser mode
                           shooter.shooterMode==ShooterMode.SHOOT_LASER?rotationInput*0.5:rotationInput, 
                           driveFieldRelative, // always field relative
                           getCardinalDirectionDegrees());

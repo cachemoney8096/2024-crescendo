@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 9.36655154328827,
-        "y": 4.670937638171573
+        "x": 9.143228064233906,
+        "y": 4.460728699235176
       },
       "prevControl": null,
       "nextControl": {
-        "x": 9.339234729395383,
-        "y": 6.603245914825163
+        "x": 9.115911250341018,
+        "y": 6.393036975888767
       },
       "isLocked": false,
       "linkedName": "6 INTAKE DASH BLUE"
     },
     {
       "anchor": {
-        "x": 5.881071317698191,
-        "y": 7.688426043518754
+        "x": 6.306070612141224,
+        "y": 7.26342674907572
       },
       "prevControl": {
-        "x": 7.95435810779029,
-        "y": 7.763844203614333
+        "x": 8.379357402233325,
+        "y": 7.338844909171299
       },
       "nextControl": null,
       "isLocked": false,
@@ -39,7 +39,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 20.0,
+    "rotation": 16.0,
     "rotateFast": false
   },
   "reversed": false,
