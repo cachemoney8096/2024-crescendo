@@ -1,7 +1,5 @@
 package frc.robot.commands;
 
-import java.util.Optional;
-
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -11,7 +9,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.drive.DriveSubsystem;
@@ -21,11 +18,12 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
 import frc.robot.subsystems.shooterLimelight.ShooterLimelight;
+import java.util.Optional;
 
-public class SpeakerPrepScoreAutoVision extends SequentialCommandGroup{
-    Optional<Pair<Rotation2d, Double>> tagDetection = Optional.empty();
+public class SpeakerPrepScoreAutoVision extends SequentialCommandGroup {
+  Optional<Pair<Rotation2d, Double>> tagDetection = Optional.empty();
 
-    public boolean sawTags = false;
+  public boolean sawTags = false;
 
   public SpeakerPrepScoreAutoVision(
       Intake intake,
@@ -89,7 +87,8 @@ public class SpeakerPrepScoreAutoVision extends SequentialCommandGroup{
                     }
                   }
                 })
-            .until(drive::nearTargetAuto).withTimeout(2.0),
+            .until(drive::nearTargetAuto)
+            .withTimeout(2.0),
         new WaitUntilCommand(() -> elevator.atDesiredPosition()));
   }
 }
