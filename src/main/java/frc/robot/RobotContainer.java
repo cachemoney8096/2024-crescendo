@@ -686,7 +686,7 @@ public class RobotContainer implements Sendable {
             new SequentialCommandGroup(
                 new InstantCommand(() -> prepState = PrepState.AMP),
                 new AmpPrepScore(elevator, conveyor, intake, shooter, drive, lights),
-                new InstantCommand(() -> drive.throttle(0.6))));
+                new InstantCommand(() -> drive.throttle(0.3))));
 
     // bottom left back button
     // TODO comment out for demo mode
@@ -711,7 +711,7 @@ public class RobotContainer implements Sendable {
                             .raceWith(new WaitUntilCommand(driverJoysticksActive))
                             .schedule())
                 .andThen(new InstantCommand(() -> driveFieldRelative = false))
-                .andThen(new InstantCommand(() -> drive.throttle(0.3))));
+                .andThen(new InstantCommand(() -> drive.throttle(0.15))));
 
     driverController
         .back()
