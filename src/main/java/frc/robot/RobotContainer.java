@@ -219,7 +219,18 @@ public class RobotContainer implements Sendable {
             .andThen(
                 new SpeakerPrepScoreAuto(
                     intake, elevator, shooter, conveyor, ShooterCal.AUTO_FAR_SHOOTING_DISTANCE_M)));
-    NamedCommands.registerCommand("SPEAKER PREP FAR VISION", new InstantCommand(() -> pathCmd = "SPEAKER PREP FAR VISION").andThen(new SpeakerPrepScoreAutoVision(intake, elevator, shooter, conveyor, ShooterCal.AUTO_FAR_SHOOTING_DISTANCE_M, shooterLimelight, drive)));
+    NamedCommands.registerCommand(
+        "SPEAKER PREP FAR VISION",
+        new InstantCommand(() -> pathCmd = "SPEAKER PREP FAR VISION")
+            .andThen(
+                new SpeakerPrepScoreAutoVision(
+                    intake,
+                    elevator,
+                    shooter,
+                    conveyor,
+                    ShooterCal.AUTO_FAR_SHOOTING_DISTANCE_M,
+                    shooterLimelight,
+                    drive)));
     NamedCommands.registerCommand(
         "SPEAKER PREP STAGE",
         new InstantCommand(() -> pathCmd = "SPEAKER PREP STAGE")
@@ -302,7 +313,7 @@ public class RobotContainer implements Sendable {
     autonChooser.addOption(
         "BLUE dash left",
         new Pair<Command, String>(
-            new DashAuto(drive, intake, elevator, shooter, conveyor, shooterLimelight, true),
+            new DashAuto(drive, intake, elevator, shooter, conveyor, shooterLimelight, false),
             "DASH BLUE"));
     autonChooser.addOption(
         "RED dash right",
@@ -603,9 +614,12 @@ public class RobotContainer implements Sendable {
           return Math.abs(driverController.getRightX()) > 0.05;
         };
 
-    BooleanSupplier cardinalCommanded = 
+    BooleanSupplier cardinalCommanded =
         () -> {
-            return driverController.getHID().getAButton() || driverController.getHID().getBButton() || driverController.getHID().getXButton() || driverController.getHID().getYButton();
+          return driverController.getHID().getAButton()
+              || driverController.getHID().getBButton()
+              || driverController.getHID().getXButton()
+              || driverController.getHID().getYButton();
         };
 
     driverController
@@ -686,7 +700,7 @@ public class RobotContainer implements Sendable {
             new SequentialCommandGroup(
                 new InstantCommand(() -> prepState = PrepState.AMP),
                 new AmpPrepScore(elevator, conveyor, intake, shooter, drive, lights),
-                new InstantCommand(() -> drive.throttle(0.6))));
+                new InstantCommand(() -> drive.throttle(0.3))));
 
     // bottom left back button
     // TODO comment out for demo mode
@@ -711,7 +725,7 @@ public class RobotContainer implements Sendable {
                             .raceWith(new WaitUntilCommand(driverJoysticksActive))
                             .schedule())
                 .andThen(new InstantCommand(() -> driveFieldRelative = false))
-                .andThen(new InstantCommand(() -> drive.throttle(0.3))));
+                .andThen(new InstantCommand(() -> drive.throttle(0.15))));
 
     driverController
         .back()
@@ -733,8 +747,10 @@ public class RobotContainer implements Sendable {
                       drive.rotateOrKeepHeading(
                           translationInputs.getFirst(),
                           translationInputs.getSecond(),
-                          //TODO 718AIM test throttling rotation input in laser mode
-                          shooter.shooterMode==ShooterMode.SHOOT_LASER?rotationInput*0.5:rotationInput, 
+                          // TODO 718AIM test throttling rotation input in laser mode
+                          shooter.shooterMode == ShooterMode.SHOOT_LASER
+                              ? rotationInput * 0.5
+                              : rotationInput,
                           driveFieldRelative, // always field relative
                           getCardinalDirectionDegrees());
                     },
