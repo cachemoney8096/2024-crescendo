@@ -26,7 +26,8 @@ public class DriveConstants {
   /** the distance from the center of the robot to the furthest module */
   public static final double DRIVE_BASE_RADIUS_METERS = Units.inchesToMeters(15.2);
 
-  public static final double DRIVING_MOTOR_REDUCTION = 3.75;
+  public static final double DRIVING_MOTOR_REDUCTION = 3.75,
+      TURNING_MOTOR_REDUCTION = Constants.PLACEHOLDER_DOUBLE;
   public static final double DRIVE_WHEEL_FREE_SPEED_FUDGE_FACTOR = 1.0;
   public static final double DRIVE_WHEEL_FREE_SPEED_METERS_PER_SECOND =
       DRIVE_WHEEL_FREE_SPEED_FUDGE_FACTOR
@@ -38,11 +39,16 @@ public class DriveConstants {
 
   public static final IdleMode TURNING_MOTOR_IDLE_MODE = IdleMode.kBrake;
 
-  public static final int DRIVING_MOTOR_SUPPLY_CURRENT_LIMIT_AMPS = 50; // amps
-  //   public static final int DRIVING_MOTOR_STATOR_CURRENT_LIMIT_AMPS = 120; // amps
-  public static final int DRIVING_MOTOR_STATOR_AUTO_CURRENT_LIMIT_AMPS = 90; // amps
-  public static final int DRIVING_MOTOR_STATOR_TELEOP_CURRENT_LIMIT_AMPS = 90; // amps
-  public static final int TURNING_MOTOR_CURRENT_LIMIT_AMPS = 20; // amps
+  public static final int DRIVING_MOTOR_SUPPLY_CURRENT_LIMIT_AMPS = 50,
+      DRIVING_MOTOR_STATOR_AUTO_CURRENT_LIMIT_AMPS = 90,
+      DRIVING_MOTOR_STATOR_TELEOP_CURRENT_LIMIT_AMPS = 90,
+      TURNING_MOTOR_CURRENT_LIMIT_AMPS = 20;
+  //   public static final int DRIVING_MOTOR_STATOR_CURRENT_LIMIT_AMPS = 120;
+
+  //   public static final int TURNING_MOTOR_CURRENT_LIMIT_AMPS = 20; // from 2024 sparkmax code
+  public static final int TURNING_MOTOR_SUPPLY_CURRENT_LIMIT_AMPS = Constants.PLACEHOLDER_INT,
+      TURNING_MOTOR_STATOR_AUTO_CURRENT_LIMIT_AMPS = Constants.PLACEHOLDER_INT,
+      TURNING_MOTOR_STATOR_TELEOP_CURRENT_LIMIT_AMPS = Constants.PLACEHOLDER_INT;
 
   public static final double TURN_MODULE_RELATIVE_ENCODER_GEAR_RATIO = 50.34;
   public static final double TURN_MODULE_ABSOLUTE_ENCODER_GEAR_RATIO = 1.0;
