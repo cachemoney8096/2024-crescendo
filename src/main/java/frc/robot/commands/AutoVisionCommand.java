@@ -3,6 +3,8 @@ package frc.robot.commands;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
+
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -24,6 +26,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class AutoVisionCommand extends SequentialCommandGroup {
+  public Optional<PathPlannerPath> path = Optional.empty();
+  public Optional<Pair<Pose2d, Pose2d>> poses = Optional.empty();
   public AutoVisionCommand(
       DriveSubsystem drive,
       Intake intake,
@@ -64,9 +68,11 @@ public class AutoVisionCommand extends SequentialCommandGroup {
                       curPose,
                       goalPose
                     );
-                    PathPlannerPath path = new PathPlannerPath(bezierPoints, new PathConstraints(5.0, 6.0, 2*Math.PI, 4*Math.PI), new GoalEndState(2.5, Rotation2d.fromDegrees(latestNoteDetection.yawAngleDeg)));
-                    drive.followTrajectoryCommand(path, false);
+                    poses = Optional.of(new Pair<Pose2d, Pose2d>(curPose, goalPose));
+                    path = Optional.of(new PathPlannerPath(bezierPoints, new PathConstraints(5.0, 6.0, 2*Math.PI, 4*Math.PI), new GoalEndState(2.5, Rotation2d.fromDegrees(latestNoteDetection.yawAngleDeg))));
                   }
-                })));
+                }), 
+                path.isPresent()?drive.followTrajectoryCommand(path.get(), false):new InstantCommand()
+          ));
   }
 }

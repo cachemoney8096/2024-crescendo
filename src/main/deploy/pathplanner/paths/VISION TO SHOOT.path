@@ -1,0 +1,52 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.4432626933232395,
+        "y": 1.174854585845129
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.826464035754548,
+        "y": 1.4685682323064113
+      },
+      "isLocked": false,
+      "linkedName": "VISION"
+    },
+    {
+      "anchor": {
+        "x": 3.240410344863624,
+        "y": 2.393766218659451
+      },
+      "prevControl": {
+        "x": 3.739723543847804,
+        "y": 2.0413098429059118
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "SHOOT NEAR VISION"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 5.0,
+    "maxAcceleration": 6.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -41.87786953788428,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "SOURCE SIDE VISION BLUE",
+  "previewStartingState": {
+    "rotation": 0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": true
+}
