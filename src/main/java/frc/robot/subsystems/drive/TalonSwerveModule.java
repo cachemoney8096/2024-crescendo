@@ -13,7 +13,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class TalonsSwerveModule extends SubsystemBase {
+public class TalonSwerveModule extends SubsystemBase {
   public final TalonFX drivingTalon;
   public final TalonFX turningTalon;
 
@@ -31,7 +31,7 @@ public class TalonsSwerveModule extends SubsystemBase {
    * Constructs a SwerveModule and configures the driving and turning motor, encoder, and PID
    * controller.
    */
-  public TalonsSwerveModule(int drivingCanId, int turningCanId, double chassisAngularOffset) {
+  public TalonSwerveModule(int drivingCanId, int turningCanId, double chassisAngularOffset) {
     drivingTalon = new TalonFX(drivingCanId);
     turningTalon = new TalonFX(turningCanId);
     chassisAngularOffsetRadians = chassisAngularOffset;
