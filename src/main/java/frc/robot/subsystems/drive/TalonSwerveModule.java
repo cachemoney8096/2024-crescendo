@@ -22,16 +22,17 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 public class TalonSwerveModule implements Sendable{
   public TalonFX drivingTalon;
   public TalonFX turningTalon;
-  public CANcoder turningTalonEncoder;
-  public double turningRotationalOffset;
+  public CANcoder turningTalonAbsoluteEncoder;
+  public double turningOffsetRotations;
 
   public SwerveModuleState desiredState = new SwerveModuleState(0.0, new Rotation2d());
 
-  public TalonSwerveModule(int drivingTalonCanId, int turningTalonCanId, int cancoderCanId, double turningRotationalOffsetValue){
+  public TalonSwerveModule(int drivingTalonCanId, int turningTalonCanId, int cancoderCanId, double turningOffsetRotationsValue){
     drivingTalon = new TalonFX(drivingTalonCanId);
     turningTalon = new TalonFX(turningTalonCanId);
-    turningTalonEncoder = new CANcoder(cancoderCanId);
-    turningRotationalOffset = turningRotationalOffsetValue;
+    turningTalonAbsoluteEncoder = new CANcoder(cancoderCanId);
+    turningOffsetRotations = turningOffsetRotationsValue;
+    initAllDevices();
   }
 
   public void initAllDevices(){
@@ -41,8 +42,8 @@ public class TalonSwerveModule implements Sendable{
     CANcoderConfiguration ccToApply = new CANcoderConfiguration();
     ccToApply.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
     ccToApply.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive; //TODO: subject to change
-    ccToApply.MagnetSensor.MagnetOffset = turningRotationalOffset; //https://v6.docs.ctr-electronics.com/en/stable/docs/hardware-reference/cancoder/index.html
-    turningTalonEncoder.getConfigurator().apply(ccToApply);
+    ccToApply.MagnetSensor.MagnetOffset = turningOffsetRotations; //https://v6.docs.ctr-electronics.com/en/stable/docs/hardware-reference/cancoder/index.html
+    turningTalonAbsoluteEncoder.getConfigurator().apply(ccToApply);
 
     //drive talon
     TalonFXConfiguration toApply = new TalonFXConfiguration();
@@ -83,9 +84,10 @@ public class TalonSwerveModule implements Sendable{
     toApply.Slot0.kI = TalonDriveVars.TURNING_I;
     toApply.Slot0.kD = TalonDriveVars.TURNING_D;
     toApply.Slot0.kV = TalonDriveVars.TURNING_FF;
-    toApply.Feedback.FeedbackRemoteSensorID = turningTalonEncoder.getDeviceID();
+    toApply.Feedback.FeedbackRemoteSensorID = turningTalonAbsoluteEncoder.getDeviceID();
     toApply.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
     turningTalon.getConfigurator().apply(toApply);
+    desiredState.angle = Rotation2d.fromRotations(turningTalon.getPosition().getValueAsDouble());
   }
 
   /** Ensures the value a is in [0, b) */
@@ -99,11 +101,11 @@ public class TalonSwerveModule implements Sendable{
 
   /** Consider zeroing based on absolute values */
   public void considerZeroingEncoder(){
-    if(Math.abs(turningTalonEncoder.getAbsolutePosition().getValueAsDouble()) < 0.01){
+    if(Math.abs(turningTalonAbsoluteEncoder.getAbsolutePosition().getValueAsDouble()) < 0.01){
       return;
     }
-    if(Math.abs(turningTalonEncoder.getAbsolutePosition().getValueAsDouble()-mod(turningTalon.getPosition().getValueAsDouble(), 1)) < TalonDriveVars.TURNING_ENCODER_ZERO_THRESHOLD_ROTATION){
-      turningTalon.setPosition(turningTalonEncoder.getAbsolutePosition().getValueAsDouble());
+    if(Math.abs(turningTalonAbsoluteEncoder.getAbsolutePosition().getValueAsDouble()-mod(turningTalon.getPosition().getValueAsDouble(), 1)) > TalonDriveVars.TURNING_ENCODER_ZERO_THRESHOLD_ROTATION){
+      turningTalon.setPosition(turningTalonAbsoluteEncoder.getAbsolutePosition().getValueAsDouble());
     }
   }
 
@@ -111,7 +113,7 @@ public class TalonSwerveModule implements Sendable{
   public SwerveModuleState getState(){
     return new SwerveModuleState(
       drivingTalon.getVelocity().getValueAsDouble(),
-      new Rotation2d(turningTalonEncoder.getAbsolutePosition().getValueAsDouble())
+      Rotation2d.fromRotations(turningTalon.getPosition().getValueAsDouble())
     );
   }
 
@@ -119,7 +121,7 @@ public class TalonSwerveModule implements Sendable{
   public SwerveModuleState getPosition(){
     return new SwerveModuleState(
       drivingTalon.getPosition().getValueAsDouble(),
-      new Rotation2d(turningTalonEncoder.getAbsolutePosition().getValueAsDouble())
+      Rotation2d.fromRotations(turningTalon.getPosition().getValueAsDouble())
     );
   }
 
@@ -149,7 +151,7 @@ public class TalonSwerveModule implements Sendable{
   public void setDesiredState(SwerveModuleState inputState, boolean overrideSlew){
     inputState =
         SwerveModuleState.optimize(
-            inputState, new Rotation2d(turningTalonEncoder.getAbsolutePosition().getValueAsDouble()));
+            inputState, Rotation2d.fromRotations(turningTalonAbsoluteEncoder.getAbsolutePosition().getValueAsDouble()));
     inputState.angle = Rotation2d.fromRadians(mod(inputState.angle.getRadians(), 2.0 * Math.PI));
     if (!overrideSlew) {
       inputState.speedMetersPerSecond = getDesiredVelocityMps(inputState.speedMetersPerSecond);
@@ -162,7 +164,7 @@ public class TalonSwerveModule implements Sendable{
 
   /** Zeroes all the SwerveModule encoders. */
   public void resetDriveEncoder() {
-    drivingTalon.setPosition(0);
+    drivingTalon.setPosition(0.0);
   }
 
   public void initSendable(SendableBuilder builder){
