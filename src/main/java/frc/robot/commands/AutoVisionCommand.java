@@ -72,7 +72,7 @@ public class AutoVisionCommand extends SequentialCommandGroup {
                     path = Optional.of(new PathPlannerPath(bezierPoints, new PathConstraints(5.0, 6.0, 2*Math.PI, 4*Math.PI), new GoalEndState(2.5, Rotation2d.fromDegrees(latestNoteDetection.yawAngleDeg))));
                   }
                 }), 
-                path.isPresent()?drive.followTrajectoryCommand(path.get(), false):new InstantCommand()
+                path.isPresent()?drive.followTrajectoryCommand(path.get(), false):new InstantCommand(()->System.out.println("[AVC]: Failed"))
           ));
   }
 }

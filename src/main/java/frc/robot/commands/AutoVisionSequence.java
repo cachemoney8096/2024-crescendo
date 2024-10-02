@@ -6,7 +6,6 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -37,7 +36,7 @@ public class AutoVisionSequence extends SequentialCommandGroup {
                 autoVisionCommand.poses.get().getSecond(),
                 autoVisionCommand.poses.get().getFirst()
               );
-              path = new PathPlannerPath(bezierPoints, new PathConstraints(5.0, 6.0, 2*Math.PI, 4*Math.PI), new GoalEndState(1, autoVisionCommand.poses.get().getSecond().getRotation()));
+              path = new PathPlannerPath(bezierPoints, new PathConstraints(5.0, 6.0, 2*Math.PI, 4*Math.PI), new GoalEndState(1, autoVisionCommand.poses.get().getFirst().getRotation()));
             }),
             drive.followTrajectoryCommand(path, false)
           )
