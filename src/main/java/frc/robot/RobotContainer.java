@@ -39,6 +39,7 @@ import frc.robot.RobotContainer.PrepState;
 import frc.robot.commands.AmpPrepScore;
 import frc.robot.commands.AmpScore;
 import frc.robot.commands.AutoIntakeSequence;
+import frc.robot.commands.AutoVisionCommand;
 import frc.robot.commands.ClimbPrepSequence;
 import frc.robot.commands.ClimbSequence;
 import frc.robot.commands.FeedPrepScore;
@@ -243,11 +244,16 @@ public class RobotContainer implements Sendable {
                     conveyor,
                     ShooterCal.AUTO_STAGE_SHOOTING_DISTANCE_M)));
     NamedCommands.registerCommand(
+        "AUTO VISION SEQUENCE", 
+        new InstantCommand(()->pathCmd="AUTO VISION SEQUENCE").andThen(new AutoVisionCommand(drive, intake, conveyor, elevator, shooter, lights, intakeLimelight))
+        );
+    NamedCommands.registerCommand(
         "STOP SUBSYSTEMS",
         new InstantCommand(() -> pathCmd = "STOP SUBSYSTEMS")
             .andThen(Conveyor.stop(conveyor))
             .andThen(new InstantCommand(() -> shooter.setShooterMode(ShooterMode.IDLE)))
             .andThen(new InstantCommand(() -> intake.stopRollers())));
+
 
     // Configure the controller bindings
     configureDriver();

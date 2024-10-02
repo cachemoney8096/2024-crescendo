@@ -1,0 +1,49 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.7952442380734501,
+      "y": 4.361647649950041
+    },
+    "rotation": -60.875946505222586
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "PRELOAD TO VISION"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AUTO VISION SEQUENCE"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "VISION TO SHOOT"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SPEAKER PREP STAGE"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SPEAKER SCORE"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}
