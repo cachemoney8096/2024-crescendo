@@ -1,5 +1,6 @@
 package frc.robot.subsystems.drive;
 
+import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.configs.MountPoseConfigs;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.Pigeon2Configurator;
@@ -107,6 +108,8 @@ public class DriveSubsystem extends SubsystemBase {
    */
   private InterpolatingDoubleTreeMap yawOffsetMap;
 
+  private Orchestra orchestra = new Orchestra();
+
   /**
    * Interpolation map to convert drive velocities (m/s) as keys and a value in [0,1] for the
    * keepheading PID multiplier as values
@@ -162,6 +165,14 @@ public class DriveSubsystem extends SubsystemBase {
 
     SmartDashboard.putNumber("Norm Velocity (mps)", 0);
     SmartDashboard.putNumber("Velocity PID multiplier", 0);
+
+    orchestra.addInstrument(frontLeft.drivingTalon);
+    orchestra.addInstrument(frontRight.drivingTalon);
+    orchestra.addInstrument(rearLeft.drivingTalon);
+    orchestra.addInstrument(rearRight.drivingTalon);
+    orchestra.loadMusic("filename.chrp");
+    orchestra.play();
+
   }
 
   public void intializeGyro() {

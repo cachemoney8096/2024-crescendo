@@ -659,6 +659,7 @@ public class RobotContainer implements Sendable {
                 .beforeStarting(() -> drive.throttle(1.0))
                 .beforeStarting(() -> prepState = PrepState.OFF));
     // driverController.start().onTrue(new InstantCommand(drive::resetYaw));
+    // bottom left back button
     driverController
         .povRight()
         .and(() -> !buttonsLocked)
@@ -702,7 +703,7 @@ public class RobotContainer implements Sendable {
                 new AmpPrepScore(elevator, conveyor, intake, shooter, drive, lights),
                 new InstantCommand(() -> drive.throttle(0.3))));
 
-    // bottom left back button
+    
     // TODO comment out for demo mode
     driverController
         .start()

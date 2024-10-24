@@ -1,5 +1,6 @@
 package frc.robot.subsystems.drive;
 
+import com.ctre.phoenix6.configs.AudioConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
@@ -142,6 +143,9 @@ public class SwerveModule implements Sendable {
     // TODO check status codes
     TalonFXConfigurator cfg = drivingTalon.getConfigurator();
     TalonFXConfiguration toApply = new TalonFXConfiguration();
+    AudioConfigs audioConfigs = new AudioConfigs();
+    audioConfigs.AllowMusicDurDisable = true;
+    cfg.apply(audioConfigs);
     toApply.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // TODO: check this
     toApply.Feedback.SensorToMechanismRatio =
         DriveConstants.DRIVING_MOTOR_REDUCTION / DriveConstants.WHEEL_CIRCUMFERENCE_METERS;
