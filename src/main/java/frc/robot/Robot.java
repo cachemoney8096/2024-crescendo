@@ -5,7 +5,6 @@
 package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.GeometryUtil;
 import com.revrobotics.CANSparkBase.IdleMode;
@@ -18,7 +17,6 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.drive.DriveConstants;
-import frc.robot.subsystems.drive.SwerveModule;
 import frc.robot.subsystems.intakeLimelight.IntakeLimelightConstants;
 import frc.robot.subsystems.lights.Lights.LightCode;
 import frc.robot.subsystems.shooter.Shooter.ShooterMode;
@@ -28,9 +26,12 @@ import frc.robot.utils.MatchStateUtil;
 import org.littletonrobotics.urcl.URCL;
 
 /**
- * The VM is configured to automatically run this class, and to call the functions corresponding to
- * each mode, as described in the TimedRobot documentation. If you change the name of this class or
- * the package after creating this project, you must also update the build.gradle file in the
+ * The VM is configured to automatically run this class, and to call the
+ * functions corresponding to
+ * each mode, as described in the TimedRobot documentation. If you change the
+ * name of this class or
+ * the package after creating this project, you must also update the
+ * build.gradle file in the
  * project.
  */
 public class Robot extends TimedRobot {
@@ -43,13 +44,15 @@ public class Robot extends TimedRobot {
   private MatchStateUtil matchState = new MatchStateUtil(false, true, false);
 
   /**
-   * This function is run when the robot is first started up and should be used for any
+   * This function is run when the robot is first started up and should be used
+   * for any
    * initialization code.
    */
   @Override
   public void robotInit() {
     /**
-     * Instantiate our RobotContainer. This will perform all our button bindings, and put our
+     * Instantiate our RobotContainer. This will perform all our button bindings,
+     * and put our
      * autonomous chooser on the dashboard.
      */
     DataLogManager.start();
@@ -61,19 +64,21 @@ public class Robot extends TimedRobot {
 
     m_robotContainer = new RobotContainer(matchState);
     RobotController.setBrownoutVoltage(Constants.BROWNOUT_VOLTAGE);
-    m_PoseEstimator =
-        new SwerveDrivePoseEstimator(
-            DriveConstants.DRIVE_KINEMATICS,
-            m_robotContainer.drive.getGyro().getRotation2d(),
-            m_robotContainer.drive.getModulePositions(),
-            new Pose2d());
+    m_PoseEstimator = new SwerveDrivePoseEstimator(
+        DriveConstants.DRIVE_KINEMATICS,
+        m_robotContainer.drive.getGyro().getRotation2d(),
+        m_robotContainer.drive.getModulePositions(),
+        new Pose2d());
   }
 
   /**
-   * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
+   * This function is called every 20 ms, no matter the mode. Use this for items
+   * like diagnostics
    * that you want ran during disabled, autonomous, teleoperated and test.
    *
-   * <p>This runs after the mode specific periodic functions, but before LiveWindow and
+   * <p>
+   * This runs after the mode specific periodic functions, but before LiveWindow
+   * and
    * SmartDashboard integrated updating.
    */
   @Override
@@ -104,10 +109,10 @@ public class Robot extends TimedRobot {
       m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kCoast);
       m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kCoast);
 
-      m_robotContainer.drive.frontRight.drivingTalon.setNeutralMode(NeutralModeValue.Coast);
-      m_robotContainer.drive.frontLeft.drivingTalon.setNeutralMode(NeutralModeValue.Coast);
-      m_robotContainer.drive.rearRight.drivingTalon.setNeutralMode(NeutralModeValue.Coast);
-      m_robotContainer.drive.rearLeft.drivingTalon.setNeutralMode(NeutralModeValue.Coast);
+      m_robotContainer.drive.frontRight.drivingSparkMax.setIdleMode(IdleMode.kCoast);
+      m_robotContainer.drive.frontLeft.drivingSparkMax.setIdleMode(IdleMode.kCoast);
+      m_robotContainer.drive.rearRight.drivingSparkMax.setIdleMode(IdleMode.kCoast);
+      m_robotContainer.drive.rearLeft.drivingSparkMax.setIdleMode(IdleMode.kCoast);
 
       m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kCoast);
       m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kCoast);
@@ -135,40 +140,24 @@ public class Robot extends TimedRobot {
         m_PoseEstimator, m_robotContainer.drive);
   }
 
-  /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
+  /**
+   * This autonomous runs the autonomous command selected by your
+   * {@link RobotContainer} class.
+   */
   @Override
   public void autonomousInit() {
     matchState.updateMatchState(false);
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     m_robotContainer.drive.setNoMove();
-    SwerveModule[] moduleArray = {
-      m_robotContainer.drive.frontLeft,
-      m_robotContainer.drive.frontRight,
-      m_robotContainer.drive.rearLeft,
-      m_robotContainer.drive.rearRight
-    };
-    for (var module : moduleArray) {
-      var talon = module.drivingTalon;
-      var currentConfig = module.appliedConfiguration;
-      var conigurator = talon.getConfigurator();
-      currentConfig.CurrentLimits.SupplyCurrentLimit =
-          DriveConstants.DRIVING_MOTOR_SUPPLY_CURRENT_LIMIT_AMPS;
-      currentConfig.CurrentLimits.StatorCurrentLimit =
-          DriveConstants.DRIVING_MOTOR_STATOR_AUTO_CURRENT_LIMIT_AMPS;
-      conigurator.apply(currentConfig);
-    }
-
-    // If there's a path planner auto and the robot didn't initialize its pose from tags, then
+    // If there's a path planner auto and the robot didn't initialize its pose from
+    // tags, then
     // initialize from the path's starting pose
     if (m_autonomousCommand != null && m_robotContainer.getAutonomousName() != null) {
       if (m_robotContainer.shooterLimelight.checkForTag().isEmpty()) {
-        Pose2d pathStartingPose =
-            PathPlannerAuto.getStaringPoseFromAutoFile(m_robotContainer.getAutonomousName());
-        if (Math.abs(m_robotContainer.drive.getPose().getX())
-                < Constants.ODOMETRY_MARGIN_FOR_ZEROING_M
-            && Math.abs(m_robotContainer.drive.getPose().getY())
-                < Constants.ODOMETRY_MARGIN_FOR_ZEROING_M) {
+        Pose2d pathStartingPose = PathPlannerAuto.getStaringPoseFromAutoFile(m_robotContainer.getAutonomousName());
+        if (Math.abs(m_robotContainer.drive.getPose().getX()) < Constants.ODOMETRY_MARGIN_FOR_ZEROING_M
+            && Math.abs(m_robotContainer.drive.getPose().getY()) < Constants.ODOMETRY_MARGIN_FOR_ZEROING_M) {
           if (matchState.isRed()) {
             Pose2d flippedPose = GeometryUtil.flipFieldPose(pathStartingPose);
             m_robotContainer.drive.resetOdometry(flippedPose);
@@ -186,10 +175,10 @@ public class Robot extends TimedRobot {
     m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
     m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kBrake);
 
-    m_robotContainer.drive.frontRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
-    m_robotContainer.drive.frontLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
-    m_robotContainer.drive.rearRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
-    m_robotContainer.drive.rearLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+    m_robotContainer.drive.frontRight.drivingSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.frontLeft.drivingSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.rearRight.drivingSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.rearLeft.drivingSparkMax.setIdleMode(IdleMode.kBrake);
 
     m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
     m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
@@ -211,7 +200,8 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+  }
 
   @Override
   public void teleopInit() {
@@ -224,22 +214,6 @@ public class Robot extends TimedRobot {
     }
 
     m_robotContainer.drive.setNoMove();
-    SwerveModule[] moduleArray = {
-      m_robotContainer.drive.frontLeft,
-      m_robotContainer.drive.frontRight,
-      m_robotContainer.drive.rearLeft,
-      m_robotContainer.drive.rearRight
-    };
-    for (var module : moduleArray) {
-      var talon = module.drivingTalon;
-      var currentConfig = module.appliedConfiguration;
-      var conigurator = talon.getConfigurator();
-      currentConfig.CurrentLimits.SupplyCurrentLimit =
-          DriveConstants.DRIVING_MOTOR_SUPPLY_CURRENT_LIMIT_AMPS;
-      currentConfig.CurrentLimits.StatorCurrentLimit =
-          DriveConstants.DRIVING_MOTOR_STATOR_TELEOP_CURRENT_LIMIT_AMPS;
-      conigurator.apply(currentConfig);
-    }
 
     m_robotContainer.lights.setLEDColor(
         !m_robotContainer.conveyor.backConveyorBeamBreakSensor.get()
@@ -257,10 +231,10 @@ public class Robot extends TimedRobot {
     m_robotContainer.elevator.rightMotor.setIdleMode(IdleMode.kBrake);
     m_robotContainer.shooter.pivotMotor.setIdleMode(IdleMode.kBrake);
 
-    m_robotContainer.drive.frontRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
-    m_robotContainer.drive.frontLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
-    m_robotContainer.drive.rearRight.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
-    m_robotContainer.drive.rearLeft.drivingTalon.setNeutralMode(NeutralModeValue.Brake);
+    m_robotContainer.drive.frontRight.drivingSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.frontLeft.drivingSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.rearRight.drivingSparkMax.setIdleMode(IdleMode.kBrake);
+    m_robotContainer.drive.rearLeft.drivingSparkMax.setIdleMode(IdleMode.kBrake);
 
     m_robotContainer.drive.frontRight.turningSparkMax.setIdleMode(IdleMode.kBrake);
     m_robotContainer.drive.frontLeft.turningSparkMax.setIdleMode(IdleMode.kBrake);
@@ -284,13 +258,16 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+  }
 
   /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() {}
+  public void simulationInit() {
+  }
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+  }
 }
