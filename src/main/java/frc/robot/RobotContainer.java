@@ -700,7 +700,7 @@ public class RobotContainer implements Sendable {
             new SequentialCommandGroup(
                 new InstantCommand(() -> prepState = PrepState.AMP),
                 new AmpPrepScore(elevator, conveyor, intake, shooter, drive, lights),
-                new InstantCommand(() -> drive.throttle(0.3))));
+                new InstantCommand(() -> drive.throttle(0.45))));
 
     // bottom left back button
     // TODO comment out for demo mode
@@ -793,7 +793,7 @@ public class RobotContainer implements Sendable {
 
     operatorController.rightTrigger().onTrue(new InstantCommand(() -> conveyor.startRollers(1.0)));
     operatorController.rightTrigger().onFalse(new InstantCommand(() -> conveyor.stopRollers()));
-    operatorController
+    /*operatorController
         .leftTrigger()
         .onTrue(
             new InstantCommand(() -> conveyor.startRollers(-1.0))
@@ -801,7 +801,11 @@ public class RobotContainer implements Sendable {
     operatorController
         .leftTrigger()
         .onFalse(
-            new InstantCommand(() -> conveyor.stopRollers()).andThen(() -> intake.stopRollers()));
+            new InstantCommand(() -> conveyor.stopRollers()).andThen(() -> intake.stopRollers()));*/
+
+    operatorController.leftTrigger().onTrue(new InstantCommand(()->{elevator.leftMotor.setVoltage(1);elevator.rightMotor.setVoltage(1);}));
+    operatorController.leftTrigger().onFalse(new InstantCommand(()->{elevator.leftMotor.setVoltage(0);elevator.rightMotor.setVoltage(0);}));
+
 
     operatorController
         .povDown()
