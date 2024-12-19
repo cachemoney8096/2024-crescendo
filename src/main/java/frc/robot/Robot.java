@@ -96,7 +96,7 @@ public class Robot extends TimedRobot {
     m_robotContainer.lights.setLEDColor(LightCode.DISABLED);
     LimelightHelpers.getLatestResults(
         IntakeLimelightConstants.INTAKE_LIMELIGHT_NAME); // It takes 2.5-3s on first run
-    LimelightHelpers.getLatestResults(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
+    //LimelightHelpers.getLatestResults(ShooterLimelightConstants.SHOOTER_LIMELIGHT_NAME);
 
     if (!matchState.isRealMatch()) {
       m_robotContainer.intake.pivotMotor.setIdleMode(IdleMode.kCoast);
@@ -131,8 +131,8 @@ public class Robot extends TimedRobot {
       m_robotContainer.intake.considerZeroingEncoder();
       m_robotContainer.drive.considerZeroingSwerveEncoders();
     }
-    m_robotContainer.shooterLimelight.resetOdometryWithTags(
-        m_PoseEstimator, m_robotContainer.drive);
+    /*m_robotContainer.shooterLimelight.resetOdometryWithTags(
+        m_PoseEstimator, m_robotContainer.drive);*/
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
