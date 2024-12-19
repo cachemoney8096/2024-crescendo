@@ -161,12 +161,12 @@ public class RobotContainer implements Sendable {
             () -> {
               lights.setLEDColor(LightCode.HAS_NOTE);
             });
-    shooterLimelight =
+    /*shooterLimelight =
         new ShooterLimelight(
             ShooterLimelightConstants.SHOOTER_LIMELIGHT_PITCH_DEGREES,
             ShooterLimelightConstants.SHOOTER_LIMELIGHT_HEIGHT_METERS,
             ShooterLimelightConstants.SHOOTER_LIMELIGHT_TARGET_HEIGHT_METERS,
-            matchState);
+            matchState);*/
     intakeLimelight =
         new IntakeLimelight(
             IntakeLimelightConstants.INTAKE_LIMELIGHT_PITCH_DEGREES,
@@ -219,7 +219,7 @@ public class RobotContainer implements Sendable {
             .andThen(
                 new SpeakerPrepScoreAuto(
                     intake, elevator, shooter, conveyor, ShooterCal.AUTO_FAR_SHOOTING_DISTANCE_M)));
-    NamedCommands.registerCommand(
+    /*NamedCommands.registerCommand(
         "SPEAKER PREP FAR VISION",
         new InstantCommand(() -> pathCmd = "SPEAKER PREP FAR VISION")
             .andThen(
@@ -230,7 +230,7 @@ public class RobotContainer implements Sendable {
                     conveyor,
                     ShooterCal.AUTO_FAR_SHOOTING_DISTANCE_M,
                     shooterLimelight,
-                    drive)));
+                    drive)));*/
     NamedCommands.registerCommand(
         "SPEAKER PREP STAGE",
         new InstantCommand(() -> pathCmd = "SPEAKER PREP STAGE")
@@ -258,7 +258,7 @@ public class RobotContainer implements Sendable {
     Shuffleboard.getTab("Subsystems").add(conveyor.getName(), conveyor);
     Shuffleboard.getTab("Subsystems").add(shooter.getName(), shooter);
     Shuffleboard.getTab("Subsystems").add(elevator.getName(), elevator);
-    Shuffleboard.getTab("Subsystems").add("Shooter limelight", shooterLimelight);
+    //Shuffleboard.getTab("Subsystems").add("Shooter limelight", shooterLimelight);
     Shuffleboard.getTab("Subsystems").add("Intake limelight", intakeLimelight);
     Shuffleboard.getTab("Subsystems").add("Container", this);
 
@@ -269,7 +269,7 @@ public class RobotContainer implements Sendable {
     driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
     operatorController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
 
-    autonChooser.setDefaultOption(
+    /*autonChooser.setDefaultOption(
         "Score two",
         new Pair<Command, String>(
             new ScoreTwoNotes(
@@ -321,7 +321,7 @@ public class RobotContainer implements Sendable {
             new DashAuto(drive, intake, elevator, shooter, conveyor, shooterLimelight, true),
             "DASH RED"));
 
-    SmartDashboard.putData(autonChooser);
+    SmartDashboard.putData(autonChooser);*/
 
     // TODO comment this stuff out for a real match
     // this.noteTooCloseThreshold = 0.5;
@@ -596,7 +596,7 @@ public class RobotContainer implements Sendable {
         PrepState.OPERATOR,
         new SequentialCommandGroup(
             Conveyor.shoot(conveyor),
-            new InstantCommand(() -> shooterLimelight.resetOdometryDuringPrep(drive)),
+            //new InstantCommand(() -> shooterLimelight.resetOdometryDuringPrep(drive)),
             new InstantCommand(() -> System.out.println("rezeroed odemetry in speakerprep"))));
 
     SelectCommand<PrepState> driverLeftTriggerCommand =
@@ -622,7 +622,7 @@ public class RobotContainer implements Sendable {
               || driverController.getHID().getYButton();
         };
 
-    driverController
+    /*driverController
         .leftBumper()
         .and(() -> !buttonsLocked)
         .onTrue(
@@ -639,7 +639,7 @@ public class RobotContainer implements Sendable {
                     drive,
                     lights,
                     driverRotationCommanded),
-                new InstantCommand(() -> usingTagHeading = true)));
+                new InstantCommand(() -> usingTagHeading = true)));*/
 
     // bottom right back button
     driverController
